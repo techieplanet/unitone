@@ -1,0 +1,74 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Feb 17, 2016, 10:07:06 PM
+    Author     : Swedge
+*/
+
+.homebackdrop{
+    height: 360px;
+    padding: 0;
+}
+.homebackdrop img { width: 100% !important; }
+
+.nomargin{ margin: 0 !important;}
+.marginauto{    margin: auto !important; }
+.margintop3{    margin-top: 3px !important; }
+.margintop10 {margin-top: 10px !important;}
+.margintop15 {margin-top: 15px !important;}
+.margintop20 {margin-top: 20px !important;}
+.margintop40 {margin-top: 40px !important;}
+.marginbottom10 {margin-bottom: 10px !important;}
+.marginbottom15 {margin-bottom: 15px !important;}
+.marginbottom20 {margin-bottom: 20px !important;}
+.marginleft10 {margin-left: 10px !important;}
+.marginleft20 {margin-left: 20% !important;}
+.marginleft25 {margin-left: 25px !important;}
+.marginright15 {margin-right: 15px !important;}
+.marginleft15 {margin-left: 20px !important;}
+.marginright10 {margin-right: 10px !important;}
+.marginleft20px {margin-left: 20px !important;}
+.marginright20 {margin-right: 20px !important;}
+
+.nopadding {padding: 0 !important;}
+.padding10{ padding: 10px !important;}
+.padding15{padding: 15px !important;}
+.padding30{ padding: 30px !important;}
+.paddingtop10{padding-top: 10px !important;}
+.paddingtop30{padding-top: 30px !important;}
+.paddingtop20{padding-top: 20px !important;}
+.paddingbottom10{padding-bottom: 10px !important;}
+.paddingbottom20{padding-bottom: 20px !important;}
+.paddingbottom30{padding-bottom: 30px !important;}
+
+
+.hidden {display: none !important;}
+.block{display: block !important;}
+.inlineblock{display: inline-block;}
+.bold {font-weight: bold !important;}
+.uppercase {text-transform: uppercase; }
+.borderallccc{ border: 1px solid #ccc; }
+.borderbottom{ border-bottom: 1px solid #ccc; }
+
+.bgeee {background-color: #eeeeee; }
+.primary-color {color: #3c8dbc; }
+.blockquote { font-weight: bold; line-height: 1.4; }
+.modal-title { color: #3c8dbc; font-weight: bold; }
+.form-control.medium { width: 60% !important; }
+.deleting{background: #ee4545 !important; border-color: #ee4545 !important;}
+.adding{background: #dff0d8 !important; border-color: #dff0d8; !important;}
+
+
+@media (min-width: 768px){
+    .modal-dialog{ width: 400px !important;}
+}
+
+.productSpan{
+    width:100% !important;
+    display:block !important;
+    height:45px !important;
+   
+}
