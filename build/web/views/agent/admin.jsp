@@ -1,12 +1,11 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!-- Include the lid -->
 
-<link href="plugins/bootstrap-switch/docs/css/bootstrap.min.css" rel="stylesheet">
-    <link href="plugins/bootstrap-switch/docs/css/highlight.css" rel="stylesheet">
-    <link href="plugins/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
-    <link href="http://getbootstrap.com/assets/css/docs.min.css" rel="stylesheet">
-    <link href="plugins/bootstrap-switch/docs/css/main.css" rel="stylesheet">
+<!--        <link type="text/css" rel="stylesheet" href="plugins/rcswitcher-master/css/style.min.css">-->
+	<link type="text/css" rel="stylesheet" href="plugins/rcswitcher-master/css/rcswitcher.min.css">
+	
     
+  
 <%@ include file="../includes/lid.jsp" %>      
 
 <!-- Include the header -->
@@ -42,7 +41,8 @@
                 </div><!-- /.box-header -->
                 
                  <div class="box-body">
-                  <table id="entitylist" class="table table-bordered table-striped table-hover">
+                     <div class="permissions block">
+                  <table id="entitylist" class="table table-bordered table-striped table-hover tabSwitch">
                     <thead>
                       <tr>
                         <th>Image</th>
@@ -70,8 +70,10 @@
                                 <td><c:out value="${agent.email}" /></td>
                                 
                                 <td><c:out value="${agent.state}" /></td>
-                                <td>
-                                    <input id="switch-state" type="checkbox" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});" data-switch-get="state" <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if> data-size="mini" data-on-text="No" data-off-text="Yes" data-on-color="danger" data-off-color="success"  /></td>
+                                <td style="text-align:center;">
+                                    <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
+                                   
+                                </td>
                               
                                 <td>
                                     <a class="btn btn-success btn-xs" href="Agent?action=view&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
@@ -101,7 +103,25 @@
                       </tr>
                     </tfoot>
                   </table>
-                  
+                 </div>
+<!--                  <div class="permissions block">
+				<h4>Permissions</h4>
+			
+				<label >Access CP</label><input type="checkbox" name="access_cp" value="access_cp"><br />
+				<label >Manage Users </label><input type="checkbox" name="manage_users" value="manage_users" checked >
+
+				<div class="info">
+					<ul class="clear-fix">
+						<li>width<span>44</span></li>
+						<li>height<span>16</span></li>
+						<li>Theme<span>dark</span></li>
+						<li>blobOffset<span>2</span></li>
+						<li>autoStick<span>true</span></li>
+						<li>onText<span>YES</span></li>
+						<li>offText<span>NO</span></li>
+					</ul>
+				</div>
+			</div>-->
                     <div class="box-header">
                         <h3 class="box-title block">
                             <span class="pull-right"><a class="btn btn-primary" href="Agent?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a></span>
@@ -131,22 +151,27 @@
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
 
-      
+<!--      <script type="text/javascript" src="plugins/rcswitcher-master/js/jquery-2.1.3.min.js"></script>-->
+	
 <!-- Include the footer -->
 <%@ include file="../includes/footer.jsp" %>      
 
 
 <!-- Include the control sidebar -->
 <%--<%@ include file="../includes/control-sidebar.jsp" %>--%>      
-       <script src="plugins/bootstrap-switch/docs/js/jquery.min.js"></script>
-    <script src="plugins/bootstrap-switch/docs/js/bootstrap.min.js"></script>
+<!--       <script src="plugins/bootstrap-switch/docs/js/jquery.min.js"></script>
+    <script src="plugins/bootstrap-switch/docs/js/bootstrap.min.js"></script>-->
      
 <!-- Include the bottom -->
-<%@ include file="../includes/bottom.jsp" %>
+<!--<script src="plugins/ios-checkboxes/jquery/iphone-style-checkboxes.js"></script>
+  <script src="plugins/ios-checkboxes/jquery/highlight.pack.js"></script>
+  <script src="plugins/ios-checkboxes/jquery.js"></script>-->
 
-<script src="plugins/bootstrap-switch/docs/js/highlight.js"></script>
+<%@ include file="../includes/bottom.jsp" %>
+<script type="text/javascript" src="plugins/rcswitcher-master/js/rcswitcher.min.js"></script>
+<!--<script src="plugins/bootstrap-switch/docs/js/highlight.js"></script>
     <script src="plugins/bootstrap-switch/dist/js/bootstrap-switch.js"></script>
-    <script src="plugins/bootstrap-switch/docs/js/main.js"></script>
+    <script src="plugins/bootstrap-switch/docs/js/main.js"></script>-->
 <script>
         
         $(function () {
@@ -159,6 +184,39 @@
                 ]
         });
     
+ <c:forEach items="${agents}" var="agent">
+                       var id = "row"+ <c:out value="${agent.agentId}" />;
+                       $('#'+id+' :checkbox').rcSwitcher({
+
+					// reverse: true,
+					// inputs: true,
+					width: 65,
+					height: 24,
+					blobOffset: 2,
+					onText: 'YES',
+					offText: 'NO',
+					theme: 'flat',
+				        autoFontSize: false,
+					
+
+				});
+  </c:forEach>
+    
+                                
+    
+                                
       
           });
-    </script>
+          
+          
+//    
+//    $(document).ready(function() {
+//      $('#switch-state').iphoneStyle();
+//    });
+//
+//    $('#switch-state').iphoneStyle({
+//  checkedLabel: 'YES',
+//  uncheckedLabel: 'NO'
+//});
+  </script>
+  

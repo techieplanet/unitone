@@ -46,34 +46,34 @@ function checkFormRequired(){4
    var depositorsName = $("#depositorsName").val();
    var tellerNumber = $("#tellerNumber").val();
    var tellerAmount = $("#tellerAmount").val();
-   var message ;
+   var message = "";
    
    //cash payment method
    var cashAmount = $("#cashAmount").val();
    if(paymentMethod==1){
       if(bankName==""){
           $("#bankName").focus();
-          message .= "Bank Name is required for the payment method selected\r\n";
+          message += "Bank Name is required for the payment method selected\r\n";
       } 
       
       if(depositorsName==""){
           $("#depositorsName").focus();
-          message .= "Depositors Name is required for the payment method selected\r\n";
+          message += "Depositors Name is required for the payment method selected\r\n";
       }
       if(tellerNumber==""){
           $("#tellerNumber").focus();
-          message .= "Teller Number is required for the payment method selected\r\n";
+          message += "Teller Number is required for the payment method selected\r\n";
       }
       if(tellerAmount==""){
           $("#tellerAmount").focus();
-          message .= "Teller Amount is required for the payment method selected\r\n";
+          message += "Teller Amount is required for the payment method selected\r\n";
       }
       
    }
    else if(paymentMethod==3){
        if(cashAmount==""){
        $("#cashAmount").focus();
-       message .= "Cash Amount is required for the payment method selected\r\n";
+       message += "Cash Amount is required for the payment method selected\r\n";
    }
    
    
@@ -518,8 +518,11 @@ setTimeout(function(){
    var type;
     url = appName + '/' + entityName;
     console.log("URL: " + url);
-      type = $("#row"+agentId+" [data-switch-get]").data("switch-get");
-      var result = $("#row"+agentId+" #switch-" + type).bootstrapSwitch(type);
+     var locator = "#row"+agentId+" #switch-state";
+      var result = $("#row"+agentId+" #switch-state").prop('checked');
+//      var value = $("#row"+agentId+" #switch-state").val();
+//      alert(value+"this is the spirit of prophecy"+result+" locator"+locator);
+//      alert($(locator).prop('checked'));
       var status;
       if(result == true){
           status = 1;
@@ -529,7 +532,6 @@ setTimeout(function(){
       console.log("URL: " + url);
     
   
-    $('#loading2').removeClass("hidden");
     
     $.ajax({
        type : 'POST',
@@ -549,6 +551,7 @@ setTimeout(function(){
 }, 450);
    
 }
+
 function getProjectUnits(appName, entityName){
    // alert(punit);
     $("#addToCart").attr("disabled",false);

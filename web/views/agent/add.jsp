@@ -1,9 +1,5 @@
 <!-- Include the lid -->
-<link href="plugins/bootstrap-switch/docs/css/bootstrap.min.css" rel="stylesheet">
-    <link href="plugins/bootstrap-switch/docs/css/highlight.css" rel="stylesheet">
-    <link href="plugins/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
-    <link href="http://getbootstrap.com/assets/css/docs.min.css" rel="stylesheet">
-    <link href="plugins/bootstrap-switch/docs/css/main.css" rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="plugins/rcswitcher-master/css/rcswitcher.min.css">
     
 <%@ include file="../includes/lid.jsp" %>      
  
@@ -42,14 +38,29 @@
      
 <!-- Include the bottom -->
 <%@ include file="../includes/bottom.jsp" %>
-      
-<script src="plugins/bootstrap-switch/docs/js/highlight.js"></script>
-    <script src="plugins/bootstrap-switch/dist/js/bootstrap-switch.js"></script>
-    <script src="plugins/bootstrap-switch/docs/js/main.js"></script>
+<script type="text/javascript" src="plugins/rcswitcher-master/js/rcswitcher.min.js"></script>
+
 
 <script>
       $(function () {
         //Add text editor
         $("#compose-textarea").wysihtml5();
+        
+        var id = "row"+ <c:out value="${agent.agentId}" />;
+                       $('#'+id+' :checkbox').rcSwitcher({
+
+					// reverse: true,
+					// inputs: true,
+					width: 104,
+					height: 26,
+					blobOffset: 2,
+					onText: 'Deactivate',
+					offText: 'Activate',
+					theme: 'flat',
+				        autoFontSize: false,
+                                        fontSize:'20px',
+					
+
+				});
       });
     </script>

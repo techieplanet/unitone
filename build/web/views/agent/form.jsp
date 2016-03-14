@@ -43,16 +43,18 @@
                     </div>
                 </div>
           </c:if>
-                           <div class="box-footer " style="margin-right:10px !important;margin-top:-10px !important;margin-bottom:-8px !important; background-color:transparent;height:50px !important;">
+                           <div class="box-footer " style="margin-right:10px !important;margin-top:-10px !important; background-color:transparent;height:50px !important;">
                               
                            <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate"/>
-                          
-                           
-<!--                            <c:if test="${agent.agentId !='' && agent.agentId!=null}">
-                                <span id="row${agent.agentId}">
-                                <input id="switch-state" type="checkbox" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  class="pull-right" data-switch-get="state" data-size="mini" data-on-text="Deactivate" data-off-text="Activate" data-on-color="danger" data-off-color="success" data-label-text="Status" class="pull-right"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>  />
+                               
+                           <div class="col-md-6 pull-right">
+                            <c:if test="${agent.agentId !='' && agent.agentId!=null}">
+                                <span id="row${agent.agentId}" style="margin: 0 auto !important;">
+                                 <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
+                             
                                 </span>
-                               </c:if> -->
+                               </c:if> 
+                                 </div>
                   </div>
                     
             
