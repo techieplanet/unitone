@@ -247,7 +247,7 @@ public class CustomerController extends HttpServlet  {
                 
                 e.printStackTrace();
                 System.out.println("System Error: " + e.getMessage());
-                SystemLogger.logSystemIssue("Project", gson.toJson(customer), e.getMessage());
+                SystemLogger.logSystemIssue("Customer", gson.toJson(customer), e.getMessage());
             }
             
            

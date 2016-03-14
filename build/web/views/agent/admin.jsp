@@ -52,10 +52,8 @@
                         <th>Last Name</th>
                         <th>Phone No</th>
                         <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
                         <th>State</th>
-                        <th>Status</th>
+                        <th>Active</th>
                         <th>Action</th>
                         
                       </tr>
@@ -70,11 +68,10 @@
                                 <td><c:out value="${agent.lastname}" /></td>
                                 <td><c:out value="${agent.phone}" /></td>
                                 <td><c:out value="${agent.email}" /></td>
-                                <td><c:out value="${agent.street}" /></td>
-                                <td><c:out value="${agent.city}" /></td>
+                                
                                 <td><c:out value="${agent.state}" /></td>
                                 <td>
-                                    <input id="switch-state" type="checkbox" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});" data-switch-get="state" <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if> data-size="mini" data-on-text="Deactivate" data-off-text="Activate" data-on-color="danger" data-off-color="success" data-label-text="Status" /></td>
+                                    <input id="switch-state" type="checkbox" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});" data-switch-get="state" <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if> data-size="mini" data-on-text="No" data-off-text="Yes" data-on-color="danger" data-off-color="success"  /></td>
                               
                                 <td>
                                     <a class="btn btn-success btn-xs" href="Agent?action=view&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
@@ -97,9 +94,9 @@
                         <th>Last Name</th>
                         <th>Phone No</th>
                         <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
+                        
                         <th>State</th>
+                        <th>Active</th>
                         <th>Action</th>
                       </tr>
                     </tfoot>

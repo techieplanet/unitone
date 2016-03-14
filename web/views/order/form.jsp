@@ -261,10 +261,10 @@
                                 </div>
                                 
                                              
-                            </div> /.col-md-12 
+                            </div>  
                             <div class="col-md-1"></div>
                     	</fieldset>
-                  	</div> /.col-md-12 
+                  	</div> 
                         
                          <div class="col-md-12" id="paymentCheckout">
                       
@@ -280,9 +280,9 @@
                                     	<div class="form-group">
                                             <label for="paymentMethod">Payment method:</label><br/>
                                            
-                                            <input type="radio" name="paymentMethod" value="bankdep" id="bankdep" onclick="showNecessaryMenu('bankdep')"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
-                                            <input type="radio" name="paymentMethod" value="paywithcard" id="paywithcard" onclick="showNecessaryMenu('paywithcard')"/>&nbsp; <label for="paywithcard" style="display:inline !important;cursor:pointer !important;">Credit/Debit Card <img src="${pageContext.request.contextPath}/images/img/paywithcard.png" /></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            <input type="radio" name="paymentMethod" value="paywithcash" id="paywithcash" onclick="showNecessaryMenu('paywithcash')"/>&nbsp;<label for="paywithcash" style="display:inline !important;"> Cash</label>
+                                            <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <input type="radio" name="paymentMethod" value="2" id="paywithcard" onclick="showNecessaryMenu(2)"/>&nbsp; <label for="paywithcard" style="display:inline !important;cursor:pointer !important;">Credit/Debit Card <img src="${pageContext.request.contextPath}/images/img/paywithcard.png" /></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <input type="radio" name="paymentMethod" value="3" id="paywithcash" onclick="showNecessaryMenu(3)"/>&nbsp;<label for="paywithcash" style="display:inline !important;"> Cash</label>
                                             		
                                                 </div>
                                         </div>
@@ -308,12 +308,6 @@
                                     </div>
                              
                                 
-                                	<div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="tellerName">Teller Name</label>
-                                            <input type="text" class="form-control" id="tellerName" name="tellerName" style="width: 100%;">
-                                        </div>
-                                    </div>
                                 
                                 
                                 	<div class="col-md-2">
@@ -347,8 +341,8 @@
                                 
                                 	<div class="col-md-2">
                                     	<div class="form-group">
-                                            <label for="tellerAmount">Amount</label>
-                                            <input type="text" class="form-control" id="tellerAmount" name="tellerAmount" style="width: 100%;">
+                                            <label for="cashAmount">Amount</label>
+                                            <input type="text" class="form-control" id="cashAmount" name="cashAmount" style="width: 100%;">
                                         </div> 
                                             
                                     </div>
@@ -373,7 +367,8 @@
                                 	<div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="tellerNumber">Click to proceed to payment</label>
-                                        <a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
+<!--                                        <a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
+                                            --> <button type="submit"  name="Pay" class="btn btn-success"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
                                         </div> 
                                     </div>
                              

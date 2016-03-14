@@ -38,7 +38,125 @@ function deleteEntity(appName, entityName, id){
     });
 }
 
-
+function checkFormRequired(){4
+   var paymentMethod = $("#paymentMethod").val();
+   
+   //bank payment method;
+   var bankName = $("#bankName").val();
+   var depositorsName = $("#depositorsName").val();
+   var tellerNumber = $("#tellerNumber").val();
+   var tellerAmount = $("#tellerAmount").val();
+   var message ;
+   
+   //cash payment method
+   var cashAmount = $("#cashAmount").val();
+   if(paymentMethod==1){
+      if(bankName==""){
+          $("#bankName").focus();
+          message .= "Bank Name is required for the payment method selected\r\n";
+      } 
+      
+      if(depositorsName==""){
+          $("#depositorsName").focus();
+          message .= "Depositors Name is required for the payment method selected\r\n";
+      }
+      if(tellerNumber==""){
+          $("#tellerNumber").focus();
+          message .= "Teller Number is required for the payment method selected\r\n";
+      }
+      if(tellerAmount==""){
+          $("#tellerAmount").focus();
+          message .= "Teller Amount is required for the payment method selected\r\n";
+      }
+      
+   }
+   else if(paymentMethod==3){
+       if(cashAmount==""){
+       $("#cashAmount").focus();
+       message .= "Cash Amount is required for the payment method selected\r\n";
+   }
+   
+   
+   
+   }
+   if(message!=""){
+       alert(message);
+      return false; 
+   }else{
+       return true;
+   }
+}
+function lodgePaymentCheck(){
+    var defAmount = parseInt($("#defAmount").val());
+    var amountLeft = parseInt($("#amountLeft").val());
+    var durationLeft = parseInt($("#durationLeft").val());
+    var productAmountToPay = parseInt($("#productAmountToPay").val());
+    $("#tellerAmount").val(productAmountToPay);
+    $("#cashAmount").val(productAmountToPay);
+//    if(productAmountToPay > amountLeft){
+//            alert("Product amount is greater than the amount left");
+//        }else{
+//           alert("Product amount is less  than the amount left");
+//        }
+        
+    if(productAmountToPay>defAmount && amountLeft==productAmountToPay){
+        //this is the part of the last payment of the user
+        
+        $("#payLodge").attr("disabled",false);
+        return true;
+        
+    }
+    else if(productAmountToPay<=defAmount && amountLeft==productAmountToPay){
+        //this is the system's last payment 
+       // alert("yes yea system last payment");
+        $("#errorText").text("");
+        $("#payLodge").attr("disabled",false);
+        return true;
+        
+    }
+    else if((productAmountToPay>defAmount) && (productAmountToPay <= amountLeft)){
+//        alert("This is the product amount "+productAmountToPay);
+//        alert("This is the amount left amount "+amountLeft);
+        
+        //this is the part where the multiples of the amount user is paying is needed
+        if((productAmountToPay%defAmount) >0){
+           // alert("You need to input an amount that is a multiple of the preset monthly payment");
+            $("#productAmountToPay").focus();
+            $("#payLodge").attr("disabled",true);
+            if($("#multPayment").length <= 0){
+             $("#errorText").append("<p id='multPayment'>You need to input an amount that is a multiple of the preset monthly payment, or you stick to the default muonthly payment plan </p>");
+         }
+         return false;
+        }else{
+            alert("proper multiple payment");
+            $("#errorText").text("");
+            $("#payLodge").attr("disabled",false);
+            return true;
+        }
+        
+    }else if(productAmountToPay==defAmount){
+        //this is the normal payment
+       // alert("this is the payment thing");
+        $("#errorText").text("");
+        $("#payLodge").attr("disabled",false);
+        return true;
+    }
+    else if(productAmountToPay<defAmount){
+       // alert("The amount cant be lss than the normal point");
+        $("#payLodge").attr("disabled",true);
+         if($("#minAmount").length <= 0){
+        $("#errorText").append("<p id='minAmount'>The amount you can pay cannot be less than the preset monthly payment</p>");
+    }
+    return false;
+    }else{
+         $("#payLodge").attr("disabled",true);
+          if($("#maxAmount").length <= 0){
+        $("#errorText").append("<p id='maxAmount'>The amount you want to pay has exceeded the amount you have left</p>");
+    }
+    return false;
+    }
+    
+}
 
 function calculateSum(){
     var sum = 0;
@@ -168,18 +286,18 @@ function addToCart(event){
 }
 function showNecessaryMenu(pmtMethod){
     
-    if(pmtMethod=="bankdep"){
+    if(pmtMethod==1){
         $("#pwCard:visible" ).toggle();
         $("#pwCash:visible").toggle();
          $( "#pwBankdeposit:hidden").toggle();
           
-    }else if(pmtMethod=="paywithcard"){
+    }else if(pmtMethod==2){
        $("#pwCard:hidden" ).toggle();
        $("#pwCash:visible").toggle();
        $( "#pwBankdeposit:visible").toggle();
         //alert("You have selected pay online");
     }
-    else if(pmtMethod=="paywithcash"){
+    else if(pmtMethod==3){
         $("#pwCard:visible" ).toggle();
        $("#pwCash:hidden").toggle();
        $( "#pwBankdeposit:visible").toggle();
@@ -310,6 +428,19 @@ function deleteDataFromCart(id){
        calculateSum();
     
     $("#productCart tbody").focus();
+    return false;
+}
+function payLodge(){
+    var productAmountToPay = parseInt($("#productAmountToPay").val());
+    if(lodgePaymentCheck()){
+         var sum  = $("#paySum").text(productAmountToPay);
+         var dataArray = {};
+         dataArray["invoiceId"] = $("#invoiceId");
+         dataArray["amountPaying"] = $("#amountPaying");
+         
+         $("#paymentCheckout:hidden").toggle();
+         $("#shoppingCart:visible").toggle();
+    }
     return false;
 }
 function checkOutOfCart(){
@@ -597,7 +728,7 @@ function calculateDurationFromMonthlyPay(){
 //       $("#errorText").append()
    //    jQuery.append( $("#errorText"), "errorDuration", "The duration has exceeded the maximum duration considering the monthly pay inputed" );
    if($("#errorDuration").length <= 0){
-        var htmlMessage = $('<p id="errorDuration">The duration has exceeded the maximum duration considering the monthly pay inputed </p>')
+        var htmlMessage = $('<p id="errorDuration">The duration has exceeded the maximum duration considering the monthly pay inputed </p>');
         $("#errorText").append(htmlMessage);
     }
             $("#addToCart").attr("disabled",true);

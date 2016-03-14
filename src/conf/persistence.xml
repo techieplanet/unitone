@@ -7,6 +7,10 @@
     <class>com.tp.neo.model.Agent_1</class>
     <class>com.tp.neo.model.CustomerAgent</class>
     <class>com.tp.neo.model.CustomerAgent_1</class>
+    <class>com.tp.neo.model.Customer_1</class>
+    <class>com.tp.neo.model.Lodgement</class>
+    <class>com.tp.neo.model.Sale</class>
+    <class>com.tp.neo.model.Sale_1</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/xforce?zeroDateTimeBehavior=convertToNull"/>

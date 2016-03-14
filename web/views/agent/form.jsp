@@ -32,10 +32,12 @@
                     <c:if test="${success}">
               <div class="row">
                     <div class="col-md-12 ">
-                        <p class="bg-success padding10" style="width:90%">
+                        <p class="bg-success padding15" style="vertical-align:center !important;" >
                           <i class="fa fa-check"></i>Saved Successfully
                           <span class="pull-right">
-                              <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-angle-double-left"></i> Back to list</a>
+                              <a class="btn btn-primary" role="button" href="${pageContext.request.contextPath}/Agent" style="vertical-align:center !important;"><i class="fa fa-angle-double-left"></i> Back to list</a>
+                              &nbsp;&nbsp;&nbsp;
+                              <a class="btn btn-primary" href="Agent?action=new" role="button" style="vertical-align:center !important;"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a>
                           </span>
                         </p>
                     </div>
@@ -45,12 +47,12 @@
                               
                            <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate"/>
                           
-                           <a class="btn btn-primary" href="Agent?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a>
-                            <c:if test="${agent.agentId !='' && agent.agentId!=null}">
+                           
+<!--                            <c:if test="${agent.agentId !='' && agent.agentId!=null}">
                                 <span id="row${agent.agentId}">
                                 <input id="switch-state" type="checkbox" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  class="pull-right" data-switch-get="state" data-size="mini" data-on-text="Deactivate" data-off-text="Activate" data-on-color="danger" data-off-color="success" data-label-text="Status" class="pull-right"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>  />
                                 </span>
-                               </c:if> 
+                               </c:if> -->
                   </div>
                     
             
@@ -253,7 +255,7 @@
                             <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
                             <label for="agentPhone">Phone Number</label>
                                
-                                <input type="tel" class="form-control" id="agentPhone" name="agentPhone" placeholder="Phone Number" 
+                                <input type="tel" class="form-control" id="agentPhone" name="agentPhone" placeholder="Phone Number"  minlength="8" maxlength="11"
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.agentPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.phone}"</c:if> "/>
                                     
                             </div>
@@ -391,7 +393,7 @@
                         <input type="hidden" name="agent_id" id="agent_id" value="${agent.agentId}">
                         <input type="hidden" name="id" id="id" value="${agent.agentId}">
                   <div class="box-footer" style="margin-left:10px !important;margin-right:10px !important;margin-top:-20px !important; background-color:transparent;">
-                      <input type="submit" class="btn btn-primary" name="agentCreate" value="Save" id="agentCreate"/>
+                      <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate" />
                   </div>
                  
                 </div>
