@@ -90,7 +90,7 @@
                                     	<div class="form-group">
                                             <label for="amountLeft">Amount Payable(N)</label>
                                             <br/>
-                                            <input type="text" class="form-control" id="amountLeft" name="amountLeft" style="width: 100%;"  value=<c:if test="${fn:length(errors) > 0 }">"${param.mountLeft}"</c:if> <c:if test="${fn:length(errors) <= 0 }">"${paymentPlan.mountLeft}"</c:if>readonly />
+                                            <input type="text" class="form-control" id="amountLeft" name="amountLeft" style="width: 100%;"  value=<c:if test="${fn:length(errors) > 0 }">"${param.amountLeft}"</c:if> <c:if test="${fn:length(errors) <= 0 }">"${paymentPlan.amountLeft}"</c:if>readonly />
                                         </div> 
 <!--                                                  /.form-group initial monthly amount -->
                                     </div>
@@ -215,7 +215,7 @@
                                     	<div class="form-group">
                                             <label for="tellerNumber">Depositor's Name</label>
                                             <input type="text" class="form-control" id="depositorsName" name="depositorsName" style="width: 100%;" 
-                                                    value=<c:if test="${fn:length(errors) > 0 }">"${param.depositorsName}"</c:if> 
+                                                    value='<c:if test="${fn:length(errors) > 0 }">"${param.depositorsName}"</c:if> '
                                                    >
                                         </div> 
                                     </div>
@@ -223,7 +223,7 @@
                                     	<div class="form-group">
                                             <label for="tellerNumber">Teller Number</label>
                                             <input type="text" class="form-control" id="tellerNumber" name="tellerNumber" style="width: 100%;"  
-                                                   value=<c:if test="${fn:length(errors) > 0 }">"${param.tellerNumber}"</c:if> 
+                                                   value='<c:if test="${fn:length(errors) > 0 }">"${param.tellerNumber}"</c:if> '
                                                    />
                                         </div> 
                                     </div>
@@ -235,7 +235,7 @@
                                     	<div class="form-group">
                                             <label for="tellerAmount">Amount</label>
                                             <input type="text" class="form-control" id="tellerAmount" name="tellerAmount" style="width: 100%;" readonly  
-                                                    value=<c:if test="${fn:length(errors) > 0 }">"${param.tellerAmount}"</c:if> 
+                                                    value='<c:if test="${fn:length(errors) > 0 }">"${param.tellerAmount}"</c:if>' 
                                                    />
                                         </div> 
                                             

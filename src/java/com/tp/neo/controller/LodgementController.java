@@ -111,12 +111,19 @@ public class LodgementController extends HttpServlet {
             
          request.setAttribute("invoiceId", invoiceID);
          request.setAttribute("paymentPlan",map);
+//         request.setAttribute("lodgements",listLodgements());
+//         request.setAttribute("resultList","hello");
          }else{
          viewFile = LODGEMENT_ADMIN;
+//         request.setAttribute("lodgementList",listLodgements());
+//        request.setAttribute("lodgements",listLodgements());
+//        request.setAttribute("resultList","hello");
          }
         
-       
+         //System.out.println("This is the lodgement details "+listLodgements());
         request.setAttribute("lodgementList",listLodgements());
+        request.setAttribute("lodgements",listLodgements());
+        request.setAttribute("resultList","hello");
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
@@ -208,13 +215,17 @@ public class LodgementController extends HttpServlet {
          viewFile = LODGEMENT_ADMIN;
          request.setAttribute("paymentPlan",map);
          request.setAttribute("invoiceId",invoiceID);
+         
          //System.out.println("This is the object we want to print out"+lodgement);
 //         System.out.println("Lodgement object "+gson.toJson(lodgement));    
         if(Integer.parseInt(paymentMethod) == 2){ // we have to redirect to the image page from here
           response.sendRedirect("images/img/webpay.png");
         }else{
+            
+       
         request.setAttribute("success",true);
-        request.setAttribute("lodgementList",listLodgements());
+        request.setAttribute("lodgements",listLodgements());
+        request.setAttribute("resultList","hello");
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
         }
@@ -324,12 +335,14 @@ public class LodgementController extends HttpServlet {
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-
+        int i = 1;
+        Long id = new Long(i);
         //find by ID
         Query jpqlQuery  = em.createNamedQuery("Lodgement.findAll");
        
         List<Lodgement> lodgementList = jpqlQuery.getResultList();
-       
+        
+        System.out.println("This is the new lodgement details "+lodgementList);
         return lodgementList;
     }
     
