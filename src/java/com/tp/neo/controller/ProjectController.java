@@ -10,7 +10,9 @@ import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
+
 import com.tp.neo.model.utils.TPController;
+
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -38,6 +40,7 @@ import java.util.Map;
 @WebServlet(name = "Project", urlPatterns = {"/Project"})
 public class ProjectController extends TPController {
     public final String pageTitle = "Project";
+
     
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String PROJECTS_ADMIN = "/views/project/admin.jsp"; 
@@ -86,10 +89,12 @@ public class ProjectController extends TPController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
             processGetRequest(request, response);
     }
     
+
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -98,21 +103,25 @@ public class ProjectController extends TPController {
         EntityManager em = emf.createEntityManager();
         String viewFile = PROJECTS_ADMIN; 
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         
         if (action.equalsIgnoreCase("new")){
                viewFile = PROJECTS_NEW;
                //request.setAttribute("action", "edit");
+
                request.setAttribute("id", "");
         }
         else if(action.equalsIgnoreCase("delete")){
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
+
         else if(action.equalsIgnoreCase("edit") && !(stringId.equals(""))){
             viewFile = PROJECTS_NEW;
             
             //find by ID
             int id = Integer.parseInt(stringId);
+
             Project project = em.find(Project.class, id);
             
             Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
@@ -127,10 +136,12 @@ public class ProjectController extends TPController {
             viewFile = PROJECTS_ADMIN;
             request.setAttribute("projects", listProjects());
         }
+
         else{
             viewFile = PROJECTS_ADMIN;
             request.setAttribute("projects", listProjects());
         }
+
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -150,6 +161,7 @@ public class ProjectController extends TPController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         
         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
             if(request.getParameter("id").equals(""))
@@ -157,6 +169,7 @@ public class ProjectController extends TPController {
             else
                 processUpdateRequest(request, response);
         }
+
     }
 
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)

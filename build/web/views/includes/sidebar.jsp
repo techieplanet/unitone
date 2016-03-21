@@ -10,11 +10,14 @@
               <img src="images/img/boxed-bg.jpg" class="img-circle" alt="User Image">
             </div>
             <div class="pull-left info">
+
               <p>${sessionScope.user.firstname} ${sessionScope.user.lastname}</p>
+
               <!-- Status -->
               <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
             </div>
           </div>
+
 
               
           <c:if test="${sessionScope.userType eq sessionScope.userTypes.ADMIN}" >
@@ -51,6 +54,7 @@
           
           <c:if test="${sessionScope.userType eq sessionScope.userTypes.CUSTOMER}">
           </c:if>
+
           
         </section>
         <!-- /.sidebar -->

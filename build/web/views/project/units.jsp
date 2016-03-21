@@ -79,8 +79,10 @@
                                 $('#mpd').val(unit.mpd);
                                 $('#commp').val(unit.commp);
                                 $('#quantity').val(unit.quantity);
+
                                 $('#monthly_pay').val(unit.monthly_pay);
                                 $('#amt_payable').val(unit.amt_payable);
+
                                 
                                 $('#loading').addClass("hidden");
         });

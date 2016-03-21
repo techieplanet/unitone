@@ -18,7 +18,9 @@ and open the template in the editor.
     <body>
         <div class="container-fluid">
             <div class="row">
+
                 <div class="col-md-12 homebackdrop"><img class="img-responsive" src="${pageContext.request.contextPath}/images/home-bg-with-neo.png"></div>
+
             </div>
             
             <div class="row" style="margin-top: 10px;">
@@ -31,6 +33,7 @@ and open the template in the editor.
                 </div>
                 <div class="col-md-3 bgeee paddingtop20">
                     <p class="bold">Sign In</p>
+
                     <form class="borderbottom paddingbottom10" action="Login" method="POST">
                             <div class="form-group">
                                 <label>Login as</label>
@@ -48,6 +51,7 @@ and open the template in the editor.
                             <div class="form-group">
                               <label for="password">Password</label>
                               <input type="password" class="form-control" name="password" id="password" placeholder="Password">
+
                             </div>
                             
                             <button type="submit" class="btn btn-primary">Sign In</button>
