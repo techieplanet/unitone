@@ -5,7 +5,8 @@
  */
 package com.tp.neo.model;
 
-import com.tp.neo.model.utils.ITrailable;
+import com.tp.neo.interfaces.ITrailable;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -35,7 +36,11 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "ProjectUnit.findByCpu", query = "SELECT p FROM ProjectUnit p WHERE p.cpu = :cpu"),
     @NamedQuery(name = "ProjectUnit.findByLeastInitDep", query = "SELECT p FROM ProjectUnit p WHERE p.leastInitDep = :leastInitDep"),
     @NamedQuery(name = "ProjectUnit.findByDiscount", query = "SELECT p FROM ProjectUnit p WHERE p.discount = :discount"),
+
+    @NamedQuery(name = "ProjectUnit.findByAmountPayable", query = "SELECT p FROM ProjectUnit p WHERE p.amountPayable = :amountPayable"),
     @NamedQuery(name = "ProjectUnit.findByMaxPaymentDuration", query = "SELECT p FROM ProjectUnit p WHERE p.maxPaymentDuration = :maxPaymentDuration"),
+    @NamedQuery(name = "ProjectUnit.findByMonthlyPay", query = "SELECT p FROM ProjectUnit p WHERE p.monthlyPay = :monthlyPay"),
+
     @NamedQuery(name = "ProjectUnit.findByCommissionPercentage", query = "SELECT p FROM ProjectUnit p WHERE p.commissionPercentage = :commissionPercentage"),
     @NamedQuery(name = "ProjectUnit.findByQuantity", query = "SELECT p FROM ProjectUnit p WHERE p.quantity = :quantity"),
     @NamedQuery(name = "ProjectUnit.findByDeleted", query = "SELECT p FROM ProjectUnit p WHERE p.deleted = :deleted"),
@@ -60,8 +65,16 @@ public class ProjectUnit implements Serializable, ITrailable {
     private Double leastInitDep;
     @Column(name = "discount")
     private Double discount;
+
+    @Basic(optional = false)
+    @Column(name = "amount_payable")
+    private double amountPayable;
     @Column(name = "max_payment_duration")
     private Integer maxPaymentDuration;
+    @Basic(optional = false)
+    @Column(name = "monthly_pay")
+    private double monthlyPay;
+
     @Column(name = "commission_percentage")
     private Double commissionPercentage;
     @Basic(optional = false)
@@ -90,8 +103,11 @@ public class ProjectUnit implements Serializable, ITrailable {
         this.projectUnitPK = projectUnitPK;
     }
 
-    public ProjectUnit(ProjectUnitPK projectUnitPK, int quantity) {
+    public ProjectUnit(ProjectUnitPK projectUnitPK, double amountPayable, double monthlyPay, int quantity) {
         this.projectUnitPK = projectUnitPK;
+        this.amountPayable = amountPayable;
+        this.monthlyPay = monthlyPay;
+
         this.quantity = quantity;
     }
 
@@ -139,12 +155,32 @@ public class ProjectUnit implements Serializable, ITrailable {
         this.discount = discount;
     }
 
+
+
+    public double getAmountPayable() {
+        return amountPayable;
+    }
+
+    public void setAmountPayable(double amountPayable) {
+        this.amountPayable = amountPayable;
+    }
+
+
     public Integer getMaxPaymentDuration() {
         return maxPaymentDuration;
     }
 
     public void setMaxPaymentDuration(Integer maxPaymentDuration) {
         this.maxPaymentDuration = maxPaymentDuration;
+    }
+
+
+    public double getMonthlyPay() {
+        return monthlyPay;
+    }
+
+    public void setMonthlyPay(double monthlyPay) {
+        this.monthlyPay = monthlyPay;
     }
 
     public Double getCommissionPercentage() {

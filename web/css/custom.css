@@ -9,21 +9,25 @@ and open the template in the editor.
 */
 
 .homebackdrop{
-    height: 360px;
+
+    height: 280px;
     padding: 0;
 }
 .homebackdrop img { width: 100% !important; }
-
+.noborder{border: 0 !important; }
 .nomargin{ margin: 0 !important;}
 .marginauto{    margin: auto !important; }
-.margintop3{    margin-top: 3px !important; }
+.margintop5{    margin-top: 5px !important; }
 .margintop10 {margin-top: 10px !important;}
 .margintop15 {margin-top: 15px !important;}
 .margintop20 {margin-top: 20px !important;}
 .margintop40 {margin-top: 40px !important;}
+.marginbottom5 {margin-bottom: 5px !important;}
 .marginbottom10 {margin-bottom: 10px !important;}
 .marginbottom15 {margin-bottom: 15px !important;}
 .marginbottom20 {margin-bottom: 20px !important;}
+.marginleft5 {margin-left: 5px !important;}
+
 .marginleft10 {margin-left: 10px !important;}
 .marginleft20 {margin-left: 20% !important;}
 .marginleft25 {margin-left: 25px !important;}
@@ -32,6 +36,7 @@ and open the template in the editor.
 .marginright10 {margin-right: 10px !important;}
 .marginleft20px {margin-left: 20px !important;}
 .marginright20 {margin-right: 20px !important;}
+.margintop5negative {margin-top: -5px !important;}
 
 .nopadding {padding: 0 !important;}
 .padding10{ padding: 10px !important;}
@@ -43,6 +48,13 @@ and open the template in the editor.
 .paddingbottom10{padding-bottom: 10px !important;}
 .paddingbottom20{padding-bottom: 20px !important;}
 .paddingbottom30{padding-bottom: 30px !important;}
+
+
+.width10{width: 10px !important;}
+.width70{width: 70px !important;}
+.fullwidth{width: 100% !important;}
+.width30{width: 30% !important;}
+
 
 
 .hidden {display: none !important;}
@@ -59,11 +71,19 @@ and open the template in the editor.
 .modal-title { color: #3c8dbc; font-weight: bold; }
 .form-control.medium { width: 60% !important; }
 .deleting{background: #ee4545 !important; border-color: #ee4545 !important;}
-.adding{background: #dff0d8 !important; border-color: #dff0d8; !important;}
 
+.updating{background: #008d4c !important; }
+.blacktext{ color: #000 !important; }
+
+.box-title {display: block !important;}
+
+/*.innersidebarli{margin-bottom: 5px; }*/
 
 @media (min-width: 768px){
     .modal-dialog{ width: 400px !important;}
+    .modal-dialog.delete-modal{ width: 400px !important;}
+    
+    .modal-dialog.form-modal{ width: 600px !important;}
 }
 
 .productSpan{
@@ -72,3 +92,6 @@ and open the template in the editor.
     height:45px !important;
    
 }
+
+.adding{background: #dff0d8 !important; border-color: #dff0d8; !important;}
+

@@ -49,55 +49,73 @@
                 </div>
           <%--</c:if>--%>
               
-          <div class="form-group">
+
+          <div class="form-group marginbottom10">
             <label for="title" class="col-sm-4 control-label">Unit Title*</label>
             <div class="col-sm-8">
-                <input type="text" name="title" id="title" class="form-control marginbottom15" value="">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="cpu" class="col-sm-4 control-label">Project Cost Per Unit*</label>
-            <div class="col-sm-7">
-                <input type="text" name="cpu" id="cpu" class="form-control text-right medium marginbottom15" value="">
+                <input type="text" name="title" id="title" class="form-control" value="">
             </div>
           </div>
           
-          <div class="form-group">
-            <label for="lid" class="col-sm-4 control-label">Least Initial Deposit*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="lid" id="lid" class="form-control medium text-right marginbottom15" value="">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="discount" class="col-sm-4 control-label">Discount*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="discount" id="discount" class="form-control medium text-right marginbottom15" value="">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="mpd" class="col-sm-4 control-label">Max. Payment Duration*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="mpd" id="mpd" class="form-control medium text-right marginbottom15" value="">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="commp" class="col-sm-4 control-label">Commission Percentage*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="commp" id="commp" class="form-control medium text-right marginbottom15" value="">
-            </div>
-          </div>
-          
-          <div class="form-group">
+          <div class="form-group marginbottom10">
             <label for="quantity" class="col-sm-4 control-label">Quantity Available*</label>
             <div class="col-sm-7">            
-                <input type="text" name="quantity" id="quantity" class="form-control medium text-right marginbottom15" value="">
+                <input type="text" name="quantity" id="quantity" class="form-control medium text-right" value="">
+            </div>
+          </div>
+
+          <div class="form-group marginbottom10">
+            <label for="cpu" class="col-sm-4 control-label">Project Cost Per Unit*</label>
+            <div class="col-sm-7">
+                <input type="text" name="cpu" id="cpu" class="form-control text-right medium" value="">
             </div>
           </div>
           
+          <div class="form-group marginbottom10">
+            <label for="discount" class="col-sm-4 control-label">Discount Percentage*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="discount" id="discount" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          <div class="form-group marginbottom10">
+            <label for="amt_payable" class="col-sm-4 control-label">Amount Payable*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="amt_payable" id="amt_payable" readonly="readony" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          <div class="form-group marginbottom10">
+            <label for="lid" class="col-sm-4 control-label">Least Initial Deposit*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="lid" id="lid" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          <div class="form-group marginbottom10">
+            <label for="mpd" class="col-sm-4 control-label">Max. Payment Duration*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="mpd" id="mpd" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          <div class="form-group marginbottom10">
+            <label for="mpd" class="col-sm-4 control-label">Monthly Payment*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="monthly_pay" id="monthly_pay" readonly="readony" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          <div class="form-group marginbottom10">
+            <label for="commp" class="col-sm-4 control-label">Commission Percentage*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="commp" id="commp" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          
+          
+
         </div>
             
           <input type="hidden" name="projectid" id="projectid" value="${project.id}">
@@ -116,6 +134,47 @@
 </form>
           
 <script>
+
+    
+    $(document).ready(function(){
+        
+        //on key up for diacount and cost per unit, calculating amount payable
+        $("#discount, #cpu, #lid, #mpd").on("keyup", function(){
+            var cpu = parseFloat($("#cpu").val());
+            cpu = !isNaN(cpu) ? cpu : 0; 
+            $("#cpu").val(cpu);
+            
+            var discount = parseFloat($("#discount").val());
+            discount = !isNaN(discount) ? discount : 0; 
+            $("#discount").val(discount);
+            
+            var amt_payable = cpu - (discount/100*cpu);
+            $("#amt_payable").val(amt_payable.toFixed(2));
+            
+//            var amt_payable = parseFloat($("#amt_payable").val());
+//            amt_payable = !isNaN(amt_payable) ? amt_payable : 0; 
+//            $("#amt_payable").val(amt_payable);
+
+            var lid = parseFloat($("#lid").val());
+            lid = !isNaN(lid) ? lid : 0; 
+            $("#lid").val(lid);
+            
+            var mpd = parseInt($("#mpd").val());
+            mpd = !isNaN(mpd) ? mpd : 0;
+            $("#mpd").val(mpd);
+            
+            var monthly_pay = (amt_payable - lid) / mpd;
+            monthly_pay = isFinite(monthly_pay) ? monthly_pay : 0;
+            $("#monthly_pay").val(monthly_pay.toFixed(2));
+            
+            console.log("cpu: " + cpu, "discount: " + discount, "amt: " + amt_payable);
+            console.log("lid " + lid, "mpd " + mpd, "amt_payable " + amt_payable, "monthly_pay: " + monthly_pay);
+        });
+        
+        
+    });
+    
+
     $('#myModal').on('hidden.bs.modal', function (e) {
         //console.log('Modal hiding');
         $('#projectunitform .form-control, #id').val("");
@@ -123,15 +182,17 @@
      });
      
     function sendData(){        
-        var dataObject = {};
-        dataObject.title = $('#title').val();
-        dataObject.cpu = $('#cpu').val();
-        dataObject.lid = $('#lid').val();
-        dataObject.discount = $('#discount').val();
-        dataObject.mpd = $('#mpd').val();
-        dataObject.commp = $('#commp').val();
-        dataObject.id = $('#id').val();
-        dataObject.projectid = $('#projectid').val();
+
+//        var dataObject = {};
+//        dataObject.title = $('#title').val();
+//        dataObject.cpu = $('#cpu').val();
+//        dataObject.lid = $('#lid').val();
+//        dataObject.discount = $('#discount').val();
+//        dataObject.mpd = $('#mpd').val();
+//        dataObject.commp = $('#commp').val();
+//        dataObject.id = $('#id').val();
+//        dataObject.projectid = $('#projectid').val();
+
         
         console.log("send data: " + $('#projectunitform').serialize());
         submitPostForm('${pageContext.request.contextPath}/ProjectUnit', 

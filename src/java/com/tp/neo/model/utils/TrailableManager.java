@@ -5,6 +5,8 @@
  */
 package com.tp.neo.model.utils;
 
+import com.tp.neo.interfaces.ITrailable;
+
 import java.util.Date;
 
 

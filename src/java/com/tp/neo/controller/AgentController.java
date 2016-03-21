@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package com.tp.neo.controller;
-
+import com.tp.neo.model.utils.TPController;
 import com.tp.neo.model.Agent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -38,13 +38,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.xml.bind.PropertyException;
-import org.apache.tomcat.util.http.fileupload.FileItem;
-import org.apache.tomcat.util.http.fileupload.FileItemFactory;
-import org.apache.tomcat.util.http.fileupload.RequestContext;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+//import org.apache.tomcat.util.http.fileupload.FileItem;
+//import org.apache.tomcat.util.http.fileupload.FileItemFactory;
+//import org.apache.tomcat.util.http.fileupload.RequestContext;
+//import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
+//import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import javax.xml.bind.PropertyException;
 import java.util.Map;
+
 
 
 /**
@@ -53,7 +54,7 @@ import java.util.Map;
  */
 @WebServlet(name = "Agent", urlPatterns = {"/Agent"})
 @MultipartConfig
-public class AgentController extends HttpServlet {
+public class AgentController extends TPController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String AGENTS_ADMIN = "/views/agent/admin.jsp"; 
     private static String AGENTS_NEW = "/views/agent/add.jsp";
@@ -106,7 +107,10 @@ public class AgentController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         processGetRequest(request, response);
+        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            processGetRequest(request, response);
+        }
+//         processGetRequest(request, response);
     }
 
     /*TP: processes the get request in general*/

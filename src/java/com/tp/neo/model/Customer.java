@@ -5,7 +5,7 @@
  */
 package com.tp.neo.model;
 
-import com.tp.neo.model.utils.ITrailable;
+import com.tp.neo.interfaces.ITrailable;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;

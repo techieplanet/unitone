@@ -10,12 +10,14 @@ import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
+
+import com.tp.neo.model.utils.TPController;
+
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -36,7 +38,9 @@ import java.util.Map;
  * @author Swedge
  */
 @WebServlet(name = "Project", urlPatterns = {"/Project"})
-public class ProjectController extends HttpServlet {
+public class ProjectController extends TPController {
+    public final String pageTitle = "Project";
+
     
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String PROJECTS_ADMIN = "/views/project/admin.jsp"; 
@@ -85,70 +89,12 @@ public class ProjectController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-          if(action.equalsIgnoreCase("punits")){
-              int id = Integer.parseInt(request.getParameter("project_id"));
-              sendProjectUnitsData(request, response,id);
 
-        }else {
-        processGetRequest(request, response);
-          }
+        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
+            processGetRequest(request, response);
     }
     
-    protected void sendProjectUnitsData(HttpServletRequest request, HttpServletResponse response,int id) throws ServletException, IOException{
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        Project project = em.find(Project.class, id);
-//            
-            Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
-            List <ProjectUnit> projectUnits =  query.getResultList();
-            em.close(); emf.close();
-//           
-            Map<Integer, Map> map = new HashMap<Integer, Map>();
-           for(int i=0; i< projectUnits.size(); i++){
-           
-            
-           Map<String, String> mapSmall = new HashMap<String, String>();
-            mapSmall.put("id",projectUnits.get(i).getProjectUnitPK().getId()+"");
-            mapSmall.put("title", projectUnits.get(i).getTitle());
-            mapSmall.put("cpu", projectUnits.get(i).getCpu().toString());
-            mapSmall.put("lid", projectUnits.get(i).getLeastInitDep().toString());
-            mapSmall.put("discount", projectUnits.get(i).getDiscount().toString());
-            mapSmall.put("mpd", projectUnits.get(i).getMaxPaymentDuration().toString());
-            mapSmall.put("commp", projectUnits.get(i).getCommissionPercentage().toString());
-            mapSmall.put("quantity", projectUnits.get(i).getQuantity() + "");
-            map.put(i,mapSmall);
-          
-           }
-             
-//            map.put("id",projectUnits.getProjectUnitPK().getId()+"");
-//            map.put("title", projectUnits.getTitle());
-//            map.put("cpu", projectUnits.getCpu().toString());
-//            map.put("lid", projectUnits.getLeastInitDep().toString());
-//            map.put("discount", projectUnits.getDiscount().toString());
-//            map.put("mpd", projectUnits.getMaxPaymentDuration().toString());
-//            map.put("commp", projectUnits.getCommissionPercentage().toString());
-//            map.put("quantity", projectUnits.getQuantity() + "");
-            
-            Gson gson = new GsonBuilder().create();
-            String jsonResponse = gson.toJson(map);
-            response.setContentType("text/plain");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jsonResponse);
-            System.out.println("jsonResponse: " + jsonResponse);
-//            
-////            Gson gson = new GsonBuilder().create();
-////            String jsonResponse = gson.toJson(projectUnits);
-////            response.setContentType("text/plain");
-////            response.setCharacterEncoding("UTF-8");
-////            response.getWriter().write(jsonResponse);
-////            System.out.println("jsonResponse: " + jsonResponse);
-////              response.setContentType("text/plain");
-////              //response.setCharacterEncoding("UTF-8");
-////              response.getWriter().write("johndoe");
-//              System.out.println("jsonResponse: "+"hheloo world"+projectUnits);
-        
-    }
+
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -157,38 +103,25 @@ public class ProjectController extends HttpServlet {
         EntityManager em = emf.createEntityManager();
         String viewFile = PROJECTS_ADMIN; 
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+
+        String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         
         if (action.equalsIgnoreCase("new")){
                viewFile = PROJECTS_NEW;
-               request.setAttribute("action", "edit");
+               //request.setAttribute("action", "edit");
+
                request.setAttribute("id", "");
         }
         else if(action.equalsIgnoreCase("delete")){
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
-        else if(action.equalsIgnoreCase("punits")){
-              int id = Integer.parseInt(request.getParameter("project_id"));
-              Project project = em.find(Project.class, id);
-//            
-            Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
-            List<ProjectUnit> projectUnits = query.getResultList();
-//           
-//            Gson gson = new GsonBuilder().create();
-//            String jsonResponse = gson.toJson(projectUnits);
-//            response.setContentType("text/plain");
-//            response.setCharacterEncoding("UTF-8");
-//            response.getWriter().write(jsonResponse);
-//            System.out.println("jsonResponse: " + jsonResponse);
-              response.setContentType("text/plain");
-              //response.setCharacterEncoding("UTF-8");
-              response.getWriter().write("johndoe");
-              System.out.println("jsonResponse: "+"hheloo world"+projectUnits);
-        }
-        else if(action.equalsIgnoreCase("edit")){
+
+        else if(action.equalsIgnoreCase("edit") && !(stringId.equals(""))){
             viewFile = PROJECTS_NEW;
             
             //find by ID
-            int id = Integer.parseInt(request.getParameter("id"));
+            int id = Integer.parseInt(stringId);
+
             Project project = em.find(Project.class, id);
             
             Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
@@ -203,6 +136,12 @@ public class ProjectController extends HttpServlet {
             viewFile = PROJECTS_ADMIN;
             request.setAttribute("projects", listProjects());
         }
+
+        else{
+            viewFile = PROJECTS_ADMIN;
+            request.setAttribute("projects", listProjects());
+        }
+
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -222,11 +161,15 @@ public class ProjectController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("E dey get to post");
-        if(request.getParameter("id").equals(""))
-            processInsertRequest(request, response);
-        else
-            processUpdateRequest(request, response);
+
+        
+        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            if(request.getParameter("id").equals(""))
+                processInsertRequest(request, response);
+            else
+                processUpdateRequest(request, response);
+        }
+
     }
 
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)

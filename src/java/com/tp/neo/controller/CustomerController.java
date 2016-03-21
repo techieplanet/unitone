@@ -5,6 +5,7 @@
  */
 package com.tp.neo.controller;
 
+import com.tp.neo.model.utils.TPController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
@@ -46,7 +47,7 @@ import javax.xml.bind.PropertyException;
  */
 @WebServlet(name = "Customer", urlPatterns = {"/Customer"})
 @MultipartConfig
-public class CustomerController extends HttpServlet  {
+public class CustomerController extends TPController  {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String CUSTOMER_ADMIN = "/views/customer/admin.jsp"; 
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";

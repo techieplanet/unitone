@@ -5,7 +5,9 @@
  */
 package com.tp.neo.model;
 
-import com.tp.neo.model.utils.ITrailable;
+
+import com.tp.neo.interfaces.ITrailable;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -48,8 +50,18 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findByModifiedBy", query = "SELECT p FROM Project p WHERE p.modifiedBy = :modifiedBy")})
 public class Project implements Serializable, ITrailable {
 
+
+    @Basic(optional = false)
+    @Column(name = "deleted")
+    private short deleted;
+    @Basic(optional = false)
+    @Column(name = "active")
+    private short active;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
     private Collection<ProjectUnit> projectUnitCollection;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -68,10 +80,8 @@ public class Project implements Serializable, ITrailable {
     private String projectManager;
     @Column(name = "target_sales_units")
     private Integer targetSalesUnits;
-    @Column(name = "deleted")
-    private Short deleted;
-    @Column(name = "active")
-    private Short active;
+
+
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
@@ -143,21 +153,8 @@ public class Project implements Serializable, ITrailable {
         this.targetSalesUnits = targetSalesUnits;
     }
 
-    public Short getDeleted() {
-        return deleted;
-    }
 
-    public void setDeleted(Short deleted) {
-        this.deleted = deleted;
-    }
 
-    public Short getActive() {
-        return active;
-    }
-
-    public void setActive(Short active) {
-        this.active = active;
-    }
 
     public Date getCreatedDate() {
         return createdDate;
@@ -216,7 +213,25 @@ public class Project implements Serializable, ITrailable {
         return "com.tp.neo.model.Project[ id=" + id + " ]";
     }
 
-   @XmlTransient
+
+    public short getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(short deleted) {
+        this.deleted = deleted;
+    }
+
+    public short getActive() {
+        return active;
+    }
+
+    public void setActive(short active) {
+        this.active = active;
+    }
+
+    @XmlTransient
+
     public Collection<ProjectUnit> getProjectUnitCollection() {
         return projectUnitCollection;
     }

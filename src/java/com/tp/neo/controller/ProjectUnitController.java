@@ -11,6 +11,7 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.ProjectUnitPK;
+import com.tp.neo.model.utils.TPController;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -35,7 +36,8 @@ import javax.xml.bind.PropertyException;
  * @author Swedge
  */
 @WebServlet(name = "ProjectUnit", urlPatterns = {"/ProjectUnit"})
-public class ProjectUnitController extends HttpServlet {
+public class ProjectUnitController extends TPController {
+
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String PROJECTS_ADMIN = "/views/project/admin.jsp"; 
     private static String PROJECTS_NEW = "/views/project/add.jsp";
@@ -84,7 +86,10 @@ public class ProjectUnitController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processGetRequest(request, response);
+
+        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
+            processGetRequest(request, response);
+
     }
 
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
@@ -102,7 +107,8 @@ public class ProjectUnitController extends HttpServlet {
         if(action.equalsIgnoreCase("delete")){
             delete(Integer.parseInt(request.getParameter("id")));
         }
-        
+
+
         else if(action.equalsIgnoreCase("edit")){            
             int id = (Integer.parseInt(request.getParameter("id")));
             Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
@@ -117,6 +123,11 @@ public class ProjectUnitController extends HttpServlet {
             map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
             map.put("commp", projectUnit.getCommissionPercentage().toString());
             map.put("quantity", projectUnit.getQuantity() + "");
+
+            map.put("amt_payable", projectUnit.getAmountPayable()+ "");
+            map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
+            
+
             
             Gson gson = new GsonBuilder().create();
             String jsonResponse = gson.toJson(map);
@@ -146,10 +157,14 @@ public class ProjectUnitController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if(request.getParameter("id").equals(""))  //save mode
-            processInsertRequest(request, response);
-        else
-            processUpdateRequest(request, response);
+
+        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            if(request.getParameter("id").equals(""))  //save mode
+                processInsertRequest(request, response);
+            else
+                processUpdateRequest(request, response);
+        }
+
     }
 
       
@@ -178,6 +193,10 @@ public class ProjectUnitController extends HttpServlet {
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
+
+                projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
+                projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
+
                 
                 new TrailableManager(projectUnit).registerInsertTrailInfo(1);
                 
@@ -187,7 +206,8 @@ public class ProjectUnitController extends HttpServlet {
                 projectUnit.setProjectUnitPK(pk);
                 project.getProjectUnitCollection().add(projectUnit);
                 
-                if(true) throw new Exception("User triggered exception");
+
+
                 em.persist(project);
                 
                 em.getTransaction().commit();
@@ -230,12 +250,16 @@ public class ProjectUnitController extends HttpServlet {
                 System.out.println("System Error: " + e.getMessage());
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("title", projectUnit.getTitle());
+
+                map.put("quantity", projectUnit.getQuantity() + "");
                 map.put("cpu", projectUnit.getCpu().toString());
                 map.put("lid", projectUnit.getLeastInitDep().toString());
                 map.put("discount", projectUnit.getDiscount().toString());
+                map.put("amt_payable", projectUnit.getAmountPayable()+ "");
                 map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
+                map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
                 map.put("commp", projectUnit.getCommissionPercentage().toString());
-                map.put("quantity", projectUnit.getQuantity() + "");
+
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
             }
         
@@ -274,10 +298,13 @@ public class ProjectUnitController extends HttpServlet {
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
+
+                projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
+                projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
                 
                 new TrailableManager(projectUnit).registerUpdateTrailInfo(1);
                 
-                if(true) throw new Exception("User triggered exception");
+
                 em.getTransaction().commit();
                                 
                 em.close();
@@ -310,12 +337,16 @@ public class ProjectUnitController extends HttpServlet {
                 System.out.println("System Error: " + e.getMessage());
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("title", projectUnit.getTitle());
+
+                map.put("quantity", projectUnit.getQuantity() + "");
                 map.put("cpu", projectUnit.getCpu().toString());
                 map.put("lid", projectUnit.getLeastInitDep().toString());
                 map.put("discount", projectUnit.getDiscount().toString());
+                map.put("amt_payable", projectUnit.getAmountPayable()+ "");
                 map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
+                map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
                 map.put("commp", projectUnit.getCommissionPercentage().toString());
-                map.put("quantity", projectUnit.getQuantity() + "");
+
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
             }
         
@@ -360,7 +391,17 @@ public class ProjectUnitController extends HttpServlet {
         }    
 
         if(!request.getParameter("mpd").matches("^\\d+(\\.?\\d+$)?")){
-            errorMessages.put("mpd", "Please enter Max. Payment Duration");
+
+            errorMessages.put("mpd", "Please enter a valid whole month number");
+        }    
+        
+        if(!request.getParameter("amt_payable").matches("^\\d+(\\.?\\d+$)?") || Double.parseDouble(request.getParameter("amt_payable")) <= 0 ){
+            errorMessages.put("amt_payable", "Ammount Payable cannot be empty or 0. Please adjust other values.");
+        }    
+        
+        if(!request.getParameter("monthly_pay").matches("^\\d+(\\.?\\d+$)?") || Double.parseDouble(request.getParameter("monthly_pay")) <= 0 ){
+            errorMessages.put("monthly_pay", "Monthly Pay cannot be empty or 0. Please adjust other values.");
+
         }    
         
         if(!request.getParameter("commp").matches("^\\d+(\\.?\\d+$)?")){

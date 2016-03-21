@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+
 /* global data */
 /*TP: ondocument ready actions to be performed*/
  $( document ).ready(function() {
@@ -20,6 +21,7 @@
     
   
 /*TP: a generic method for sending an ajax delete request to the server*/
+
 function deleteEntity(appName, entityName, id){
     url = appName + '/' + entityName;
     console.log("URL: " + url);
@@ -32,13 +34,18 @@ function deleteEntity(appName, entityName, id){
            console.log("Delete Successful");
            $('#deleteModal').modal('hide');
            $('#row'+id + ',#row'+id + ' td').addClass("deleting");
-           $('#row'+id).fadeOut(1500);
+
+           $('#row'+id).fadeOut(1500, function(){
+               $('#row'+id).remove();
+           });
+
        },
        error: function(){
            console.log("Delete NOT Successful");
        }
     });
 }
+
 
 /*TP: client side validation of the required fields*/
 function checkFormRequired(){4
@@ -879,7 +886,7 @@ function modal_agree(){
     $('input[id="agentCreate"]').attr( "disabled",false);
     $('#agreementStatusModal').modal('hide');
     
-}'\n\
+}
 
 /*TP: check the agreement status*/
 function agreementStatusChecked(element){
@@ -915,6 +922,7 @@ function showDeleteModal(context, entityName, id){
     $("#deleteModal #ok").attr("onclick", args);
     $('#deleteModal').modal();
 }
+
 
 /*TP: the delete modal for the cart system*/
 function showDeleteCartModal( id){    
@@ -953,6 +961,7 @@ function submitgetForm(url,formData){
 function submitPostForm(url, formData){
     //url = appName + '/' + entityName;
     //$('#projectunitform').serialize()
+
     console.log("URL: " + url);
     
     console.log("Data: " + formData);
