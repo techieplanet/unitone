@@ -59,6 +59,7 @@ public class AgentController extends HttpServlet {
     private static String AGENTS_NEW = "/views/agent/add.jsp";
     private static String AGENTS_VIEW = "/views/agent/view.jsp";
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
+    private Agent agent = new Agent();
    
     private final static Logger LOGGER = 
             Logger.getLogger(Agent.class.getCanonicalName());
@@ -179,7 +180,7 @@ public class AgentController extends HttpServlet {
             throws ServletException, IOException {
                 Gson gson = new GsonBuilder().create();
               //  String viewFile = AGENTS_ADMIN;
-              Agent agent = new Agent();
+//              Agent agent = new Agent();
               String updateStatus = request.getParameter("updateStatus") != null ? request.getParameter("updateStatus") : "";
             try{                                
                 if(!(request.getParameter("agent_id").isEmpty()) ) { //edit mode'
@@ -212,7 +213,7 @@ public class AgentController extends HttpServlet {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         String viewFile = AGENTS_NEW;
-        Agent agent = new Agent();
+//        Agent agent = new Agent();
         String agentFileName = null;
         String agentKinFileName = null;
         
@@ -308,7 +309,7 @@ public class AgentController extends HttpServlet {
             throws ServletException, IOException, PropertyException{
              EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
              EntityManager em = emf.createEntityManager();
-             Agent agent = new Agent();
+//             Agent agent = new Agent();
              Gson gson = new GsonBuilder().create();
         try{                                
 
@@ -352,7 +353,7 @@ public class AgentController extends HttpServlet {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         String viewFile = AGENTS_NEW;
-        Agent agent = new Agent();
+//        Agent agent = new Agent();
         String agentFileName = null;
         String agentKinFileName = null;
         
@@ -656,7 +657,7 @@ public class AgentController extends HttpServlet {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
          
-        Agent agent = em.find(Agent.class, new Long(id));
+        agent = em.find(Agent.class, new Long(id));
         int i = 1;
         short y = (short) i;
         em.getTransaction().begin();
@@ -667,6 +668,11 @@ public class AgentController extends HttpServlet {
         em.close();
         emf.close();
         
+    }
+    
+    /*TP: Getting the agent Id for public use*/
+    public Long getSystemUserId(){
+    return agent.getAgentId();
     }
     /**
      * Returns a short description of the servlet.

@@ -50,6 +50,7 @@ public class CustomerController extends HttpServlet  {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String CUSTOMER_ADMIN = "/views/customer/admin.jsp"; 
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";
+    private Customer customer = new Customer();
     private final static Logger LOGGER = 
             Logger.getLogger(Customer.class.getCanonicalName());
     
@@ -142,7 +143,7 @@ public class CustomerController extends HttpServlet  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         String viewFile = CUSTOMER_NEW;
-        Customer customer = new Customer();
+//        Customer customer = new Customer();
         String customerFileName = null;
         String customerKinFileName = null;
         
@@ -264,7 +265,7 @@ public class CustomerController extends HttpServlet  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         String viewFile = CUSTOMER_NEW;
-        Customer customer = new Customer();
+//        Customer customer = new Customer();
         String customerFileName = null;
         String customerKinFileName = null;
         
@@ -583,7 +584,7 @@ public class CustomerController extends HttpServlet  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
          
-        Customer customer = em.find(Customer.class, new Long(id));
+        customer = em.find(Customer.class, new Long(id));
         int i = 1;
         short y = (short) i;
         em.getTransaction().begin();
@@ -596,6 +597,10 @@ public class CustomerController extends HttpServlet  {
         
     }
     
+      /*TP: Getting the customer Id for public use*/
+    public Long getSystemUserId(){
+    return customer.getCustomerId();
+    }
     
     /**
      * Returns a short description of the servlet.
