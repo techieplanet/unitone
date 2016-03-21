@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/dev/JPA/NeoForce/web/views/project/unitform.jsp</file>
+            <file>file:/C:/dev/JPA/NeoForce/web/css/custom.css</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/controller/ProjectUnitController.java</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/model/utils/TrailableManager.java</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/controller/LoginController.java</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/model/utils/AuthManager.java</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/controller/UserController.java</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/model/Project.java</file>
+            <file>file:/C:/dev/JPA/NeoForce/web/views/project/admin.jsp</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/model/utils/TPController.java</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/model/ProjectUnit.java</file>
+            <file>file:/C:/dev/JPA/NeoForce/web/js/functions.js</file>
+            <file>file:/C:/dev/JPA/NeoForce/web/views/project/add.jsp</file>
+            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/model/utils/ITrailable.java</file>
+        </group>
+    </open-files>
+</project-private>
