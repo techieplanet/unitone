@@ -49,6 +49,7 @@
                 </div>
           <%--</c:if>--%>
               
+
           <div class="form-group marginbottom10">
             <label for="title" class="col-sm-4 control-label">Unit Title*</label>
             <div class="col-sm-8">
@@ -114,6 +115,7 @@
           
           
           
+
         </div>
             
           <input type="hidden" name="projectid" id="projectid" value="${project.id}">
@@ -132,6 +134,7 @@
 </form>
           
 <script>
+
     
     $(document).ready(function(){
         
@@ -171,6 +174,7 @@
         
     });
     
+
     $('#myModal').on('hidden.bs.modal', function (e) {
         //console.log('Modal hiding');
         $('#projectunitform .form-control, #id').val("");
@@ -178,6 +182,7 @@
      });
      
     function sendData(){        
+
 //        var dataObject = {};
 //        dataObject.title = $('#title').val();
 //        dataObject.cpu = $('#cpu').val();
@@ -187,6 +192,7 @@
 //        dataObject.commp = $('#commp').val();
 //        dataObject.id = $('#id').val();
 //        dataObject.projectid = $('#projectid').val();
+
         
         console.log("send data: " + $('#projectunitform').serialize());
         submitPostForm('${pageContext.request.contextPath}/ProjectUnit', 

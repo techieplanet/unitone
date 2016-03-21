@@ -5,7 +5,9 @@
  */
 package com.tp.neo.model;
 
+
 import com.tp.neo.interfaces.ITrailable;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -48,6 +50,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findByModifiedBy", query = "SELECT p FROM Project p WHERE p.modifiedBy = :modifiedBy")})
 public class Project implements Serializable, ITrailable {
 
+
     @Basic(optional = false)
     @Column(name = "deleted")
     private short deleted;
@@ -58,6 +61,7 @@ public class Project implements Serializable, ITrailable {
     private Collection<ProjectUnit> projectUnitCollection;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -76,6 +80,8 @@ public class Project implements Serializable, ITrailable {
     private String projectManager;
     @Column(name = "target_sales_units")
     private Integer targetSalesUnits;
+
+
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
@@ -148,6 +154,8 @@ public class Project implements Serializable, ITrailable {
     }
 
 
+
+
     public Date getCreatedDate() {
         return createdDate;
     }
@@ -205,6 +213,7 @@ public class Project implements Serializable, ITrailable {
         return "com.tp.neo.model.Project[ id=" + id + " ]";
     }
 
+
     public short getDeleted() {
         return deleted;
     }
@@ -222,6 +231,7 @@ public class Project implements Serializable, ITrailable {
     }
 
     @XmlTransient
+
     public Collection<ProjectUnit> getProjectUnitCollection() {
         return projectUnitCollection;
     }
