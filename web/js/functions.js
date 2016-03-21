@@ -5,6 +5,7 @@
  */
 
 /* global data */
+/*TP: ondocument ready actions to be performed*/
  $( document ).ready(function() {
         $( "#pwBankdeposit").hide();
         $("#pwCard" ).hide();
@@ -17,7 +18,8 @@
         calculateSum();
     });
     
-    
+  
+/*TP: a generic method for sending an ajax delete request to the server*/
 function deleteEntity(appName, entityName, id){
     url = appName + '/' + entityName;
     console.log("URL: " + url);
@@ -38,6 +40,7 @@ function deleteEntity(appName, entityName, id){
     });
 }
 
+/*TP: client side validation of the required fields*/
 function checkFormRequired(){4
    var paymentMethod = $("#paymentMethod").val();
    
@@ -86,6 +89,8 @@ function checkFormRequired(){4
        return true;
    }
 }
+
+/*TP: validation to make sure the lodgement the user wants to make is valid*/
 function lodgePaymentCheck(){
     var defAmount = parseInt($("#defAmount").val());
     var amountLeft = parseInt($("#amountLeft").val());
@@ -158,6 +163,7 @@ function lodgePaymentCheck(){
     
 }
 
+/*TP: calculate the sum of the total amount of items in the cart*/
 function calculateSum(){
     var sum = 0;
 // iterate through each td based on class and add the values
@@ -177,6 +183,8 @@ $(".payOut").each(function() {
     $("#cartSum").text(sum);
     
 }
+
+/*TP: add item to the cart*/
 function addToCart(event){
    $("#shoppingCart:hidden").toggle();
    $("#paymentCheckout:visible").toggle();
@@ -284,6 +292,9 @@ function addToCart(event){
   //alert(productName);
     return false;
 }
+
+
+/*TP: show the payment details menu based on the payment method selected*/
 function showNecessaryMenu(pmtMethod){
     
     if(pmtMethod==1){
@@ -303,6 +314,8 @@ function showNecessaryMenu(pmtMethod){
        $( "#pwBankdeposit:visible").toggle();
     }
 }
+
+/*TP: pass data back to the form to edit*/
 function editDataFromCart(id){
     
     //alert("hhello");
@@ -385,6 +398,8 @@ setTimeout(function(){
 
   return false;
 }
+
+/*TP: */
 function updateUnit(id){
     
      var datajson = $("#tr"+id).val();
@@ -400,22 +415,27 @@ function updateUnit(id){
 //    var productUnitId = $("#pUnitId").val();
    //alert(productUnitId);
    
-$('#selectUnit').val(productUnitId);
+    $('#selectUnit').val(productUnitId);
 //getProjectQuantity(baseUrl, 'ProjectUnit');
-$("#selectQuantity").val(productQuantity);
-$("#productAmount").val(productAmount);
-$("#productMaximumDuration").val(productMaximumDuration);
+    $("#selectQuantity").val(productQuantity);
+    $("#productAmount").val(productAmount);
+    $("#productMaximumDuration").val(productMaximumDuration);
 //$("#monthlyPayPerUnit").text(monthlyPayPerUnit);
-$("#productMinimumInitialAmount").val(productMinimumInitialAmount);
-monthlyPayCalculator();
+    $("#productMinimumInitialAmount").val(productMinimumInitialAmount);
+    monthlyPayCalculator();
 //alert(productQuantity);
 }
+
+/*TP: get the base url to be used later by other methods*/
 function getBaseUrl() {
     var re = new RegExp(/^.*\//);
     
     
     return re.exec(window.location.href);
 }
+
+
+/*TP: delete item from cart*/
 function deleteDataFromCart(id){
     
     $("#productCart tbody").focus();
@@ -430,6 +450,8 @@ function deleteDataFromCart(id){
     $("#productCart tbody").focus();
     return false;
 }
+
+/*TP: make payment for a given lodgment*/
 function payLodge(){
     var productAmountToPay = parseInt($("#productAmountToPay").val());
     if(lodgePaymentCheck()){
@@ -443,6 +465,8 @@ function payLodge(){
     }
     return false;
 }
+
+/*TP: CHeck of the cart*/
 function checkOutOfCart(){
     //allData
     
@@ -475,6 +499,8 @@ function checkOutOfCart(){
    
     return false;
 }
+
+/*TP: Reset the product order form*/
 function resetForm(){
     
    $('#selectQuantity').empty(); //select
@@ -511,6 +537,8 @@ $('#selectQuantity').append($('<option>', {
 }));
 
 }
+
+/*TP: Activate the agent via the switch created*/
 function checkActivateSwitch(appName,entityName,agentId){
       
     
@@ -552,6 +580,7 @@ setTimeout(function(){
    
 }
 
+/*TP: Get the project units*/
 function getProjectUnits(appName, entityName){
    // alert(punit);
     $("#addToCart").attr("disabled",false);
@@ -601,7 +630,7 @@ $("#")
     
 }
 
-
+/*TP: Get the project quantity*/
 function getProjectQuantity(appName, entityName){
     $("#addToCart").attr("disabled",false);
     var id =  $('#selectUnit').val();
@@ -654,6 +683,7 @@ function getProjectQuantity(appName, entityName){
     
 }
 
+/*TP: calculate the monthly pay*/
 function monthlyPayCalculator(){
     $("#addToCart").attr("disabled",false);
     var productAmount = $("#productAmount").val();
@@ -672,6 +702,7 @@ function monthlyPayCalculator(){
     calculateAmountToPay();
 }
 
+/*TP: calculate the amount to pay*/
 function calculateAmountToPay(){
    // alert("we are working here");
    
@@ -708,6 +739,8 @@ function calculateAmountToPay(){
     
     
 }
+
+/*TP: calculate the duration from monthly pay*/
 function calculateDurationFromMonthlyPay(){
     var data = $("#dataHidden").val();
     $("#addToCart").attr("disabled",false);
@@ -748,17 +781,8 @@ function calculateDurationFromMonthlyPay(){
     }
    
 }
-function calculateDiscountPerUnit(){
-//  var data = $("#dataHidden").val();
-//    //alert(data);
-//    var resp = JSON.parse(data);
-//    var quantity = $("#selectQuantity").val();
-//    var lid = resp.lid;  
-//    var discount = resp.discount;
-//    var totalDiscount = discount * quantity;
-//  
-//    var defaultDiscount = lid * quantity;
-}
+
+/*TP: calculate the product amount from the quantity*/
 function calculateProductAmount(){
     var data = $("#dataHidden").val();
     //alert(data);
@@ -848,12 +872,16 @@ $(this).attr("selected","selected");
     monthlyPayCalculator();
     
 }
+
+/*TP: Modal for the agreement status of the agent*/
 function modal_agree(){
     $("#agree").attr("checked",true);
     $('input[id="agentCreate"]').attr( "disabled",false);
     $('#agreementStatusModal').modal('hide');
     
-}
+}'\n\
+
+/*TP: check the agreement status*/
 function agreementStatusChecked(element){
     //alert(status);
     var button = $(element).val();
@@ -880,18 +908,22 @@ function agreementStatusChecked(element){
     }
    
 }
+
+/*TP: show the delete modal for each entity*/
 function showDeleteModal(context, entityName, id){    
     var args = "deleteEntity('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
     $("#deleteModal #ok").attr("onclick", args);
     $('#deleteModal').modal();
 }
 
+/*TP: the delete modal for the cart system*/
 function showDeleteCartModal( id){    
     var args = "deleteDataFromCart("+id+")";
     $("#deleteModalCart #ok").attr("onclick", args);
     $('#deleteModalCart').modal();
 }
 
+/*TP: ajax submit form method using get*/
 function submitgetForm(url,formData){
      console.log("URL: " + url);
     
@@ -917,6 +949,7 @@ function submitgetForm(url,formData){
     });
 }
 
+/*TP: ajax submit form method using post*/
 function submitPostForm(url, formData){
     //url = appName + '/' + entityName;
     //$('#projectunitform').serialize()
