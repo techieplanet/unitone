@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.utils.TrailableManager;
+import com.tp.neo.model.utils.AuthManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.xml.bind.PropertyException;
+
 //import org.apache.tomcat.util.http.fileupload.FileItem;
 //import org.apache.tomcat.util.http.fileupload.FileItemFactory;
 //import org.apache.tomcat.util.http.fileupload.RequestContext;
@@ -107,9 +109,9 @@ public class AgentController extends TPController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+       
             processGetRequest(request, response);
-        }
+        
 //         processGetRequest(request, response);
     }
 
@@ -122,12 +124,16 @@ public class AgentController extends TPController {
         EntityManager em = emf.createEntityManager();
         String viewFile = AGENTS_ADMIN; 
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-        
+       
         if (action.equalsIgnoreCase("new")){
                viewFile = AGENTS_NEW;
-        }
-        
-        else if(action.equalsIgnoreCase("delete")){
+               RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+        dispatcher.forward(request, response);
+        }else {
+          if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+              
+         
+         if(action.equalsIgnoreCase("delete")){
            
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
@@ -158,9 +164,11 @@ public class AgentController extends TPController {
             viewFile = AGENTS_ADMIN;
             request.setAttribute("agents", listAgents());
         }
-
-        RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
+    }
+        }
+        
             
     }
     
@@ -252,7 +260,9 @@ public class AgentController extends TPController {
                 agent.setFirstname(request.getParameter("agentFirstname"));
                 agent.setLastname(request.getParameter("agentLastname"));               
                 agent.setEmail(request.getParameter("agentEmail"));
-                agent.setPassword(request.getParameter("agentPassword"));
+               // String initPass = AuthManager.generateInitialPassword();  //randomly generated password
+                agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
+                //agent.setPassword(AuthManager.request.getParameter("agentPassword"));
                 agent.setStreet(request.getParameter("agentStreet"));
                 agent.setCity(request.getParameter("agentCity"));
                 agent.setState(request.getParameter("agentState"));
@@ -392,7 +402,8 @@ public class AgentController extends TPController {
                 agent.setFirstname(request.getParameter("agentFirstname"));
                 agent.setLastname(request.getParameter("agentLastname"));               
                 agent.setEmail(request.getParameter("agentEmail"));
-                agent.setPassword(request.getParameter("agentPassword"));
+                //agent.setPassword(request.getParameter("agentPassword"));
+                agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
                 agent.setStreet(request.getParameter("agentStreet"));
                 agent.setCity(request.getParameter("agentCity"));
                 agent.setState(request.getParameter("agentState"));
