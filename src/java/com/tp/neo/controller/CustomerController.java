@@ -306,7 +306,9 @@ public class CustomerController extends TPController  {
                 customer.setLastname(request.getParameter("customerLastname"));               
                 customer.setEmail(request.getParameter("customerEmail"));
                 //customer.setPassword(request.getParameter("customerPassword"));
+                if(!request.getParameter("customerPassword").isEmpty()){
                 customer.setPassword(AuthManager.getSaltedHash(request.getParameter("customerPassword")));
+                }
                 customer.setStreet(request.getParameter("customerStreet"));
                 customer.setCity(request.getParameter("customerCity"));
                 customer.setState(request.getParameter("customerState"));
@@ -374,9 +376,9 @@ public class CustomerController extends TPController  {
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
         }
-        else {
-             if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
-        if(action.equalsIgnoreCase("delete")){
+//        else {
+//             if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+        else if(action.equalsIgnoreCase("delete")){
            
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
@@ -399,8 +401,8 @@ public class CustomerController extends TPController  {
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
-        }
-        }
+//        }
+//        }
     }
     
     

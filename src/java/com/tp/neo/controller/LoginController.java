@@ -6,7 +6,9 @@
 package com.tp.neo.controller;
 
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.Agent;
 import com.tp.neo.model.Auditlog;
+import com.tp.neo.model.Customer;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.AuthManager;
 import java.io.IOException;
@@ -121,9 +123,10 @@ public class LoginController extends HttpServlet {
             
             SystemUser user = getUserTypeObject(userType, email);
             String storedPassword = user.getPassword();
-
+            
             if(AuthManager.check(password, storedPassword)){
                 log("logged in");
+                System.out.println("This is the stored password "+ storedPassword);
                 //start the session
                 HttpSession session = request.getSession();
                 session.setMaxInactiveInterval(900); //15 minutes
@@ -131,7 +134,7 @@ public class LoginController extends HttpServlet {
                 session.setAttribute("userType", userType);
                 session.setAttribute("userTypes", userTypes);
                 
-                String basePath = "/NeoForce/";
+                String basePath = "/NeoForce/Agent";
                 String referrerURI = new URI(request.getHeader("referer")).toString();
                 String referrerPath = new URI(request.getHeader("referer")).getPath();
                 System.out.println("Context: " + URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath());
@@ -149,12 +152,15 @@ public class LoginController extends HttpServlet {
                 
                 em.persist(auditlog);
                 em.getTransaction().commit();
-                
+               
                 if(session.getAttribute("loginCallback") == null){
+                     System.out.println("THis is the login call back of the session before redirect null"+ referrerURI );
                     response.sendRedirect(referrerURI + "Dashboard");
+                    ////AuthManager.ucfirst(userType
                     return;
                 }
                 else{ 
+                     System.out.println("THis is the login call back of the session before redirect not null"+ referrerURI );
                     response.sendRedirect(session.getAttribute("loginCallback").toString());
                     return;
                 }
@@ -175,23 +181,42 @@ public class LoginController extends HttpServlet {
     private SystemUser getUserTypeObject(String userType, String email){        
         String queryArg = "";
         SystemUser systemUser = new User();
-        
-        if(userType.equals(userTypesEnum.ADMIN.toString())) {
+        Agent agentUser = new Agent();
+        Customer customerUser = new Customer();
+        String returnName = "";
+        if(userType.equals(userTypesEnum.ADMIN.toString().trim())) {
             queryArg = "User.findByEmail";
             Query query = em.createNamedQuery(queryArg).setParameter("email", email);
             systemUser = (User)query.getSingleResult();
+            
         }
-        else if(userType.equals(userTypesEnum.AGENT)) {
+        else if(userType.equals(userTypesEnum.AGENT.toString().trim())) {
             queryArg = "Agent.findByEmail";
             Query query = em.createNamedQuery(queryArg).setParameter("email", email);
-            //Agent user = (User)query.getSingleResult();
+             agentUser = (Agent)query.getSingleResult();
+             systemUser = (SystemUser) agentUser;
         }
-        if(userType.equals(userTypesEnum.CUSTOMER)) {
+        else if(userType.equals(userTypesEnum.CUSTOMER.toString().trim())) {
             queryArg = "Customer.findByEmail";
             Query query = em.createNamedQuery(queryArg).setParameter("email", email);
-            //User user = (User)query.getSingleResult();
+            customerUser = (Customer)query.getSingleResult();
+            systemUser = (SystemUser) customerUser;
         }
         
+        System.out.println(queryArg+" This is the query arguments");
+        System.out.println(" hello"+email);
+        
+//        if(returnName.equals("systemUser")){
+//        return (SystemUser) systemUser;
+//        }
+//        else if(returnName.equals("agentUser")){
+//        return (SystemUser) agentUser;
+//        }
+//        else if(returnName.equals("customerUser")){
+//        return (SystemUser) customerUser;
+//        }
+//      
+       
         return (SystemUser)systemUser;
     }
     /**

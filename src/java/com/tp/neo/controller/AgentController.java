@@ -109,9 +109,9 @@ public class AgentController extends TPController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-       
+//        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
             processGetRequest(request, response);
-        
+       // }
 //         processGetRequest(request, response);
     }
 
@@ -124,16 +124,12 @@ public class AgentController extends TPController {
         EntityManager em = emf.createEntityManager();
         String viewFile = AGENTS_ADMIN; 
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-       
+        
         if (action.equalsIgnoreCase("new")){
                viewFile = AGENTS_NEW;
-               RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-        dispatcher.forward(request, response);
-        }else {
-          if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
-              
-         
-         if(action.equalsIgnoreCase("delete")){
+        }
+        
+        else if(action.equalsIgnoreCase("delete")){
            
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
@@ -164,11 +160,9 @@ public class AgentController extends TPController {
             viewFile = AGENTS_ADMIN;
             request.setAttribute("agents", listAgents());
         }
-         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
-    }
-        }
-        
             
     }
     
@@ -262,7 +256,7 @@ public class AgentController extends TPController {
                 agent.setEmail(request.getParameter("agentEmail"));
                // String initPass = AuthManager.generateInitialPassword();  //randomly generated password
                 agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
-                //agent.setPassword(AuthManager.request.getParameter("agentPassword"));
+                //agent.setPassword(request.getParameter("agentPassword"));
                 agent.setStreet(request.getParameter("agentStreet"));
                 agent.setCity(request.getParameter("agentCity"));
                 agent.setState(request.getParameter("agentState"));
@@ -403,7 +397,10 @@ public class AgentController extends TPController {
                 agent.setLastname(request.getParameter("agentLastname"));               
                 agent.setEmail(request.getParameter("agentEmail"));
                 //agent.setPassword(request.getParameter("agentPassword"));
+                if(!request.getParameter("agentPassword").isEmpty()){
                 agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
+              
+                }
                 agent.setStreet(request.getParameter("agentStreet"));
                 agent.setCity(request.getParameter("agentCity"));
                 agent.setState(request.getParameter("agentState"));

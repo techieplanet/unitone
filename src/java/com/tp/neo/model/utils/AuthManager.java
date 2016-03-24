@@ -65,4 +65,9 @@ public class AuthManager {
         );
         return Base64.encodeBase64String(key.getEncoded());
     }
+    
+    public static String ucfirst(String subject) {
+    subject = subject.toLowerCase();
+    return Character.toUpperCase(subject.charAt(0)) + subject.substring(1);
+    }
 }

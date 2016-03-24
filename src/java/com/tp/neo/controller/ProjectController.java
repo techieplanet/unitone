@@ -90,10 +90,52 @@ public class ProjectController extends TPController {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
-            processGetRequest(request, response);
+//        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
+           String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+          if(action.equalsIgnoreCase("punits")){
+              int id = Integer.parseInt(request.getParameter("project_id"));
+              sendProjectUnitsData(request, response,id);
+
+        }else {
+        processGetRequest(request, response);
+          }
     }
     
+    protected void sendProjectUnitsData(HttpServletRequest request, HttpServletResponse response,int id) throws ServletException, IOException{
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        Project project = em.find(Project.class, id);
+//            
+            Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
+            List <ProjectUnit> projectUnits =  query.getResultList();
+            em.close(); emf.close();
+//           
+            Map<Integer, Map> map = new HashMap<Integer, Map>();
+           for(int i=0; i< projectUnits.size(); i++){
+           
+            
+           Map<String, String> mapSmall = new HashMap<String, String>();
+            mapSmall.put("id",projectUnits.get(i).getProjectUnitPK().getId()+"");
+            mapSmall.put("title", projectUnits.get(i).getTitle());
+            mapSmall.put("cpu", projectUnits.get(i).getCpu().toString());
+            mapSmall.put("lid", projectUnits.get(i).getLeastInitDep().toString());
+            mapSmall.put("discount", projectUnits.get(i).getDiscount().toString());
+            mapSmall.put("mpd", projectUnits.get(i).getMaxPaymentDuration().toString());
+            mapSmall.put("commp", projectUnits.get(i).getCommissionPercentage().toString());
+            mapSmall.put("quantity", projectUnits.get(i).getQuantity() + "");
+            map.put(i,mapSmall);
+          
+           }
+        
+            Gson gson = new GsonBuilder().create();
+            String jsonResponse = gson.toJson(map);
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(jsonResponse);
+            System.out.println("jsonResponse: " + jsonResponse);
+
+        
+    }
 
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

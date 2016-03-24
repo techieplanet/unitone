@@ -6,6 +6,7 @@
 package com.tp.neo.model;
 
 import com.tp.neo.interfaces.ITrailable;
+import com.tp.neo.interfaces.SystemUser;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -60,7 +61,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByCreatedBy", query = "SELECT a FROM Agent a WHERE a.createdBy = :createdBy"),
     @NamedQuery(name = "Agent.findByModifiedDate", query = "SELECT a FROM Agent a WHERE a.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy")})
-public class Agent implements Serializable, ITrailable {
+public class Agent implements Serializable, ITrailable,SystemUser {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -369,6 +370,12 @@ public class Agent implements Serializable, ITrailable {
         return hash;
     }
 
+    
+    public Integer getSystemUserId(){
+        int id = getAgentId().intValue();
+        return id;
+    }
+    
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
@@ -385,6 +392,26 @@ public class Agent implements Serializable, ITrailable {
     @Override
     public String toString() {
         return "com.tp.neo.model.Agent[ agentId=" + agentId + " ]";
+    }
+
+    @Override
+    public String getUsername() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setUsername(String username) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getPermissions() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setPermissions(String permissions) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
