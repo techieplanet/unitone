@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
@@ -36,6 +37,7 @@ public class LoginController extends HttpServlet {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em;
     HashMap<String, String> userTypes = new HashMap<String, String>();
+    String rootUrl;
     
     enum userTypesEnum {
         ADMIN, AGENT, CUSTOMER
@@ -82,8 +84,12 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-            processRequest(request, response);
-            
+            //processRequest(request, response);
+       String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+       
+       if(action.equals("logout")){
+           processLogoutRequest(request, response);
+       }
     }
 
     /**
@@ -144,7 +150,8 @@ public class LoginController extends HttpServlet {
                 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));                
                 
                 auditlog.setLogDate(calendar.getTime());
-                auditlog.setNote(String.format("User %s %s logged in as admin user at %s.",user.getFirstname(),user.getLastname(), calendar.getTime()));
+                auditlog.setNote(String.format("User %s %s logged in as %s user at %s.",user.getFirstname(),user.getLastname(), userType, calendar.getTime()));
+                auditlog.setUsertype(user.getSystemUserTypeId());
                 auditlog.setUserId(user.getSystemUserId());
                 
                 em.persist(auditlog);
@@ -194,6 +201,51 @@ public class LoginController extends HttpServlet {
         
         return (SystemUser)systemUser;
     }
+    
+    public void processLogoutRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try{
+            em = emf.createEntityManager();
+            
+            HttpSession session = request.getSession();
+            SystemUser user = (SystemUser)session.getAttribute("user");
+            String userType = session.getAttribute("userType").toString();
+                                
+            //do logging here
+            em.getTransaction().begin();
+            Auditlog auditlog = new Auditlog();
+            auditlog.setActionName("User Logout");
+                
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));                
+
+            auditlog.setLogDate(calendar.getTime());
+            auditlog.setNote(String.format("User %s %s logged out as %s user at %s.",user.getFirstname(),user.getLastname(), userType, calendar.getTime()));
+            auditlog.setUsertype(user.getSystemUserTypeId());
+            auditlog.setUserId(user.getSystemUserId());
+
+            em.persist(auditlog);
+            em.getTransaction().commit();
+                
+            String scheme = request.isSecure() ? "https" : "http";
+            String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
+            String host = new URI(request.getHeader("host")).toString();
+            rootUrl = scheme + "://" + host + context + "/";
+            
+            session.invalidate();
+            response.sendRedirect(rootUrl);
+                
+        } catch(IllegalStateException e){
+            response.sendRedirect(rootUrl);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
+        finally {
+            em.close();
+        }
+    }
+    
     /**
      * Returns a short description of the servlet.
      *
