@@ -6,6 +6,7 @@
 package com.tp.neo.model;
 
 import com.tp.neo.interfaces.ITrailable;
+import com.tp.neo.interfaces.SystemUser;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -56,7 +57,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customer.findByCreatedBy", query = "SELECT c FROM Customer c WHERE c.createdBy = :createdBy"),
     @NamedQuery(name = "Customer.findByModifiedDate", query = "SELECT c FROM Customer c WHERE c.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Customer.findByModifiedBy", query = "SELECT c FROM Customer c WHERE c.modifiedBy = :modifiedBy")})
-public class Customer implements Serializable, ITrailable {
+public class Customer implements Serializable, ITrailable, SystemUser {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -320,6 +321,11 @@ public class Customer implements Serializable, ITrailable {
         return hash;
     }
 
+    public Integer getSystemUserId(){
+       int id =  getCustomerId().intValue();
+       return id;
+    }
+     
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
@@ -336,6 +342,26 @@ public class Customer implements Serializable, ITrailable {
     @Override
     public String toString() {
         return "com.tp.neo.model.Customer[ customerId=" + customerId + " ]";
+    }
+
+    @Override
+    public String getUsername() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setUsername(String username) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getPermissions() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setPermissions(String permissions) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

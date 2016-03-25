@@ -87,7 +87,8 @@ public class ProjectUnitController extends TPController {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
+        
+        
             processGetRequest(request, response);
 
     }
