@@ -36,5 +36,6 @@ public interface SystemUser {
     public void setPermissions(String permissions);
     
     public Integer getSystemUserId();
+    public Integer getSystemUserTypeId();
     
 }

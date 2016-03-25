@@ -115,14 +115,18 @@ public class UserController extends TPController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {          
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
+        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            log("Inside hasActiveUserSession");
             processGetRequest(request, response);
+        }
     }
 
     
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        
+        log("Inside get request");
     
         EntityManager em = emf.createEntityManager();
         String viewFile = ENTITY_LIST; 
@@ -130,9 +134,10 @@ public class UserController extends TPController {
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         
         if (action.equalsIgnoreCase("new")){
+               log("Inside new action");
+                
                viewFile = NEW_ENTITY;
                request.setAttribute("userId", "");
-               
                request.setAttribute("rolesList", rolesList);
                request.setAttribute("action", "new");
         }
@@ -141,31 +146,25 @@ public class UserController extends TPController {
         }
         else if(action.equalsIgnoreCase("edit") && !(stringId.equals(""))){
             viewFile = NEW_ENTITY;
+            log("Inside editaction");
             
             //find by ID
             int id = Integer.parseInt(stringId);
             
             User user = em.find(User.class, id);
-            request.setAttribute("user", user);
+            request.setAttribute("reqUser", user); //different from session user
             request.setAttribute("action", "edit");
             request.setAttribute("rolesList", rolesList);
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listusers")){
             viewFile = ENTITY_LIST;
             request.setAttribute("users", listUsers());
-                
         }
         else{
             viewFile = ENTITY_LIST;
             request.setAttribute("users", listUsers());
         }
         
-//        try{
-//            log("Initial AuthManager: " + AuthManager.getInitialPassword());
-//        } catch(Exception e){
-//            
-//        }
-
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
@@ -233,7 +232,7 @@ public class UserController extends TPController {
                 em.refresh(user);
                 
                 request.setAttribute("rolesList", rolesList);
-                request.setAttribute("user", user);
+                request.setAttribute("reqUser", user);
                 request.setAttribute("action", "edit");
                 request.setAttribute("success", true);
                
@@ -248,7 +247,7 @@ public class UserController extends TPController {
                 e.printStackTrace();
                 System.out.println("inside catch area: " + e.getMessage() + "ACTION: " + action);
                 viewFile = NEW_ENTITY;
-                request.setAttribute("user", user);
+                request.setAttribute("reqUser", user);
                 request.setAttribute("action", action);
                 request.setAttribute("rolesList", rolesList);
                 request.setAttribute("errors", errorMessages);
@@ -257,7 +256,7 @@ public class UserController extends TPController {
                 e.printStackTrace();
                 System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
                 viewFile = NEW_ENTITY;
-                request.setAttribute("user", user);
+                request.setAttribute("reqUser", user);
                 request.setAttribute("action", action);
                 request.setAttribute("rolesList", rolesList);
                 errorMessages.put("mysqlviiolation", e.getMessage());
@@ -306,8 +305,12 @@ public class UserController extends TPController {
                 
                 em.getTransaction().commit();
             
+                User sessionUser = (User)request.getSession().getAttribute("user");
+                
+                if((int)sessionUser.getUserId() == (int)user.getUserId()) request.getSession().setAttribute("user", user);
+                
                 request.setAttribute("rolesList", rolesList);
-                request.setAttribute("user", user);
+                request.setAttribute("reqUser", user);
                 request.setAttribute("action", "edit");
                 request.setAttribute("success", true);
                
@@ -318,7 +321,7 @@ public class UserController extends TPController {
                 e.printStackTrace();
                 System.out.println("inside catch area: " + e.getMessage());
                 viewFile = NEW_ENTITY;
-                request.setAttribute("user", user);
+                request.setAttribute("reqUser", user);
                 request.setAttribute("action", action);
                 request.setAttribute("rolesList", rolesList);
                 request.setAttribute("errors", errorMessages);
@@ -327,7 +330,7 @@ public class UserController extends TPController {
                     e.printStackTrace();
                     System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
                     viewFile = NEW_ENTITY;
-                    request.setAttribute("user", user);
+                    request.setAttribute("reqUser", user);
                     request.setAttribute("action", action);
                     request.setAttribute("rolesList", rolesList);
                     errorMessages.put("mysqlviiolation", e.getMessage());

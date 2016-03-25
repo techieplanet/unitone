@@ -89,6 +89,10 @@ public class User implements Serializable, ITrailable, SystemUser{
     @ManyToOne(optional = false)
     private Role role;
 
+    
+    //Extra
+    transient final Integer USERTYPEID = 1;
+    
     public User() {
     }
 
@@ -245,6 +249,10 @@ public class User implements Serializable, ITrailable, SystemUser{
     
     public Integer getSystemUserId(){
         return getUserId();
+    }
+    
+    public Integer getSystemUserTypeId(){
+        return USERTYPEID;
     }
 
     @Override
