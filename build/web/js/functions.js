@@ -545,6 +545,60 @@ $('#selectQuantity').append($('<option>', {
 
 }
 
+/*TP: Activate the new agent via the switch and transfer to agent list*/
+function checkActivateSwitchWait(appName,entityName,agentId){
+    //alert("heello world");
+    setTimeout(function(){
+   var type;
+    url = appName + '/' + entityName;
+    console.log("URL: " + url);
+     var locator = "#row"+agentId+" #switch-state";
+      var result = $("#row"+agentId+" #switch-state").prop('checked');
+//      var value = $("#row"+agentId+" #switch-state").val();
+//      alert(value+"this is the spirit of prophecy"+result+" locator"+locator);
+//      alert($(locator).prop('checked'));
+      var status;
+      if(result == true){
+          status = 1;
+      }else{
+          status = 0;
+      }
+      console.log("URL: " + url);
+    
+     
+    
+    $.ajax({
+       type : 'POST',
+       url : url,
+       data : {updateStatusWait:status,agent_id:agentId},
+       success: function(response){
+          // alert("this is successful");
+           console.log("Successful: " + JSON.stringify(response));
+           var resp = JSON.parse(response);
+//           alert("working");
+           removeTableElement(agentId);
+           //alert(response);
+       },
+       error: function(xHr, status, error){
+           console.log("NOT Successful: " + xHr.responseText);
+           //processSubmitError(xHr.responseText);
+       }
+    });
+    
+}, 450);
+}
+
+
+function removeTableElement(agent_id){
+    
+    
+    $('#row'+agent_id).fadeOut(1500, function(){
+               $('#row'+agent_id).remove();
+           });
+    var message = '<br/><div class="row"><div class="col-md-12 "><p class="bg-success padding15" style="vertical-align:center !important;" ><i class="fa fa-check"></i>Agent successfully activated... <span class="pull-right"><a class="btn btn-primary" role="button" href="Agent" style="vertical-align:center !important;"><i class="fa fa-angle-double-left"></i> See Agent list</a>&nbsp;&nbsp;&nbsp;</span> </p></div></div>';        
+  $("#removeMessage").html(message);
+    
+}
 /*TP: Activate the agent via the switch created*/
 function checkActivateSwitch(appName,entityName,agentId){
       
@@ -574,8 +628,8 @@ setTimeout(function(){
        data : {updateStatus:status,agent_id:agentId},
        success: function(response){
            console.log("Successful: " + JSON.stringify(response));
-           var resp = JSON.parse(response);
-           alert(response);
+//           var resp = JSON.parse(response);
+//           alert(response);
        },
        error: function(xHr, status, error){
            console.log("NOT Successful: " + xHr.responseText);
@@ -590,23 +644,22 @@ setTimeout(function(){
 /*TP: Get the project units*/
 function getProjectUnits(appName, entityName){
    // alert(punit);
+   //url = appName + '/' + entityName;
     $("#addToCart").attr("disabled",false);
     var id =  $('#selectProduct').val();
    // alert("This is the project Id as the case may be"+id);
      url = appName + '/' + entityName;
     console.log("URL: " + url);
 //    alert(id);
-//    alert(url);
+//   alert(url);
 resetForm();
-
-$("#")
     $.ajax({
        type : 'GET',
        url : url,
        data : {project_id:id, action:'punits'},
        success: function(data){
            
-           //alert(data);
+           alert(data);
            var resp = JSON.parse(data);
            $('#selectUnit').empty();
            $('#selectUnit').append($('<option>', {
@@ -885,6 +938,7 @@ function modal_agree(){
     $("#agree").attr("checked",true);
     $('input[id="agentCreate"]').attr( "disabled",false);
     $('#agreementStatusModal').modal('hide');
+    $("#agree").attr("checked",true);
     
 }
 
