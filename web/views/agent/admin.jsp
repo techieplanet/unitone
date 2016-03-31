@@ -43,7 +43,7 @@
                 
                  <div class="box-body">
                      <div class="permissions block">
-                  <table id="entitylist" class="table table-bordered table-striped table-hover tabSwitch">
+                  <table id="entitylist" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
                         <th>Image</th>
