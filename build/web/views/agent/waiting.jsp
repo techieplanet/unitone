@@ -76,6 +76,7 @@
                                 </td>
                               
                                 <td>
+                                    <a class="btn btn-success btn-xs" title="Activation Checkbox" href="Agent?action=view&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
                                     
                                      <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${agent.agentId}"/>)" role="button"><i class="fa fa-remove"></i></a>
                                     
@@ -150,16 +151,22 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cancel2"><span aria-hidden="true">&times;</span></button>
               <h4 class="modal-title">NEOFORCE</h4>
             </div>
             <div class="modal-body">
-              <p>Are you sure you want to activate this agent?</p>
-              <p>if you do, the record of the agent will be moved from the waiting agent list to the agent list...</p>
+              You are about to activate this person as an agent. <br/><br/>
+
+Please be sure that you have verified their information and are satisfied as this person will become a representative of your organisation. If you are sure, please click 'Yes' or 'Cancel' if not sure.
+<br/><br/>
+Please note this record will be moved to the general agents list immediately after you click 'Yes'.
+<br/><br/>
+Are you sure you want to proceed?
+
             </div>
             <div class="modal-footer">
               <button type="button" id="cancel" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
-              <button id="ok" type="button" onclick="" class="btn btn-primary">OK</button>
+              <button id="ok" type="button" onclick="" class="btn btn-primary">Yes</button>
             </div>
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->

@@ -616,7 +616,7 @@ function removeTableElement(agent_id){
     $('#row'+agent_id).fadeOut(1500, function(){
                $('#row'+agent_id).remove();
            });
-    var message = '<br/><div class="row"><div class="col-md-12 "><p class="bg-success padding15" style="vertical-align:center !important;" ><i class="fa fa-check"></i>Agent successfully activated... <span class="pull-right"><a class="btn btn-primary" role="button" href="Agent" style="vertical-align:center !important;"><i class="fa fa-angle-double-left"></i> See Agent list</a>&nbsp;&nbsp;&nbsp;</span> </p></div></div>';        
+    var message = '<br/><div class="row"><div class="col-md-12 "><p class="bg-success padding15" style="vertical-align:center !important;" ><i class="fa fa-check"></i>Agent successfully activated. [<a href="Agent"><i>see agents full list</i></a>] </p></div></div>';        
   $("#removeMessage").html(message);
     
 }
@@ -1004,6 +1004,7 @@ function showActivateModal(context, entityName, id){
   var cancelFunction = "cancelSelection('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
     $("#activateModal #ok").attr("onclick", args);
     $("#activateModal #cancel").attr("onclick",cancelFunction);
+    $("#activateModal #cancel2").attr("onclick",cancelFunction);
     $('#activateModal').modal();  
     
 }
