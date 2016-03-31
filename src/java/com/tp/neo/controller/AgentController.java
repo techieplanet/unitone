@@ -716,9 +716,9 @@ public class AgentController extends TPController {
 
         //find by ID
         //Query jpqlQuery  = em.createNamedQuery("Agent.findByDeleted");
-        Query jpqlQuery = em.createNamedQuery("Agent.findByActiveAndDeleted");
+        Query jpqlQuery = em.createNamedQuery("Agent.findByApprovalStatusAndDeleted");
         jpqlQuery.setParameter("deleted", 0);
-        jpqlQuery.setParameter("active",1);
+        jpqlQuery.setParameter("approvalStatus",1);
         List<Agent> agentList = jpqlQuery.getResultList();
 
         return agentList;

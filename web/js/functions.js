@@ -47,7 +47,7 @@ function deleteEntity(appName, entityName, id){
 }
 
 
-/*TP: client side validation of the required fields*/
+/*TP: client side cidation of the required fields*/
 function checkFormRequired(){4
    var paymentMethod = $("#paymentMethod").val();
    
@@ -545,6 +545,18 @@ $('#selectQuantity').append($('<option>', {
 
 }
 
+function cancelSelection(appName,entityName,agentId){
+    var locator = "#row"+agentId+" #switch-state";
+     setTimeout(function(){
+   var type;
+    url = appName + '/' + entityName;
+    console.log("URL: " + url);
+    $(locator).iCheck('uncheck');
+     },
+    450);
+    
+    //setTimeout(function(){ $(locator).iCheck('uncheck');}, 1);
+}
 /*TP: Activate the new agent via the switch and transfer to agent list*/
 function checkActivateSwitchWait(appName,entityName,agentId){
     //alert("heello world");
@@ -553,7 +565,9 @@ function checkActivateSwitchWait(appName,entityName,agentId){
     url = appName + '/' + entityName;
     console.log("URL: " + url);
      var locator = "#row"+agentId+" #switch-state";
-      var result = $("#row"+agentId+" #switch-state").prop('checked');
+      var result = $(locator).parent('[class*="icheckbox"]').hasClass("checked");
+      //alert(result);
+      
 //      var value = $("#row"+agentId+" #switch-state").val();
 //      alert(value+"this is the spirit of prophecy"+result+" locator"+locator);
 //      alert($(locator).prop('checked'));
@@ -562,12 +576,15 @@ function checkActivateSwitchWait(appName,entityName,agentId){
           status = 1;
       }else{
           status = 0;
+          $(locator).on('ifChecked', function() {
+    $(locator).iCheck('uncheck');
+});
+          
       }
       console.log("URL: " + url);
     
-     
-    
-    $.ajax({
+     if(result==true){
+         $.ajax({
        type : 'POST',
        url : url,
        data : {updateStatusWait:status,agent_id:agentId},
@@ -578,12 +595,16 @@ function checkActivateSwitchWait(appName,entityName,agentId){
 //           alert("working");
            removeTableElement(agentId);
            //alert(response);
+            $('#activateModal').modal('hide');
        },
        error: function(xHr, status, error){
            console.log("NOT Successful: " + xHr.responseText);
            //processSubmitError(xHr.responseText);
        }
     });
+     }
+    
+    
     
 }, 450);
 }
@@ -630,6 +651,7 @@ setTimeout(function(){
            console.log("Successful: " + JSON.stringify(response));
 //           var resp = JSON.parse(response);
 //           alert(response);
+       $("#row"+agentId+" #switch-state").click();
        },
        error: function(xHr, status, error){
            console.log("NOT Successful: " + xHr.responseText);
@@ -975,6 +997,15 @@ function showDeleteModal(context, entityName, id){
     var args = "deleteEntity('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
     $("#deleteModal #ok").attr("onclick", args);
     $('#deleteModal').modal();
+}
+function showActivateModal(context, entityName, id){
+   // alert("hello");
+  var args = "checkActivateSwitchWait('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
+  var cancelFunction = "cancelSelection('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
+    $("#activateModal #ok").attr("onclick", args);
+    $("#activateModal #cancel").attr("onclick",cancelFunction);
+    $('#activateModal').modal();  
+    
 }
 
 
