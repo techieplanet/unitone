@@ -18,7 +18,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Agents
+              <a href="Agent">Agents</a>
             <!--<small>Optional description</small>-->
           </h1>
 <!--          <ol class="breadcrumb">
@@ -33,17 +33,14 @@
           <div class="box">
                 <div class="box-header">
                   <h3 class="box-title block">
-                      Agent List<br/><br/>
-                      <a href="Agent?action=wait">View Waiting List</a>
-                      <span class="pull-right">
-                          <a class="btn btn-primary" href="Agent?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a>
-                      </span>
+                      Waiting Agent List<br/>
+                      <div id="removeMessage"></div>
                   </h3>
                 </div><!-- /.box-header -->
                 
                  <div class="box-body">
                      <div class="permissions block">
-                  <table id="entitylist" class="table table-bordered table-striped table-hover">
+                  <table id="entitylist" class="table table-bordered table-striped table-hover tabSwitch">
                     <thead>
                       <tr>
                         <th>Image</th>
@@ -72,20 +69,19 @@
                                 
                                 <td><c:out value="${agent.state}" /></td>
                                 <td style="text-align:center;">
-                                    <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
-                                   
+<!--                                    <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitchWait('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
+                                   -->
+                                   <input type="checkbox" class="minimal"  id="switch-state" value = '<c:out value="${agent.agentId}"/>' <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if> onClick="showActivateModal('${pageContext.request.contextPath}', 'Agent',<c:out value="${agent.agentId}"/>);" />
+                       
                                 </td>
                               
                                 <td>
-                                    <a class="btn btn-success btn-xs" href="Agent?action=view&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
+                                    <a class="btn btn-success btn-xs" title="Activation Checkbox" href="Agent?action=view&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
                                     
-                                    <a class="btn btn-primary btn-xs" href="Agent?action=edit&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-pencil"></i></a>
-                                     
                                      <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${agent.agentId}"/>)" role="button"><i class="fa fa-remove"></i></a>
                                     
                                    
-                                
-                        </td>
+                                </td>
                             </tr>
                         </c:forEach>
                   </tbody>
@@ -124,11 +120,7 @@
 					</ul>
 				</div>
 			</div>-->
-                    <div class="box-header">
-                        <h3 class="box-title block">
-                            <span class="pull-right"><a class="btn btn-primary" href="Agent?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a></span>
-                        </h3>
-                    </div><!-- /.box-header -->
+                   
                 </div><!-- /.box-body -->
               </div><!-- /.box -->
         </section><!-- /.content -->
@@ -152,10 +144,33 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
-      
-      
-      
 
+      
+       <!--MODAL-->
+      <div class="modal fade" id="activateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cancel2"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">NEOFORCE</h4>
+            </div>
+            <div class="modal-body">
+              You are about to activate this person as an agent. <br/><br/>
+
+Please be sure that you have verified their information and are satisfied as this person will become a representative of your organisation. If you are sure, please click 'Yes' or 'Cancel' if not sure.
+<br/><br/>
+Please note this record will be moved to the general agents list immediately after you click 'Yes'.
+<br/><br/>
+Are you sure you want to proceed?
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" id="cancel" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+              <button id="ok" type="button" onclick="" class="btn btn-primary">Yes</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
 <!--      <script type="text/javascript" src="plugins/rcswitcher-master/js/jquery-2.1.3.min.js"></script>-->
 	
 <!-- Include the footer -->
@@ -189,23 +204,16 @@
                 ]
         });
     
- <c:forEach items="${agents}" var="agent">
-                       var id = "row"+ <c:out value="${agent.agentId}" />;
-                       $('#'+id+' :checkbox').rcSwitcher({
-
-					// reverse: true,
-					// inputs: true,
-					width: 65,
-					height: 24,
-					blobOffset: 2,
-					onText: 'YES',
-					offText: 'NO',
-					theme: 'flat',
-				        autoFontSize: false,
-					
-
-				});
-  </c:forEach>
+ $('#switch-state').on('ifClicked', function(event){
+//  showActivateModal(context, entityName, id);
+        
+        //alert(chkValue);
+        var agentId = $(this).val();
+//        #row"+agentId+" #switch-state"
+//        var chkValue = $("#switch-state").parent('[class*="icheckbox"]').hasClass("checked");
+           showActivateModal('${pageContext.request.contextPath}', 'Agent', agentId);
+//alert(("#switch-state").val());
+});
     
                                 
     

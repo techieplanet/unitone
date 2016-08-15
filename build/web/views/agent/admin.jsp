@@ -33,7 +33,8 @@
           <div class="box">
                 <div class="box-header">
                   <h3 class="box-title block">
-                      Agent List
+                      Agent List<br/><br/>
+                      <a href="Agent?action=wait">View Waiting List</a>
                       <span class="pull-right">
                           <a class="btn btn-primary" href="Agent?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a>
                       </span>
@@ -42,7 +43,7 @@
                 
                  <div class="box-body">
                      <div class="permissions block">
-                  <table id="entitylist" class="table table-bordered table-striped table-hover tabSwitch">
+                  <table id="entitylist" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
                         <th>Image</th>
@@ -83,7 +84,8 @@
                                      <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${agent.agentId}"/>)" role="button"><i class="fa fa-remove"></i></a>
                                     
                                    
-                                </td>
+                                
+                        </td>
                             </tr>
                         </c:forEach>
                   </tbody>
@@ -150,6 +152,9 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
+      
+      
+      
 
 <!--      <script type="text/javascript" src="plugins/rcswitcher-master/js/jquery-2.1.3.min.js"></script>-->
 	
