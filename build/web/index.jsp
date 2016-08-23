@@ -34,7 +34,7 @@ and open the template in the editor.
                 <div class="col-md-3 bgeee paddingtop20">
                     <p class="bold">Sign In</p>
 
-                    <form class="borderbottom paddingbottom10" action="Login" method="POST">
+                    <form class="borderbottom paddingbottom10" action="${pageContext.request.contextPath}/Login" method="POST">
                             <div class="form-group">
                                 <label>Login as</label>
                                 <select name="usertype" id="usertype" class="form-control select2" style="">

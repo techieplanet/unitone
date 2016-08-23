@@ -16,12 +16,16 @@ import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.controller.helpers.EmailHelper;
 import com.tp.neo.controller.helpers.SMSHelper;
 import com.tp.neo.model.User;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,6 +65,7 @@ public class AgentController extends AppController {
     private static String AGENTS_ADMIN = "/views/agent/admin.jsp"; 
     private static String AGENTS_NEW = "/views/agent/add.jsp";
     private static String AGENTS_VIEW = "/views/agent/view.jsp";
+    private static String AGENTS_WAIT = "/views/agent/waiting.jsp";
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
     private Agent agent = new Agent();
    
@@ -114,9 +119,14 @@ public class AgentController extends AppController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-//        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+         if(action.equalsIgnoreCase("new")){
+             processGetRequest(request, response);
+         }else{
+        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
             processGetRequest(request, response);
-       // }
+        }
+         }
 //         processGetRequest(request, response);
     }
 
@@ -124,7 +134,17 @@ public class AgentController extends AppController {
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-    
+//      URL url = new URL("http://developers.cloudsms.com.ng/api.php?userid=18012676&password=damilaregrace&type=5&destination=2348169013692&sender=NeoForce&message=TestJava");
+//        InputStream is = url.openConnection().getInputStream();
+//
+//        BufferedReader reader = new BufferedReader( new InputStreamReader( is )  );
+//
+//        String line = null;
+//            while( ( line = reader.readLine() ) != null )  {
+//       System.out.println(line);
+//        }
+//        reader.close();
+
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         String viewFile = AGENTS_ADMIN; 
@@ -139,6 +159,10 @@ public class AgentController extends AppController {
         else if(action.equalsIgnoreCase("delete")){
            
             this.delete(Integer.parseInt(request.getParameter("id")));
+        }
+        else if(action.equalsIgnoreCase("wait")){
+        viewFile = AGENTS_WAIT;
+        request.setAttribute("agents",listWaitingAgents());
         }
         else if (action.equalsIgnoreCase("view")){
                 viewFile = AGENTS_VIEW;
@@ -198,11 +222,16 @@ public class AgentController extends AppController {
               //  String viewFile = AGENTS_ADMIN;
 //              Agent agent = new Agent();
               String updateStatus = request.getParameter("updateStatus") != null ? request.getParameter("updateStatus") : "";
+              String updateStatusWait = request.getParameter("updateStatusWait")!=null ? request.getParameter("updateStatusWait") : "";
             try{                                
                 if(!(request.getParameter("agent_id").isEmpty()) ) { //edit mode'
                     if(!(updateStatus.isEmpty())){
                     this.processAgentAccountStatus(request,response);
-                    }else{
+                    }
+                    else if(!(updateStatusWait.isEmpty())){
+                    this.processAgentAccountStatusActivateAndApprove(request,response);
+                    }
+                    else{
                     this.processUpdateRequest(request,response);
                     }
                 
@@ -277,6 +306,9 @@ public class AgentController extends AppController {
                 agent.setKinName(request.getParameter("agentKinName"));
                 agent.setKinPhone(request.getParameter("agentKinPhone"));
                 agent.setKinAddress(request.getParameter("agentKinAddress"));
+                agent.setActive((short)0);
+                agent.setApprovalStatus((short)-1);
+                agent.setAgreementStatus(true);
                 new TrailableManager(agent).registerInsertTrailInfo(1);
                 agent.setDeleted((short)0);
                 if(agentFileName!=null){
@@ -326,6 +358,7 @@ public class AgentController extends AppController {
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
     }
+
     
     /*
         this method inserts the agent id into the system (generic) user table
@@ -354,6 +387,49 @@ public class AgentController extends AppController {
     }
     
     
+      
+    protected void processAgentAccountStatusActivateAndApprove(HttpServletRequest request,HttpServletResponse response)
+            throws ServletException, IOException, PropertyException{
+       EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+             EntityManager em = emf.createEntityManager();
+//             Agent agent = new Agent();
+             Gson gson = new GsonBuilder().create();
+        try{                                
+
+                em.getTransaction().begin();
+                
+               
+               
+                    agent = em.find(Agent.class, new Long(Integer.parseInt(request.getParameter("agent_id"))));
+                    int  status = Integer.parseInt(request.getParameter("updateStatusWait"));
+                    agent.setActive((short) status);
+                    agent.setApprovalStatus((short) status);
+                    em.persist(agent);
+                    em.getTransaction().commit();
+                    em.close();
+                    emf.close();
+                    Long agentId = agent.getAgentId();
+            String jsonResponse = gson.toJson(agentId);
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(jsonResponse);
+
+            System.out.println("jsonResponse: " + jsonResponse);
+           }
+//        catch(PropertyException err){
+//                err.printStackTrace();
+//                System.out.println("inside catch area: " + err.getMessage());
+//                  
+//                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), err.getMessage());
+//            }
+            catch(Exception e){
+               
+                e.printStackTrace();
+                System.out.println("System Error: " + e.getMessage());
+                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
+            }
+    }
+
     protected void processAgentAccountStatus(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, PropertyException{
              EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -374,10 +450,10 @@ public class AgentController extends AppController {
                     em.close();
                     emf.close();
                     Long agentId = agent.getAgentId();
-//            String jsonResponse = gson.toJson(agentId);
+            String jsonResponse = gson.toJson(agentId);
             response.setContentType("text/plain");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("This is the agent id"+agentId);
+            response.getWriter().write(jsonResponse);
 
 //            System.out.println("jsonResponse: " + jsonResponse);
            }
@@ -735,8 +811,27 @@ public class AgentController extends AppController {
         EntityManager em = emf.createEntityManager();
 
         //find by ID
-        Query jpqlQuery  = em.createNamedQuery("Agent.findByDeleted");
+        //Query jpqlQuery  = em.createNamedQuery("Agent.findByDeleted");
+        Query jpqlQuery = em.createNamedQuery("Agent.findByApprovalStatusAndDeleted");
         jpqlQuery.setParameter("deleted", 0);
+        jpqlQuery.setParameter("approvalStatus",1);
+        List<Agent> agentList = jpqlQuery.getResultList();
+
+        return agentList;
+    }
+    
+     public List<Agent> listWaitingAgents(){
+        //List<Agent> agentList = new ArrayList<Agent>();
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+
+        //find by ID
+        //Query jpqlQuery  = em.createNamedQuery("Agent.findByDeleted");
+        Query jpqlQuery = em.createNamedQuery("Agent.findByActiveAndDeletedAndApprovalStatus");
+        jpqlQuery.setParameter("deleted", 0);
+        jpqlQuery.setParameter("active",0);
+        jpqlQuery.setParameter("approvalStatus",-1);
         List<Agent> agentList = jpqlQuery.getResultList();
 
         return agentList;

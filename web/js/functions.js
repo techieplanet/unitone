@@ -47,7 +47,7 @@ function deleteEntity(appName, entityName, id){
 }
 
 
-/*TP: client side validation of the required fields*/
+/*TP: client side cidation of the required fields*/
 function checkFormRequired(){4
    var paymentMethod = $("#paymentMethod").val();
    
@@ -545,6 +545,81 @@ $('#selectQuantity').append($('<option>', {
 
 }
 
+function cancelSelection(appName,entityName,agentId){
+    var locator = "#row"+agentId+" #switch-state";
+     setTimeout(function(){
+   var type;
+    url = appName + '/' + entityName;
+    console.log("URL: " + url);
+    $(locator).iCheck('uncheck');
+     },
+    450);
+    
+    //setTimeout(function(){ $(locator).iCheck('uncheck');}, 1);
+}
+/*TP: Activate the new agent via the switch and transfer to agent list*/
+function checkActivateSwitchWait(appName,entityName,agentId){
+    //alert("heello world");
+    setTimeout(function(){
+   var type;
+    url = appName + '/' + entityName;
+    console.log("URL: " + url);
+     var locator = "#row"+agentId+" #switch-state";
+      var result = $(locator).parent('[class*="icheckbox"]').hasClass("checked");
+      //alert(result);
+      
+//      var value = $("#row"+agentId+" #switch-state").val();
+//      alert(value+"this is the spirit of prophecy"+result+" locator"+locator);
+//      alert($(locator).prop('checked'));
+      var status;
+      if(result == true){
+          status = 1;
+      }else{
+          status = 0;
+          $(locator).on('ifChecked', function() {
+    $(locator).iCheck('uncheck');
+});
+          
+      }
+      console.log("URL: " + url);
+    
+     if(result==true){
+         $.ajax({
+       type : 'POST',
+       url : url,
+       data : {updateStatusWait:status,agent_id:agentId},
+       success: function(response){
+          // alert("this is successful");
+           console.log("Successful: " + JSON.stringify(response));
+           var resp = JSON.parse(response);
+//           alert("working");
+           removeTableElement(agentId);
+           //alert(response);
+            $('#activateModal').modal('hide');
+       },
+       error: function(xHr, status, error){
+           console.log("NOT Successful: " + xHr.responseText);
+           //processSubmitError(xHr.responseText);
+       }
+    });
+     }
+    
+    
+    
+}, 450);
+}
+
+
+function removeTableElement(agent_id){
+    
+    
+    $('#row'+agent_id).fadeOut(1500, function(){
+               $('#row'+agent_id).remove();
+           });
+    var message = '<br/><div class="row"><div class="col-md-12 "><p class="bg-success padding15" style="vertical-align:center !important;" ><i class="fa fa-check"></i>Agent successfully activated. [<a href="Agent"><i>see agents full list</i></a>] </p></div></div>';        
+  $("#removeMessage").html(message);
+    
+}
 /*TP: Activate the agent via the switch created*/
 function checkActivateSwitch(appName,entityName,agentId){
       
@@ -574,8 +649,9 @@ setTimeout(function(){
        data : {updateStatus:status,agent_id:agentId},
        success: function(response){
            console.log("Successful: " + JSON.stringify(response));
-           var resp = JSON.parse(response);
-           alert(response);
+//           var resp = JSON.parse(response);
+//           alert(response);
+       $("#row"+agentId+" #switch-state").click();
        },
        error: function(xHr, status, error){
            console.log("NOT Successful: " + xHr.responseText);
@@ -590,23 +666,22 @@ setTimeout(function(){
 /*TP: Get the project units*/
 function getProjectUnits(appName, entityName){
    // alert(punit);
+   //url = appName + '/' + entityName;
     $("#addToCart").attr("disabled",false);
     var id =  $('#selectProduct').val();
    // alert("This is the project Id as the case may be"+id);
      url = appName + '/' + entityName;
     console.log("URL: " + url);
 //    alert(id);
-//    alert(url);
+//   alert(url);
 resetForm();
-
-$("#")
     $.ajax({
        type : 'GET',
        url : url,
        data : {project_id:id, action:'punits'},
        success: function(data){
            
-           //alert(data);
+           alert(data);
            var resp = JSON.parse(data);
            $('#selectUnit').empty();
            $('#selectUnit').append($('<option>', {
@@ -885,6 +960,7 @@ function modal_agree(){
     $("#agree").attr("checked",true);
     $('input[id="agentCreate"]').attr( "disabled",false);
     $('#agreementStatusModal').modal('hide');
+    $("#agree").attr("checked",true);
     
 }
 
@@ -921,6 +997,16 @@ function showDeleteModal(context, entityName, id){
     var args = "deleteEntity('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
     $("#deleteModal #ok").attr("onclick", args);
     $('#deleteModal').modal();
+}
+function showActivateModal(context, entityName, id){
+   // alert("hello");
+  var args = "checkActivateSwitchWait('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
+  var cancelFunction = "cancelSelection('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
+    $("#activateModal #ok").attr("onclick", args);
+    $("#activateModal #cancel").attr("onclick",cancelFunction);
+    $("#activateModal #cancel2").attr("onclick",cancelFunction);
+    $('#activateModal').modal();  
+    
 }
 
 
