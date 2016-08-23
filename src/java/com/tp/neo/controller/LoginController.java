@@ -123,7 +123,6 @@ public class LoginController extends HttpServlet {
         String email = request.getParameter("email") != null ? request.getParameter("email") : "";
         String password = request.getParameter("password") != null ? request.getParameter("password") : "";
         String userType = request.getParameter("usertype") != null ? request.getParameter("usertype") : "";
-        System.out.println("Password: " + password);
         
         try{
             em = emf.createEntityManager();           
