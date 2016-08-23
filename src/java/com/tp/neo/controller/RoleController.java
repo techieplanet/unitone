@@ -11,7 +11,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Role;
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -37,7 +37,7 @@ import javax.xml.bind.PropertyException;
  * @author Swedge
  */
 @WebServlet(name = "Role", urlPatterns = {"/Role"})
-public class RoleController extends TPController {
+public class RoleController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String ROLE_ADMIN = "/views/role/admin.jsp"; 
     private static String ROLE_NEW = "/views/role/add.jsp";

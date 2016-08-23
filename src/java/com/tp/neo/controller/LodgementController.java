@@ -9,7 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Customer;
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementPK;
 import com.tp.neo.model.Sale;
@@ -38,7 +38,7 @@ import javax.xml.bind.PropertyException;
  * @author John
  */
 @WebServlet(name = "LodgementController", urlPatterns = {"/Lodgement"})
-public class LodgementController extends TPController {
+public class LodgementController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String LODGEMENT_ADMIN = "/views/lodgement/admin.jsp"; 
     private static String LODGEMENT_NEW_AGENT = "/views/lodgement/customer_orders.jsp";

@@ -55,14 +55,14 @@
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                   <!-- The user image in the navbar-->
                   <img src="images/img/boxed-bg.jpg" class="user-image" alt="User Image">
-                  <span class="hidden-xs">Alexander Pierce</span>
+                  <span class="hidden-xs">${user.firstname} ${user.lastname}</span>
                 </a>
                 <ul class="dropdown-menu">
                   <!-- The user image in the menu -->
                   <li class="user-header">
                     <img src="images/img/boxed-bg.jpg" class="img-circle" alt="User Image">
                     <p>
-                      Alexander Pierce - Web Developer
+                      ${user.firstname} ${user.lastname}
                       <small>Member since Nov. 2012</small>
                     </p>
                   </li>
@@ -84,7 +84,7 @@
                       <a href="#" class="btn btn-default btn-flat">Profile</a>
                     </div>
                     <div class="pull-right">
-                      <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                      <a href="${pageContext.request.contextPath}/Login?action=logout" class="btn btn-default btn-flat">Sign out</a>
                     </div>
                   </li>
                 </ul>

@@ -8,8 +8,10 @@ package com.tp.neo.model;
 import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,17 +22,19 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
  * @author Swedge
  */
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "User.findAll", query = "SELECT u FROM User u"),
@@ -51,30 +55,43 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "User.findByModifiedBy", query = "SELECT u FROM User u WHERE u.modifiedBy = :modifiedBy")})
 public class User implements Serializable, ITrailable, SystemUser{
 
+    @Basic(optional = false)
+    @Column(name = "firstname")
+    private String firstname;
+    @Column(name = "middlename")
+    private String middlename;
+    @Basic(optional = false)
+    @Column(name = "lastname")
+    private String lastname;
+    @Basic(optional = false)
+    @Column(name = "username")
+    private String username;
+    @Basic(optional = false)
+    @Column(name = "password")
+    private String password;
+    @Basic(optional = false)
+    @Column(name = "email")
+    private String email;
+    @Column(name = "phone")
+    private String phone;
+    @Lob
+    @Column(name = "permissions")
+    private String permissions;
+    @Basic(optional = false)
+    @Column(name = "deleted")
+    private short deleted;
+    @Basic(optional = false)
+    @Column(name = "active")
+    private short active;
+
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
     @Basic(optional = false)
-    private String firstname;
-    private String middlename;
-    @Basic(optional = false)
-    private String lastname;
-    @Basic(optional = false)
-    private String username;
-    @Basic(optional = false)
-    private String password;
-    @Basic(optional = false)
-    private String email;
-    private String phone;
-    @Lob
-    private String permissions;
-    @Basic(optional = false)
-    private short deleted;
-    @Basic(optional = false)
-    private short active;
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
@@ -96,11 +113,11 @@ public class User implements Serializable, ITrailable, SystemUser{
     public User() {
     }
 
-    public User(Integer userId) {
+    public User(Long userId) {
         this.userId = userId;
     }
 
-    public User(Integer userId, String firstname, String lastname, String username, String password, String email, short deleted, short active) {
+    public User(Long userId, String firstname, String lastname, String username, String password, String email, short deleted, short active) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -111,11 +128,11 @@ public class User implements Serializable, ITrailable, SystemUser{
         this.active = active;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -246,8 +263,10 @@ public class User implements Serializable, ITrailable, SystemUser{
         return hash;
     }
     
+
     
-    public Integer getSystemUserId(){
+    
+    public Long getSystemUserId(){
         return getUserId();
     }
     
@@ -272,5 +291,6 @@ public class User implements Serializable, ITrailable, SystemUser{
     public String toString() {
         return "com.tp.neo.model.User[ userId=" + userId + " ]";
     }
+
     
 }

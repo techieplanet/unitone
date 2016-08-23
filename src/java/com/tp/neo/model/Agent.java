@@ -63,6 +63,16 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy")})
 public class Agent implements Serializable, ITrailable,SystemUser {
 
+    @Basic(optional = false)
+    @Column(name = "generic_id")
+    private long genericId;
+    @Basic(optional = false)
+    @Column(name = "agreement_status")
+    private boolean agreementStatus;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
+    private Collection<Customer> customerCollection;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -114,9 +124,6 @@ public class Agent implements Serializable, ITrailable,SystemUser {
     @Basic(optional = false)
     @Column(name = "photo_path")
     private String photoPath;
-    @Basic(optional = false)
-    @Column(name = "agreement_status")
-    private boolean agreementStatus;
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
@@ -127,9 +134,12 @@ public class Agent implements Serializable, ITrailable,SystemUser {
     private Date modifiedDate;
     @Column(name = "modified_by")
     private Integer modifiedBy;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
-    private Collection<CustomerAgent> customerAgentCollection;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
+//    private Collection<CustomerAgent> customerAgentCollection;
 
+    //Extra
+    transient final Integer USERTYPEID = 2;
+    
     public Agent() {
     }
 
@@ -314,6 +324,7 @@ public class Agent implements Serializable, ITrailable,SystemUser {
         this.photoPath = photoPath;
     }
 
+    
     public boolean getAgreementStatus() {
         return agreementStatus;
     }
@@ -354,15 +365,6 @@ public class Agent implements Serializable, ITrailable,SystemUser {
         this.modifiedBy = modifiedBy;
     }
 
-    @XmlTransient
-    public Collection<CustomerAgent> getCustomerAgentCollection() {
-        return customerAgentCollection;
-    }
-
-    public void setCustomerAgentCollection(Collection<CustomerAgent> customerAgentCollection) {
-        this.customerAgentCollection = customerAgentCollection;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -371,9 +373,13 @@ public class Agent implements Serializable, ITrailable,SystemUser {
     }
 
     
-    public Integer getSystemUserId(){
-        int id = getAgentId().intValue();
+    public Long getSystemUserId(){
+        long id = getAgentId();
         return id;
+    }
+    
+    public Integer getSystemUserTypeId(){
+        return USERTYPEID;
     }
     
     @Override
@@ -413,5 +419,25 @@ public class Agent implements Serializable, ITrailable,SystemUser {
     public void setPermissions(String permissions) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public long getGenericId() {
+        return genericId;
+    }
+
+    public void setGenericId(long genericId) {
+        this.genericId = genericId;
+    }
+
+   
+
+    @XmlTransient
+    public Collection<Customer> getCustomerCollection() {
+        return customerCollection;
+    }
+
+    public void setCustomerCollection(Collection<Customer> customerCollection) {
+        this.customerCollection = customerCollection;
+    }
+
     
 }

@@ -11,7 +11,7 @@
             </div>
             <div class="pull-left info">
 
-              <p>${sessionScope.user.firstname} ${sessionScope.user.lastname}</p>
+              <p>${user.firstname} ${user.lastname}</p>
 
               <!-- Status -->
               <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
@@ -26,9 +26,7 @@
                   <li class="header"></li>
                   <!-- Optionally, you can add icons to the links -->
                   <li class="active"><a href="#"><i class="fa fa-tachometer"></i> <span>Dashboard</span></a></li>
-                  
-                  
-<!--                  <li class=""><a href="#"><i class="fa fa-microphone"></i> <span>Announcements</span><small class="label pull-right bg-yellow">2</small></a></li>
+                  <li class=""><a href="#"><i class="fa fa-microphone"></i> <span>Announcements</span><small class="label pull-right bg-yellow">2</small></a></li>
                   <li class=""><a href="#"><i class="fa fa-envelope"></i> <span>Mailbox</span><small class="label pull-right bg-red">5</small></a></li>
                   <li class=""><a href="#"><i class="fa fa-user-plus"></i> <span>Ceate New Customer</span></a></li>
                   <li class=""><a href="#"><i class="fa fa-users"></i> <span>My Customers</span></a></li>
@@ -44,12 +42,12 @@
                   </li>
                   <li class=""><a href="${pageContext.request.contextPath}/Project"><i class="fa fa-home"></i><span>Projects</span></a></li>
                   <li class=""><a href="${pageContext.request.contextPath}/Role"><i class="fa fa-user"></i> <span>Roles</span></a></li>
-                  <li class=""><a href="${pageContext.request.contextPath}/User"><i class="fa fa-users"></i> <span>Users</span></a></li>-->
+                  <li class=""><a href="${pageContext.request.contextPath}/User"><i class="fa fa-users"></i> <span>Users</span></a></li>
                 </ul><!-- /.sidebar-menu -->
           </c:if>
           
                 
-          <c:if test="${sessionScope.userType eq sessionScope.userTypes.ADMIN}">
+          <c:if test="${sessionScope.userType eq sessionScope.userTypes.AGENT}">
           </c:if>
           
           <c:if test="${sessionScope.userType eq sessionScope.userTypes.CUSTOMER}">

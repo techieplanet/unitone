@@ -11,7 +11,7 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.ProjectUnitPK;
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -36,7 +36,7 @@ import javax.xml.bind.PropertyException;
  * @author Swedge
  */
 @WebServlet(name = "ProjectUnit", urlPatterns = {"/ProjectUnit"})
-public class ProjectUnitController extends TPController {
+public class ProjectUnitController extends AppController {
 
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String PROJECTS_ADMIN = "/views/project/admin.jsp"; 

@@ -17,9 +17,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -58,6 +61,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customer.findByModifiedDate", query = "SELECT c FROM Customer c WHERE c.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Customer.findByModifiedBy", query = "SELECT c FROM Customer c WHERE c.modifiedBy = :modifiedBy")})
 public class Customer implements Serializable, ITrailable, SystemUser {
+
+    
+    @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
+    @ManyToOne(optional = false)
+    private Agent agentId;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -115,6 +123,9 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<CustomerAgent> customerAgentCollection;
 
+    //Extra
+    transient final Integer USERTYPEID = 3;
+    
     public Customer() {
     }
 
@@ -321,9 +332,12 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         return hash;
     }
 
-    public Integer getSystemUserId(){
-       int id =  getCustomerId().intValue();
-       return id;
+    public Long getSystemUserId(){
+       return getCustomerId();
+    }
+    
+    public Integer getSystemUserTypeId(){
+        return USERTYPEID;
     }
      
     @Override
@@ -363,5 +377,16 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public void setPermissions(String permissions) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+  
+
+    public Agent getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(Agent agentId) {
+        this.agentId = agentId;
+    }
+
     
 }

@@ -42,7 +42,6 @@
                         <th>Last Name</th>
                         <th>Email</th>
                         <th>Role</th>
-                        <th>Status</th>
                         <th class="text-center">Action</th>
                       </tr>
                     </thead>
@@ -54,7 +53,6 @@
                                 <td><c:out value="${user.lastname}" /></td>
                                 <td><c:out value="${user.email}" /></td>
                                 <td><c:out value="${user.role.title}" /></td>
-                                <td><c:out value="${user.active}" /></td>
                                 <td class="text-center">
                                     <a class="btn btn-success btn-xs" href="User?action=edit&id=<c:out value="${user.userId}"/>" user="button"><i class="fa fa-pencil"></i></a>
                                     <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'User', <c:out value="${user.userId}"/>)" user="button"><i class="fa fa-remove"></i></a>
@@ -69,7 +67,6 @@
                         <th>Last Name</th>
                         <th>Email</th>
                         <th>Role</th>
-                        <th>Status</th>
                         <th class="text-center">Action</th>
                       </tr>
                     </tfoot>
@@ -129,7 +126,7 @@
                 "columnDefs": [
                     { "width":"50px", "targets": 0 },
                     { "width":"200px", "targets": 3 },
-                    { "sortable": false, "width":"100px", "targets": 6 }
+                    { "sortable": false, "width":"100px", "targets": 5 }
                 ]
         });
     

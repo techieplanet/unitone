@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.tp.neo.model.utils;
+package com.tp.neo.controller.components;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,14 +30,14 @@ import javax.servlet.http.HttpSession;
  *
  * @author Swedge
  */
-public class TPController extends HttpServlet{
+public class AppController extends HttpServlet{
     public static final String APP_NAME = "NeoForce";
     public static final String defaultEmail = "no-reply@tplocalhost.com";
     
     public Calendar calendar;
     public String userType;
     
-    public TPController(){
+    public AppController(){
         System.out.println("Inside TPController");
         calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
     }

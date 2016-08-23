@@ -11,7 +11,7 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Role;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.User;
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.utils.AuthManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,7 +28,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.PropertyException;
-import com.tp.neo.model.utils.MailSender;
+import com.tp.neo.controller.components.MailSender;
 import java.net.URI;
 import java.util.Enumeration;
 import javax.persistence.RollbackException;
@@ -39,7 +39,7 @@ import org.apache.commons.validator.routines.EmailValidator;
  * @author Swedge
  */
 @WebServlet(name = "User", urlPatterns = {"/User"})
-public class UserController extends TPController {
+public class UserController extends AppController {
     public final String pageTitle = "User";
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static final String ENTITY_LIST = "/views/user/admin.jsp"; 
@@ -149,7 +149,7 @@ public class UserController extends TPController {
             log("Inside editaction");
             
             //find by ID
-            int id = Integer.parseInt(stringId);
+            long id = Long.parseLong(stringId);
             
             User user = em.find(User.class, id);
             request.setAttribute("reqUser", user); //different from session user
@@ -288,7 +288,7 @@ public class UserController extends TPController {
         try{                                
                 em.getTransaction().begin();
                 
-                user = em.find(User.class, Integer.parseInt(request.getParameter("id")));
+                user = em.find(User.class, Long.parseLong(request.getParameter("id")));
                 user.setFirstname(request.getParameter("firstname"));
                 user.setMiddlename(request.getParameter("middlename"));
                 user.setLastname(request.getParameter("lastname"));
@@ -297,7 +297,7 @@ public class UserController extends TPController {
                 user.setRole(em.find(Role.class, Integer.parseInt(request.getParameter("role_id"))));
                 user.setPermissions("");
                 user.setDeleted((short)0);   
-                user.setActive((short)1); 
+                user.setActive((short)1);
                 
                 validate(user);
                 
@@ -307,7 +307,7 @@ public class UserController extends TPController {
             
                 User sessionUser = (User)request.getSession().getAttribute("user");
                 
-                if((int)sessionUser.getUserId() == (int)user.getUserId()) request.getSession().setAttribute("user", user);
+                if((long)sessionUser.getUserId() == (long)user.getUserId()) request.getSession().setAttribute("user", user);
                 
                 request.setAttribute("rolesList", rolesList);
                 request.setAttribute("reqUser", user);
@@ -335,14 +335,14 @@ public class UserController extends TPController {
                     request.setAttribute("rolesList", rolesList);
                     errorMessages.put("mysqlviiolation", e.getMessage());
                     request.setAttribute("errors", errorMessages);
-                }
+            }
             catch(Exception e){
                 e.printStackTrace();
                 String message = e.getMessage();
                 if(message == null) message = "An error occured";
                 setExceptionAttribbutes(user);
                 SystemLogger.logSystemIssue("User", gson.toJson(errorMessages), message);
-            }        
+            }
             
             //new URI(request.getHeader("referer")).getPath();
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
@@ -350,7 +350,7 @@ public class UserController extends TPController {
     }
     
     
-    public void delete(int id){
+    public void delete(long id){
         em = emf.createEntityManager();
         
         User user = em.find(User.class, id);

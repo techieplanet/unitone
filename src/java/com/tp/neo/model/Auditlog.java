@@ -58,7 +58,7 @@ public class Auditlog implements Serializable {
     private int usertype;
     @Basic(optional = false)
     @Column(name = "user_id")
-    private int userId;
+    private Long userId;
 
     public Auditlog() {
     }
@@ -67,7 +67,7 @@ public class Auditlog implements Serializable {
         this.id = id;
     }
 
-    public Auditlog(Long id, String actionName, Date logDate, int usertype, int userId) {
+    public Auditlog(Long id, String actionName, Date logDate, int usertype, Long userId) {
         this.id = id;
         this.actionName = actionName;
         this.logDate = logDate;
@@ -115,11 +115,11 @@ public class Auditlog implements Serializable {
         this.usertype = usertype;
     }
 
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

@@ -1,12 +1,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<form name="userform" id="userform" method="POST" action="User?action=${action}&id=${user.userId}" class="form-horizontal"> 
+<form name="userform" id="userform" method="POST" action="User?action=${action}&id=${reqUser.userId}" class="form-horizontal"> 
         <div class="box box-primary" >
           <div class="box-header with-border">
             <h3 class="box-title">
                 <c:choose>
-                    <c:when test="${user.userId != null}">
+                    <c:when test="${reqUser.userId != null}">
                         Edit User
                     </c:when>    
                     <c:otherwise>
@@ -14,7 +14,7 @@
                     </c:otherwise>
                 </c:choose>
 
-                <!--${user.userId == null ? "New User" : "Edit User"}-->
+                <!--${reqUser.userId == null ? "New User" : "Edit User"}-->
             </h3>
           </div><!-- /.box-header -->
 
@@ -57,12 +57,12 @@
                                 <!--<h3 class="box-title">Personal Information</h3>-->
                                 <div class="form-group">
                                     <label for="firstname" class="control-label">First Name*</label>
-                                    <input type="text" name="firstname" id="firstname" class="form-control col-md-10" value="${user.firstname}">
+                                    <input type="text" name="firstname" id="firstname" class="form-control col-md-10" value="${reqUser.firstname}">
                                 </div>
 
                                 <div class="form-group">
                                     <label for="email" class="control-label">Email*</label>
-                                      <input type="text" name="email" id="email" class="form-control" value="${user.email}">
+                                      <input type="text" name="email" id="email" class="form-control" value="${reqUser.email}">
                                 </div>
                         </div>
                         <div class="col-md-1"></div>
@@ -71,12 +71,12 @@
                         <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="middlename" class="control-label">Middle Name*</label>
-                                    <input type="text" name="middlename" id="middlename" class="form-control col-md-4" value="${user.middlename}">
+                                    <input type="text" name="middlename" id="middlename" class="form-control col-md-4" value="${reqUser.middlename}">
                                 </div>
 
                                 <div class="form-group">
                                     <label for="phone" class="control-label">Phone</label>
-                                      <input type="text" name="phone" id="phone" class="form-control medium" value="${user.phone}">
+                                      <input type="text" name="phone" id="phone" class="form-control medium" value="${reqUser.phone}">
                                       <small>e.g:080xxxxxxxx, 01xxxxxx</small>
                                 </div>
                         </div>
@@ -85,7 +85,7 @@
                         <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="lastname" class="control-label">Last Name*</label>
-                                      <input type="text" name="lastname" id="lastname" class="form-control" value="${user.lastname}">
+                                      <input type="text" name="lastname" id="lastname" class="form-control" value="${reqUser.lastname}">
                                 </div>
 
                                 <div class="form-group">
@@ -93,7 +93,7 @@
                                         <select name="role_id" id="role_id" style="width: 80%;" class="form-control">
                                             <option value="0">--Choose--</option>
                                             <c:forEach items="${rolesList}" var="role">
-                                                <option value="${role.roleId}" <c:if test="${user.role.roleId == role.roleId}"> selected </c:if> >${role.title}</option>
+                                                <option value="${role.roleId}" <c:if test="${reqUser.role.roleId == role.roleId}"> selected </c:if> >${role.title}</option>
                                             </c:forEach>
                                         </select>
                                 </div>    
@@ -109,7 +109,7 @@
                         <div class="form-group">
                             <label for="username" class="col-sm-3 control-label">User Name*</label>
                             <div class="col-sm-9">
-                              <input type="text" name="username" id="username" class="form-control medium" value="${user.username}">
+                              <input type="text" name="username" id="username" class="form-control medium" value="${reqUser.username}">
                             </div>
                         </div>
                         
@@ -131,7 +131,7 @@
                     
                     
                     <div class="col-md-12">
-                        <input type="hidden" name="id" id="id" value="${user.userId}">
+                        <input type="hidden" name="id" id="id" value="${reqUser.userId}">
                         <div class="box-footer">
                             <button type="submit" class="btn btn-primary">Submit</button>
                          </div>

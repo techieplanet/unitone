@@ -2,11 +2,10 @@
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
   <persistence-unit name="NeoForcePU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-
-    <class>com.tp.neo.model.Agent</class>
+    <!--<class>com.tp.neo.model.Agent</class>-->
     <class>com.tp.neo.model.Customer</class>
-    <class>com.tp.neo.model.CustomerAgent</class>
-     <class>com.tp.neo.model.Lodgement</class>
+    <!--<class>com.tp.neo.model.CustomerAgent</class>-->
+    <class>com.tp.neo.model.Lodgement</class>
     <class>com.tp.neo.model.Sale</class>
     <class>com.tp.neo.model.Project</class>
     <class>com.tp.neo.exception.ExceptionLog</class>
@@ -16,13 +15,14 @@
     <class>com.tp.neo.model.ProjectUnit</class>
     <class>com.tp.neo.model.User</class>
     <class>com.tp.neo.model.Auditlog</class>
-
+    <class>com.tp.neo.model.GenericUser</class>
+    <class>com.tp.neo.model.Account</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/xforce?zeroDateTimeBehavior=convertToNull"/>
-      <property name="javax.persistence.jdbc.user" value="root"/>
-      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
-      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/xforce"/>
+      <property name="javax.persistence.jdbc.user" value="postgres"/>
+      <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="postgres"/>
     </properties>
   </persistence-unit>
 </persistence>

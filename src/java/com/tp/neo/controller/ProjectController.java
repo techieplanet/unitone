@@ -11,7 +11,7 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
@@ -38,7 +38,7 @@ import java.util.Map;
  * @author Swedge
  */
 @WebServlet(name = "Project", urlPatterns = {"/Project"})
-public class ProjectController extends TPController {
+public class ProjectController extends AppController {
     public final String pageTitle = "Project";
 
     
