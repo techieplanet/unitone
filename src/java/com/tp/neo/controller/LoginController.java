@@ -211,20 +211,9 @@ public class LoginController extends HttpServlet {
         }
         
         System.out.println(queryArg+" This is the query arguments");
-        System.out.println(" hello"+email);
-        
-//        if(returnName.equals("systemUser")){
-//        return (SystemUser) systemUser;
-//        }
-//        else if(returnName.equals("agentUser")){
-//        return (SystemUser) agentUser;
-//        }
-//        else if(returnName.equals("customerUser")){
-//        return (SystemUser) customerUser;
-//        }
-//      
+        System.out.println(" hello "+email);
        
-        return (SystemUser)systemUser;
+        return systemUser;
     }
     
     public void processLogoutRequest(HttpServletRequest request, HttpServletResponse response)

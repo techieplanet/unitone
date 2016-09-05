@@ -9,6 +9,8 @@ import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 
 /**
  *
@@ -17,9 +19,11 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class ProjectUnitPK implements Serializable {
 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private long id;
+    
     @Basic(optional = false)
     @Column(name = "project_id")
     private int projectId;

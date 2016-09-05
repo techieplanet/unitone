@@ -6,6 +6,7 @@
 package com.tp.neo.model;
 
 
+import com.tp.neo.interfaces.IRestricted;
 import com.tp.neo.interfaces.ITrailable;
 
 import java.io.Serializable;
@@ -48,7 +49,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findByCreatedBy", query = "SELECT p FROM Project p WHERE p.createdBy = :createdBy"),
     @NamedQuery(name = "Project.findByModifiedDate", query = "SELECT p FROM Project p WHERE p.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Project.findByModifiedBy", query = "SELECT p FROM Project p WHERE p.modifiedBy = :modifiedBy")})
-public class Project implements Serializable, ITrailable {
+public class Project implements Serializable, ITrailable, IRestricted {
 
 
     @Basic(optional = false)
@@ -86,12 +87,12 @@ public class Project implements Serializable, ITrailable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     @Column(name = "created_by")
-    private Integer createdBy;
+    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     @Column(name = "modified_by")
-    private Integer modifiedBy;
+    private Long modifiedBy;
 
     public Project() {
     }
@@ -164,11 +165,11 @@ public class Project implements Serializable, ITrailable {
         this.createdDate = createdDate;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -180,11 +181,11 @@ public class Project implements Serializable, ITrailable {
         this.modifiedDate = modifiedDate;
     }
 
-    public Integer getModifiedBy() {
+    public Long getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(Integer modifiedBy) {
+    public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
@@ -239,5 +240,11 @@ public class Project implements Serializable, ITrailable {
     public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
         this.projectUnitCollection = projectUnitCollection;
     }
-    
+
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_project";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_project";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_project";
+        else return "view_project";
+    }
 }

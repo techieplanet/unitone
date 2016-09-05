@@ -15,7 +15,7 @@
             <c:forEach items="${units}" var="unit">
                 <li id="row<c:out value="${unit.projectUnitPK.id}" />" class="list-group-item noborder">
                     <span class="" style="width: 60%; display: inline-table;">${unit.title}<span class="badge marginleft5">${unit.quantity}</span></span>
-                    <a class="pull-right btn btn-danger btn-xs marginleft5" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'ProjectUnit', <c:out value="${unit.projectUnitPK.id}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                    <a class="pull-right btn btn-danger btn-xs marginleft5" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'ProjectUnit', ${unit.projectUnitPK.id})" role="button"><i class="fa fa-remove"></i></a>
                     <a class="pull-right btn btn-success btn-xs" onclick="launchEditUnitForm(${unit.projectUnitPK.id},'${pageContext.request.contextPath}')" role="button"><i class="fa fa-pencil"></i></a>
                 </li>
             </c:forEach>
@@ -70,9 +70,10 @@
 <script>
     function launchEditUnitForm(unitId, context){        
         $.get(context+'/ProjectUnit',{action:'edit',id:unitId},function(response){
+                                console.log(response);
                                 unit = JSON.parse(response);
                                 $('#title').val(unit.title);
-                                $('#cpu').val(unit.cpu);
+                                $('#cpu').val(parseFloat(unit.cpu));
                                 $('#lid').val(unit.lid);
                                 $('#discount').val(unit.discount);
                                 $('#mpd').val(unit.mpd);

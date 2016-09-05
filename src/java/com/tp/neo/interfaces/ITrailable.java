@@ -14,19 +14,15 @@ import java.util.Date;
 public interface ITrailable {
 
     public Date getCreatedDate();
-
     public void setCreatedDate(Date createdDate);
 
-    public Integer getCreatedBy();
-
-    public void setCreatedBy(Integer createdBy);
+    public Long getCreatedBy();
+    public void setCreatedBy(Long createdBy);
 
     public Date getModifiedDate();
-
     public void setModifiedDate(Date modifiedDate);
 
-    public Integer getModifiedBy();
-
-    public void setModifiedBy(Integer modifiedBy);
+    public Long getModifiedBy();
+    public void setModifiedBy(Long modifiedBy);
     
 }

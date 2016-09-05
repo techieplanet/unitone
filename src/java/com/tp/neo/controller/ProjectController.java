@@ -11,12 +11,11 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -26,27 +25,29 @@ import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.PropertyException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.persistence.RollbackException;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author Swedge
  */
 @WebServlet(name = "Project", urlPatterns = {"/Project"})
-public class ProjectController extends TPController {
+public class ProjectController extends AppController {
     public final String pageTitle = "Project";
 
-    
-    private static String INSERT_OR_EDIT = "/user.jsp";
     private static String PROJECTS_ADMIN = "/views/project/admin.jsp"; 
     private static String PROJECTS_NEW = "/views/project/add.jsp";
     
     private HashMap<String, String> errorMessages = new HashMap<String, String>();
+    
+    private String action = "";
+    private String viewFile = "";
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -89,32 +90,35 @@ public class ProjectController extends TPController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
 
-//        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
-           String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-          if(action.equalsIgnoreCase("punits")){
-              int id = Integer.parseInt(request.getParameter("project_id"));
-              sendProjectUnitsData(request, response,id);
-
-        }else {
-        processGetRequest(request, response);
-          }
+        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
+                if(action.equalsIgnoreCase("punits")){
+                  int id = Integer.parseInt(request.getParameter("project_id"));
+                  sendProjectUnitsData(request, response,id);
+                }else {
+                    processGetRequest(request, response);
+                }
+            }
+        }
     }
+    
     
     protected void sendProjectUnitsData(HttpServletRequest request, HttpServletResponse response,int id) throws ServletException, IOException{
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         Project project = em.find(Project.class, id);
-//            
+            
             Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
             List <ProjectUnit> projectUnits =  query.getResultList();
             em.close(); emf.close();
-//           
+           
             Map<Integer, Map> map = new HashMap<Integer, Map>();
            for(int i=0; i< projectUnits.size(); i++){
            
             
-           Map<String, String> mapSmall = new HashMap<String, String>();
+            Map<String, String> mapSmall = new HashMap<String, String>();
             mapSmall.put("id",projectUnits.get(i).getProjectUnitPK().getId()+"");
             mapSmall.put("title", projectUnits.get(i).getTitle());
             mapSmall.put("cpu", projectUnits.get(i).getCpu().toString());
@@ -133,8 +137,7 @@ public class ProjectController extends TPController {
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(jsonResponse);
             System.out.println("jsonResponse: " + jsonResponse);
-
-        
+  
     }
 
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
@@ -143,8 +146,7 @@ public class ProjectController extends TPController {
     
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        String viewFile = PROJECTS_ADMIN; 
-        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        viewFile = PROJECTS_ADMIN; 
 
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         
@@ -204,12 +206,14 @@ public class ProjectController extends TPController {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
-            if(request.getParameter("id").equals(""))
-                processInsertRequest(request, response);
-            else
-                processUpdateRequest(request, response);
+            if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
+                if(request.getParameter("id").equals(""))
+                    processInsertRequest(request, response);
+                else
+                    processUpdateRequest(request, response);
+            }
         }
 
     }
@@ -219,7 +223,7 @@ public class ProjectController extends TPController {
         System.out.println("Insert mode");
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        String viewFile = PROJECTS_NEW;
+        viewFile = PROJECTS_NEW;
         request.setAttribute("success", false);
         
         Project project = new Project();
@@ -237,7 +241,8 @@ public class ProjectController extends TPController {
                 project.setDeleted((short)0);
                 project.setActive((short)1);
                 
-                new TrailableManager(project).registerInsertTrailInfo(1);
+                //sessionUser is a class variable 
+                new TrailableManager(project).registerInsertTrailInfo(sessionUser.getSystemUserId());
                 
                 validate(project);
                 
@@ -268,6 +273,16 @@ public class ProjectController extends TPController {
                 request.setAttribute("units", projectUnits);
                 request.setAttribute("action", "edit");
                 //request.setAttribute("id", project.getId());
+                request.setAttribute("errors", errorMessages);
+            }
+            catch(RollbackException e){
+                e.printStackTrace();
+                System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
+                viewFile = PROJECTS_NEW;
+                request.setAttribute("project", project);
+                request.setAttribute("action", action);
+                //request.setAttribute("rolesList", rolesList);
+                errorMessages.put("mysqlviolation", e.getMessage());
                 request.setAttribute("errors", errorMessages);
             }
             catch(Exception e){
@@ -311,18 +326,24 @@ public class ProjectController extends TPController {
                 Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",project.getId());
                 projectUnits = query.getResultList();
                 
-                new TrailableManager(project).registerUpdateTrailInfo(1);
+                //sessionUser is a class variable 
+                System.out.println("sessionUser.getSystemUserId(): " + sessionUser.getSystemUserId());
+                new TrailableManager(project).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+                log("update");
                 
                 validate(project);
-                                
+                log("validate");
+                log("Peoject data" + gson.toJson(project));
+                
                 em.getTransaction().commit();
-            
+                log("commit");
+                
                 request.setAttribute("units", projectUnits);
                 request.setAttribute("project", project);
                 request.setAttribute("action", "edit");
                 request.setAttribute("id", project.getId());
-                request.setAttribute("success", true);
-               
+                request.setAttribute("success", true);                
+                
                 em.close();
                 emf.close();
             }
@@ -357,8 +378,11 @@ public class ProjectController extends TPController {
         
         Project project = em.find(Project.class, id);
         em.getTransaction().begin();
-        project.setDeleted((short)1);
-        new TrailableManager(project).registerUpdateTrailInfo(1);
+        project.setDeleted(sessionUser.getSystemUserId().shortValue());
+        
+        //sessionUser is a class variable 
+        new TrailableManager(project).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+        
         em.getTransaction().commit();
 
         em.close();

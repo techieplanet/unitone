@@ -122,7 +122,7 @@
           <input type="hidden" name="id" id="id" value="">
 
           <div class="box-footer text-center">
-              <a role="button" class="btn btn-default pull-left" onclick="$('#myModal').modal('hide'); return false;" >Cancel</a>
+              <a role="button" class="btn btn-default pull-left" onclick="$('#myModal').modal('hide'); return false;" >Close</a>
               <a role="button" class="btn btn-primary pull-right" onclick="sendData();return false;">Save</a>
               <span id="loading2" class="hidden" >
                 <small>Saving... &nbsp;&nbsp;&nbsp;</small> 
