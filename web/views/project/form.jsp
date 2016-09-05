@@ -51,7 +51,7 @@
 
           <!-- textarea -->
           <div class="form-group">
-            <label>Project Description *</label>
+            <label>Project Description</label>
             <textarea name="desc" id="desc" class="form-control medium" rows="3" placeholder="">${project.description}</textarea>
           </div>
 
@@ -63,7 +63,7 @@
         <div class="form-group">
           <label>Project Manager *</label>
           <select name="pmanager" id="pmanager" class="form-control select2" style="width: 50%;">
-            <option value="0"></option>
+            <option value="0">--Select--</option>
             <option value="1" <c:if test="${project.projectManager == 1}"> <jsp:text>selected</jsp:text> </c:if> >Oladele Emmanuel</option>
             <option value="2" <c:if test="${project.projectManager == 2}"> <jsp:text>selected</jsp:text> </c:if> >Alex Ighalo</option>
             <option value="3" <c:if test="${project.projectManager == 3}"> <jsp:text>selected</jsp:text> </c:if> >Bada Johnson</option>

@@ -77,6 +77,7 @@ public class DashboardController extends HttpServlet {
         
         if(request.getParameter("action") !=null && request.getParameter("action").equals("logout")) {
             request.getSession().invalidate();
+            System.out.println("invalidated");
         }
         else
             processRequest(request, response);

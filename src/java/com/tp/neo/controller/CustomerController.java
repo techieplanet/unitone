@@ -5,7 +5,7 @@
  */
 package com.tp.neo.controller;
 
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
@@ -48,7 +48,7 @@ import javax.xml.bind.PropertyException;
  */
 @WebServlet(name = "Customer", urlPatterns = {"/Customer"})
 @MultipartConfig
-public class CustomerController extends TPController  {
+public class CustomerController extends AppController  {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String CUSTOMER_ADMIN = "/views/customer/admin.jsp"; 
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";
@@ -196,7 +196,7 @@ public class CustomerController extends TPController  {
                
 //                if(true) throw new Exception("User triggered exception");
                 
-                new TrailableManager(customer).registerInsertTrailInfo(1);
+                new TrailableManager(customer).registerInsertTrailInfo((long)1);
                 customer.setDeleted((short)0);
                 if(customerFileName!=null){
                 customer.setPhotoPath(customerFileName);
@@ -300,7 +300,7 @@ public class CustomerController extends TPController  {
                
                 Integer i = 2; 
                 Long l = new Long(i);
-               new TrailableManager(customer).registerUpdateTrailInfo(1);
+               new TrailableManager(customer).registerUpdateTrailInfo((long)1);
                
                 customer.setFirstname(request.getParameter("customerFirstname"));
                 customer.setLastname(request.getParameter("customerLastname"));               

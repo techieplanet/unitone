@@ -73,16 +73,18 @@ public class Lodgement implements Serializable, ITrailable {
     private double transAmount;
     @Column(name = "verification_status")
     private Short verificationStatus;
+    
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     @Column(name = "created_by")
-    private Integer createdBy;
+    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     @Column(name = "modified_by")
-    private Integer modifiedBy;
+    private Long modifiedBy;
+    
     @JoinColumn(name = "sale_id", referencedColumnName = "sale_id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Sale sale;
@@ -193,11 +195,11 @@ public class Lodgement implements Serializable, ITrailable {
         this.createdDate = createdDate;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -209,11 +211,11 @@ public class Lodgement implements Serializable, ITrailable {
         this.modifiedDate = modifiedDate;
     }
 
-    public Integer getModifiedBy() {
+    public Long getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(Integer modifiedBy) {
+    public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 

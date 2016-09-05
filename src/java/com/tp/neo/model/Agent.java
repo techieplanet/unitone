@@ -5,6 +5,7 @@
  */
 package com.tp.neo.model;
 
+import com.tp.neo.interfaces.IRestricted;
 import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
 import java.io.Serializable;
@@ -63,7 +64,17 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByCreatedBy", query = "SELECT a FROM Agent a WHERE a.createdBy = :createdBy"),
     @NamedQuery(name = "Agent.findByModifiedDate", query = "SELECT a FROM Agent a WHERE a.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy")})
-public class Agent implements Serializable, ITrailable,SystemUser {
+public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
+
+    @Basic(optional = false)
+    @Column(name = "generic_id")
+    private long genericId;
+    @Basic(optional = false)
+    @Column(name = "agreement_status")
+    private boolean agreementStatus;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
+    private Collection<Customer> customerCollection;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -116,22 +127,23 @@ public class Agent implements Serializable, ITrailable,SystemUser {
     @Basic(optional = false)
     @Column(name = "photo_path")
     private String photoPath;
-    @Basic(optional = false)
-    @Column(name = "agreement_status")
-    private boolean agreementStatus;
+    
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     @Column(name = "created_by")
-    private Integer createdBy;
+    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     @Column(name = "modified_by")
-    private Integer modifiedBy;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
-    private Collection<CustomerAgent> customerAgentCollection;
+    private Long modifiedBy;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
+//    private Collection<CustomerAgent> customerAgentCollection;
 
+    //Extra
+    transient final Integer USERTYPEID = 2;
+    
     public Agent() {
     }
 
@@ -316,6 +328,7 @@ public class Agent implements Serializable, ITrailable,SystemUser {
         this.photoPath = photoPath;
     }
 
+    
     public boolean getAgreementStatus() {
         return agreementStatus;
     }
@@ -332,11 +345,11 @@ public class Agent implements Serializable, ITrailable,SystemUser {
         this.createdDate = createdDate;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -348,21 +361,12 @@ public class Agent implements Serializable, ITrailable,SystemUser {
         this.modifiedDate = modifiedDate;
     }
 
-    public Integer getModifiedBy() {
+    public Long getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(Integer modifiedBy) {
+    public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
-    }
-
-    @XmlTransient
-    public Collection<CustomerAgent> getCustomerAgentCollection() {
-        return customerAgentCollection;
-    }
-
-    public void setCustomerAgentCollection(Collection<CustomerAgent> customerAgentCollection) {
-        this.customerAgentCollection = customerAgentCollection;
     }
 
     @Override
@@ -373,9 +377,13 @@ public class Agent implements Serializable, ITrailable,SystemUser {
     }
 
     
-    public Integer getSystemUserId(){
-        int id = getAgentId().intValue();
+    public Long getSystemUserId(){
+        long id = getAgentId();
         return id;
+    }
+    
+    public Integer getSystemUserTypeId(){
+        return USERTYPEID;
     }
     
     @Override
@@ -415,5 +423,32 @@ public class Agent implements Serializable, ITrailable,SystemUser {
     public void setPermissions(String permissions) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public long getGenericId() {
+        return genericId;
+    }
+
+    public void setGenericId(long genericId) {
+        this.genericId = genericId;
+    }
+
+
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_agent";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_agent";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_agent";
+        else return "view_agent";
+    }
+    
+
+    @XmlTransient
+    public Collection<Customer> getCustomerCollection() {
+        return customerCollection;
+    }
+
+    public void setCustomerCollection(Collection<Customer> customerCollection) {
+        this.customerCollection = customerCollection;
+    }
+
     
 }

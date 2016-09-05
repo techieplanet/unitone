@@ -4,24 +4,23 @@
  * and open the template in the editor.
  */
 package com.tp.neo.controller;
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.Agent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.tp.neo.controller.components.AuditLogger;
 import com.tp.neo.exception.SystemLogger;
+import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.utils.AuthManager;
-import java.io.BufferedReader;
+import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.User;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.URL;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,12 +35,9 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.annotation.*;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import javax.xml.bind.PropertyException;
 
 //import org.apache.tomcat.util.http.fileupload.FileItem;
 //import org.apache.tomcat.util.http.fileupload.FileItemFactory;
@@ -49,7 +45,7 @@ import javax.xml.bind.PropertyException;
 //import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
 //import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import javax.xml.bind.PropertyException;
-import java.util.Map;
+import javax.persistence.RollbackException;
 
 
 
@@ -59,7 +55,7 @@ import java.util.Map;
  */
 @WebServlet(name = "Agent", urlPatterns = {"/Agent"})
 @MultipartConfig
-public class AgentController extends TPController {
+public class AgentController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String AGENTS_ADMIN = "/views/agent/admin.jsp"; 
     private static String AGENTS_NEW = "/views/agent/add.jsp";
@@ -68,10 +64,18 @@ public class AgentController extends TPController {
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
     private Agent agent = new Agent();
    
-    private final static Logger LOGGER = 
-            Logger.getLogger(Agent.class.getCanonicalName());
+    private final static Logger LOGGER = Logger.getLogger(Agent.class.getCanonicalName());
     
     private HashMap<String, String> errorMessages = new HashMap<String, String>();
+    //private SystemUser sessionUser;
+    
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+    EntityManager em;
+    Gson gson = new GsonBuilder().create();
+    
+    private String action = "";
+    private String viewFile = "";
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -113,15 +117,17 @@ public class AgentController extends TPController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-         if(action.equalsIgnoreCase("new")){
-             processGetRequest(request, response);
-         }else{
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
-            processGetRequest(request, response);
-        }
+         
+         action = request.getParameter("action") != null ? request.getParameter("action") : "";
+         
+         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
+                processGetRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
          }
-//         processGetRequest(request, response);
     }
 
     /*TP: processes the get request in general*/
@@ -141,20 +147,22 @@ public class AgentController extends TPController {
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        String viewFile = AGENTS_ADMIN; 
-        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        viewFile = AGENTS_ADMIN;
+        
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        String agent_id = request.getParameter("agent_id") != null ? request.getParameter("agent_id") : "";
+        String status = request.getParameter("status") != null ? request.getParameter("status") : "";
         
         if (action.equalsIgnoreCase("new")){
                viewFile = AGENTS_NEW;
         }
-        
         else if(action.equalsIgnoreCase("delete")){
-           
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
         else if(action.equalsIgnoreCase("wait")){
-        viewFile = AGENTS_WAIT;
-        request.setAttribute("agents",listWaitingAgents());
+            viewFile = AGENTS_WAIT;
+            request.setAttribute("agents",listWaitingAgents());
         }
         else if (action.equalsIgnoreCase("view")){
                 viewFile = AGENTS_VIEW;
@@ -183,6 +191,9 @@ public class AgentController extends TPController {
             viewFile = AGENTS_ADMIN;
             request.setAttribute("agents", listAgents());
         }
+        else if(action.equalsIgnoreCase("approval")){
+            this.processApprovalRequest(Long.parseLong(agent_id), Integer.parseInt(status), request);
+        }
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -201,18 +212,27 @@ public class AgentController extends TPController {
      @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processPostRequest(request, response);
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
+                    processPostRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+         }
     }
 
     /*TP: Processes the post requests in general*/
     protected void processPostRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-                Gson gson = new GsonBuilder().create();
-              //  String viewFile = AGENTS_ADMIN;
-//              Agent agent = new Agent();
-              String updateStatus = request.getParameter("updateStatus") != null ? request.getParameter("updateStatus") : "";
-              String updateStatusWait = request.getParameter("updateStatusWait")!=null ? request.getParameter("updateStatusWait") : "";
-            try{                                
+              Gson gson = new GsonBuilder().create();
+              
+            String updateStatus = request.getParameter("updateStatus") != null ? request.getParameter("updateStatus") : "";
+            String updateStatusWait = request.getParameter("updateStatusWait")!=null ? request.getParameter("updateStatusWait") : "";
+              
+            try{
                 if(!(request.getParameter("agent_id").isEmpty()) ) { //edit mode'
                     if(!(updateStatus.isEmpty())){
                     this.processAgentAccountStatus(request,response);
@@ -226,7 +246,7 @@ public class AgentController extends TPController {
                 
                 }
                else{
-                this.processInsertRequest(request, response);
+                    this.processInsertRequest(request, response);
                 }
                
             }
@@ -242,12 +262,15 @@ public class AgentController extends TPController {
     /*TP: Processes every insert request of request type POST*/
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         errorMessages.clear();
-        String root = getServletContext().getRealPath("/");
+        
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        String viewFile = AGENTS_NEW;
-//        Agent agent = new Agent();
+        
+        String root = getServletContext().getRealPath("/");
+        viewFile = AGENTS_NEW;
+
         String agentFileName = null;
         String agentKinFileName = null;
         
@@ -260,9 +283,9 @@ public class AgentController extends TPController {
                 em.getTransaction().begin();
                 
                
-                if(!(request.getParameter("agent_id").equals(""))) { //edit mode
-                    agent = em.find(Agent.class, new Long(Integer.parseInt(request.getParameter("agent_id"))));
-                }
+//                if(!(request.getParameter("agent_id").equals(""))) { //edit mode
+//                    agent = em.find(Agent.class, new Long(Integer.parseInt(request.getParameter("agent_id"))));
+//                }
                
                Date date = new Date();
                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
@@ -276,7 +299,7 @@ public class AgentController extends TPController {
                  agentFileName = uploadAgentPicture(agent,request,agentFileName);
                  agentKinFileName = uploadAgentKinPicture(agent,request,agentKinFileName);
                
-                Integer i = 2; 
+                Integer i = 2;
                 Long l = new Long(i);
                
                 agent.setFirstname(request.getParameter("agentFirstname"));
@@ -298,7 +321,9 @@ public class AgentController extends TPController {
                 agent.setActive((short)0);
                 agent.setApprovalStatus((short)-1);
                 agent.setAgreementStatus(true);
-                new TrailableManager(agent).registerInsertTrailInfo(1);
+                
+                
+                new TrailableManager(agent).registerInsertTrailInfo((long)1);
                 agent.setDeleted((short)0);
                 if(agentFileName!=null){
                 agent.setPhotoPath(agentFileName);
@@ -306,16 +331,20 @@ public class AgentController extends TPController {
                 if(agentKinFileName != null){
                 agent.setKinPhotoPath(agentKinFileName);
                 }
-               
                 
                //persist only on save mode
-
-                if(!em.contains(agent)){
-                    em.persist(agent);
-                   
-                }
-               
+                em.persist(agent);   
+                
                 em.getTransaction().commit();
+                
+                //HANDLE SYSTEM ID
+                //set the agent ID into the generic user table
+                em.refresh(agent);  
+                GenericUser systemuser = setUpAgentGenericRecord(agent);
+                System.out.println("After creating System user: " + agent.getAgentId());
+                
+                //update the agent record with the generic id 
+                setAgentGenericId(agent, systemuser);
                 
                 em.close();
                 emf.close();
@@ -343,6 +372,35 @@ public class AgentController extends TPController {
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
     }
+
+    
+    /*
+        this method inserts the agent id into the system (generic) user table
+    */
+    private GenericUser setUpAgentGenericRecord(Agent agent) throws Exception{
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        GenericUser genericUser = new GenericUser();
+        genericUser.setAgentId(agent.getAgentId());
+        em.persist(genericUser);
+        em.getTransaction().commit();
+        
+        em.refresh(genericUser);
+        return genericUser;
+    }
+    
+    /*
+        this method updates the agent record with the agent's system ID
+    */
+    private void setAgentGenericId(Agent agent, GenericUser sys)  throws Exception{
+        EntityManager em = emf.createEntityManager();
+        Agent agent1 = em.find(Agent.class, agent.getAgentId());
+        em.getTransaction().begin();
+        agent1.setGenericId(sys.getId());
+        em.getTransaction().commit();
+    }
+    
+    
       
     protected void processAgentAccountStatusActivateAndApprove(HttpServletRequest request,HttpServletResponse response)
             throws ServletException, IOException, PropertyException{
@@ -385,6 +443,7 @@ public class AgentController extends TPController {
                 SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
             }
     }
+
     protected void processAgentAccountStatus(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, PropertyException{
              EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -425,6 +484,59 @@ public class AgentController extends TPController {
                 SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
             }
     }
+    
+    
+    /*
+    *   This method executes the approval process for agents 
+    *   It collects an agent's information and 
+    *   1. Sets the approval status to 1
+    *   2. Send an email to the agent notifying them of the approval
+    *   3. Send an SMS to the agent notifying them of the approval
+    *   Args
+        1. Agent Id - id of the agent to be approved
+        2. Status - status to put the agent in i.e. approved (1) or declined (0)
+    */
+    protected void processApprovalRequest (long agentId, int status, HttpServletRequest request){
+//            String agentId = request.getParameter("agent_id") != null ? request.getParameter("agent_id") : "";
+//            String status  = request.getParameter("status") != null ? request.getParameter("status") : "";
+            
+            try{
+                em = emf.createEntityManager();
+                Agent agent = em.find(Agent.class, agentId);
+
+                em.getTransaction().begin();
+                agent.setApprovalStatus((short) status);
+                agent.setActive((short) status);
+                em.flush();
+                em.getTransaction().commit();
+      
+                System.err.println("user ID: " + ((User)request.getSession().getAttribute("user")).getUserId() + " and " + agent.getSystemUserTypeId());
+//                while(request.getSession().getAttributeNames().hasMoreElements()){
+//                    System.out.println("request attribute: " + request.getAttributeNames().nextElement());
+//                }
+                //log, send email, send SMS
+                new AuditLogger().logAction("Agent Approval", 
+                                            String.format("Agent %s %s, Agent ID: %d was approved as an agent.", agent.getFirstname(),agent.getLastname(), agent.getAgentId()), 
+                                            agent.getSystemUserTypeId(), 
+                                            ((User)request.getSession().getAttribute("user")).getUserId());
+                //EmailHelper.sendAgentApprovalEmail(agent, status);
+                //SMSHelper.sendAgentApprovalSMS(agent, status);
+                
+                
+                
+            } catch (RollbackException e){
+                e.printStackTrace();
+            } catch(Exception e){
+                e.printStackTrace();
+                String message = e.getMessage();
+                if(message.equals("")) message="Error occurred";
+                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), message);
+            }
+            finally{
+                em.close();
+            }
+    }
+    
     /*TP: Processes every update request of request type POST*/
     protected void processUpdateRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException{
@@ -463,7 +575,7 @@ public class AgentController extends TPController {
                
                 Integer i = 2; 
                 Long l = new Long(i);
-               new TrailableManager(agent).registerUpdateTrailInfo(1);
+                new TrailableManager(agent).registerUpdateTrailInfo((long)1);
                
                 agent.setFirstname(request.getParameter("agentFirstname"));
                 agent.setLastname(request.getParameter("agentLastname"));               
@@ -492,11 +604,9 @@ public class AgentController extends TPController {
                
                 
                //persist only on save mode
-
-                if(!em.contains(agent)){
-                    em.persist(agent);
-                   
-                }
+//                if(!em.contains(agent)){
+//                    em.persist(agent);
+//                }
                
                 em.getTransaction().commit();
                 
@@ -773,10 +883,11 @@ public class AgentController extends TPController {
         
     }
     
-    /*TP: Getting the agent Id for public use*/
+    /*Getting the agent Id for public use*/
     public Long getSystemUserId(){
-    return agent.getAgentId();
+        return agent.getAgentId();
     }
+    
     /**
      * Returns a short description of the servlet.
      *

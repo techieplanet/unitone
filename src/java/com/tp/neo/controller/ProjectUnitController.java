@@ -11,7 +11,7 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.ProjectUnitPK;
-import com.tp.neo.model.utils.TPController;
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -36,7 +37,7 @@ import javax.xml.bind.PropertyException;
  * @author Swedge
  */
 @WebServlet(name = "ProjectUnit", urlPatterns = {"/ProjectUnit"})
-public class ProjectUnitController extends TPController {
+public class ProjectUnitController extends AppController {
 
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String PROJECTS_ADMIN = "/views/project/admin.jsp"; 
@@ -44,6 +45,8 @@ public class ProjectUnitController extends TPController {
     
     private HashMap<String, String> errorMessages = new HashMap<String, String>();
     private HashMap<String, String> messages = new HashMap<String, String>();
+    
+    
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -199,7 +202,7 @@ public class ProjectUnitController extends TPController {
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
 
                 
-                new TrailableManager(projectUnit).registerInsertTrailInfo(1);
+                new TrailableManager(projectUnit).registerInsertTrailInfo((long)1);
                 
                 //connect the Project entity with Project unit entity using PK entity
                 ProjectUnitPK pk = new ProjectUnitPK();
@@ -303,7 +306,7 @@ public class ProjectUnitController extends TPController {
                 projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
                 
-                new TrailableManager(projectUnit).registerUpdateTrailInfo(1);
+                new TrailableManager(projectUnit).registerUpdateTrailInfo((long)1);
                 
 
                 em.getTransaction().commit();
@@ -366,7 +369,7 @@ public class ProjectUnitController extends TPController {
         Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
         ProjectUnit projectUnit = (ProjectUnit)query.getSingleResult();
         em.getTransaction().begin();
-        new TrailableManager(projectUnit).registerUpdateTrailInfo(1);
+        new TrailableManager(projectUnit).registerUpdateTrailInfo((long)1);
         em.remove(projectUnit);
         em.getTransaction().commit();
 
