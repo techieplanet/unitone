@@ -179,7 +179,7 @@ public class RoleController extends AppController {
                 
                 validate(role);
                 
-                new TrailableManager(role).registerInsertTrailInfo(1);                
+                new TrailableManager(role).registerInsertTrailInfo((long)1);                
                 
                 em.persist(role);
                 
@@ -236,7 +236,7 @@ public class RoleController extends AppController {
                 
                 validate(role);
                 
-                new TrailableManager(role).registerUpdateTrailInfo(1);
+                new TrailableManager(role).registerUpdateTrailInfo((long)1);
                                 
                 em.getTransaction().commit();
             

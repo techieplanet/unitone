@@ -6,7 +6,7 @@
 package com.tp.neo.controller.components;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Permission;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,13 +35,21 @@ public class AppController extends HttpServlet{
     public static final String defaultEmail = "no-reply@tplocalhost.com";
     
     public Calendar calendar;
-    public String userType;
+    protected String userType;
+    protected SystemUser sessionUser;
     
     public AppController(){
         System.out.println("Inside TPController");
         calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
     }
     
+    public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, java.io.IOException {
+     System.out.println("Inside Service Method");
+      //hasActiveUserSession(req, res, APP_NAME);
+      
+      sessionUser = (SystemUser)req.getSession().getAttribute("user");
+      super.service(req, res);
+    }
     
     public void init(ServletConfig config) throws ServletException {
         super.init(config);       
@@ -62,6 +70,26 @@ public class AppController extends HttpServlet{
         
         return true;
     }
+       
+    public boolean hasActionPermission(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{                
+        String[] permissions = sessionUser.getPermissions().split(",");
+        //log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
+        
+        for(String p : permissions){
+            //log("p: " + p); log("action: " + action);
+            if(p.equalsIgnoreCase(action))
+                return true;
+        }
+        return false;
+    }
+    
+    
+    public void errorPageHandler(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{
+        String errorPage = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Error?action="+action;
+        log("errorPage: " + errorPage);
+        response.sendRedirect(errorPage);
+    }
+    
     
     public List<Permission> getSystemPermissions(){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -72,6 +100,10 @@ public class AppController extends HttpServlet{
         List<Permission> permissionsList = jpqlQuery.getResultList();
 
         return permissionsList;
+    }
+    
+    public String getUserCleanedPermissions(){
+        return sessionUser.getPermissions().replaceAll("\\[|\\]|\"", "");  //Regex matches the characters: []"
     }
     
     public HashMap<String, List<Permission>> getSystemPermissionsEntitiesMap(){

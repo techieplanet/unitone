@@ -21,7 +21,7 @@ public class TrailableManager {
         trailable = t;
     }
     
-    private void setCreatedBy(Integer userId){
+    private void setCreatedBy(Long userId){
         trailable.setCreatedBy(userId);
     }
     
@@ -29,7 +29,7 @@ public class TrailableManager {
         trailable.setCreatedDate(date);
     }
     
-    private void setModifiedBy(Integer userId){
+    private void setModifiedBy(Long userId){
         trailable.setModifiedBy(userId);
     }
     
@@ -37,13 +37,13 @@ public class TrailableManager {
         trailable.setModifiedDate(date);
     }
     
-    public void registerInsertTrailInfo(Integer userId){
+    public void registerInsertTrailInfo(Long userId){
         Date date = new Date();
         setCreatedBy(userId);
         setCreatedDate(date);
     }
     
-    public void registerUpdateTrailInfo(Integer userId){
+    public void registerUpdateTrailInfo(Long userId){
         Date date = new Date();
         setModifiedBy(userId);
         setModifiedDate(date);

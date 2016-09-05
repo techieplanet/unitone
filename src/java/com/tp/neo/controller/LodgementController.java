@@ -193,7 +193,7 @@ public class LodgementController extends AppController {
         lodgement.setLodgmentDate(date);
         lodgement.setSale(sale);
         
-        new TrailableManager(lodgement).registerInsertTrailInfo(1);
+        new TrailableManager(lodgement).registerInsertTrailInfo((long)1);
         LodgementPK pk = new LodgementPK();
         pk.setSaleId(new Long(1));
         pk.setLodgementId(new Long(1));

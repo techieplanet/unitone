@@ -20,7 +20,14 @@
     });
     
   
-/*TP: a generic method for sending an ajax delete request to the server*/
+/**
+ * 
+ * a generic method for sending an ajax delete request to the controller for entity name
+ * @param {type} appName name of the application on server (NeoForce)
+ * @param {type} entityName entity we are working on
+ * @param {type} id ID of the entity record to delete
+ * @returns None
+ */
 
 function deleteEntity(appName, entityName, id){
     url = appName + '/' + entityName;
@@ -998,6 +1005,7 @@ function showDeleteModal(context, entityName, id){
     $("#deleteModal #ok").attr("onclick", args);
     $('#deleteModal').modal();
 }
+
 function showActivateModal(context, entityName, id){
    // alert("hello");
   var args = "checkActivateSwitchWait('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";

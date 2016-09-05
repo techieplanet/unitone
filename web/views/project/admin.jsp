@@ -11,7 +11,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Products
+            Projects
             <!--<small>Optional description</small>-->
           </h1>
 <!--          <ol class="breadcrumb">
@@ -28,7 +28,9 @@
                   <h3 class="box-title block">
                       Projects List
                       <span class="pull-right">
-                          <a class="btn btn-primary" href="Project?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Product</a>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'create_project')}">
+                                <a class="btn btn-primary" href="Project?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Product</a>
+                            </c:if>
                       </span>
                   </h3>
                 </div><!-- /.box-header -->
@@ -41,7 +43,9 @@
                         <th>Name</th>
                         <th>Description</th>
                         <th>Location</th>
-                        <th>Action</th>
+                        <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_project') || fn:contains(sessionScope.user.permissions, 'delete_delete')}">
+                            <th>Action</th>
+                        </c:if>
                       </tr>
                     </thead>
                     <tbody>
@@ -52,8 +56,12 @@
                                 <td><c:out value="${project.description}" /></td>
                                 <td><c:out value="${project.location}" /></td>
                                 <td>
-                                    <a class="btn btn-success btn-xs" href="Project?action=edit&id=<c:out value="${project.id}"/>" role="button"><i class="fa fa-pencil"></i></a>
-                                    <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Project', <c:out value="${project.id}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                                    <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_project')}">
+                                        <a class="btn btn-success btn-xs" href="Project?action=edit&id=<c:out value="${project.id}"/>" role="button"><i class="fa fa-pencil"></i></a>
+                                    </c:if>
+                                    <c:if test="${fn:contains(sessionScope.user.permissions, 'delete_project')}">
+                                        <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Project', <c:out value="${project.id}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                                    </c:if>
                                     
                                 </td>
                             </tr>
@@ -65,7 +73,9 @@
                         <th>Name</th>
                         <th>Description</th>
                         <th>Location</th>
-                        <th>Action</th>
+                        <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_project') || fn:contains(sessionScope.user.permissions, 'delete_delete')}">
+                            <th>Action</th>
+                        </c:if>
                       </tr>
                     </tfoot>
                   </table>
@@ -73,7 +83,9 @@
                     <div class="box-header">
                         <h3 class="box-title block">
                             <span class="pull-right">
-                                <a class="btn btn-primary" href="Project?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Product</a>
+                                <c:if test="${fn:contains(sessionScope.user.permissions, 'create_project')}">
+                                    <a class="btn btn-primary" href="Project?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Product</a>
+                                </c:if>
                             </span>
                                 
                         </h3>
@@ -120,7 +132,9 @@
             $("#entitylist").DataTable({
                 "autoWidth": false,
                 "columnDefs": [
-                    { "sortable": false, "width":"50px", "targets": 4 }
+                    <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_project') || fn:contains(sessionScope.user.permissions, 'delete_delete')}">
+                        { "sortable": false, "width":"50px", "targets": 4 }
+                    </c:if>
                 ]
         });
     

@@ -13,19 +13,14 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.utils.AuthManager;
-import com.tp.neo.controller.helpers.EmailHelper;
-import com.tp.neo.controller.helpers.SMSHelper;
+import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.User;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.URL;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,14 +64,17 @@ public class AgentController extends AppController {
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
     private Agent agent = new Agent();
    
-    private final static Logger LOGGER = 
-            Logger.getLogger(Agent.class.getCanonicalName());
+    private final static Logger LOGGER = Logger.getLogger(Agent.class.getCanonicalName());
     
     private HashMap<String, String> errorMessages = new HashMap<String, String>();
+    //private SystemUser sessionUser;
     
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em;
     Gson gson = new GsonBuilder().create();
+    
+    private String action = "";
+    private String viewFile = "";
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -119,15 +117,17 @@ public class AgentController extends AppController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-         if(action.equalsIgnoreCase("new")){
-             processGetRequest(request, response);
-         }else{
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
-            processGetRequest(request, response);
-        }
+         
+         action = request.getParameter("action") != null ? request.getParameter("action") : "";
+         
+         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
+                processGetRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
          }
-//         processGetRequest(request, response);
     }
 
     /*TP: processes the get request in general*/
@@ -147,22 +147,22 @@ public class AgentController extends AppController {
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        String viewFile = AGENTS_ADMIN; 
-        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        viewFile = AGENTS_ADMIN;
+        
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
         String agent_id = request.getParameter("agent_id") != null ? request.getParameter("agent_id") : "";
         String status = request.getParameter("status") != null ? request.getParameter("status") : "";
         
         if (action.equalsIgnoreCase("new")){
                viewFile = AGENTS_NEW;
         }
-        
         else if(action.equalsIgnoreCase("delete")){
-           
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
         else if(action.equalsIgnoreCase("wait")){
-        viewFile = AGENTS_WAIT;
-        request.setAttribute("agents",listWaitingAgents());
+            viewFile = AGENTS_WAIT;
+            request.setAttribute("agents",listWaitingAgents());
         }
         else if (action.equalsIgnoreCase("view")){
                 viewFile = AGENTS_VIEW;
@@ -212,18 +212,27 @@ public class AgentController extends AppController {
      @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processPostRequest(request, response);
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+            if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
+                    processPostRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+         }
     }
 
     /*TP: Processes the post requests in general*/
     protected void processPostRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-                Gson gson = new GsonBuilder().create();
-              //  String viewFile = AGENTS_ADMIN;
-//              Agent agent = new Agent();
-              String updateStatus = request.getParameter("updateStatus") != null ? request.getParameter("updateStatus") : "";
-              String updateStatusWait = request.getParameter("updateStatusWait")!=null ? request.getParameter("updateStatusWait") : "";
-            try{                                
+              Gson gson = new GsonBuilder().create();
+              
+            String updateStatus = request.getParameter("updateStatus") != null ? request.getParameter("updateStatus") : "";
+            String updateStatusWait = request.getParameter("updateStatusWait")!=null ? request.getParameter("updateStatusWait") : "";
+              
+            try{
                 if(!(request.getParameter("agent_id").isEmpty()) ) { //edit mode'
                     if(!(updateStatus.isEmpty())){
                     this.processAgentAccountStatus(request,response);
@@ -237,7 +246,7 @@ public class AgentController extends AppController {
                 
                 }
                else{
-                this.processInsertRequest(request, response);
+                    this.processInsertRequest(request, response);
                 }
                
             }
@@ -253,12 +262,15 @@ public class AgentController extends AppController {
     /*TP: Processes every insert request of request type POST*/
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         errorMessages.clear();
-        String root = getServletContext().getRealPath("/");
+        
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        String viewFile = AGENTS_NEW;
-//        Agent agent = new Agent();
+        
+        String root = getServletContext().getRealPath("/");
+        viewFile = AGENTS_NEW;
+
         String agentFileName = null;
         String agentKinFileName = null;
         
@@ -271,9 +283,9 @@ public class AgentController extends AppController {
                 em.getTransaction().begin();
                 
                
-                if(!(request.getParameter("agent_id").equals(""))) { //edit mode
-                    agent = em.find(Agent.class, new Long(Integer.parseInt(request.getParameter("agent_id"))));
-                }
+//                if(!(request.getParameter("agent_id").equals(""))) { //edit mode
+//                    agent = em.find(Agent.class, new Long(Integer.parseInt(request.getParameter("agent_id"))));
+//                }
                
                Date date = new Date();
                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
@@ -287,7 +299,7 @@ public class AgentController extends AppController {
                  agentFileName = uploadAgentPicture(agent,request,agentFileName);
                  agentKinFileName = uploadAgentKinPicture(agent,request,agentKinFileName);
                
-                Integer i = 2; 
+                Integer i = 2;
                 Long l = new Long(i);
                
                 agent.setFirstname(request.getParameter("agentFirstname"));
@@ -309,7 +321,9 @@ public class AgentController extends AppController {
                 agent.setActive((short)0);
                 agent.setApprovalStatus((short)-1);
                 agent.setAgreementStatus(true);
-                new TrailableManager(agent).registerInsertTrailInfo(1);
+                
+                
+                new TrailableManager(agent).registerInsertTrailInfo((long)1);
                 agent.setDeleted((short)0);
                 if(agentFileName!=null){
                 agent.setPhotoPath(agentFileName);
@@ -561,7 +575,7 @@ public class AgentController extends AppController {
                
                 Integer i = 2; 
                 Long l = new Long(i);
-               new TrailableManager(agent).registerUpdateTrailInfo(1);
+                new TrailableManager(agent).registerUpdateTrailInfo((long)1);
                
                 agent.setFirstname(request.getParameter("agentFirstname"));
                 agent.setLastname(request.getParameter("agentLastname"));               
@@ -869,10 +883,11 @@ public class AgentController extends AppController {
         
     }
     
-    /*TP: Getting the agent Id for public use*/
+    /*Getting the agent Id for public use*/
     public Long getSystemUserId(){
-    return agent.getAgentId();
+        return agent.getAgentId();
     }
+    
     /**
      * Returns a short description of the servlet.
      *

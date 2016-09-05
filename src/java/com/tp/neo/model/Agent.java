@@ -5,6 +5,7 @@
  */
 package com.tp.neo.model;
 
+import com.tp.neo.interfaces.IRestricted;
 import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
 import java.io.Serializable;
@@ -63,7 +64,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByCreatedBy", query = "SELECT a FROM Agent a WHERE a.createdBy = :createdBy"),
     @NamedQuery(name = "Agent.findByModifiedDate", query = "SELECT a FROM Agent a WHERE a.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy")})
-public class Agent implements Serializable, ITrailable,SystemUser {
+public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
 
     @Basic(optional = false)
     @Column(name = "generic_id")
@@ -126,16 +127,17 @@ public class Agent implements Serializable, ITrailable,SystemUser {
     @Basic(optional = false)
     @Column(name = "photo_path")
     private String photoPath;
+    
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     @Column(name = "created_by")
-    private Integer createdBy;
+    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     @Column(name = "modified_by")
-    private Integer modifiedBy;
+    private Long modifiedBy;
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
 //    private Collection<CustomerAgent> customerAgentCollection;
 
@@ -343,11 +345,11 @@ public class Agent implements Serializable, ITrailable,SystemUser {
         this.createdDate = createdDate;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -359,11 +361,11 @@ public class Agent implements Serializable, ITrailable,SystemUser {
         this.modifiedDate = modifiedDate;
     }
 
-    public Integer getModifiedBy() {
+    public Long getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(Integer modifiedBy) {
+    public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
@@ -430,7 +432,14 @@ public class Agent implements Serializable, ITrailable,SystemUser {
         this.genericId = genericId;
     }
 
-   
+
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_agent";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_agent";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_agent";
+        else return "view_agent";
+    }
+    
 
     @XmlTransient
     public Collection<Customer> getCustomerCollection() {

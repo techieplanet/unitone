@@ -196,7 +196,7 @@ public class CustomerController extends AppController  {
                
 //                if(true) throw new Exception("User triggered exception");
                 
-                new TrailableManager(customer).registerInsertTrailInfo(1);
+                new TrailableManager(customer).registerInsertTrailInfo((long)1);
                 customer.setDeleted((short)0);
                 if(customerFileName!=null){
                 customer.setPhotoPath(customerFileName);
@@ -300,7 +300,7 @@ public class CustomerController extends AppController  {
                
                 Integer i = 2; 
                 Long l = new Long(i);
-               new TrailableManager(customer).registerUpdateTrailInfo(1);
+               new TrailableManager(customer).registerUpdateTrailInfo((long)1);
                
                 customer.setFirstname(request.getParameter("customerFirstname"));
                 customer.setLastname(request.getParameter("customerLastname"));               

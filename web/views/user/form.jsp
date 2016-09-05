@@ -70,7 +70,7 @@
                     
                         <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="middlename" class="control-label">Middle Name*</label>
+                                    <label for="middlename" class="control-label">Middle Name</label>
                                     <input type="text" name="middlename" id="middlename" class="form-control col-md-4" value="${reqUser.middlename}">
                                 </div>
 

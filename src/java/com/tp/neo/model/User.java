@@ -5,6 +5,7 @@
  */
 package com.tp.neo.model;
 
+import com.tp.neo.interfaces.IRestricted;
 import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
 import java.io.Serializable;
@@ -53,7 +54,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "User.findByCreatedBy", query = "SELECT u FROM User u WHERE u.createdBy = :createdBy"),
     @NamedQuery(name = "User.findByModifiedDate", query = "SELECT u FROM User u WHERE u.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "User.findByModifiedBy", query = "SELECT u FROM User u WHERE u.modifiedBy = :modifiedBy")})
-public class User implements Serializable, ITrailable, SystemUser{
+public class User implements Serializable, ITrailable, SystemUser, IRestricted{
 
     @Basic(optional = false)
     @Column(name = "firstname")
@@ -96,12 +97,12 @@ public class User implements Serializable, ITrailable, SystemUser{
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     @Column(name = "created_by")
-    private Integer createdBy;
+    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     @Column(name = "modified_by")
-    private Integer modifiedBy;
+    private Long modifiedBy;
     @JoinColumn(name = "role_id", referencedColumnName = "role_id")
     @ManyToOne(optional = false)
     private Role role;
@@ -224,11 +225,11 @@ public class User implements Serializable, ITrailable, SystemUser{
         this.createdDate = createdDate;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -240,11 +241,11 @@ public class User implements Serializable, ITrailable, SystemUser{
         this.modifiedDate = modifiedDate;
     }
 
-    public Integer getModifiedBy() {
+    public Long getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(Integer modifiedBy) {
+    public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
@@ -272,6 +273,13 @@ public class User implements Serializable, ITrailable, SystemUser{
     
     public Integer getSystemUserTypeId(){
         return USERTYPEID;
+    }
+    
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_user";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_user";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_user";
+        else return "view_user";
     }
 
     @Override

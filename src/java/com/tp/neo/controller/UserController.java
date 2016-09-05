@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.PropertyException;
 import com.tp.neo.controller.components.MailSender;
-import java.net.URI;
-import java.util.Enumeration;
+import com.tp.neo.model.Permission;
+import java.util.ArrayList;
 import javax.persistence.RollbackException;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -51,6 +51,7 @@ public class UserController extends AppController {
     Gson gson = new GsonBuilder().create();
     
     List<Role> rolesList;
+    //private User sessionUser;  //session user will always be admin user here so use User object
     
     String newEmailSubject = "Your NeoForce login details";
     String newRegEmail = "Dear %s,<br/>" +
@@ -114,10 +115,20 @@ public class UserController extends AppController {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {          
+            throws ServletException, IOException {    
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        //System.out.println("referrer: " + request.getRequestURL().toString());
+        
+        User user = new User();
+        
         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
-            log("Inside hasActiveUserSession");
-            processGetRequest(request, response);
+            if(super.hasActionPermission(user.getPermissionName(action), request, response)){
+                processGetRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
         }
     }
 
@@ -180,18 +191,25 @@ public class UserController extends AppController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        User user = new User();
+        
         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
-            if(request.getParameter("id").equalsIgnoreCase(""))
-                processInsertRequest(request, response);
-            else
-                processUpdateRequest(request, response);
+            if(super.hasActionPermission(user.getPermissionName(action), request, response)){
+                if(request.getParameter("id").equalsIgnoreCase(""))
+                    processInsertRequest(request, response);
+                else
+                    processUpdateRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
         }
     }
 
     
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //System.out.println("Insert mode");
                
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         em = emf.createEntityManager();
@@ -221,7 +239,7 @@ public class UserController extends AppController {
                 user.setPassword(AuthManager.getSaltedHash(initPass));  //hash the inital password
                 user.setUsername(user.getEmail());
                 
-                new TrailableManager(user).registerInsertTrailInfo(1);                
+                new TrailableManager(user).registerInsertTrailInfo(sessionUser.getSystemUserId());   
                 
                 //log(gson.toJson(user));
                 
@@ -237,8 +255,7 @@ public class UserController extends AppController {
                 request.setAttribute("success", true);
                
                 em.close();
-                
-                
+               
                 //send email to user on new registration 
                 String message = String.format(newRegEmail, user.getFirstname(), initPass);
                 new MailSender().sendHtmlEmail(user.getEmail(), defaultEmail, newEmailSubject, message);
@@ -259,7 +276,7 @@ public class UserController extends AppController {
                 request.setAttribute("reqUser", user);
                 request.setAttribute("action", action);
                 request.setAttribute("rolesList", rolesList);
-                errorMessages.put("mysqlviiolation", e.getMessage());
+                errorMessages.put("mysqlviolation", e.getMessage());
                 request.setAttribute("errors", errorMessages);
             }
             catch(Exception e){
@@ -285,7 +302,7 @@ public class UserController extends AppController {
         User user = new User();
         Gson gson = new GsonBuilder().create();
         
-        try{                                
+        try{                 
                 em.getTransaction().begin();
                 
                 user = em.find(User.class, Long.parseLong(request.getParameter("id")));
@@ -295,19 +312,34 @@ public class UserController extends AppController {
                 user.setEmail(request.getParameter("email"));
                 user.setPhone(request.getParameter("phone"));
                 user.setRole(em.find(Role.class, Integer.parseInt(request.getParameter("role_id"))));
-                user.setPermissions("");
                 user.setDeleted((short)0);   
                 user.setActive((short)1);
                 
+                /*************************************************************
+                 * This will be hooked into both insert and update later.
+                 * UI will also be developed to go with.
+                 */
+                Query jpqlQuery  = em.createNamedQuery("Permission.findAll");
+                List<Permission> pList = jpqlQuery.getResultList();
+                String uPermissions = "";
+                for(Permission p : pList){
+                    uPermissions += p.getAlias() + ",";
+                }
+                uPermissions = uPermissions.substring(0, uPermissions.length()-1);
+                System.out.println("Permissions: " + uPermissions);
+                user.setPermissions(uPermissions);
+                /**************************************************************/
+                
                 validate(user);
                 
-                new TrailableManager(user).registerUpdateTrailInfo(1);
+                new TrailableManager(user).registerUpdateTrailInfo(sessionUser.getSystemUserId());   
                 
                 em.getTransaction().commit();
             
-                User sessionUser = (User)request.getSession().getAttribute("user");
-                
-                if((long)sessionUser.getUserId() == (long)user.getUserId()) request.getSession().setAttribute("user", user);
+                //if the updated user is the same as logged in, i.e. user updating their own records
+                //replace the session user object with the new updated user object
+                if((long)sessionUser.getSystemUserId() == (long)user.getUserId()) 
+                    request.getSession().setAttribute("user", user);
                 
                 request.setAttribute("rolesList", rolesList);
                 request.setAttribute("reqUser", user);
@@ -355,7 +387,10 @@ public class UserController extends AppController {
         
         User user = em.find(User.class, id);
         em.getTransaction().begin();
-        em.remove(user);
+        user.setDeleted(sessionUser.getSystemUserId().shortValue());
+        
+        new TrailableManager(user).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+        
         em.getTransaction().commit();
 
         em.close();

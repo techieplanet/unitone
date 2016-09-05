@@ -7,7 +7,7 @@ import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
-@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-08-15T21:22:49")
+@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-09-02T20:23:22")
 @StaticMetamodel(Agent.class)
 public class Agent_ { 
 
@@ -22,7 +22,7 @@ public class Agent_ {
     public static volatile SingularAttribute<Agent, String> kinAddress;
     public static volatile SingularAttribute<Agent, String> password;
     public static volatile SingularAttribute<Agent, String> street;
-    public static volatile SingularAttribute<Agent, Integer> modifiedBy;
+    public static volatile SingularAttribute<Agent, Long> modifiedBy;
     public static volatile SingularAttribute<Agent, String> state;
     public static volatile SingularAttribute<Agent, String> email;
     public static volatile SingularAttribute<Agent, Short> approvalStatus;
@@ -37,7 +37,7 @@ public class Agent_ {
     public static volatile SingularAttribute<Agent, Date> createdDate;
     public static volatile CollectionAttribute<Agent, Customer> customerCollection;
     public static volatile SingularAttribute<Agent, String> phone;
-    public static volatile SingularAttribute<Agent, Integer> createdBy;
+    public static volatile SingularAttribute<Agent, Long> createdBy;
     public static volatile SingularAttribute<Agent, Date> modifiedDate;
 
 }
