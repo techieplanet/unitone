@@ -39,7 +39,7 @@
                   </c:if>
                   
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
-                        <li class=""><a href="#"><i class="fa fa-users"></i> <span>Agents</span></a></li>
+                        <li class=""><a href="${pageContext.request.contextPath}/Agent"><i class="fa fa-users"></i> <span>Agents</span></a></li>
                   </c:if>
                         
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_customer')}">

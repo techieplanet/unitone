@@ -49,6 +49,9 @@ public class RoleController extends AppController {
     
     public final String pageTitle = "Role";
     
+    private String action = "";
+    private String viewFile = "";
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -90,18 +93,26 @@ public class RoleController extends AppController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString()))
-            processGetRequest(request, response);
-        
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new Role().getPermissionName(action), request, response)){
+                processGetRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+        }   
     }
     
    protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+       
         response.setContentType("text/html;charset=UTF-8");
     
         EntityManager em = emf.createEntityManager();
         String viewFile = ROLE_ADMIN; 
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        int status = request.getParameter("status") != null   ? Integer.parseInt(request.getParameter("status")) : 0;
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         
         if (action.equalsIgnoreCase("new")){
@@ -122,7 +133,9 @@ public class RoleController extends AppController {
             Role role = em.find(Role.class, id);
             log("Logging permissions: " + role.getPermissions());
             request.setAttribute("selectedPermissions", getSelectedPermissionsCollection(role.getPermissions()));
+            if(status == 1) request.setAttribute("success", true);
             setRequestAttributes(request, role, "edit"); //set others
+            
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listroles")){
             viewFile = ROLE_ADMIN;
@@ -149,11 +162,18 @@ public class RoleController extends AppController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
-            if(request.getParameter("id").equalsIgnoreCase(""))
-                processInsertRequest(request, response);
-            else
-                processUpdateRequest(request, response);
+        
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new Role().getPermissionName(action), request, response)){
+                if(request.getParameter("id").equalsIgnoreCase(""))
+                    processInsertRequest(request, response);
+                else
+                    processUpdateRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
         }
     }
 
@@ -164,6 +184,7 @@ public class RoleController extends AppController {
         
         em = emf.createEntityManager();
         String viewFile = ROLE_NEW;
+        boolean insertStatus = false;
         request.setAttribute("success", false);
         
         Role role = new Role();
@@ -185,12 +206,14 @@ public class RoleController extends AppController {
                 
                 em.getTransaction().commit();
                 
+                insertStatus = true;
+                
                 em.refresh(role);
                 
-                setRequestAttributes(request, role, "edit");
-                request.setAttribute("success", true);
-                request.setAttribute("selectedPermissions", new ArrayList<String>());
-                request.setAttribute("selectedPermissions", getSelectedPermissionsCollection(role.getPermissions()));
+                //setRequestAttributes(request, role, "edit");
+                //request.setAttribute("success", true);
+                //request.setAttribute("selectedPermissions", new ArrayList<String>());
+                //request.setAttribute("selectedPermissions", getSelectedPermissionsCollection(role.getPermissions()));
                
                 em.close();
             }
@@ -210,8 +233,14 @@ public class RoleController extends AppController {
                 SystemLogger.logSystemIssue("Role", gson.toJson(role), e.getMessage());
             }
             
-            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-            dispatcher.forward(request, response);
+            if(insertStatus){
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Role?action=edit&id=" + role.getRoleId() + "&status=1";
+                response.sendRedirect(page);
+            }
+            else{
+                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+                dispatcher.forward(request, response);
+            }
     }
     
     

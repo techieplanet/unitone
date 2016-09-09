@@ -37,6 +37,7 @@ public class AppController extends HttpServlet{
     public Calendar calendar;
     protected String userType;
     protected SystemUser sessionUser;
+    protected String callbackUrRL = "";
     
     public AppController(){
         System.out.println("Inside TPController");
@@ -55,11 +56,14 @@ public class AppController extends HttpServlet{
         super.init(config);       
     }
     
-    public boolean hasActiveUserSession(HttpServletRequest request, HttpServletResponse response, String callbackURL)
+    public boolean hasActiveUserSession(HttpServletRequest request, HttpServletResponse response)
             throws IOException{
         HttpSession session = request.getSession(true);
         log("Login Callback before setting: " + session.getAttribute("loginCallback"));
-        //log("user before check: " + session.getAttribute("user").toString());
+        
+        String callbackURL = getCallbackURL(request, response);
+        log("callbackURL: " + callbackURL);
+        
         if(session.getAttribute("user") == null){
             session.setAttribute("loginCallback", callbackURL);
             String loginPage = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/";
@@ -69,6 +73,18 @@ public class AppController extends HttpServlet{
         }
         
         return true;
+    }
+    
+    private String getCallbackURL(HttpServletRequest request, HttpServletResponse response) throws IOException{
+//        String uri = request.getScheme() + "://" +
+//             request.getServerName() + 
+//             ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort() ) +
+//             request.getRequestURI() +
+//            (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+
+        String url = request.getRequestURL().toString() + 
+                     (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+        return url;
     }
        
     public boolean hasActionPermission(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{                

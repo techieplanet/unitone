@@ -49,34 +49,7 @@ public class ProjectController extends AppController {
     private String action = "";
     private String viewFile = "";
     
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ProjectController</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ProjectController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        } finally {
-            out.close();
-        }
-    }
+  
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -92,7 +65,7 @@ public class ProjectController extends AppController {
             throws ServletException, IOException {
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
 
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+        if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
                 if(action.equalsIgnoreCase("punits")){
                   int id = Integer.parseInt(request.getParameter("project_id"));
@@ -149,6 +122,7 @@ public class ProjectController extends AppController {
         viewFile = PROJECTS_ADMIN; 
 
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
+        int status = request.getParameter("status") != null   ? Integer.parseInt(request.getParameter("status")) : 0;
         
         if (action.equalsIgnoreCase("new")){
                viewFile = PROJECTS_NEW;
@@ -175,6 +149,7 @@ public class ProjectController extends AppController {
             request.setAttribute("project", project);
             request.setAttribute("action", "edit");
             request.setAttribute("id", id);
+            if(status == 1) request.setAttribute("success", true);
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
             viewFile = PROJECTS_ADMIN;
@@ -207,7 +182,7 @@ public class ProjectController extends AppController {
             throws ServletException, IOException {
 
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+        if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
                 if(request.getParameter("id").equals(""))
                     processInsertRequest(request, response);
@@ -224,6 +199,7 @@ public class ProjectController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         viewFile = PROJECTS_NEW;
+        boolean insertStatus = false;
         request.setAttribute("success", false);
         
         Project project = new Project();
@@ -250,17 +226,19 @@ public class ProjectController extends AppController {
                 
                 em.getTransaction().commit();
                 
+                insertStatus = true;
+                
                 em.refresh(project);
                 
                 //get this as early as possible
-                Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",project.getId());
-                projectUnits = query.getResultList();
+                //Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",project.getId());
+                //projectUnits = query.getResultList();
             
-                request.setAttribute("project", project);
-                request.setAttribute("success", true);
-                request.setAttribute("units", projectUnits);
-                request.setAttribute("action", "edit");
-                request.setAttribute("id", project.getId());
+                //request.setAttribute("project", project);
+                //request.setAttribute("success", true);
+                //request.setAttribute("units", projectUnits);
+                //request.setAttribute("action", "edit");
+                //request.setAttribute("id", project.getId());
                
                 em.close();
                 emf.close();
@@ -291,10 +269,14 @@ public class ProjectController extends AppController {
                 SystemLogger.logSystemIssue("Project", gson.toJson(project), e.getMessage());
             }
         
-            //new URI(request.getHeader("referer")).getPath();
-            
-            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-            dispatcher.forward(request, response);
+            if(insertStatus){
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Project?action=edit&id=" + project.getId() + "&status=1";
+                response.sendRedirect(page);
+            }
+            else {
+                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+                dispatcher.forward(request, response);
+            }
     }
     
     
@@ -378,7 +360,7 @@ public class ProjectController extends AppController {
         
         Project project = em.find(Project.class, id);
         em.getTransaction().begin();
-        project.setDeleted(sessionUser.getSystemUserId().shortValue());
+        project.setDeleted((short)1);
         
         //sessionUser is a class variable 
         new TrailableManager(project).registerUpdateTrailInfo(sessionUser.getSystemUserId());

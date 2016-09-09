@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
  <div class="row">
             <!-- Customer Registration Form -->
@@ -29,15 +30,16 @@
                     </div>
                 </div>
             </c:if>
-                    <c:if test="${success}">
+           
+            <c:if test="${success}">
               <div class="row">
                     <div class="col-md-12 ">
                         <p class="bg-success padding15" style="vertical-align:center !important;" >
                           <i class="fa fa-check"></i>Saved Successfully
                           <span class="pull-right">
-                              <a class="btn btn-primary" role="button" href="${pageContext.request.contextPath}/Agent" style="vertical-align:center !important;"><i class="fa fa-angle-double-left"></i> Back to list</a>
-                              &nbsp;&nbsp;&nbsp;
-                              <a class="btn btn-primary" href="Agent?action=new" role="button" style="vertical-align:center !important;"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a>
+                              <a class="btn btn-primary btn-sm margintop5negative" user="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;&nbsp;Back to list</a>
+                              <!--&nbsp;&nbsp;&nbsp;-->
+                              <a class="btn btn-primary btn-sm margintop5negative marginleft10" href="Agent?action=new" user="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New User</a>
                           </span>
                         </p>
                     </div>
@@ -135,27 +137,24 @@
                              <div class="row text-center" id="imgholder">
                         <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
                             <div class="form-group text-center">
-                              <img <c:if test="${agent.photoPath != null}"> src="${pageContext.request.contextPath}/images/uploads/agents/${agent.photoPath}" </c:if>
-                               <c:if test="${agent.photoPath == null}"> src="${pageContext.request.contextPath}/images/img/avatar.png"
-                    </c:if>
-                                class=" img-responsive text-center" style="max-height:220px !important;"/>
+                                <c:if test="${agent.photoPath != null}">
+                                    <img src="${pageContext.request.contextPath}/images/uploads/agents/${agent.photoPath}" 
+                                        class="img-responsive text-center" style="max-height:220px !important;"/>
+                                </c:if>
                             </div>
                         </div>
                         <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
                             <div class="form-group">
                               <div class="btn-group btn-group-xs">
-                                  <div class="btn btn-primary btn-file">
-                      Change <span title="Change Profile Picture" class="glyphicon glyphicon-edit"></span> 
-                      <input type="file" name="agentPhoto" accept="image/gif, image/jpeg, image/png" id="agentPhoto"  
-                             />
-                    </div>
-                    <input type="hidden" name="agentPhotoHidden" 
-                           <c:if test="${agentPhotoHidden == null && agent.photoPath==null}"> value=""
-                    </c:if><c:if test="${agentPhotoHidden != null}"> value="${agentPhotoHidden}"
-                    </c:if> <c:if test="${agent.photoPath != null}"> value="${agent.photoPath}"
-                    </c:if> />
-                    
+                                  <div class="btn btn-primary">
+                                        <!--Upload Picture  <i class="fa fa-upload" aria-holder="true"></i>--> 
+                                        <input type="file" name="agentPhoto" accept="image/gif, image/jpeg, image/png" id="agentPhoto" />
+                                  </div>
                                   
+                                <input type="hidden" name="agentPhotoHidden" 
+                                        <c:if test="${agentPhotoHidden == null && agent.photoPath==null}"> value=""</c:if>
+                                        <c:if test="${agentPhotoHidden != null}"> value="${agentPhotoHidden}" </c:if> 
+                                        <c:if test="${agent.photoPath != null}"> value="${agent.photoPath}" </c:if> />
                               </div>
                                 
                             </div>
@@ -349,14 +348,21 @@
                                     <div class="row" >
                             <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
                               <label for="agentKinPhoto" style="">Next of Kin - Picture</label>
-                              <c:if test="${agent.agentId != ""}"> 
-                               <img <c:if test="${agent.kinPhotoPath != null}"> src="${pageContext.request.contextPath}/images/uploads/agents/${agent.kinPhotoPath}" </c:if>
-                               
-                                class="img-responsive text-center" width="50.33333333%"/>
-                                </c:if>
-                                    <input type="file" class="form-control" id="agentKinPhoto" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" 
-                                         style="max-height:220px !important;"
-                                           />
+                                <c:choose>
+                                    <c:when test="${agent.agentId != ''} && ${agent.kinPhotoPath != null}"> 
+                                        <img src="${pageContext.request.contextPath}/images/uploads/agents/${agent.kinPhotoPath}" 
+                                             class="img-responsive text-center" width="50.33333333%"/>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="btn btn-primary">
+                                            <input type="file" id="agentKinPhoto" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" 
+                                             style="max-height:220px !important;"
+                                               />
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                                             
+                                    
                                           
                                              <input type="hidden" name="agentKinPhotoHidden" 
                            <c:if test="${agentKinPhotoHidden == null && agent.kinPhotoPath ==null}"> value=""

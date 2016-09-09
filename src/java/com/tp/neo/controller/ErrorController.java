@@ -28,7 +28,7 @@ public class ErrorController extends AppController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {            
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){    
+        if(super.hasActiveUserSession(request, response)){
             log("Inside hasActiveUserSession");
             processGetRequest(request, response);
         }

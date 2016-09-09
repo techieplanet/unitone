@@ -162,7 +162,7 @@ public class ProjectUnitController extends AppController {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+        if(super.hasActiveUserSession(request, response)){
             if(request.getParameter("id").equals(""))  //save mode
                 processInsertRequest(request, response);
             else
@@ -319,7 +319,7 @@ public class ProjectUnitController extends AppController {
                 messages.put("TITLE", projectUnit.getTitle());
                 messages.put("QUANTITY", projectUnit.getQuantity() + "");
                 
-                jsonResponse = gson.toJson(messages);
+                //jsonResponse = gson.toJson(messages);
                 System.out.println("BEFORE RETURN");
             }
             catch(PropertyException e){

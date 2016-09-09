@@ -49,7 +49,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findByCreatedBy", query = "SELECT p FROM Project p WHERE p.createdBy = :createdBy"),
     @NamedQuery(name = "Project.findByModifiedDate", query = "SELECT p FROM Project p WHERE p.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Project.findByModifiedBy", query = "SELECT p FROM Project p WHERE p.modifiedBy = :modifiedBy")})
-public class Project implements Serializable, ITrailable, IRestricted {
+public class Project extends BaseModel{
 
 
     @Basic(optional = false)

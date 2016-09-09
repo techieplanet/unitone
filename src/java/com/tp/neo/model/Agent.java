@@ -71,7 +71,7 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
     private long genericId;
     @Basic(optional = false)
     @Column(name = "agreement_status")
-    private boolean agreementStatus;
+    private short agreementStatus;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
     private Collection<Customer> customerCollection;
@@ -151,7 +151,7 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
         this.agentId = agentId;
     }
 
-    public Agent(Long agentId, String password, String kinPhone, String kinPhotoPath, String photoPath, boolean agreementStatus) {
+    public Agent(Long agentId, String password, String kinPhone, String kinPhotoPath, String photoPath, short agreementStatus) {
         this.agentId = agentId;
         this.password = password;
         this.kinPhone = kinPhone;
@@ -329,11 +329,11 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
     }
 
     
-    public boolean getAgreementStatus() {
+    public short getAgreementStatus() {
         return agreementStatus;
     }
 
-    public void setAgreementStatus(boolean agreementStatus) {
+    public void setAgreementStatus(short agreementStatus) {
         this.agreementStatus = agreementStatus;
     }
 
