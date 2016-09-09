@@ -35,13 +35,14 @@
                         <p class="bg-success padding10" style="width:90%">
                           <i class="fa fa-check"></i>Saved Successfully
                           <span class="pull-right">
-                              <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Agent">Back to list</a>
+                              <a class="btn btn-primary btn-sm margintop5negative" user="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;&nbsp;Back to list</a>
                           </span>
                         </p>
                     </div>
                 </div>
           </c:if>
-                           <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-angle-double-left"></i> Back to list</a>
+                          <a class="btn btn-primary btn-sm margintop5negative" user="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;&nbsp;Back to list</a>
+                           <!--<a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-angle-double-left"></i> Back to list</a>-->
                            <div class="box-footer " style="margin-right:10px !important;margin-top:-10px !important;margin-bottom:-8px !important; background-color:transparent;">
                      
 <!--                               <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate"/><a class="btn btn-primary" href="Agent?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a>

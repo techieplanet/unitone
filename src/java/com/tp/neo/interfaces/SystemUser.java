@@ -11,29 +11,29 @@ package com.tp.neo.interfaces;
  */
 public interface SystemUser {
     
-    public String getFirstname();
-    public void setFirstname(String firstname);
+    default String getFirstname(){return "";};
+    default void setFirstname(String firstname){};
 
-    public String getMiddlename();
-    public void setMiddlename(String middlename);
+    default String getMiddlename(){return "";};
+    default void setMiddlename(String middlename){};
 
-    public String getLastname();
-    public void setLastname(String lastname);
+    default String getLastname(){return "";};
+    default void setLastname(String lastname){};
 
-    public String getUsername();
-    public void setUsername(String username);
+    default String getUsername(){return "";};
+    default void setUsername(String username){};
 
-    public String getPassword();
-    public void setPassword(String password);
+    default String getPassword(){return "";};
+    default void setPassword(String password){};
 
-    public String getEmail();
-    public void setEmail(String email);
+    default String getEmail(){return "";};
+    default void setEmail(String email){};
 
-    public String getPhone();
-    public void setPhone(String phone);
+    default String getPhone(){return "";};
+    default void setPhone(String phone){};
 
-    public String getPermissions();
-    public void setPermissions(String permissions);
+    default String getPermissions(){return "";}
+    default void setPermissions(String permissions){};
     
     public Long getSystemUserId();
     public Integer getSystemUserTypeId();

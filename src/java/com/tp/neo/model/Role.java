@@ -43,7 +43,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Role.findByCreatedBy", query = "SELECT r FROM Role r WHERE r.createdBy = :createdBy"),
     @NamedQuery(name = "Role.findByModifiedDate", query = "SELECT r FROM Role r WHERE r.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Role.findByModifiedBy", query = "SELECT r FROM Role r WHERE r.modifiedBy = :modifiedBy")})
-public class Role implements Serializable, ITrailable {
+public class Role extends BaseModel {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
     private Collection<User> userCollection;
@@ -160,6 +160,14 @@ public class Role implements Serializable, ITrailable {
     public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
+    
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_role";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_role";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_role";
+        else return "view_role";
+    }
+    
 
     @Override
     public int hashCode() {

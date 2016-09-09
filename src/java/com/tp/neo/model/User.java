@@ -54,7 +54,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "User.findByCreatedBy", query = "SELECT u FROM User u WHERE u.createdBy = :createdBy"),
     @NamedQuery(name = "User.findByModifiedDate", query = "SELECT u FROM User u WHERE u.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "User.findByModifiedBy", query = "SELECT u FROM User u WHERE u.modifiedBy = :modifiedBy")})
-public class User implements Serializable, ITrailable, SystemUser, IRestricted{
+public class User extends BaseModel implements SystemUser{
 
     @Basic(optional = false)
     @Column(name = "firstname")

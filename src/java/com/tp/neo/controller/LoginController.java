@@ -124,11 +124,14 @@ public class LoginController extends HttpServlet {
         String password = request.getParameter("password") != null ? request.getParameter("password") : "";
         String userType = request.getParameter("usertype") != null ? request.getParameter("usertype") : "";
         
+        System.out.println("Password: " + password);
+        
         try{
             em = emf.createEntityManager();           
             
             SystemUser user = getUserTypeObject(userType, email);
             String storedPassword = user.getPassword();
+            System.out.println("storedPassword: " + storedPassword);
             
             if(AuthManager.check(password, storedPassword)){
                 log("logged in");

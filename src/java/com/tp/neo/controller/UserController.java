@@ -33,6 +33,7 @@ import com.tp.neo.model.Permission;
 import java.util.ArrayList;
 import javax.persistence.RollbackException;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.eclipse.persistence.internal.libraries.antlr.runtime.misc.Stats;
 
 /**
  *
@@ -51,7 +52,8 @@ public class UserController extends AppController {
     Gson gson = new GsonBuilder().create();
     
     List<Role> rolesList;
-    //private User sessionUser;  //session user will always be admin user here so use User object
+    private String action = "";
+    private String viewFile = "";
     
     String newEmailSubject = "Your NeoForce login details";
     String newRegEmail = "Dear %s,<br/>" +
@@ -117,12 +119,12 @@ public class UserController extends AppController {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {    
         
-        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-        //System.out.println("referrer: " + request.getRequestURL().toString());
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        System.out.println("referrer: " + request.getRequestURL().toString());
         
         User user = new User();
         
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+        if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(user.getPermissionName(action), request, response)){
                 processGetRequest(request, response);
             }
@@ -140,8 +142,9 @@ public class UserController extends AppController {
         log("Inside get request");
     
         EntityManager em = emf.createEntityManager();
-        String viewFile = ENTITY_LIST; 
-        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        viewFile = ENTITY_LIST; 
+        int status = request.getParameter("status") != null   ? Integer.parseInt(request.getParameter("status")) : 0;
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         
         if (action.equalsIgnoreCase("new")){
@@ -166,6 +169,7 @@ public class UserController extends AppController {
             request.setAttribute("reqUser", user); //different from session user
             request.setAttribute("action", "edit");
             request.setAttribute("rolesList", rolesList);
+            if(status == 1) request.setAttribute("success", true);
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listusers")){
             viewFile = ENTITY_LIST;
@@ -191,10 +195,11 @@ public class UserController extends AppController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
         User user = new User();
         
-        if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+        if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(user.getPermissionName(action), request, response)){
                 if(request.getParameter("id").equalsIgnoreCase(""))
                     processInsertRequest(request, response);
@@ -214,8 +219,10 @@ public class UserController extends AppController {
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         em = emf.createEntityManager();
         String viewFile = NEW_ENTITY;
+        boolean insertStatus = false;
         request.setAttribute("success", false);
         
+        System.out.println("Inside processInsertRequest");
         
         User user = new User();
         
@@ -247,12 +254,14 @@ public class UserController extends AppController {
                 
                 em.getTransaction().commit();
                 
+                insertStatus = true;
+                
                 em.refresh(user);
                 
-                request.setAttribute("rolesList", rolesList);
-                request.setAttribute("reqUser", user);
-                request.setAttribute("action", "edit");
-                request.setAttribute("success", true);
+                //request.setAttribute("rolesList", rolesList);
+                //request.setAttribute("reqUser", user);
+                //request.setAttribute("action", "edit");
+                //request.setAttribute("success", true);
                
                 em.close();
                
@@ -287,8 +296,15 @@ public class UserController extends AppController {
                 SystemLogger.logSystemIssue("User", gson.toJson(errorMessages), message);
             }
             
-            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-            dispatcher.forward(request, response);
+            if(insertStatus){
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/User?action=edit&id=" + user.getUserId() + "&status=1";
+                log("redirect page: " + page);
+                response.sendRedirect(page);
+            }
+            else{
+                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+                dispatcher.forward(request, response);
+            }
     }
     
     
@@ -387,7 +403,7 @@ public class UserController extends AppController {
         
         User user = em.find(User.class, id);
         em.getTransaction().begin();
-        user.setDeleted(sessionUser.getSystemUserId().shortValue());
+        user.setDeleted((short)1);
         
         new TrailableManager(user).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         

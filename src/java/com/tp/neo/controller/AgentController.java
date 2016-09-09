@@ -119,8 +119,9 @@ public class AgentController extends AppController {
             throws ServletException, IOException {
          
          action = request.getParameter("action") != null ? request.getParameter("action") : "";
+         System.out.println("Inside do get");
          
-         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
                 processGetRequest(request, response);
             }
@@ -214,7 +215,7 @@ public class AgentController extends AppController {
             throws ServletException, IOException {
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
-         if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
                     processPostRequest(request, response);
             }
@@ -320,7 +321,7 @@ public class AgentController extends AppController {
                 agent.setKinAddress(request.getParameter("agentKinAddress"));
                 agent.setActive((short)0);
                 agent.setApprovalStatus((short)-1);
-                agent.setAgreementStatus(true);
+                agent.setAgreementStatus((short)1);
                 
                 
                 new TrailableManager(agent).registerInsertTrailInfo((long)1);
