@@ -130,7 +130,7 @@ public class CustomerController extends AppController  {
             }
             catch(Exception e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 request.setAttribute("errors", errorMessages);    
                 SystemLogger.logSystemIssue("Customer", gson.toJson(customer), e.getMessage());
             }
@@ -158,6 +158,11 @@ public class CustomerController extends AppController  {
                 em.getTransaction().begin();
                 
                
+                /**
+                 * TP:Godson why this, the check has being done on processPostRequest(),
+                 * so if the customer_id parameter is empty, control is transfered here
+                 * 
+                **/
                 if(!(request.getParameter("customer_id").equals(""))) { //edit mode
                     customer = em.find(Customer.class, new Long(Integer.parseInt(request.getParameter("customer_id"))));
                 }
@@ -181,6 +186,7 @@ public class CustomerController extends AppController  {
                 customer.setFirstname(request.getParameter("customerFirstname"));
                 customer.setLastname(request.getParameter("customerLastname"));               
                 customer.setEmail(request.getParameter("customerEmail"));
+                customer.setMiddlename(request.getParameter("customerMiddlename"));
                 //customer.setPassword(request.getParameter("customerPassword"));
                 customer.setPassword(AuthManager.getSaltedHash(request.getParameter("customerPassword")));
                 customer.setStreet(request.getParameter("customerStreet"));
@@ -191,19 +197,19 @@ public class CustomerController extends AppController  {
                 customer.setKinPhone(request.getParameter("customerKinPhone"));
                 customer.setKinAddress(request.getParameter("customerKinAddress"));
                 
-                
-                customer.setCustomerId(l);
+                customer.setAgentId(agent);
+                //customer.setCustomerId(l);
                
 //                if(true) throw new Exception("User triggered exception");
                 
                 new TrailableManager(customer).registerInsertTrailInfo((long)1);
                 customer.setDeleted((short)0);
-                if(customerFileName!=null){
-                customer.setPhotoPath(customerFileName);
-                }
-                if(customerKinFileName != null){
-                customer.setKinPhotoPath(customerKinFileName);
-                }
+//                if(customerFileName!=null){
+//                customer.setPhotoPath(customerFileName);
+//                }
+//                if(customerKinFileName != null){
+//                customer.setKinPhotoPath(customerKinFileName);
+//                }
                 
               
                 
@@ -238,7 +244,7 @@ public class CustomerController extends AppController  {
             }
             catch (PropertyException err){
             err.printStackTrace();
-                System.out.println("inside catch area: " + err.getMessage());
+                //System.out.println("inside catch area: " + err.getMessage());
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
@@ -250,7 +256,7 @@ public class CustomerController extends AppController  {
                 
                 
                 e.printStackTrace();
-                System.out.println("System Error: " + e.getMessage());
+                //System.out.println("System Error: " + e.getMessage());
                 SystemLogger.logSystemIssue("Customer", gson.toJson(customer), e.getMessage());
             }
             
@@ -347,7 +353,7 @@ public class CustomerController extends AppController  {
             }
             catch(Exception e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
@@ -363,7 +369,7 @@ public class CustomerController extends AppController  {
 
      protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        //response.setContentType("text/html;charset=UTF-8");
     
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
@@ -375,6 +381,7 @@ public class CustomerController extends AppController  {
                viewFile = CUSTOMER_NEW;
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
+        return;
         }
 //        else {
 //             if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
@@ -432,11 +439,16 @@ public class CustomerController extends AppController  {
                         Part customerPartPhoto = request.getPart("customerPhoto"); 
                         String myName = getFileName(customerPartPhoto);
                          
-                         if(myName.isEmpty() && !request.getParameter("customerPhotoHidden").isEmpty() ){
+                         if(myName == null && !request.getParameter("customerPhotoHidden").isEmpty() ){
                             
                               customerFileName = request.getParameter("customerPhotoHidden");
                               customer.setPhotoPath(request.getParameter("customerPhotoHidden"));
-                         }else {
+                         }
+                         else if(myName == null && request.getParameter("customerPhotoHidden").isEmpty())
+                         {
+                             customer.setPhotoPath("default");
+                         }
+                         else {
                             
                         int fnameLength = myName.length();
                         int startingPoint = fnameLength - 4;
@@ -464,16 +476,20 @@ public class CustomerController extends AppController  {
      if((request.getPart("customerKinPhoto")!= null) || (!request.getParameter("customerKinPhotoHidden").isEmpty() && request.getParameter("customerKinPhotoHidden") != null)){
               
                        
-                if( request.getPart("customerKinPhoto") !=null ){
+                if( request.getPart("customerKinPhoto") !=null){
                        /*TP: Customer Kin personal file upload*/
                                Part customerKinPartPhoto = request.getPart("customerKinPhoto");
                                String myNameKin = "";
                                myNameKin = getFileName(customerKinPartPhoto);
-                               System.out.println("This is the my name of the next of kin we are testing for "+request.getParameter("customerKinPhotoHidden"));
-                             if( myNameKin.isEmpty()&& (!request.getParameter("customerKinPhotoHidden").isEmpty())){
+                               //System.out.println("This is the my name of the next of kin we are testing for "+request.getParameter("customerKinPhotoHidden"));
+                             if( myNameKin == null && (!request.getParameter("customerKinPhotoHidden").isEmpty())){
                                customerKinFileName = request.getParameter("customerKinPhotoHidden");
                                customer.setPhotoPath(request.getParameter("customerKinPhotoHidden"));
-                              }else {
+                              }
+                             else if(myNameKin == null && request.getParameter("customerKinPhotoHidden").isEmpty()) {
+                                 customer.setKinPhotoPath("default");
+                             }
+                             else {
                                int fnameLengthK = myNameKin.length();
                                int startingPointK = fnameLengthK - 4;
                                myNameKin = myNameKin.substring(startingPointK,fnameLengthK);
@@ -482,7 +498,7 @@ public class CustomerController extends AppController  {
                 }
                           }
                     else if(!request.getParameter("customerKinPhotoHidden").isEmpty()){
-
+                               System.out.println("photo nd hidden photo is empty");
                                customerKinFileName = request.getParameter("customerKinPhotoHidden");
                                customer.setPhotoPath(request.getParameter("customerKinPhotoHidden"));
                               }
@@ -530,7 +546,7 @@ public class CustomerController extends AppController  {
          Query jpqlQuery  = em.createNamedQuery("Customer.findByEmail");
          jpqlQuery.setParameter("email",request.getParameter("customerEmail"));
          List<Customer> customerDetails = jpqlQuery.getResultList();
-         System.out.println(customerDetails);
+         //System.out.println(customerDetails);
         if(request.getParameter("customerFirstname").isEmpty()){
             errorMessages.put("errors1", "Please enter First Name");
         } 
@@ -542,14 +558,14 @@ public class CustomerController extends AppController  {
             errorMessages.put("errors3", "Please enter Email");
         }
         
-        if((request.getParameter("customer_id").equals(""))) { //edit mode
-                if(request.getParameter("customerPassword").isEmpty()){
-            errorMessages.put("errors4", "Please enter Password");
-        }  
-                if(!customerDetails.isEmpty()){
-        errorMessages.put("errors6","Email exists in the database");
-        }
+        if((request.getParameter("customer_id").equals(""))) { //insert mode
+               if(request.getParameter("customerPassword").isEmpty()){
+                    errorMessages.put("errors4", "Please enter Password");
+                }  
+               if(!customerDetails.isEmpty()){
+                errorMessages.put("errors6","Email has already been used");
                 }
+        }
        
        if(request.getParameter("customerStreet").isEmpty()){
         errorMessages.put("errors7", "Please enter Street");
@@ -581,12 +597,23 @@ public class CustomerController extends AppController  {
     private String getFileName(final Part part) {
             final String partHeader = part.getHeader("content-disposition");
             LOGGER.log(Level.INFO, "Part Header = {0}", partHeader);
-         for (String content : part.getHeader("content-disposition").split(";")) {
+         for (String content : part.getHeader("content-disposition").split(";")) 
+         {
                 if (content.trim().startsWith("filename")) {
-                    return content.substring(
-                    content.indexOf('=') + 1).trim().replace("\"", "");
+//                    return content.substring(
+//                    content.indexOf('=') + 1).trim().replace("\"", "");
+                      System.out.println("Content = " + content.indexOf("="));
+                      String filename = content.substring(content.indexOf("=")+2,content.length()-1 );
+                      
+                      String filenameCleaned = filename.trim().replace("\"", "");
+                      
+                      if(filenameCleaned.equals(""))
+                          return null;
+                      else
+                          return filenameCleaned;
                     }
-                }
+         }
+            
             return null;
         }
     
