@@ -18,8 +18,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Agents
-            <!--<small>Optional description</small>-->
+              <a href="Agent"> Agents</a>
           </h1>
 <!--          <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
@@ -35,7 +34,7 @@
                   <h3 class="box-title block">
                       Agent List<br/><br/>
                       <c:if test="${fn:contains(sessionScope.user.permissions, 'waiting_agent')}">
-                        <a href="Agent?action=wait">View Waiting List</a>
+                        <a href="Agent?action=waiting">View Waiting List</a>
                       </c:if>
                         
                       <span class="pull-right">
@@ -67,7 +66,8 @@
                     <tbody>
                         <c:forEach items="${agents}" var="agent">
                             <tr id="row<c:out value="${agent.agentId}" />">
-                                <td><img src="${pageContext.request.contextPath}/images/uploads/agents/${agent.photoPath}" width='55' height='50'/></td>
+                                <!--<td><img src="${pageContext.request.contextPath}/build/images/uploads/agents/${agent.photoPath}" width='55' height='50'/></td>-->
+                                <td><img src="${agentImageAccessDir}/${agent.photoPath}" width='55' height='50'/></td>
                                 <td><c:out value="${agent.agentId}" /></td>
                                 <td><c:out value="${agent.firstname}" /></td>
                                 <td><c:out value="${agent.middlename}" /></td>
@@ -81,10 +81,10 @@
                                 <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
                                     <td class="text-center">
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
-                                            <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="Agent?action=view&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
+                                            <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="Agent?action=view&route=approved&agentId=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
                                         </c:if>
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_agent')}">
-                                            <a class="btn btn-success btn-xs anti-rcswitchwer-buttons" href="Agent?action=edit&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-pencil"></i></a> 
+                                            <a class="btn btn-success btn-xs anti-rcswitchwer-buttons" href="Agent?action=edit&agentId=${agent.agentId}" role="button"><i class="fa fa-pencil"></i></a> 
                                         </c:if>
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'delete_agent')}">
                                             <a class="btn btn-danger btn-xs anti-rcswitchwer-buttons" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${agent.agentId}"/>)" role="button"><i class="fa fa-remove"></i></a>

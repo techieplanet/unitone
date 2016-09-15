@@ -122,7 +122,7 @@ public class ProjectController extends AppController {
         viewFile = PROJECTS_ADMIN; 
 
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
-        int status = request.getParameter("status") != null   ? Integer.parseInt(request.getParameter("status")) : 0;
+        int addstat = request.getParameter("addstat") != null   ? Integer.parseInt(request.getParameter("addstat")) : 0;
         
         if (action.equalsIgnoreCase("new")){
                viewFile = PROJECTS_NEW;
@@ -149,7 +149,7 @@ public class ProjectController extends AppController {
             request.setAttribute("project", project);
             request.setAttribute("action", "edit");
             request.setAttribute("id", id);
-            if(status == 1) request.setAttribute("success", true);
+            if(addstat == 1) request.setAttribute("success", true);
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
             viewFile = PROJECTS_ADMIN;
@@ -270,7 +270,7 @@ public class ProjectController extends AppController {
             }
         
             if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Project?action=edit&id=" + project.getId() + "&status=1";
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Project?action=edit&id=" + project.getId() + "&addstat=1";
                 response.sendRedirect(page);
             }
             else {

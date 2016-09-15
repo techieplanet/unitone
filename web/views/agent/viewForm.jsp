@@ -29,20 +29,21 @@
                     </div>
                 </div>
             </c:if>
-                    <c:if test="${success}">
-              <div class="row">
-                    <div class="col-md-12 ">
-                        <p class="bg-success padding10" style="width:90%">
-                          <i class="fa fa-check"></i>Saved Successfully
-                          <span class="pull-right">
-                              <a class="btn btn-primary btn-sm margintop5negative" user="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;&nbsp;Back to list</a>
-                          </span>
-                        </p>
-                    </div>
-                </div>
-          </c:if>
-                          <a class="btn btn-primary btn-sm margintop5negative" user="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;&nbsp;Back to list</a>
-                           <!--<a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-angle-double-left"></i> Back to list</a>-->
+                    
+                            <c:if test="${waitingroute}">
+                                <a class="btn btn-primary btn-sm margintop5negative" user="button" href="${pageContext.request.contextPath}/Agent?action=waiting"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;&nbsp;Back to list</a>
+                            </c:if>
+                            <c:if test="${!waitingroute}">
+                                <a class="btn btn-primary btn-sm margintop5negative" user="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;&nbsp;Back to list</a>
+                            </c:if>
+                            
+                            <span class="pull-right">
+                                <c:if test="${fn:contains(sessionScope.user.permissions, 'approve_agent') && waitingroute}">
+                                    <a id="approve-agent-btn" class="btn btn-success btn-sm margintop5negative" href="#" role="button" onClick="showActivateModal('${pageContext.request.contextPath}', 'Agent',<c:out value='${agent.agentId}'/>, 1); return false;"><i class="fa fa-check-square-o"></i>&nbsp;&nbsp;&nbsp;&nbsp;Approve Agent</a>
+                                </c:if>
+                            </span>
+                                    
+                          <!--<a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-angle-double-left"></i> Back to list</a>-->
                            <div class="box-footer " style="margin-right:10px !important;margin-top:-10px !important;margin-bottom:-8px !important; background-color:transparent;">
                      
 <!--                               <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate"/><a class="btn btn-primary" href="Agent?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a>
@@ -122,22 +123,16 @@
                              <div class="row text-center" id="imgholder">
                         <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
                             <div class="form-group text-center">
-                              <img <c:if test="${agent.photoPath != null}"> src="${pageContext.request.contextPath}/images/uploads/agents/${agent.photoPath}" </c:if>
-                               <c:if test="${agent.photoPath == null}"> src="${pageContext.request.contextPath}/images/img/avatar.png"
-                    </c:if>
-                                class=" img-responsive text-center" style="max-height:220px !important;" />
+                                <c:if test="${agent.photoPath != null}">
+                                    <img src="${agentImageAccessDir}/${agent.photoPath}" class="img-responsive text-center" style="max-height:220px !important;" />
+                                </c:if>
                             </div>
                         </div>
                         <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
                             <div class="form-group">
                               <div class="btn-group btn-group-xs">
-<!--                                  <div class="btn btn-primary btn-file">
-                      Change <span title="Change Profile Picture" class="glyphicon glyphicon-edit"></span> 
-                      <input type="file" name="agentPhoto" accept="image/gif, image/jpeg, image/png" id="agentPhoto" disabled 
-                             />
-                    </div>-->
-                    <input type="hidden" name="agentPhotoHidden" 
-                           <c:if test="${agentPhotoHidden == null && agent.photoPath==null}"> value=""
+                                    <input type="hidden" name="agentPhotoHidden" 
+                            accept=""<c:if test="${agentPhotoHidden == null && agent.photoPath==null}"> value=""
                     </c:if><c:if test="${agentPhotoHidden != null}"> value="${agentPhotoHidden}"
                     </c:if> <c:if test="${agent.photoPath != null}"> value="${agent.photoPath}"
                     </c:if> />
@@ -337,13 +332,10 @@
                             <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
                               <label for="agentKinPhoto" style="">Next of Kin - Picture</label>
                               <c:if test="${agent.agentId != ""}"> 
-                               <img <c:if test="${agent.kinPhotoPath != null}"> src="${pageContext.request.contextPath}/images/uploads/agents/${agent.kinPhotoPath}" </c:if>
-                               
-                                class="img-responsive text-center" width="50.33333333%"/>
-                                </c:if>
-<!--                                    <input type="file" class="form-control" id="agentKinPhoto" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" 
-                                         style="max-height:220px !important;" disabled
-                                           />-->
+                                    <c:if test="${agent.kinPhotoPath != null}">
+                                        <img src="${agentKinImageAccessDir}/${agent.kinPhotoPath}" class="img-responsive text-center" width="50.33333333%" />
+                                    </c:if>
+                              </c:if>
                                           
                                              <input type="hidden" name="agentKinPhotoHidden" 
                            <c:if test="${agentKinPhotoHidden == null && agent.kinPhotoPath ==null}"> value=""
@@ -394,33 +386,28 @@
           </div>   <!-- /.row -->
           
           
-             <div class="modal fade" id="agreementStatusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-         <div class="vertical-alignment-helper">
-          <div class="modal-dialog vertical-align-center">
+             <!--MODAL-->
+      <div class="modal fade" id="activateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">NEOFORCE </h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cancel2"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">NEOFORCE</h4>
             </div>
-              
             <div class="modal-body">
-              
-              <h5>The standard Lorem Ipsum passage, used since the 1500s</h5>
-              <p>
-"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+              You are about to activate this person as an agent. <br/><br/>
 
-Section 1.10.32 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
+Please be sure that you have verified their information and are satisfied as this person will become a representative of your organisation. If you are sure, please click 'Yes' or 'Cancel' if not sure.
+<br/><br/>
+Please note this record will be moved to the general agents list immediately after you click 'Yes'.
+<br/><br/>
+Are you sure you want to proceed?
 
-
-
-"On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains."
-              </p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-default pull-left" data-dismiss="modal"> Cancel</button>
-              <button  type="button"  id="agreement" class="btn btn-success" onclick="modal_agree()"><i class="fa fa-check"></i> I agree</button>
+              <button type="button" id="cancel" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+              <button id="ok" type="button" onclick="" class="btn btn-primary">Yes</button>
             </div>
-          </div>
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
