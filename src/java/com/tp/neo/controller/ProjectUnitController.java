@@ -319,7 +319,7 @@ public class ProjectUnitController extends AppController {
                 messages.put("TITLE", projectUnit.getTitle());
                 messages.put("QUANTITY", projectUnit.getQuantity() + "");
                 
-                //jsonResponse = gson.toJson(messages);
+                jsonResponse = gson.toJson(messages);
                 System.out.println("BEFORE RETURN");
             }
             catch(PropertyException e){

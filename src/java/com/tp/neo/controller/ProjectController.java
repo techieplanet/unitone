@@ -122,7 +122,7 @@ public class ProjectController extends AppController {
         viewFile = PROJECTS_ADMIN; 
 
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
-        int status = request.getParameter("status") != null   ? Integer.parseInt(request.getParameter("status")) : 0;
+        int addstat = request.getParameter("addstat") != null   ? Integer.parseInt(request.getParameter("addstat")) : 0;
         
         if (action.equalsIgnoreCase("new")){
                viewFile = PROJECTS_NEW;
@@ -149,7 +149,7 @@ public class ProjectController extends AppController {
             request.setAttribute("project", project);
             request.setAttribute("action", "edit");
             request.setAttribute("id", id);
-            if(status == 1) request.setAttribute("success", true);
+            if(addstat == 1) request.setAttribute("success", true);
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
             viewFile = PROJECTS_ADMIN;
@@ -270,7 +270,7 @@ public class ProjectController extends AppController {
             }
         
             if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Project?action=edit&id=" + project.getId() + "&status=1";
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Project?action=edit&id=" + project.getId() + "&addstat=1";
                 response.sendRedirect(page);
             }
             else {
@@ -304,6 +304,7 @@ public class ProjectController extends AppController {
                 project.setDeleted((short)0);
                 project.setActive((short)1);
                 
+                
                 //get this as early as possible
                 Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",project.getId());
                 projectUnits = query.getResultList();
@@ -312,11 +313,11 @@ public class ProjectController extends AppController {
                 System.out.println("sessionUser.getSystemUserId(): " + sessionUser.getSystemUserId());
                 new TrailableManager(project).registerUpdateTrailInfo(sessionUser.getSystemUserId());
                 log("update");
+                //log("Project data" + gson.toJson(projectUnits));
                 
                 validate(project);
                 log("validate");
-                log("Peoject data" + gson.toJson(project));
-                
+                                
                 em.getTransaction().commit();
                 log("commit");
                 
@@ -342,7 +343,15 @@ public class ProjectController extends AppController {
             catch(Exception e){
                 e.printStackTrace();
                 System.out.println("System Error: " + e.getMessage());
-                SystemLogger.logSystemIssue("Project", gson.toJson(project), e.getMessage());
+                HashMap<String, String> projectValues = new HashMap<String, String>();
+                projectValues.put("id", project.getId().toString());
+                projectValues.put("pname", project.getName());
+                projectValues.put("desc", project.getDescription());
+                projectValues.put("location", project.getLocation());
+                projectValues.put("pmanager", project.getProjectManager());;
+                projectValues.put("deleted", String.valueOf(project.getDeleted()));
+                projectValues.put("active", String.valueOf(project.getActive()));
+                SystemLogger.logSystemIssue("Project", gson.toJson(projectValues), e.getMessage());
             }
         
             
