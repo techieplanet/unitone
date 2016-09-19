@@ -10,7 +10,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.utils.Sales;
-import com.tp.neo.model.utils.SalesItemJson;
 import com.tp.neo.model.utils.SalesObject;
 import java.io.IOException;
 import java.io.PrintWriter;
