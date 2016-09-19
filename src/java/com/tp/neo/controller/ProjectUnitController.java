@@ -9,9 +9,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
-import com.tp.neo.model.ProjectUnit;
-import com.tp.neo.model.ProjectUnitPK;
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,10 +22,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
-import javax.persistence.RollbackException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.PropertyException;
@@ -91,7 +88,7 @@ public class ProjectUnitController extends AppController {
             throws ServletException, IOException {
 
         
-        
+        log("inside get");
             processGetRequest(request, response);
 
     }
@@ -138,6 +135,8 @@ public class ProjectUnitController extends AppController {
             response.setContentType("text/plain");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(jsonResponse);
+            response.getWriter().flush(); 
+            response.getWriter().close();
             System.out.println("jsonResponse: " + jsonResponse);
         }
 //        else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
@@ -202,12 +201,10 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
 
                 
-                new TrailableManager(projectUnit).registerInsertTrailInfo((long)1);
+                new TrailableManager(projectUnit).registerInsertTrailInfo(sessionUser.getSystemUserId());
                 
-                //connect the Project entity with Project unit entity using PK entity
-                ProjectUnitPK pk = new ProjectUnitPK();
-                pk.setProjectId(project.getId());
-                projectUnit.setProjectUnitPK(pk);
+                //set the Project object
+                projectUnit.setProject(project);
                 project.getProjectUnitCollection().add(projectUnit);
                 
 
@@ -218,7 +215,7 @@ public class ProjectUnitController extends AppController {
                 
                 //find by last ID
                 if(request.getParameter("id").equals("")){
-                    Query jpqlQuery  = em.createNamedQuery("ProjectUnit.findByLastId");
+                    Query jpqlQuery  = em.createNamedQuery("ProjectUnit.findLastInserted");
                     List puList = jpqlQuery.setMaxResults(1).getResultList();
                     projectUnit = (ProjectUnit)puList.get(0);                                    
                 }
@@ -228,12 +225,12 @@ public class ProjectUnitController extends AppController {
                 emf.close();
                 
                 messages.put("STATUS", "OK");
-                messages.put("UNIT_ID", projectUnit.getProjectUnitPK().getId() + "");
+                messages.put("UNIT_ID", projectUnit.getId() + "");
                 messages.put("TITLE", projectUnit.getTitle());
                 messages.put("QUANTITY", projectUnit.getQuantity() + "");
                 
                 jsonResponse = gson.toJson(messages);
-                System.out.println("BEFORE RETURN");
+                //System.out.println("BEFORE RETURN: " + jsonResponse);
             }
             catch(PropertyException e){
                 System.out.println("inside catch area: " + gson.toJson(errorMessages));
@@ -267,7 +264,7 @@ public class ProjectUnitController extends AppController {
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
             }
         
-           boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+           //boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
            
            response.setContentType("text/plain");
            response.setCharacterEncoding("UTF-8");
@@ -290,7 +287,7 @@ public class ProjectUnitController extends AppController {
                 em.getTransaction().begin();
                 
                 validate(request);
-                
+               
                 int id = (Integer.parseInt(request.getParameter("id")));
                 Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
                 projectUnit = (ProjectUnit)query.getSingleResult();
@@ -306,21 +303,20 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
                 
-                new TrailableManager(projectUnit).registerUpdateTrailInfo((long)1);
+                new TrailableManager(projectUnit).registerUpdateTrailInfo(sessionUser.getSystemUserId());
                 
-
                 em.getTransaction().commit();
                                 
                 em.close();
                 emf.close();
                 
                 messages.put("STATUS", "OK");
-                messages.put("UNIT_ID", projectUnit.getProjectUnitPK().getId() + "");
+                messages.put("UNIT_ID", projectUnit.getId() + "");
                 messages.put("TITLE", projectUnit.getTitle());
                 messages.put("QUANTITY", projectUnit.getQuantity() + "");
                 
-                //jsonResponse = gson.toJson(messages);
-                System.out.println("BEFORE RETURN");
+                jsonResponse = gson.toJson(messages);
+                //System.out.println("BEFORE RETURN: " + jsonResponse);
             }
             catch(PropertyException e){
                 System.out.println("inside catch area: " + gson.toJson(errorMessages));
@@ -353,8 +349,8 @@ public class ProjectUnitController extends AppController {
 
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
             }
-        
-           boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+//        
+//           boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
            
            response.setContentType("text/plain");
            response.setCharacterEncoding("UTF-8");
@@ -368,10 +364,19 @@ public class ProjectUnitController extends AppController {
         
         Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
         ProjectUnit projectUnit = (ProjectUnit)query.getSingleResult();
+        
+        //get the project before deleting. We will reload the units in this project 
+        Project project = em.find(Project.class, projectUnit.getProject().getId());
+        
         em.getTransaction().begin();
-        new TrailableManager(projectUnit).registerUpdateTrailInfo((long)1);
+        new TrailableManager(projectUnit).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         em.remove(projectUnit);
+                
         em.getTransaction().commit();
+        
+        em.merge(project);
+        
+        
 
         em.close();
         emf.close();

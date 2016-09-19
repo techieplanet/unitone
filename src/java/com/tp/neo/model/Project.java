@@ -55,6 +55,12 @@ public class Project extends BaseModel{
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+<<<<<<< HEAD
+=======
+    
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "project")
+    private Collection<ProjectUnit> projectUnitCollection;
+>>>>>>> neoforce/master
 
 
     @Basic(optional = false)
@@ -63,10 +69,8 @@ public class Project extends BaseModel{
     @Basic(optional = false)
     @Column(name = "active")
     private short active;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
-    private Collection<ProjectUnit> projectUnitCollection;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
 
 
     private static final long serialVersionUID = 1L;
@@ -232,8 +236,16 @@ public class Project extends BaseModel{
         this.active = active;
     }
 
-    @XmlTransient
+    
 
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_project";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_project";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_project";
+        else return "view_project";
+    }
+
+    @XmlTransient
     public Collection<ProjectUnit> getProjectUnitCollection() {
         return projectUnitCollection;
     }
@@ -241,6 +253,7 @@ public class Project extends BaseModel{
     public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
         this.projectUnitCollection = projectUnitCollection;
     }
+<<<<<<< HEAD
 
     public String getPermissionName(String action){
         if(action.toUpperCase().equals("NEW")) return "create_project";
@@ -251,3 +264,6 @@ public class Project extends BaseModel{
 
     
 }
+=======
+}
+>>>>>>> neoforce/master

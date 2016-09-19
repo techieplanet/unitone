@@ -622,7 +622,35 @@ function checkActivateSwitchWait(appName,entityName,agentId){
       console.log("URL: " + url);
     
      if(result==true){
-         $.ajax({
+         activateAgent(appName,entityName,agentId,status)
+//         $.ajax({
+//       type : 'POST',
+//       url : url,
+//       data : {updateStatusWait:status,agent_id:agentId},
+//       success: function(response){
+//          // alert("this is successful");
+//           console.log("Successful: " + JSON.stringify(response));
+//           var resp = JSON.parse(response);
+////           alert("working");
+//           removeTableElement(agentId);
+//           //alert(response);
+//            $('#activateModal').modal('hide');
+//       },
+//       error: function(xHr, status, error){
+//           console.log("NOT Successful: " + xHr.responseText);
+//           //processSubmitError(xHr.responseText);
+//       }
+//    });
+     }
+    
+    
+    
+}, 450);
+}
+
+function activateAgent(appName,entityName,agentId,status){
+    url = appName + '/' + entityName;
+    $.ajax({
        type : 'POST',
        url : url,
        data : {updateStatusWait:status,agent_id:agentId},
@@ -631,20 +659,34 @@ function checkActivateSwitchWait(appName,entityName,agentId){
            console.log("Successful: " + JSON.stringify(response));
            var resp = JSON.parse(response);
 //           alert("working");
-           removeTableElement(agentId);
-           //alert(response);
-            $('#activateModal').modal('hide');
+           removeTableElement(agentId); 
+           
+           $('#activateModal').modal('hide');
+           
+           handleAfterHideBehaviour(appName, entityName);
+           
        },
        error: function(xHr, status, error){
            console.log("NOT Successful: " + xHr.responseText);
+           $('#activateModal .modal-body').html('An error occurred trying to activate agent');
            //processSubmitError(xHr.responseText);
        }
     });
-     }
-    
-    
-    
-}, 450);
+}
+
+/**
+ * This method detects what action to take after hiding agent activation modal
+ * @param {type} appName the application context - /NeoForce
+ * @returns none
+ */
+function handleAfterHideBehaviour(context, entityName){
+        if($("#removeMessage").length > 0){
+            var message = '<br/><div class="row"><div class="col-md-12 "><p class="bg-success padding15" style="vertical-align:center !important;" ><i class="fa fa-check"></i>Agent successfully activated and moved to approved agents list. [<a href="Agent"><i>see approved agents list</i></a>] </p></div></div>';        
+            $("#removeMessage").html(message);
+        }
+        if($("#approve-agent-btn").length > 0){
+           window.location = context + "/" + entityName + "?action=waiting";
+        }
 }
 
 
@@ -654,10 +696,8 @@ function removeTableElement(agent_id){
     $('#row'+agent_id).fadeOut(1500, function(){
                $('#row'+agent_id).remove();
            });
-    var message = '<br/><div class="row"><div class="col-md-12 "><p class="bg-success padding15" style="vertical-align:center !important;" ><i class="fa fa-check"></i>Agent successfully activated. [<a href="Agent"><i>see agents full list</i></a>] </p></div></div>';        
-  $("#removeMessage").html(message);
-    
 }
+
 /*TP: Activate the agent via the switch created*/
 function checkActivateSwitch(appName,entityName,agentId){
       
@@ -1037,15 +1077,15 @@ function showDeleteModal(context, entityName, id){
     $('#deleteModal').modal();
 }
 
-function showActivateModal(context, entityName, id){
+function showActivateModal(context, entityName, id, status){
    // alert("hello");
-  var args = "checkActivateSwitchWait('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
+  //var args = "checkActivateSwitchWait('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
+  var args = "activateAgent('" + context + "','" + entityName + "','" + id + "'," + status + ")";
   var cancelFunction = "cancelSelection('" + context + "'," + "'" + entityName + "'," + "'" + id + "')";
     $("#activateModal #ok").attr("onclick", args);
     $("#activateModal #cancel").attr("onclick",cancelFunction);
     $("#activateModal #cancel2").attr("onclick",cancelFunction);
-    $('#activateModal').modal();  
-    
+    $('#activateModal').modal();   
 }
 
 

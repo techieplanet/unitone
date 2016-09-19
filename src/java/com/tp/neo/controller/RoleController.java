@@ -112,7 +112,7 @@ public class RoleController extends AppController {
         EntityManager em = emf.createEntityManager();
         String viewFile = ROLE_ADMIN; 
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-        int status = request.getParameter("status") != null   ? Integer.parseInt(request.getParameter("status")) : 0;
+        int addstat = request.getParameter("addstat") != null   ? Integer.parseInt(request.getParameter("addstat")) : 0;
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         
         if (action.equalsIgnoreCase("new")){
@@ -133,7 +133,7 @@ public class RoleController extends AppController {
             Role role = em.find(Role.class, id);
             log("Logging permissions: " + role.getPermissions());
             request.setAttribute("selectedPermissions", getSelectedPermissionsCollection(role.getPermissions()));
-            if(status == 1) request.setAttribute("success", true);
+            if(addstat == 1) request.setAttribute("success", true);
             setRequestAttributes(request, role, "edit"); //set others
             
         }
@@ -200,7 +200,7 @@ public class RoleController extends AppController {
                 
                 validate(role);
                 
-                new TrailableManager(role).registerInsertTrailInfo((long)1);                
+                new TrailableManager(role).registerInsertTrailInfo(sessionUser.getSystemUserId());                
                 
                 em.persist(role);
                 
@@ -234,7 +234,7 @@ public class RoleController extends AppController {
             }
             
             if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Role?action=edit&id=" + role.getRoleId() + "&status=1";
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Role?action=edit&id=" + role.getRoleId() + "&addstat=1";
                 response.sendRedirect(page);
             }
             else{
@@ -265,7 +265,7 @@ public class RoleController extends AppController {
                 
                 validate(role);
                 
-                new TrailableManager(role).registerUpdateTrailInfo((long)1);
+                new TrailableManager(role).registerUpdateTrailInfo(sessionUser.getSystemUserId());
                                 
                 em.getTransaction().commit();
             
@@ -291,7 +291,7 @@ public class RoleController extends AppController {
             catch(Exception e){
                 e.printStackTrace();
                 SystemLogger.logSystemIssue("Role", gson.toJson(role), e.getMessage());
-            }        
+            }
             
             //new URI(request.getHeader("referer")).getPath();
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
@@ -321,7 +321,11 @@ public class RoleController extends AppController {
         
         Role role = em.find(Role.class, id);
         em.getTransaction().begin();
+        
+        role.setActive((short)0);
+        new TrailableManager(role).registerInsertTrailInfo(sessionUser.getSystemUserId());
         em.remove(role);
+        
         em.getTransaction().commit();
 
         em.close();

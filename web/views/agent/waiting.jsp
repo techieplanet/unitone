@@ -2,9 +2,8 @@
 <!-- Include the lid -->
 
 <!--        <link type="text/css" rel="stylesheet" href="plugins/rcswitcher-master/css/style.min.css">-->
-	<link type="text/css" rel="stylesheet" href="plugins/rcswitcher-master/css/rcswitcher.min.css">
+	<!--<link type="text/css" rel="stylesheet" href="plugins/rcswitcher-master/css/rcswitcher.min.css">-->
 	
-    
   
 <%@ include file="../includes/lid.jsp" %>      
 
@@ -49,39 +48,44 @@
                         <th>Middle Name</th>
                         <th>Last Name</th>
                         <th>Phone No</th>
-                        <th>Email</th>
                         <th>State</th>
-                        <th>Active</th>
-                        <th>Action</th>
+                        <c:if test="${fn:contains(sessionScope.user.permissions, 'approve_agent')}">
+                            <th class="text-center">Approve</th>
+                        </c:if>
+                        <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')  || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
+                            <th>Action</th>
+                        </c:if>
                         
                       </tr>
                     </thead>
                     <tbody>
                         <c:forEach items="${agents}" var="agent">
                             <tr id="row<c:out value="${agent.agentId}" />">
-                                <td><img src="${pageContext.request.contextPath}/images/uploads/agents/${agent.photoPath}" width='55' height='50'/></td>
+                                <td><img src="${agentImageAccessDir}/${agent.photoPath}" width='55' height='50'/></td>
                                 <td><c:out value="${agent.agentId}" /></td>
                                 <td><c:out value="${agent.firstname}" /></td>
                                 <td><c:out value="${agent.middlename}" /></td>
                                 <td><c:out value="${agent.lastname}" /></td>
                                 <td><c:out value="${agent.phone}" /></td>
-                                <td><c:out value="${agent.email}" /></td>
                                 
                                 <td><c:out value="${agent.state}" /></td>
-                                <td style="text-align:center;">
-<!--                                    <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitchWait('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
-                                   -->
-                                   <input type="checkbox" class="minimal"  id="switch-state" value = '<c:out value="${agent.agentId}"/>' <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if> onClick="showActivateModal('${pageContext.request.contextPath}', 'Agent',<c:out value="${agent.agentId}"/>);" />
-                       
-                                </td>
+                                <c:if test="${fn:contains(sessionScope.user.permissions, 'approve_agent')}">
+                                    <td style="text-align:center;">
+                                        <input type="checkbox" class="minimal switch-state" value = '<c:out value="${agent.agentId}"/>' <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>  />
+                                    </td>
+                                </c:if>
                               
-                                <td>
-                                    <a class="btn btn-success btn-xs" title="Activation Checkbox" href="Agent?action=view&agentId=${agent.agentId}&id=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
-                                    
-                                     <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${agent.agentId}"/>)" role="button"><i class="fa fa-remove"></i></a>
-                                    
-                                   
-                                </td>
+                                <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')  || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
+                                    <td>
+                                        <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
+                                            <a class="btn btn-primary btn-xs" title="" href="Agent?action=view&route=waiting&agentId=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
+                                        </c:if>
+
+                                        <c:if test="${fn:contains(sessionScope.user.permissions, 'delete_agent')}">
+                                            <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${agent.agentId}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                                        </c:if>
+                                    </td>
+                                </c:if>
                             </tr>
                         </c:forEach>
                   </tbody>
@@ -92,34 +96,18 @@
                         <th>First Name</th>
                         <th>Middle Name</th>
                         <th>Last Name</th>
-                        <th>Phone No</th>
-                        <th>Email</th>
-                        
+                        <th>Phone No</th>                        
                         <th>State</th>
-                        <th>Active</th>
-                        <th>Action</th>
+                        <c:if test="${fn:contains(sessionScope.user.permissions, 'approve_agent')}">
+                            <th class="text-center">Approve</th>
+                        </c:if>
+                        <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')  || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
+                            <th>Action</th>
+                        </c:if>
                       </tr>
                     </tfoot>
                   </table>
                  </div>
-<!--                  <div class="permissions block">
-				<h4>Permissions</h4>
-			
-				<label >Access CP</label><input type="checkbox" name="access_cp" value="access_cp"><br />
-				<label >Manage Users </label><input type="checkbox" name="manage_users" value="manage_users" checked >
-
-				<div class="info">
-					<ul class="clear-fix">
-						<li>width<span>44</span></li>
-						<li>height<span>16</span></li>
-						<li>Theme<span>dark</span></li>
-						<li>blobOffset<span>2</span></li>
-						<li>autoStick<span>true</span></li>
-						<li>onText<span>YES</span></li>
-						<li>offText<span>NO</span></li>
-					</ul>
-				</div>
-			</div>-->
                    
                 </div><!-- /.box-body -->
               </div><!-- /.box -->
@@ -171,7 +159,6 @@ Are you sure you want to proceed?
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
-<!--      <script type="text/javascript" src="plugins/rcswitcher-master/js/jquery-2.1.3.min.js"></script>-->
 	
 <!-- Include the footer -->
 <%@ include file="../includes/footer.jsp" %>      
@@ -200,26 +187,33 @@ Are you sure you want to proceed?
             $("#entitylist").DataTable({
                 "autoWidth": false,
                 "columnDefs": [
-                    { "sortable": false, "width":"50px", "targets": 4 }
+                    <c:choose>
+                        <c:when test="${fn:contains(sessionScope.user.permissions, 'approve_agent') && (fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent'))}">
+                            { "sortable": false, "width":"50px", "targets": 8 }
+                        </c:when>
+                        <c:when test="${!fn:contains(sessionScope.user.permissions, 'approve_agent') && (fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent'))}">
+                            { "sortable": false, "width":"50px", "targets": 7 }
+                        </c:when>
+                    </c:choose>
                 ]
         });
     
- $('#switch-state').on('ifClicked', function(event){
-//  showActivateModal(context, entityName, id);
-        
-        //alert(chkValue);
-        var agentId = $(this).val();
-//        #row"+agentId+" #switch-state"
-//        var chkValue = $("#switch-state").parent('[class*="icheckbox"]').hasClass("checked");
-           showActivateModal('${pageContext.request.contextPath}', 'Agent', agentId);
-//alert(("#switch-state").val());
-});
-    
-                                
-    
-                                
+                
       
           });
+          
+          
+          $(document).ready(function(){
+                console.log("document ready");
+                $('.switch-state').on('ifChecked', function(event){
+                        var agentId = $(this).val();
+                        var status = $(this).is(':checked') ? 1 : 0;
+                        showActivateModal('${pageContext.request.contextPath}', 'Agent', agentId, status );
+                        //console.log("inside switch-state");                        
+               });
+          });
+          
+          
           
           
 //    

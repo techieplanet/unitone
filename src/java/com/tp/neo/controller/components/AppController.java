@@ -5,15 +5,16 @@
  */
 package com.tp.neo.controller.components;
 
-import com.google.gson.Gson;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Permission;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -39,6 +40,7 @@ public class AppController extends HttpServlet{
     protected SystemUser sessionUser;
     protected String callbackUrRL = "";
     
+    
     public AppController(){
         System.out.println("Inside TPController");
         calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
@@ -63,6 +65,7 @@ public class AppController extends HttpServlet{
         
         String callbackURL = getCallbackURL(request, response);
         log("callbackURL: " + callbackURL);
+        session.setAttribute("loginCallback", callbackURL);
         
         if(session.getAttribute("user") == null){
             session.setAttribute("loginCallback", callbackURL);
@@ -163,6 +166,8 @@ public class AppController extends HttpServlet{
         while(attributeNames.hasMoreElements())
             request.removeAttribute(attributeNames.nextElement());
     }
+    
+    
     
     public void log(String str){ System.out.println(str); }
 }

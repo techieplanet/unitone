@@ -16,7 +16,7 @@
                 </div><!-- /.box-header -->
                 <!-- form start -->
                 <div style="background:#ecf0f5 !important;">
-                <form role="form" name="agentRegistration" method="POST" action="Agent" enctype="multipart/form-data" id="agentForm">
+                <form role="form" name="agentRegistration" method="POST" action="Agent?action=${action}&agentId=${agent.agentId}" enctype="multipart/form-data" id="agentForm">
                   <div class="box-body">
                   
                 <c:if test="${fn:length(errors) > 0 }">
@@ -39,7 +39,7 @@
                           <span class="pull-right">
                               <a class="btn btn-primary btn-sm margintop5negative" user="button" href="${pageContext.request.contextPath}/Agent"><i class="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;&nbsp;Back to list</a>
                               <!--&nbsp;&nbsp;&nbsp;-->
-                              <a class="btn btn-primary btn-sm margintop5negative marginleft10" href="Agent?action=new" user="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New User</a>
+                              <a class="btn btn-primary btn-sm margintop5negative marginleft10" href="Agent?action=new" user="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Agent</a>
                           </span>
                         </p>
                     </div>
@@ -138,7 +138,7 @@
                         <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
                             <div class="form-group text-center">
                                 <c:if test="${agent.photoPath != null}">
-                                    <img src="${pageContext.request.contextPath}/images/uploads/agents/${agent.photoPath}" 
+                                    <img src="${agentImageAccessDir}/${agent.photoPath}" 
                                         class="img-responsive text-center" style="max-height:220px !important;"/>
                                 </c:if>
                             </div>
@@ -347,20 +347,16 @@
                              <div class="col-md-4" >
                                     <div class="row" >
                             <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
-                              <label for="agentKinPhoto" style="">Next of Kin - Picture</label>
-                                <c:choose>
-                                    <c:when test="${agent.agentId != ''} && ${agent.kinPhotoPath != null}"> 
-                                        <img src="${pageContext.request.contextPath}/images/uploads/agents/${agent.kinPhotoPath}" 
-                                             class="img-responsive text-center" width="50.33333333%"/>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="btn btn-primary">
-                                            <input type="file" id="agentKinPhoto" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" 
-                                             style="max-height:220px !important;"
-                                               />
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
+                              <label for="agentKinPhoto" style="">Next of Kin Picture</label>
+                                    <c:if test="${agent.agentId != '' && agent.kinPhotoPath != null}"> 
+                                        <img src="${agentKinImageAccessDir}/${agent.kinPhotoPath}" 
+                                             class="img-responsive text-center" width="50.33333333%" style="max-height:220px !important;" />
+                                    </c:if> <br/>
+                                    <div class="btn btn-primary">
+                                        <input type="file" id="agentKinPhoto" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" 
+                                         style="max-height:220px !important;"
+                                           />
+                                    </div>
                                              
                                     
                                           
@@ -443,3 +439,4 @@ Section 1.10.32 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
+      

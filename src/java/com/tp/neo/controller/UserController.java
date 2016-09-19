@@ -144,7 +144,7 @@ public class UserController extends AppController {
         EntityManager em = emf.createEntityManager();
         
         viewFile = ENTITY_LIST; 
-        int status = request.getParameter("status") != null   ? Integer.parseInt(request.getParameter("status")) : 0;
+        int addstat = request.getParameter("addstat") != null   ? Integer.parseInt(request.getParameter("addstat")) : 0;
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         
         if (action.equalsIgnoreCase("new")){
@@ -169,7 +169,7 @@ public class UserController extends AppController {
             request.setAttribute("reqUser", user); //different from session user
             request.setAttribute("action", "edit");
             request.setAttribute("rolesList", rolesList);
-            if(status == 1) request.setAttribute("success", true);
+            if(addstat == 1) request.setAttribute("success", true);
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listusers")){
             viewFile = ENTITY_LIST;
@@ -297,7 +297,7 @@ public class UserController extends AppController {
             }
             
             if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/User?action=edit&id=" + user.getUserId() + "&status=1";
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/User?action=edit&id=" + user.getUserId() + "&addstat=1";
                 log("redirect page: " + page);
                 response.sendRedirect(page);
             }

@@ -9,14 +9,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
-import com.tp.neo.model.ProjectUnit;
 
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.model.ProjectUnit;
 
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -31,7 +31,6 @@ import javax.xml.bind.PropertyException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.RollbackException;
-import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -83,8 +82,7 @@ public class ProjectController extends AppController {
         EntityManager em = emf.createEntityManager();
         Project project = em.find(Project.class, id);
             
-            Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
-            List <ProjectUnit> projectUnits =  query.getResultList();
+            List<ProjectUnit> projectUnits =  (List)project.getProjectUnitCollection();
             em.close(); emf.close();
            
             Map<Integer, Map> map = new HashMap<Integer, Map>();
@@ -92,7 +90,7 @@ public class ProjectController extends AppController {
            
             
             Map<String, String> mapSmall = new HashMap<String, String>();
-            mapSmall.put("id",projectUnits.get(i).getProjectUnitPK().getId()+"");
+            mapSmall.put("id",projectUnits.get(i).getId() + "");
             mapSmall.put("title", projectUnits.get(i).getTitle());
             mapSmall.put("cpu", projectUnits.get(i).getCpu().toString());
             mapSmall.put("lid", projectUnits.get(i).getLeastInitDep().toString());
@@ -114,7 +112,7 @@ public class ProjectController extends AppController {
     }
 
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException {        
         response.setContentType("text/html;charset=UTF-8");
     
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -122,7 +120,7 @@ public class ProjectController extends AppController {
         viewFile = PROJECTS_ADMIN; 
 
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
-        int status = request.getParameter("status") != null   ? Integer.parseInt(request.getParameter("status")) : 0;
+        int addstat = request.getParameter("addstat") != null   ? Integer.parseInt(request.getParameter("addstat")) : 0;
         
         if (action.equalsIgnoreCase("new")){
                viewFile = PROJECTS_NEW;
@@ -139,17 +137,26 @@ public class ProjectController extends AppController {
             
             //find by ID
             int id = Integer.parseInt(stringId);
-
+            
             Project project = em.find(Project.class, id);
             
-            Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
+            /**
+             * the collection is usually not updated in runtime, even after refreshing the page severally.
+             * So force a hard refresh by querying the db to get the actual set of valid elements 
+             * then use that as the valid collection
+             */
+            Query query = em.createNamedQuery("ProjectUnit.findByProject").setParameter("project", project);
             List<ProjectUnit> projectUnits = query.getResultList();
+            
+            //good to do this to put every object/entity in sync
+            project.setProjectUnitCollection(projectUnits);
+            
             
             request.setAttribute("units", projectUnits);
             request.setAttribute("project", project);
             request.setAttribute("action", "edit");
             request.setAttribute("id", id);
-            if(status == 1) request.setAttribute("success", true);
+            if(addstat == 1) request.setAttribute("success", true);
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
             viewFile = PROJECTS_ADMIN;
@@ -270,7 +277,7 @@ public class ProjectController extends AppController {
             }
         
             if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Project?action=edit&id=" + project.getId() + "&status=1";
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Project?action=edit&id=" + project.getId() + "&addstat=1";
                 response.sendRedirect(page);
             }
             else {
@@ -304,19 +311,19 @@ public class ProjectController extends AppController {
                 project.setDeleted((short)0);
                 project.setActive((short)1);
                 
+                
                 //get this as early as possible
-                Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",project.getId());
-                projectUnits = query.getResultList();
+                projectUnits = (List)project.getProjectUnitCollection();
                 
                 //sessionUser is a class variable 
                 System.out.println("sessionUser.getSystemUserId(): " + sessionUser.getSystemUserId());
                 new TrailableManager(project).registerUpdateTrailInfo(sessionUser.getSystemUserId());
                 log("update");
+                //log("Project data" + gson.toJson(projectUnits));
                 
                 validate(project);
                 log("validate");
-                log("Peoject data" + gson.toJson(project));
-                
+                                
                 em.getTransaction().commit();
                 log("commit");
                 
@@ -342,7 +349,15 @@ public class ProjectController extends AppController {
             catch(Exception e){
                 e.printStackTrace();
                 System.out.println("System Error: " + e.getMessage());
-                SystemLogger.logSystemIssue("Project", gson.toJson(project), e.getMessage());
+                HashMap<String, String> projectValues = new HashMap<String, String>();
+                projectValues.put("id", project.getId().toString());
+                projectValues.put("pname", project.getName());
+                projectValues.put("desc", project.getDescription());
+                projectValues.put("location", project.getLocation());
+                projectValues.put("pmanager", project.getProjectManager());;
+                projectValues.put("deleted", String.valueOf(project.getDeleted()));
+                projectValues.put("active", String.valueOf(project.getActive()));
+                SystemLogger.logSystemIssue("Project", gson.toJson(projectValues), e.getMessage());
             }
         
             

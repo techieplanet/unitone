@@ -13,10 +13,10 @@
     <div class="box-body no-padding">
         <ul class="list-group">
             <c:forEach items="${units}" var="unit">
-                <li id="row<c:out value="${unit.projectUnitPK.id}" />" class="list-group-item noborder">
+                <li id="row<c:out value="${unit.id}" />" class="list-group-item noborder">
                     <span class="" style="width: 60%; display: inline-table;">${unit.title}<span class="badge marginleft5">${unit.quantity}</span></span>
-                    <a class="pull-right btn btn-danger btn-xs marginleft5" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'ProjectUnit', ${unit.projectUnitPK.id})" role="button"><i class="fa fa-remove"></i></a>
-                    <a class="pull-right btn btn-success btn-xs" onclick="launchEditUnitForm(${unit.projectUnitPK.id},'${pageContext.request.contextPath}')" role="button"><i class="fa fa-pencil"></i></a>
+                    <a class="pull-right btn btn-danger btn-xs marginleft5" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'ProjectUnit', ${unit.id})" role="button"><i class="fa fa-remove"></i></a>
+                    <a class="pull-right btn btn-success btn-xs" onclick="launchEditUnitForm(${unit.id},'${pageContext.request.contextPath}')" role="button"><i class="fa fa-pencil"></i></a>
                 </li>
             </c:forEach>
          </ul>
@@ -73,16 +73,15 @@
                                 console.log(response);
                                 unit = JSON.parse(response);
                                 $('#title').val(unit.title);
-                                $('#cpu').val(parseFloat(unit.cpu));
-                                $('#lid').val(unit.lid);
+                                $('#cpu').val(parseFloat(unit.cpu).toFixed(2));
+                                $('#lid').val(parseFloat(unit.lid).toFixed(2));
                                 $('#discount').val(unit.discount);
-                                $('#mpd').val(unit.mpd);
                                 $('#mpd').val(unit.mpd);
                                 $('#commp').val(unit.commp);
                                 $('#quantity').val(unit.quantity);
 
-                                $('#monthly_pay').val(unit.monthly_pay);
-                                $('#amt_payable').val(unit.amt_payable);
+                                $('#monthly_pay').val(parseFloat(unit.monthly_pay).toFixed(2));
+                                $('#amt_payable').val(parseFloat(unit.amt_payable).toFixed(2));
 
                                 
                                 $('#loading').addClass("hidden");
