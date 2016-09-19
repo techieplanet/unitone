@@ -210,7 +210,7 @@
        if($('#id').val().length == 0){//insert mode
            var html = '<li id="' + 'row'+result.UNIT_ID + '" class="list-group-item noborder">' +
                         '<span class="" style="width: 60%; display: inline-table;">' + result.TITLE + '<span class="badge marginleft5">' + result.QUANTITY + '</span></span>' +
-                        '<a class="pull-right btn btn-danger btn-xs marginleft5" href="#" onclick="showDeleteModal('+ "'/NeoForce', 'ProjectUnit'," + result.UNIT_ID + ') role="button"><i class="fa fa-remove"></i></a>' +
+                        '<a class="pull-right btn btn-danger btn-xs marginleft5" href="#" onclick="showDeleteModal('+ "'/NeoForce', 'ProjectUnit'," + result.UNIT_ID + ')" role="button"><i class="fa fa-remove"></i></a>' +
                         '<a class="pull-right btn btn-success btn-xs" onclick="launchEditUnitForm(' + result.UNIT_ID + ",'/NeoForce'" + ')" role="button"><i class="fa fa-pencil"></i></a>' +
                     '</li>';
             $('.list-group').append(html);

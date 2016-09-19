@@ -51,6 +51,14 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findByModifiedBy", query = "SELECT p FROM Project p WHERE p.modifiedBy = :modifiedBy")})
 public class Project extends BaseModel{
 
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "project")
+    private Collection<ProjectUnit> projectUnitCollection;
+
 
     @Basic(optional = false)
     @Column(name = "deleted")
@@ -58,10 +66,8 @@ public class Project extends BaseModel{
     @Basic(optional = false)
     @Column(name = "active")
     private short active;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
-    private Collection<ProjectUnit> projectUnitCollection;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
 
 
     private static final long serialVersionUID = 1L;
@@ -86,13 +92,9 @@ public class Project extends BaseModel{
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-    @Column(name = "created_by")
-    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
 
     public Project() {
     }
@@ -231,20 +233,21 @@ public class Project extends BaseModel{
         this.active = active;
     }
 
-    @XmlTransient
-
-    public Collection<ProjectUnit> getProjectUnitCollection() {
-        return projectUnitCollection;
-    }
-
-    public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
-        this.projectUnitCollection = projectUnitCollection;
-    }
+    
 
     public String getPermissionName(String action){
         if(action.toUpperCase().equals("NEW")) return "create_project";
         else if(action.toUpperCase().equals("EDIT")) return "edit_project";
         else if(action.toUpperCase().equals("DELETE")) return "delete_project";
         else return "view_project";
+    }
+
+    @XmlTransient
+    public Collection<ProjectUnit> getProjectUnitCollection() {
+        return projectUnitCollection;
+    }
+
+    public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
+        this.projectUnitCollection = projectUnitCollection;
     }
 }

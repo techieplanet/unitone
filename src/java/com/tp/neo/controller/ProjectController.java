@@ -9,14 +9,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
-import com.tp.neo.model.ProjectUnit;
 
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.model.ProjectUnit;
 
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -31,7 +31,6 @@ import javax.xml.bind.PropertyException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.RollbackException;
-import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -83,8 +82,7 @@ public class ProjectController extends AppController {
         EntityManager em = emf.createEntityManager();
         Project project = em.find(Project.class, id);
             
-            Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
-            List <ProjectUnit> projectUnits =  query.getResultList();
+            List<ProjectUnit> projectUnits =  (List)project.getProjectUnitCollection();
             em.close(); emf.close();
            
             Map<Integer, Map> map = new HashMap<Integer, Map>();
@@ -92,7 +90,7 @@ public class ProjectController extends AppController {
            
             
             Map<String, String> mapSmall = new HashMap<String, String>();
-            mapSmall.put("id",projectUnits.get(i).getProjectUnitPK().getId()+"");
+            mapSmall.put("id",projectUnits.get(i).getId() + "");
             mapSmall.put("title", projectUnits.get(i).getTitle());
             mapSmall.put("cpu", projectUnits.get(i).getCpu().toString());
             mapSmall.put("lid", projectUnits.get(i).getLeastInitDep().toString());
@@ -114,7 +112,7 @@ public class ProjectController extends AppController {
     }
 
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException {        
         response.setContentType("text/html;charset=UTF-8");
     
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -139,11 +137,20 @@ public class ProjectController extends AppController {
             
             //find by ID
             int id = Integer.parseInt(stringId);
-
+            
             Project project = em.find(Project.class, id);
             
-            Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",id);
+            /**
+             * the collection is usually not updated in runtime, even after refreshing the page severally.
+             * So force a hard refresh by querying the db to get the actual set of valid elements 
+             * then use that as the valid collection
+             */
+            Query query = em.createNamedQuery("ProjectUnit.findByProject").setParameter("project", project);
             List<ProjectUnit> projectUnits = query.getResultList();
+            
+            //good to do this to put every object/entity in sync
+            project.setProjectUnitCollection(projectUnits);
+            
             
             request.setAttribute("units", projectUnits);
             request.setAttribute("project", project);
@@ -306,8 +313,7 @@ public class ProjectController extends AppController {
                 
                 
                 //get this as early as possible
-                Query query = em.createNamedQuery("ProjectUnit.findByProjectId").setParameter("projectId",project.getId());
-                projectUnits = query.getResultList();
+                projectUnits = (List)project.getProjectUnitCollection();
                 
                 //sessionUser is a class variable 
                 System.out.println("sessionUser.getSystemUserId(): " + sessionUser.getSystemUserId());

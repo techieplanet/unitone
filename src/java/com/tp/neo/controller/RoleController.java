@@ -200,7 +200,7 @@ public class RoleController extends AppController {
                 
                 validate(role);
                 
-                new TrailableManager(role).registerInsertTrailInfo((long)1);                
+                new TrailableManager(role).registerInsertTrailInfo(sessionUser.getSystemUserId());                
                 
                 em.persist(role);
                 
@@ -265,7 +265,7 @@ public class RoleController extends AppController {
                 
                 validate(role);
                 
-                new TrailableManager(role).registerUpdateTrailInfo((long)1);
+                new TrailableManager(role).registerUpdateTrailInfo(sessionUser.getSystemUserId());
                                 
                 em.getTransaction().commit();
             
@@ -291,7 +291,7 @@ public class RoleController extends AppController {
             catch(Exception e){
                 e.printStackTrace();
                 SystemLogger.logSystemIssue("Role", gson.toJson(role), e.getMessage());
-            }        
+            }
             
             //new URI(request.getHeader("referer")).getPath();
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
@@ -321,7 +321,11 @@ public class RoleController extends AppController {
         
         Role role = em.find(Role.class, id);
         em.getTransaction().begin();
+        
+        role.setActive((short)0);
+        new TrailableManager(role).registerInsertTrailInfo(sessionUser.getSystemUserId());
         em.remove(role);
+        
         em.getTransaction().commit();
 
         em.close();
