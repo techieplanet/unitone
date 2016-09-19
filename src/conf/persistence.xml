@@ -16,12 +16,17 @@
     <class>com.tp.neo.model.GenericUser</class>
     <class>com.tp.neo.model.Account</class>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <class>com.tp.neo.model.Sale_old</class>
     <class>com.tp.neo.model.Sale</class>
     <class>com.tp.neo.model.Agent</class>
     <class>com.tp.neo.model.CustomerAgent</class>
     <class>com.tp.neo.model.Order1</class>
     <class>com.tp.neo.model.SaleItem</class>
+=======
+    <class>com.tp.neo.model.ProjectUnit1</class>
+    <class>com.tp.neo.model.ProjectUnit</class>
+>>>>>>> neoforce/master
 =======
     <class>com.tp.neo.model.ProjectUnit1</class>
     <class>com.tp.neo.model.ProjectUnit</class>

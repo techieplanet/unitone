@@ -55,13 +55,10 @@ public class Project extends BaseModel{
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-<<<<<<< HEAD
-=======
+
     
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "project")
     private Collection<ProjectUnit> projectUnitCollection;
->>>>>>> neoforce/master
-
 
     @Basic(optional = false)
     @Column(name = "deleted")
@@ -253,17 +250,12 @@ public class Project extends BaseModel{
     public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
         this.projectUnitCollection = projectUnitCollection;
     }
-<<<<<<< HEAD
 
-    public String getPermissionName(String action){
-        if(action.toUpperCase().equals("NEW")) return "create_project";
-        else if(action.toUpperCase().equals("EDIT")) return "edit_project";
-        else if(action.toUpperCase().equals("DELETE")) return "delete_project";
-        else return "view_project";
-    }
+
 
     
 }
-=======
-}
->>>>>>> neoforce/master
+
+
+
+
