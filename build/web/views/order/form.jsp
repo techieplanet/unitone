@@ -1,43 +1,45 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
  <div class="row">
+    
            <div class="col-md-12">
               <!-- general form elements -->
                
                 <!-- form start -->
                <div class="box box-primary">
+               <form role="form" name="customerRegistration" method="POST" action="Order" enctype="multipart/form-data">
                 <div class="box-header with-border">
                   <h3 class="box-title">Product Order Form 
                       
                       
-                       </h3>
+                  </h3>
                 </div><!-- /.box-header -->
                 <!-- form start -->
                 <div style="background:#ecf0f5 !important;">
-                <form role="form" name="customerRegistration" method="POST" action="Customer" enctype="multipart/form-data">
+                <!--<form role="form" name="customerRegistration" method="POST" action="Order" enctype="multipart/form-data">-->
                   <div class="box-body">
-               <c:if test="${fn:length(errors) > 0 }">
-                <div class="row">
-                    <div class="col-md-12 ">
-                        <p class="bg-danger padding10" style="width:100%; margin:0 auto !important">
-                          <c:forEach items="${errors}" var="error">
-                              <c:out value="${error.value}" /><br/>
-                          </c:forEach>
-                        </p>
-                    </div>
-                </div>
-            </c:if>
-                    <c:if test="${success}">
-              <div class="row">
-                    <div class="col-md-12 ">
-                        <p class="bg-success padding10" style="width:95%">
-                          <i class="fa fa-check"></i>Saved Successfully
-                          <span class="pull-right">
-                              <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Customer">Back to list</a>
-                          </span>
-                        </p>
-                    </div>
-                </div>
-          </c:if>   
+                    <c:if test="${fn:length(errors) > 0 }">
+                        <div class="row">
+                            <div class="col-md-12 ">
+                                <p class="bg-danger padding10" style="width:100%; margin:0 auto !important">
+                                  <c:forEach items="${errors}" var="error">
+                                      <c:out value="${error.value}" /><br/>
+                                  </c:forEach>
+                                </p>
+                            </div>
+                        </div>
+                    </c:if>
+                      <c:if test="${success}">
+                          <div class="row">
+                                <div class="col-md-12 ">
+                                    <p class="bg-success padding10" style="width:95%">
+                                      <i class="fa fa-check"></i>Saved Successfully
+                                      <span class="pull-right">
+                                          <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Customer">Back to list</a>
+                                      </span>
+                                    </p>
+                                </div>
+                            </div>
+                      </c:if>   
                
                     
                   
@@ -73,9 +75,8 @@
                                             <select class="form-control select2" id="selectProduct" style="width: 100%;" onchange="getProjectUnits('${pageContext.request.contextPath}', 'Project','')" >
                                                 <option value="" selected="selected">-- choose --</option>
                                                 
-                                              <c:forEach items="${projects}" var="project" >  
-                                              
-                                              <option  value="${project.id}">${project.name}</option>
+                                              <c:forEach items="${projects}" var="project" >
+                                                <option  value="${project.id}">${project.name}</option>
                                               </c:forEach>
                                             </select>
                                         </div> 
@@ -205,20 +206,24 @@
                   
                   
                   
-                  
-                  <div class="row">
-                  <div class="col-md-12">
-                  <div class="box box-default">
-                      <input type="hidden" name="dataHidden" id="dataHidden" />
-                    <div class="row" style="padding-top:10px;">
-                    <div class="col-md-12" id="shoppingCart">
-                        
-                    	<fieldset>
-                        	<legend style="padding-left:20px !important;">Product Cart</legend>
+  <!-- 
+    *****************************************
+    Product Cart starts here
+    *****************************************
+  -->
+  <div class="row">
+  <div class="col-md-12">
+  <div class="box box-default">
+      <input type="hidden" name="dataHidden" id="dataHidden" />
+    <div class="row" style="padding-top:10px;">
+    <div class="col-md-12" id="shoppingCart">
+
+      <fieldset>
+      <legend style="padding-left:20px !important;">Product Cart</legend>
                                 
-                            <div class="col-md-11" >
-                            	<div class="row" >
-                                	  <table id="productCart" class="table table-bordered table-striped table-hover" style="text-align:right !important;">
+              <div class="col-md-11" >
+                <div class="row" >
+                 <table id="productCart" class="table table-bordered table-striped table-hover" style="text-align:right !important;">
                     <thead>
                       <tr>
                         <th>Product</th>
@@ -249,160 +254,157 @@
                        
                             
                         
-                  </tbody>
+                   </tbody>
                    
                   </table>
-                                     <div class="col-md-1 pull-right">
-                                         <div class="form-group">
-                                            <a href="#" class="btn btn-success" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i> Proceed to payment</a>
-                                        </div> 
-                                     
-                                     </div>
-                                </div>
-                                
-                                             
-                            </div>  
-                            <div class="col-md-1"></div>
-                    	</fieldset>
-                  	</div> 
+                                    
+                                    
+                 <!-- 
+                   ***************************
+                   Checkout Button starts Here
+                   ***************************
+                 -->
+                 <div class="col-md-1 pull-right">
+                     <div class="form-group">
+                        <a href="#" class="btn btn-success" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i> Proceed to payment</a>
+                    </div> 
+
+                 </div>
+                 
+                 <!--
+                  ****************************
+                    Checkout Button ends Here
+                  ****************************
+                 -->
+                     </div>
+                   </div>  
+                 <div class="col-md-1"></div>
+               </fieldset>
+              </div> 
                         
                          <div class="col-md-12" id="paymentCheckout">
                       
                     	<fieldset>
-                        	<legend style="padding-left:20px !important;">Check Out</legend>
+                        <legend style="padding-left:20px !important;">Check Out</legend>
                                 
                             <div class="col-md-11" >
                             	
-                                <div class="row" >
-                                   
-                                	<div class="col-md-12">
-                                            <span style="color:green;font-weight:bold;">You'd be paying N<span id='paySum'></span></span>
+                                <!-- Start of Payment Method Container -->
+                                <div class="row" > 
+                                    <div class="col-md-12">
+                                        <span style="color:green;font-weight:bold;">You'd be paying N<span id='paySum'></span></span>
                                     	<div class="form-group">
                                             <label for="paymentMethod">Payment method:</label><br/>
-                                           
                                             <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
                                             <input type="radio" name="paymentMethod" value="2" id="paywithcard" onclick="showNecessaryMenu(2)"/>&nbsp; <label for="paywithcard" style="display:inline !important;cursor:pointer !important;">Credit/Debit Card <img src="${pageContext.request.contextPath}/images/img/paywithcard.png" /></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             <input type="radio" name="paymentMethod" value="3" id="paywithcash" onclick="showNecessaryMenu(3)"/>&nbsp;<label for="paywithcash" style="display:inline !important;"> Cash</label>
-                                            		
-                                                </div>
                                         </div>
+                                    </div>
                                 </div>
-                                         <div class='row' id='pwBankdeposit'>
-                                             <div class="col-md-2">
+                                <!-- End of Payment Method Container -->        
+                                            
+                                <!-- Pay via Bank Deposit Div Container -->            
+                                <div class='row' id='pwBankdeposit'>
+                                    
+                                    <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="tellerNumber">Bank Name</label>
                                             <input type="text" class="form-control" id="bankName" name="bankName" style="width: 100%;">
                                         </div> 
                                     </div>
-                                             <div class="col-md-2">
+                                    
+                                    <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="tellerNumber">Depositor's Name</label>
                                             <input type="text" class="form-control" id="depositorsName" name="depositorsName" style="width: 100%;">
                                         </div> 
                                     </div>
-                                	<div class="col-md-2">
+                                    
+                                    <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="tellerNumber">Teller Number</label>
                                             <input type="text" class="form-control" id="tellerNumber" name="tellerNumber" style="width: 100%;">
                                         </div> 
                                     </div>
                              
-                                
-                                
-                                
-                                	<div class="col-md-2">
+                                    <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="tellerAmount">Amount</label>
                                             <input type="text" class="form-control" id="tellerAmount" name="tellerAmount" style="width: 100%;">
-                                        </div> 
-                                            
+                                        </div>      
                                     </div>
-                                             <div class="col-md-2">
-                                    	<div class="form-group" style="padding-top:25px !important;">
-                                        
-                                            <input type="submit"  name="Pay" class="btn btn-success" value="Pay with Bank Deposit"/>
-                                        </div> 
-                                            
-                                    </div>
-                                             
-                                             
-                                    	
-                                            
-                                        
                                     
-                                             
-                                             
-                                         </div>
-                                            
-                                            <div class='row' id='pwCash'>
-                                	
-                             
+                                    <div class="col-md-2">
+                                    	<div class="form-group" style="padding-top:25px !important;">
+                                            <input type="submit"  name="Pay" class="btn btn-success" value="Pay with Bank Deposit"/>
+                                        </div>      
+                                    </div>
+                                    
+                                </div>
+                                <!-- End of Pay Via Bank Deposit Div Container -->
                                 
                                 
-                                	<div class="col-md-2">
+                                <!-- Pay with Cash Div Container -->
+                                <div class='row' id='pwCash'>
+                                    <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="cashAmount">Amount</label>
                                             <input type="text" class="form-control" id="cashAmount" name="cashAmount" style="width: 100%;">
-                                        </div> 
-                                            
+                                        </div>      
                                     </div>
-                                             <div class="col-md-2">
+                                    <div class="col-md-2">
                                     	<div class="form-group" style="padding-top:25px !important;">
-                                           
                                             <input type="submit"  name="Pay" class="btn btn-success" value="Pay with cash" style="vertical-align:bottom !important;"/>
-                                        </div> 
-                                            
+                                        </div>      
                                     </div>
-                                             
-                                             
-                                    	
-                                            
-                                        
-                                    
-                                             
-                                             
-                                         </div>
-                                            
+                                </div>
+                                <!-- End of Pay with Cash Div Container -->
+                                
+                                 <!-- Pay with Card Div Container -->
                                 <div class='row' id='pwCard'>
                                 	<div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="tellerNumber">Click to proceed to payment</label>
-<!--                                        <a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
-                                            --> <button type="submit"  name="Pay" class="btn btn-success"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
-                                        </div> 
-                                    </div>
-                             
-                                
-                                	
-                                    </div>
-                                             
-                                         </div>
-                                            </div>
+                                            <div class="form-group">
+                                                <label for="tellerNumber">Click to proceed to payment</label>
+    <!--                                        <a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
+                                                --> <button type="submit"  name="Pay" class="btn btn-success"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
+                                            </div> 
                                         </div>
+                                </div>
+                                <!-- End of Pay with Cash Div Container -->
+                                             
+                              </div>
+                             </div>
+                            </div>
                                  
                             <div class="col-md-1"></div>
                     	</fieldset>
                   	</div> <!--/.col-md-12 -->
                  	</div> <!--/.row -->
                   </div> <!--/.box box-default -->
-                  </div> <!---/.col-md-4 -->
-                  
+           
+          <!-- 
+            *****************************************
+            Product Cart Ends here
+            *****************************************
+          -->
+          
+      </div> <!---/.col-md-4 Box-Body class div ends here -->
 
-
-                  </div><!-- /.row -->
+      </div><!-- /.row -->
               
-                    <input type="hidden" name="customer_id" id="id" value="${customer.customerId}">
-                        <input type="hidden" name="id" id="id" value="${customer.customerId}">
-                  <div class="box-footer" style="background-color:transparent;">
-                      <input type="submit" class="btn btn-primary" name="customerCreate" value="Save"/>
-                  </div>
-                  </form>
-                </div>
-                
-              </div><!-- /.box -->
-              </div><!-- /.box -->
-            </div>
-          </div>   <!-- /.row -->
+      <input type="hidden" name="customer_id" id="id" value="${customerId}">
+      <input type="hidden" name="id" id="id" value="${customerId}">
+      <input type="hidden" name="cartDataJson" id="cartDataJson" />
+      <div class="box-footer" style="background-color:transparent;">
+          <input type="submit" class="btn btn-primary" name="customerCreate" value="Save"/>
+      </div>
+      </form>
+    </div>
+
+  </div><!-- /.box -->
+  </div><!-- /.box -->
+</div>
+</div>   <!-- /.row -->
 <!--MODAL-->
       <div class="modal fade" id="deleteModalCart" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
          <div class="vertical-alignment-helper">

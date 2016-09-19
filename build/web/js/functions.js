@@ -6,6 +6,8 @@
 
 
 /* global data */
+var cartArray = []; // holds cart item objects
+
 /*TP: ondocument ready actions to be performed*/
  $( document ).ready(function() {
         $( "#pwBankdeposit").hide();
@@ -55,7 +57,8 @@ function deleteEntity(appName, entityName, id){
 
 
 /*TP: client side cidation of the required fields*/
-function checkFormRequired(){4
+function checkFormRequired(){
+    
    var paymentMethod = $("#paymentMethod").val();
    
    //bank payment method;
@@ -206,20 +209,20 @@ function addToCart(event){
   var productId = $("#selectProduct").val();
   var productUnitName = $("#selectUnit :selected").text();
   var productUnitId = $("#selectUnit").val();
-  var productQuantity = $("#selectQuantity").val();
-  var productAmount = $("#productAmount").val();
-  var amountUnit = $("#amountUnit").text();
-  var amountTotalUnit = $("#amountTotalUnit").text();
-  var initialAmountPerUnit = $("#initialAmountPerUnit").text();
-  var minInitialAmountSpan = $("#minInitialAmountSpan").text();
-  var productMinimumInitialAmount = $("#productMinimumInitialAmount").val();
-  var amountLeft = $("#amountLeft").val();
-  var payDurationPerUnit = $("#payDurationPerUnit").text();
-  var payDurationPerQuantity = $("#payDurationPerQuantity").text();
-  var productMaximumDuration = $("#productMaximumDuration").val();
+  var productQuantity = $("#selectQuantity").val(); //Product Quantity (Quantity)
+  var productAmount = $("#productAmount").val(); //Cost Per Unit * Qty
+  var amountUnit = $("#amountUnit").text(); // Cost Per Unit {Inside Span}
+  var amountTotalUnit = $("#amountTotalUnit").text(); //Cost Per Unit  * Qty {Inside Span}
+  var initialAmountPerUnit = $("#initialAmountPerUnit").text(); // least deposit Per Unit
+  var minInitialAmountSpan = $("#minInitialAmountSpan").text(); // Least deposit per Unit * Qty
+  var productMinimumInitialAmount = $("#productMinimumInitialAmount").val(); // First deposited amount(Initial_Deposit)
+  var amountLeft = $("#amountLeft").val(); // Amount to be completed/Serviced
+  var payDurationPerUnit = $("#payDurationPerUnit").text(); // Pay Duration Per Unit
+  var payDurationPerQuantity = $("#payDurationPerQuantity").text(); // Pay Duration Per Unit * Qty
+  var productMaximumDuration = $("#productMaximumDuration").val(); //Product Max Pay Duration
   var monthlyPayPerUnit = $("#monthlyPayPerUnit").text();
   var monthlyPayPerQuantity = $("#monthlyPayPerQuantity").text();
-  var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val();
+  var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
   
   //alert(productName+" "+productId+" "+productUnitName+" "+productUnitId+" "+productQuantity);
   
@@ -231,15 +234,31 @@ function addToCart(event){
   var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuanity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
   productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment}
+  
+  /**
+   * 
+   * Push Cart item Object into cart array,
+   * Stringify cart item Object and insert into cart table column with  id {tr<id>}
+   * where <id> is the position of the cart row in the table.
+   */
+  
+  var cartItemObject = dataArray;
   var jsonData = JSON.stringify(dataArray);
-  //alert(jsonData);
-  var id = $('#productCart tr:last').attr('id');
+  
+  var id = $('#productCart tr:last').attr('id'); // Get the id of the last row in the cart table
+  
   if(id == null){
       id = 0;
   }
   if(id < 1 || isNaN(id)){
       id = 0;
   }
+  
+  /**
+   * Check if the user clicked the cart item edit button,
+   * so as to replace the edited item, with the item presently
+   * in the cart.
+   */ 
   
   if($("#editMode").val()=="" || $("#editMode").val()== null){
           var newId = parseInt(id) + 1;
@@ -270,15 +289,15 @@ function addToCart(event){
       //alert($("#editMode").val());
     //$("#" + id).html();
       $("#productCart tbody").focus();
-         if($("#editMode").val()==""){
-          //no be edit mode
-         // alert("This is where the data is lauched into the database");
-       $("#productCart tbody").append(dataTr);
-      }else{
-          //alert("We do update the padi padi here");
-          //na edit mode we dey
-          
+      if($("#editMode").val() == "")
+      {  
+          $("#productCart tbody").append(dataTr);
+          cartArray.push(cartItemObject);
+      }
+      else
+      {
           $("tr#"+newId).replaceWith(dataTr);
+          cartArray[newId - 1] = cartItemObject;
       }
       
       $('#'+newId + ',#'+newId + ' td').addClass("adding",1000,"easeInOutBack");
@@ -459,6 +478,7 @@ function deleteDataFromCart(id){
        $('#'+id + ',#'+id + ' td').addClass("deleting");
        $('#'+id).fadeOut(1000); 
        $("tr#"+id).remove();
+       cartArray.splice(id -1, 1);
        calculateSum();
     
     $("#productCart tbody").focus();
@@ -492,18 +512,29 @@ function checkOutOfCart(){
         return false;
     }
     $('#productCart > tbody').focus();
-    var cartDataArray = [];
+    var cartDataArray = {};
      var data = new Array();
        var dataArray  = "";
        var id = "";
        var dataCenter = [];
+       var i = 0;
     $('#productCart > tbody  > tr').each(function() {
           id = $(this).attr("id");
-         dataArray =$("#tr"+id).val();
-         cartDataArray.push(dataArray);
+         dataArray = $("#tr"+id).val();
+         //dataCenter.push(dataArray);
          
     });
-    alert(cartDataArray);
+    
+    cartDataArray.sales = cartArray;
+    console.log(JSON.stringify(cartDataArray));
+    
+    var cartDataArrays = JSON.stringify(cartDataArray);
+    
+//    cartDataArrays = cartDataArrays.replace('"{','{');
+//    cartDataArrays = cartDataArrays.replace('}"','}');
+//    cartDataArrays = cartDataArrays.replace('"sales"','sales');
+    $("#cartDataJson").val(cartDataArrays);
+    alert(cartDataArrays);
     $("#paymentCheckout:hidden").toggle();
     $("#shoppingCart:visible").toggle();
     

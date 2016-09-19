@@ -69,9 +69,8 @@
                                 <td>
                                     <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
                                      
-                                     <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
-                                    
-                                   
+                                    <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                                      
                                 </td>
                             </tr>
                         </c:forEach>

@@ -126,8 +126,8 @@
                              <div class="row text-center" id="imgholder">
                         <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
                             <div class="form-group text-center">
-                              <img <c:if test="${customer.photoPath != null}"> src="${pageContext.request.contextPath}/images/uploads/customers/${customer.photoPath}" </c:if>
-                               <c:if test="${customer.photoPath == null}"> src="${pageContext.request.contextPath}/images/img/avatar.png"
+                              <img <c:if test="${customer.photoPath != null && customer.photoPath != "default"}"> src="${pageContext.request.contextPath}/images/uploads/customers/${customer.photoPath}" </c:if>
+                               <c:if test="${customer.photoPath == "default"  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"
                     </c:if>
                                 class=" img-responsive text-center" style="max-height:220px !important;"/>
                             </div>
@@ -295,8 +295,9 @@
                             <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
                               <label for="customerKinPhoto" style="">Next of Kin Picture</label>
                               <c:if test="${customer.customerId != ""}"> 
-                               <img <c:if test="${customer.kinPhotoPath != null}"> src="${pageContext.request.contextPath}/images/uploads/customers/${customer.kinPhotoPath}" </c:if>
-                               
+                               <img <c:if test="${customer.kinPhotoPath != null && customer.kinPhotoPath != "default"}"> src="${pageContext.request.contextPath}/images/uploads/customers/${customer.kinPhotoPath}" </c:if>
+                               <c:if test="${customer.photoPath == "default"  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"
+                                </c:if>
                                 class="img-responsive text-center" width="50.33333333%"/>
                                 </c:if>
                                <input type="file" class="form-control" id="customerKinPhoto" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" />
