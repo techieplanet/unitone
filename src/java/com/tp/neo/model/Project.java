@@ -51,6 +51,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findByModifiedBy", query = "SELECT p FROM Project p WHERE p.modifiedBy = :modifiedBy")})
 public class Project extends BaseModel{
 
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+
 
     @Basic(optional = false)
     @Column(name = "deleted")
@@ -86,13 +91,9 @@ public class Project extends BaseModel{
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-    @Column(name = "created_by")
-    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
 
     public Project() {
     }
@@ -247,4 +248,6 @@ public class Project extends BaseModel{
         else if(action.toUpperCase().equals("DELETE")) return "delete_project";
         else return "view_project";
     }
+
+    
 }

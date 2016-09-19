@@ -5,9 +5,18 @@
  */
 package com.tp.neo.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.utils.Sales;
+import com.tp.neo.model.utils.SalesItemJson;
+import com.tp.neo.model.utils.SalesObject;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -22,10 +32,12 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.annotation.MultipartConfig;
 /**
  *
  * @author John
  */
+@MultipartConfig
 @WebServlet(name = "OrderController", urlPatterns = {"/Order"})
 public class OrderController extends HttpServlet {
     private static String INSERT_OR_EDIT = "/user.jsp";
@@ -90,7 +102,7 @@ public class OrderController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        processPostRequest(request, response);
     }
 
      protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
@@ -134,5 +146,51 @@ public class OrderController extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
+        
+        Enumeration<String> formData = request.getParameterNames();
+        Enumeration<String> formAtrr = request.getAttributeNames();
+        
+        this.processJsonData(request.getParameter("cartDataJson").toString());
+        
+        String customerId = request.getParameter("Pay") != null?request.getParameter("Pay") : "No Pay";
+        System.out.println("Pay : " + customerId);
+        System.out.println("Form Elements");
+        System.out.println("****************************");
+        
+        
+        while(formData.hasMoreElements())
+        {
+            String data = formData.nextElement();
+            System.out.println(data + " : " + request.getParameter(data));
+        }
+        System.out.println("Form Attributes");
+        System.out.println("****************************");
+        while(formAtrr.hasMoreElements())
+        {
+            String attr = formAtrr.nextElement();
+            System.out.println(attr);
+            System.out.println("_____________________________________________________________");
+        }
+    }
+    
+    private void processJsonData(String json)
+    {
+        Gson gson = new GsonBuilder().create();
+        System.out.println(json);
+        String str = "{sales:[{\"productName\":\"Kali Homes\",productId:1,productUnitName:\"2 Bedroom Duplex\",productUnitId:5,productQuanity:1,productAmount:1500000,amountUnit:1500000,amountTotalUnit:1500000,initialAmountPerUnit:250000,minInitialAmountSpan:250000,productMinimumInitialAmount:250000,amountLeft:1250000,payDurationPerUnit:\"24 months\",payDurationPerQuantity:\"24 months\",productMaximumDuration:5,monthlyPayPerUnit:250000,monthlyPayPerQuantity:250000,productMinimumMonthlyPayment:250000}]}";
+        Type collectionType = new TypeToken<ArrayList<SalesObject>>(){}.getType();
+        SalesObject salesObj = gson.fromJson(json,SalesObject.class);
+        
+        ArrayList<Sales> sales = salesObj.sales;
+        
+        for(Sales s : sales) {
+            System.out.println("Product Name : " + s.productName);
+            System.out.println("Product Qty : " + s.productQuanity);
+            System.out.println("Product Amount Per Unit " + s.amountUnit);
+            System.out.println("Product Cost" + s.amountTotalUnit);
+        }
+    }
 
 }

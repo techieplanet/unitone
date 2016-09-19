@@ -1,13 +1,14 @@
 package com.tp.neo.model;
 
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Order1;
 import java.util.Date;
 import javax.annotation.Generated;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
-@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-09-14T12:41:54")
+@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-09-18T08:59:33")
 @StaticMetamodel(Agent.class)
 public class Agent_ { 
 
@@ -21,6 +22,7 @@ public class Agent_ {
     public static volatile SingularAttribute<Agent, Long> genericId;
     public static volatile SingularAttribute<Agent, String> kinAddress;
     public static volatile SingularAttribute<Agent, String> password;
+    public static volatile CollectionAttribute<Agent, Order1> order1Collection;
     public static volatile SingularAttribute<Agent, String> street;
     public static volatile SingularAttribute<Agent, Long> modifiedBy;
     public static volatile SingularAttribute<Agent, String> state;
@@ -35,9 +37,9 @@ public class Agent_ {
     public static volatile SingularAttribute<Agent, String> lastname;
     public static volatile SingularAttribute<Agent, Short> deleted;
     public static volatile SingularAttribute<Agent, Date> createdDate;
+    public static volatile SingularAttribute<Agent, Long> createdBy;
     public static volatile CollectionAttribute<Agent, Customer> customerCollection;
     public static volatile SingularAttribute<Agent, String> phone;
-    public static volatile SingularAttribute<Agent, Long> createdBy;
     public static volatile SingularAttribute<Agent, Date> modifiedDate;
 
 }

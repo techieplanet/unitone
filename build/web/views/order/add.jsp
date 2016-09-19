@@ -12,7 +12,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Customers
+              <a href="#">Customers</a>
           </h1>
         </section>
 

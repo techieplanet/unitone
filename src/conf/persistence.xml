@@ -6,7 +6,6 @@
     <class>com.tp.neo.model.Customer</class>
     <!--<class>com.tp.neo.model.CustomerAgent</class>-->
     <class>com.tp.neo.model.Lodgement</class>
-    <class>com.tp.neo.model.Sale</class>
     <class>com.tp.neo.model.Project</class>
     <class>com.tp.neo.exception.ExceptionLog</class>
     <class>com.tp.neo.model.Permission</class>
@@ -17,6 +16,12 @@
     <class>com.tp.neo.model.Auditlog</class>
     <class>com.tp.neo.model.GenericUser</class>
     <class>com.tp.neo.model.Account</class>
+    <class>com.tp.neo.model.Sale_old</class>
+    <class>com.tp.neo.model.Sale</class>
+    <class>com.tp.neo.model.Agent</class>
+    <class>com.tp.neo.model.CustomerAgent</class>
+    <class>com.tp.neo.model.Order1</class>
+    <class>com.tp.neo.model.SaleItem</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/xforce"/>

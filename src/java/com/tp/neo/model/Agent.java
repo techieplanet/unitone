@@ -66,6 +66,13 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy")})
 public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
 
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
+    private Collection<Order1> order1Collection;
+
     @Basic(optional = false)
     @Column(name = "generic_id")
     private long genericId;
@@ -131,15 +138,9 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-    @Column(name = "created_by")
-    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
-//    private Collection<CustomerAgent> customerAgentCollection;
 
     //Extra
     transient final Integer USERTYPEID = 2;
@@ -448,6 +449,19 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
 
     public void setCustomerCollection(Collection<Customer> customerCollection) {
         this.customerCollection = customerCollection;
+    }
+
+    
+
+    
+
+    @XmlTransient
+    public Collection<Order1> getOrder1Collection() {
+        return order1Collection;
+    }
+
+    public void setOrder1Collection(Collection<Order1> order1Collection) {
+        this.order1Collection = order1Collection;
     }
 
     
