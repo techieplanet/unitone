@@ -3,15 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/dev/JPA/NeoForce/web/views/agent/admin.jsp</file>
-            <file>file:/C:/dev/JPA/NeoForce/web/views/agent/form.jsp</file>
-            <file>file:/C:/dev/JPA/NeoForce/web/views/user/form.jsp</file>
-            <file>file:/C:/dev/JPA/NeoForce/web/views/agent/add.jsp</file>
-            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/controller/AgentController.java</file>
-            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/controller/LoginController.java</file>
-            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/controller/UserController.java</file>
-            <file>file:/C:/dev/JPA/NeoForce/src/java/com/tp/neo/controller/components/AppController.java</file>
-            <file>file:/C:/dev/JPA/NeoForce/web/views/agent/waiting.jsp</file>
+            <file>file:/Users/mac/dev/javaee/NeoForce/src/java/com/tp/neo/controller/UserController.java</file>
         </group>
     </open-files>
 </project-private>
