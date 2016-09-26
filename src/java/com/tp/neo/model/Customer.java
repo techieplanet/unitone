@@ -402,5 +402,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         this.order1Collection = order1Collection;
     }
 
+
+
     
 }

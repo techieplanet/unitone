@@ -12,7 +12,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-              <a href="#">Customers</a>
+              <a href="#">New order</a>
           </h1>
         </section>
 
@@ -42,5 +42,13 @@
       $(function () {
         //Add text editor
         $("#compose-textarea").wysihtml5();
+        
+        $("#agentList").DataTable({
+                "autoWidth": false,
+                "columnDefs": [
+                    { "sortable": false, "width":"50px", "targets": 4 }
+                ],
+                "pageLength": 10
+        });
       });
     </script>

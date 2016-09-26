@@ -1,4 +1,110 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+
+<c:if test="${userType != null && userType == 1 }">
+ <div class="row" id="agentListContainer">
+     
+     <section class="content-header">
+         
+         
+         <div class="box">
+                <div class="box-header">
+                  <h3 class="box-title block">
+                      Select an agent
+                  </h3>
+                </div><!-- /.box-header -->
+                
+                 <div class="box-body">
+                  <table id="agentList" class="table table-bordered table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>Photo</th>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Middle Name</th>
+                        <th>Last Name</th>
+                        <th>Phone No</th>
+                        <th>Email</th>
+                        <th>State</th>
+                        <th>Action</th>
+                        
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach items="${agents}" var="agent">
+                            <tr id='row<c:out value="${agent.agentId}" />'>
+                                <td><img alt="No Image" class="img-responsive img-thumbnail" src="<c:out value='${agent.photoPath}'></c:out>" /></td>
+                                <td class="agentId"><c:out value="${agent.agentId}" /></td>
+                                <td class="agentFname"><c:out value="${agent.firstname}" /></td>
+                                <td class="agentMname"><c:out value="${agent.middlename}" /></td>
+                                <td class="agentLname"><c:out value="${agent.lastname}" /></td>
+                                <td class="agentPhone"><c:out value="${agent.phone}" /></td>
+                                <td class="agentEmail"><c:out value="${agent.email}" /></td>
+                                <td class="agentState"><c:out value="${agent.state}" /></td>
+                              
+                                <td>
+                                    <input type="hidden" class="agentImg" value='<c:out value="${agent.photoPath}"></c:out>' />
+                                    <a class="btn btn-primary" href="#" onclick="selectAgent('${agent.agentId}')" role="button">Select</a>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                  </tbody>
+                    <tfoot>
+                    
+                    </tfoot>
+                  </table>
+                  <div><span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span></div>
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+         
+     </section>
+     
+ </div>
+                                
+ <div class="row" id="agentSpinnerContainer" style='display:none'>
+     <div class="spinner" >
+         <img class='img-responsive' src="${pageContext.request.contextPath}/images/uploadProgress.gif" style="margin: 10px auto" />
+     </div>
+ </div>
+     
+ <div class="row" id="agentDetailContainer"  style='display:none'>
+     
+     <div class="col-md-6 pull-right">
+         
+         <div class="box box-solid">
+             
+             <div class="box-header with-border">
+                 <h3 class="box-title">Agent Details</h3>
+             </div>
+             
+             <div class="box-body ">
+                 
+                 <div class="row">
+                     
+                     <div class="col-md-3">
+                         <img src="" alt="No image" />
+                     </div>
+                     
+                     <div class="col-md-9">
+                         <span class="agent_name"></span><br/>
+                         <span class="agent_moible"></span><br/>
+                         <span class="agent_state"></span>
+                     </div>
+                     
+                 </div>
+                 
+             </div>
+             
+             <div class="box-footer">
+                 <a href="#" onclick="showAgentList()">Show agent List<<</a>
+             </div>
+             
+         </div>
+         
+     </div>
+     
+ </div>
+                                
+</c:if>                                   
  <div class="row">
     
            <div class="col-md-12">
@@ -308,14 +414,14 @@
                                     
                                     <div class="col-md-2">
                                     	<div class="form-group">
-                                            <label for="tellerNumber">Bank Name</label>
+                                            <label for="bankName">Bank Name</label>
                                             <input type="text" class="form-control" id="bankName" name="bankName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
                                     <div class="col-md-2">
                                     	<div class="form-group">
-                                            <label for="tellerNumber">Depositor's Name</label>
+                                            <label for="depositorsName">Depositor's Name</label>
                                             <input type="text" class="form-control" id="depositorsName" name="depositorsName" style="width: 100%;">
                                         </div> 
                                     </div>
@@ -403,8 +509,7 @@
 
   </div><!-- /.box -->
   </div><!-- /.box -->
-</div>
-</div>   <!-- /.row -->
+
 <!--MODAL-->
       <div class="modal fade" id="deleteModalCart" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
          <div class="vertical-alignment-helper">
@@ -425,3 +530,15 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
+      
+   
+      
+<script>
+    
+    $(function(){
+       
+       $("#agentSpinnerContainer:visible").toggle();
+       $("#agentDetailContainer:visible").toggle();
+    });
+    
+</script>

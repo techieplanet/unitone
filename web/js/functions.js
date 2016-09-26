@@ -20,8 +20,112 @@ var cartArray = []; // holds cart item objects
        
         calculateSum();
     });
+
+/**
+ * These functions are for the Order Page views/form
+ */
+
+function selectAgent(id)
+{
     
-  
+   var row = $("#agentList tbody #row"+id);
+   
+   var id = $(row).find(".agentId").text();
+   var fname = $(row).find(".agentFname").text();
+   var mName = $(row).find(".agentMname").text();
+   var lName = $(row).find(".agentLname").text();
+   var phoneNo = $(row).find(".agentPhone").text();
+   var email = $(row).find(".agentEmail").text();
+   var state = $(row).find(".agentState").text();
+   var photo = $(row).find(".agentImg").val();
+   
+   
+   var fullname = lName + " " + fname + " " + mName;
+   $("#agentDetailContainer .agent_name").text(fullname.trim());
+   $("#agentDetailContainer .agent_moible").text(phoneNo);
+   $("#agentDetailContainer .agent_state").text(state);
+   
+   $("#agentListContainer").toggle();
+   $("#agentSpinnerContainer").toggle();
+    setTimeout(function()
+    {
+        $("#agentSpinnerContainer").toggle();
+        $("#agentDetailContainer").toggle();
+    },1500);
+}
+
+function showAgentList()
+{
+    $("#agentDetailContainer").toggle();
+    $("#agentSpinnerContainer").toggle();
+    
+    setTimeout(function()
+    {
+        $("#agentSpinnerContainer").toggle();
+        $("#agentListContainer").toggle();
+    },1500);
+}
+
+function showSelectedAgent()
+{
+    $("#agentListContainer").toggle();
+   $("#agentSpinnerContainer").toggle();
+    setTimeout(function()
+    {
+        $("#agentSpinnerContainer").toggle();
+        $("#agentDetailContainer").toggle();
+    },3000);
+}
+
+// Order Page View functions ends here
+
+/**
+ * 
+ * These functions are for the customer page add new customer section
+ */
+
+    function showNextStep()
+    {
+        $("#step1").toggle();
+        $("#step2").toggle();
+        
+        return false;
+    }
+    
+    function showOrderProduct()
+    {
+        var proceed = validateCustomerRegForm();
+        
+        if(proceed == false)
+        {
+            return false;
+        }
+        
+        $("#step1").css("display","none");
+        $("#step2").css("display","block");
+        
+        $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-2").removeClass('btn-default').addClass('btn-primary');
+        $("#process-step-2").removeAttr('disabled');
+        $("#process-step-3").removeClass('btn-primary').addClass('btn-default');
+        
+        return false;
+    }
+    
+    function showCustomerReg()
+    {
+        $("#step1").css("display","block");
+        $("#step2").css("display","none");
+        
+        $("#process-step-1").removeClass('btn-default').addClass('btn-primary');
+        $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-3").removeClass('btn-primary').addClass('btn-default');
+        
+        return false;
+    }
+
+
+
 /**
  * 
  * a generic method for sending an ajax delete request to the controller for entity name
@@ -539,7 +643,9 @@ function checkOutOfCart(){
     $("#shoppingCart:visible").toggle();
     
     
-    
+    $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
+    $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
+    $("#process-step-3").removeClass('btn-default').removeAttr('disabled').addClass('btn-primary');
     
    
     return false;
@@ -762,23 +868,20 @@ resetForm();
            alert(data);
            var resp = JSON.parse(data);
            $('#selectUnit').empty();
-           $('#selectUnit').append($('<option>', {
-    value: "",
-    text: "-- choose --"
-}));
+           $('#selectUnit').append($('<option>', {value: "",text: "-- choose --"}));
 
            $.each( resp, function( key, value ) {
-              // $('#selectUnit').empty();
-              //alert(value);
-        
-               $('#selectUnit').append($('<option>', {
-    value: value.id,
-    text: value.title,
-    
-    
-}));
+          // $('#selectUnit').empty();
+          //alert(value);
 
-});
+           $('#selectUnit').append($('<option>', {
+            value: value.id,
+            text: value.title,
+
+
+        }));
+
+        });
 
            console.log("Loading project Units Successful");
 
@@ -1150,4 +1253,88 @@ function submitPostForm(url, formData){
            //processSubmitError(xHr.responseText);
        }
     });
+}
+
+
+/**
+ * Validate Customer Form
+ */
+
+function validateCustomerRegForm()
+{
+    var errors = [];
+    
+    if($("#customerFirstname").val().trim() == '')
+    {
+        errors.push("Please enter first name");
+    }
+    if($("#customerMiddlename").val().trim() == '')
+    {
+        errors.push("Please enter middle name");
+    }
+    if($("#customerLastname").val().trim() == '')
+    {
+        errors.push("Please enter last name");
+    }
+    if($("#customerEmail").val().trim() == '')
+    {
+        errors.push("Please enter email");
+    }
+    if($("#customerPassword").val().trim() == '')
+    {
+        errors.push("Please enter password");
+    }
+    else
+    {
+        if($("#customerPassword").val().trim() != $("#customerConfirmPassword").val().trim())
+        {
+            errors.push("Password mismatch");
+        }
+    }
+    if($("#customerStreet").val().trim() == '')
+    {
+        errors.push("Please enter street");
+    }
+    if($("#customerCity").val().trim() == '')
+    {
+        errors.push("Please enter city");
+    }
+    if($("#customerState").val().trim() == '')
+    {
+        errors.push("Please select state");
+    }
+    if($("#customerPhone").val().trim() == '')
+    {
+        errors.push("Please enter Phone Number");
+    }
+    if($("#customerKinNames").val().trim() == '')
+    {
+        errors.push("Please enter kin name");
+    }
+    if($("#customerKinPhone").val().trim() == '')
+    {
+        errors.push("Please enter kin Phone Number");
+    }
+    if($("#customerKinAddress").val().trim() == '')
+    {
+        errors.push("Please enter kin Address");
+    }
+    
+    $("#customerErrorModal .modal-body").html("");
+    
+    if(errors.length > 0)
+    {
+        var errorText = '';
+        
+        for(var key in errors){
+            var errorText = '' + errors[key] + '<br />';
+            $("#customerErrorModal .modal-body").append(errorText);
+        }
+        $("#customerErrorModal").modal();
+        return false;
+    }
+    else{
+        return true
+    }
+    
 }

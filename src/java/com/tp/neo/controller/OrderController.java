@@ -8,13 +8,21 @@ package com.tp.neo.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.Order1;
+import com.tp.neo.model.ProjectUnit;
+import com.tp.neo.model.SaleItem;
 import com.tp.neo.model.utils.Sales;
 import com.tp.neo.model.utils.SalesObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -24,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -32,6 +41,7 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.HttpSession;
 /**
  *
  * @author John
@@ -114,8 +124,22 @@ public class OrderController extends HttpServlet {
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         String customerId = request.getParameter("customer") != null ? request.getParameter("customer") : "";
         customerId = customerId.trim();
+        
         ProjectController project = new ProjectController();
         CustomerController customer = new CustomerController();
+        AgentController agent = new AgentController();
+        
+        
+        HttpSession session = request.getSession();
+        SystemUser user = (SystemUser)session.getAttribute("user");
+        
+        if(user != null)
+        {
+            int userType = user.getSystemUserTypeId();
+            request.setAttribute("userType", userType);
+            request.setAttribute("agents",agent.listAgents());
+        }
+        
         
         //Project listprojects = project.listProjects();
         if (action.equalsIgnoreCase("new")){
@@ -147,39 +171,17 @@ public class OrderController extends HttpServlet {
     }// </editor-fold>
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
-        
-        Enumeration<String> formData = request.getParameterNames();
-        Enumeration<String> formAtrr = request.getAttributeNames();
-        
-        this.processJsonData(request.getParameter("cartDataJson").toString());
-        
-        String customerId = request.getParameter("Pay") != null?request.getParameter("Pay") : "No Pay";
-        System.out.println("Pay : " + customerId);
-        System.out.println("Form Elements");
-        System.out.println("****************************");
-        
-        
-        while(formData.hasMoreElements())
-        {
-            String data = formData.nextElement();
-            System.out.println(data + " : " + request.getParameter(data));
-        }
-        System.out.println("Form Attributes");
-        System.out.println("****************************");
-        while(formAtrr.hasMoreElements())
-        {
-            String attr = formAtrr.nextElement();
-            System.out.println(attr);
-            System.out.println("_____________________________________________________________");
-        }
+       
+        SalesObject salesObj = this.processJsonData(request.getParameter("cartDataJson").toString());
+        //this.createOrder(request, salesObj);
     }
     
-    private void processJsonData(String json)
+    private SalesObject processJsonData(String json)
     {
         Gson gson = new GsonBuilder().create();
         System.out.println(json);
-        String str = "{sales:[{\"productName\":\"Kali Homes\",productId:1,productUnitName:\"2 Bedroom Duplex\",productUnitId:5,productQuanity:1,productAmount:1500000,amountUnit:1500000,amountTotalUnit:1500000,initialAmountPerUnit:250000,minInitialAmountSpan:250000,productMinimumInitialAmount:250000,amountLeft:1250000,payDurationPerUnit:\"24 months\",payDurationPerQuantity:\"24 months\",productMaximumDuration:5,monthlyPayPerUnit:250000,monthlyPayPerQuantity:250000,productMinimumMonthlyPayment:250000}]}";
-        Type collectionType = new TypeToken<ArrayList<SalesObject>>(){}.getType();
+        //String str = "{sales:[{\"productName\":\"Kali Homes\",productId:1,productUnitName:\"2 Bedroom Duplex\",productUnitId:5,productQuanity:1,productAmount:1500000,amountUnit:1500000,amountTotalUnit:1500000,initialAmountPerUnit:250000,minInitialAmountSpan:250000,productMinimumInitialAmount:250000,amountLeft:1250000,payDurationPerUnit:\"24 months\",payDurationPerQuantity:\"24 months\",productMaximumDuration:5,monthlyPayPerUnit:250000,monthlyPayPerQuantity:250000,productMinimumMonthlyPayment:250000}]}";
+        //Type collectionType = new TypeToken<ArrayList<SalesObject>>(){}.getType();
         SalesObject salesObj = gson.fromJson(json,SalesObject.class);
         
         ArrayList<Sales> sales = salesObj.sales;
@@ -190,6 +192,141 @@ public class OrderController extends HttpServlet {
             System.out.println("Product Amount Per Unit " + s.amountUnit);
             System.out.println("Product Cost" + s.amountTotalUnit);
         }
+        
+        return salesObj;
+    }
+    
+    
+    private void createOrder(HttpServletRequest request, SalesObject sales)
+    {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Order1 order = new Order1();
+    }   
+    
+    
+    private void createSales(HttpServletRequest request, SalesObject salesObject, EntityManager em, Order1 order, Agent agent)
+    {
+        /**
+         * Loop through each of the sales item
+         * create a sale record, and get the sale id
+         * create a new lodgement for the sale.
+         **/
+    }
+    
+    private void lodgePayment(HttpServletRequest request, EntityManager em, SaleItem saleItem, Agent agent)
+    {
+        
+    }
+    
+//    private void createOrder(HttpServletRequest request, SalesObject sales)
+//    {
+//        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+//        EntityManager em = emf.createEntityManager();
+//        
+//        HttpSession session = request.getSession();
+//        SystemUser user = (SystemUser)session.getAttribute("user");
+//        
+//        Long customerId = Long.parseLong(request.getParameter("customer_id"));
+//        Long agentId = user.getSystemUserId();
+//        //int userType = user.getSystemUserTypeId();
+//        
+//        //Check if user is an Agent
+//        
+//        Order1 order = new Order1();
+//        
+//        Agent agent = em.find(Agent.class, new Long(1));
+//        Customer customer  = em.find(Customer.class, customerId);
+//        
+//        //Prepare Order Entity
+//        order.setAgentId(agent);
+//        order.setCustomerId(customer);
+//        
+//        
+//        
+//        // Begin Transaction
+//        em.getTransaction().begin();
+//        
+//        System.out.println("Transaction Begined");
+//        
+//        em.persist(order);
+//        em.flush();
+//        System.out.println("Transaction flushed");
+//        this.insertSales(request, sales, em, order, agent);
+//        System.out.println("About to commit");
+//        em.getTransaction().commit();
+//        
+//    }
+//    
+//    private void insertSales(HttpServletRequest request, SalesObject salesObject, EntityManager em, Order1 order, Agent agent)
+//    {
+//        ArrayList<Sales> sales = salesObject.sales;
+//        Date date = this.getDateTime();
+//        
+//        for(Sales sale : sales) {
+//            
+//            SaleItem saleItem = new SaleItem();
+//            
+//            long unitId = sale.productUnitId;
+//            ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
+//            
+//            
+//            saleItem.setOrderId(order);
+//            saleItem.setUnitId(projectUnit);
+//            saleItem.setQuantity(sale.productQuanity);
+//            saleItem.setInitialDep(sale.productMinimumInitialAmount);
+//            saleItem.setDiscountAmt(projectUnit.getDiscount());
+//            saleItem.setDiscountPercentage(projectUnit.getCommissionPercentage());
+//            saleItem.setCreatedBy(agent.getAgentId());
+//            saleItem.setCreatedDate(date);
+//            
+//            em.persist(saleItem);
+//            em.flush();
+//            this.lodgePayment(request, em, saleItem, agent);
+//        }
+//        
+//    }
+//    
+//    
+//    private void lodgePayment(HttpServletRequest request, EntityManager em, SaleItem saleItem, Agent agent)
+//    {
+//        Lodgement lodgement = new Lodgement();
+//        Short paymentMethod = Short.parseShort(request.getParameter("paymentMethod"));
+//        
+//        System.out.println("Sale Id : " + saleItem.getSaleId());
+//       
+//        lodgement.setPaymentMode(paymentMethod);
+//        lodgement.setCreatedDate(this.getDateTime());
+//        lodgement.setCreatedBy(agent.getAgentId());
+//        lodgement.setSale(saleItem);
+//        
+//        if(paymentMethod == 1)
+//        {
+//            lodgement.setBankName(request.getParameter("bankName"));
+//            lodgement.setDepositorsName(request.getParameter("depositiorsName"));
+//            lodgement.setTellerNo(request.getParameter("tellerNumber"));
+//            lodgement.setAmount(Double.parseDouble(request.getParameter("tellerAmount")));
+//            
+//        }
+//        else if(paymentMethod == 2)
+//        {
+//            lodgement.setAmount(Double.parseDouble(request.getParameter("cashAmount")));
+//            
+//        }
+//        else
+//        {
+//            
+//        }
+//        
+//        em.persist(lodgement);
+//    }
+    
+    private Date getDateTime()
+    {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        Date date = calendar.getTime();
+        return date;
     }
 
 }

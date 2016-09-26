@@ -7,7 +7,7 @@ import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
-@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-09-19T10:54:10")
+@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-09-26T09:53:44")
 @StaticMetamodel(SaleItem.class)
 public class SaleItem_ { 
 
@@ -20,9 +20,9 @@ public class SaleItem_ {
     public static volatile SingularAttribute<SaleItem, Date> datetime;
     public static volatile SingularAttribute<SaleItem, Short> deleted;
     public static volatile SingularAttribute<SaleItem, Date> createdDate;
-    public static volatile SingularAttribute<SaleItem, Integer> createdBy;
+    public static volatile SingularAttribute<SaleItem, Long> createdBy;
     public static volatile SingularAttribute<SaleItem, Date> modifiedDate;
     public static volatile SingularAttribute<SaleItem, ProjectUnit> unitId;
-    public static volatile SingularAttribute<SaleItem, Integer> modifiedBy;
+    public static volatile SingularAttribute<SaleItem, Long> modifiedBy;
 
 }

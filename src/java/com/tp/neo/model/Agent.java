@@ -464,5 +464,23 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
         this.order1Collection = order1Collection;
     }
 
+//    public Integer getCreatedBy() {
+//        return createdBy;
+//    }
+//
+//    public void setCreatedBy(Integer createdBy) {
+//        this.createdBy = createdBy;
+//    }
+//
+//    public Integer getModifiedBy() {
+//        return modifiedBy;
+//    }
+//
+//    public void setModifiedBy(Integer modifiedBy) {
+//        this.modifiedBy = modifiedBy;
+//    }
+
+
+
     
 }

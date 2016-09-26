@@ -21,7 +21,7 @@ public class Sales {
     public float amountTotalUnit;
     public float initialAmountPerUnit;
     public float minInitialAmountSpan;
-    public float productMinimumInitialAmount;
+    public Double productMinimumInitialAmount;
     public float amountLeft;
     public String payDurationPerUnit;
     public String payDurationPerQuantity;

@@ -6,20 +6,28 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -43,8 +51,16 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "SaleItem.findByModifiedBy", query = "SELECT s FROM SaleItem s WHERE s.modifiedBy = :modifiedBy")})
 public class SaleItem implements Serializable {
 
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "saleitem")
+//    private Collection<Lodgement> lodgementCollection;
+
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "sale_id")
     private Long saleId;
@@ -72,15 +88,11 @@ public class SaleItem implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     
-    @Column(name = "created_by")
-    private Integer createdBy;
     
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     
-    @Column(name = "modified_by")
-    private Integer modifiedBy;
     
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
@@ -88,10 +100,7 @@ public class SaleItem implements Serializable {
     
     
     @ManyToOne(optional = false)
-    @JoinColumns({
-    @JoinColumn(name = "unit_id", referencedColumnName = "project_id"),
     @JoinColumn(name = "unit_id", referencedColumnName = "id")
-    })
     protected ProjectUnit unitId;
     
     
@@ -167,11 +176,11 @@ public class SaleItem implements Serializable {
         this.createdDate = createdDate;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -183,11 +192,11 @@ public class SaleItem implements Serializable {
         this.modifiedDate = modifiedDate;
     }
 
-    public Integer getModifiedBy() {
+    public Long getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(Integer modifiedBy) {
+    public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
@@ -230,6 +239,32 @@ public class SaleItem implements Serializable {
     @Override
     public String toString() {
         return "com.tp.neo.model.SaleItem[ saleId=" + saleId + " ]";
+    }
+
+//    public Integer getCreatedBy() {
+//        return createdBy;
+//    }
+//
+//    public void setCreatedBy(Integer createdBy) {
+//        this.createdBy = createdBy;
+//    }
+//
+//    public Integer getModifiedBy() {
+//        return modifiedBy;
+//    }
+//
+//    public void setModifiedBy(Integer modifiedBy) {
+//        this.modifiedBy = modifiedBy;
+//    }
+
+    @XmlTransient
+    public Collection<Lodgement> getLodgementCollection() {
+        List<Lodgement> lodgement = new ArrayList(); 
+        return lodgement;
+    }
+
+    public void setLodgementCollection(Collection<Lodgement> lodgementCollection) {
+        //this.lodgementCollection = lodgementCollection;
     }
     
 }

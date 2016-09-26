@@ -14,6 +14,7 @@ import com.tp.neo.model.Customer;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.controller.ProjectController;
+import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,6 +39,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import javax.xml.bind.PropertyException;
 
@@ -159,7 +161,7 @@ public class CustomerController extends AppController  {
                 
                
                 /**
-                 * TP:Godson why this, the check has being done on processPostRequest(),
+                 * Godson: why this, the check has being done on processPostRequest(),
                  * so if the customer_id parameter is empty, control is transfered here
                  * 
                 **/
@@ -377,11 +379,28 @@ public class CustomerController extends AppController  {
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         ProjectController project = new ProjectController();
         //Project listprojects = project.listProjects();
+        
+        AgentController agent = new AgentController();
+        
+        HttpSession session = request.getSession();
+        SystemUser user = (SystemUser)session.getAttribute("user");
+        int userTypeId = 0;
+        
+        if(user != null)
+        {
+            userTypeId = user.getSystemUserTypeId();
+        }
+        
         if (action.equalsIgnoreCase("new")){
                viewFile = CUSTOMER_NEW;
-        RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-        dispatcher.forward(request, response);
-        return;
+               request.setAttribute("userTypeId", userTypeId);
+               request.setAttribute("agents", agent.listAgents());
+               request.setAttribute("projects", project.listProjects());
+               request.setAttribute("action","new");
+               RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+               dispatcher.forward(request, response);
+               
+               return;
         }
 //        else {
 //             if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
