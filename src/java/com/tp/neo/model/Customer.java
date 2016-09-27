@@ -62,6 +62,13 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customer.findByModifiedBy", query = "SELECT c FROM Customer c WHERE c.modifiedBy = :modifiedBy")})
 public class Customer implements Serializable, ITrailable, SystemUser {
 
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<Order1> order1Collection;
+
     
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
@@ -114,13 +121,9 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-    @Column(name = "created_by")
-    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<CustomerAgent> customerAgentCollection;
 
@@ -388,6 +391,18 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public void setAgentId(Agent agentId) {
         this.agentId = agentId;
     }
+
+    
+    @XmlTransient
+    public Collection<Order1> getOrder1Collection() {
+        return order1Collection;
+    }
+
+    public void setOrder1Collection(Collection<Order1> order1Collection) {
+        this.order1Collection = order1Collection;
+    }
+
+
 
     
 }

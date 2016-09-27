@@ -6,6 +6,8 @@
 
 
 /* global data */
+var cartArray = []; // holds cart item objects
+
 /*TP: ondocument ready actions to be performed*/
  $( document ).ready(function() {
         $( "#pwBankdeposit").hide();
@@ -18,8 +20,112 @@
        
         calculateSum();
     });
+
+/**
+ * These functions are for the Order Page views/form
+ */
+
+function selectAgent(id)
+{
     
-  
+   var row = $("#agentList tbody #row"+id);
+   
+   var id = $(row).find(".agentId").text();
+   var fname = $(row).find(".agentFname").text();
+   var mName = $(row).find(".agentMname").text();
+   var lName = $(row).find(".agentLname").text();
+   var phoneNo = $(row).find(".agentPhone").text();
+   var email = $(row).find(".agentEmail").text();
+   var state = $(row).find(".agentState").text();
+   var photo = $(row).find(".agentImg").val();
+   
+   
+   var fullname = lName + " " + fname + " " + mName;
+   $("#agentDetailContainer .agent_name").text(fullname.trim());
+   $("#agentDetailContainer .agent_moible").text(phoneNo);
+   $("#agentDetailContainer .agent_state").text(state);
+   
+   $("#agentListContainer").toggle();
+   $("#agentSpinnerContainer").toggle();
+    setTimeout(function()
+    {
+        $("#agentSpinnerContainer").toggle();
+        $("#agentDetailContainer").toggle();
+    },1500);
+}
+
+function showAgentList()
+{
+    $("#agentDetailContainer").toggle();
+    $("#agentSpinnerContainer").toggle();
+    
+    setTimeout(function()
+    {
+        $("#agentSpinnerContainer").toggle();
+        $("#agentListContainer").toggle();
+    },1500);
+}
+
+function showSelectedAgent()
+{
+    $("#agentListContainer").toggle();
+   $("#agentSpinnerContainer").toggle();
+    setTimeout(function()
+    {
+        $("#agentSpinnerContainer").toggle();
+        $("#agentDetailContainer").toggle();
+    },3000);
+}
+
+// Order Page View functions ends here
+
+/**
+ * 
+ * These functions are for the customer page add new customer section
+ */
+
+    function showNextStep()
+    {
+        $("#step1").toggle();
+        $("#step2").toggle();
+        
+        return false;
+    }
+    
+    function showOrderProduct()
+    {
+        var proceed = validateCustomerRegForm();
+        
+        if(proceed == false)
+        {
+            return false;
+        }
+        
+        $("#step1").css("display","none");
+        $("#step2").css("display","block");
+        
+        $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-2").removeClass('btn-default').addClass('btn-primary');
+        $("#process-step-2").removeAttr('disabled');
+        $("#process-step-3").removeClass('btn-primary').addClass('btn-default');
+        
+        return false;
+    }
+    
+    function showCustomerReg()
+    {
+        $("#step1").css("display","block");
+        $("#step2").css("display","none");
+        
+        $("#process-step-1").removeClass('btn-default').addClass('btn-primary');
+        $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-3").removeClass('btn-primary').addClass('btn-default');
+        
+        return false;
+    }
+
+
+
 /**
  * 
  * a generic method for sending an ajax delete request to the controller for entity name
@@ -55,7 +161,8 @@ function deleteEntity(appName, entityName, id){
 
 
 /*TP: client side cidation of the required fields*/
-function checkFormRequired(){4
+function checkFormRequired(){
+    
    var paymentMethod = $("#paymentMethod").val();
    
    //bank payment method;
@@ -206,20 +313,20 @@ function addToCart(event){
   var productId = $("#selectProduct").val();
   var productUnitName = $("#selectUnit :selected").text();
   var productUnitId = $("#selectUnit").val();
-  var productQuantity = $("#selectQuantity").val();
-  var productAmount = $("#productAmount").val();
-  var amountUnit = $("#amountUnit").text();
-  var amountTotalUnit = $("#amountTotalUnit").text();
-  var initialAmountPerUnit = $("#initialAmountPerUnit").text();
-  var minInitialAmountSpan = $("#minInitialAmountSpan").text();
-  var productMinimumInitialAmount = $("#productMinimumInitialAmount").val();
-  var amountLeft = $("#amountLeft").val();
-  var payDurationPerUnit = $("#payDurationPerUnit").text();
-  var payDurationPerQuantity = $("#payDurationPerQuantity").text();
-  var productMaximumDuration = $("#productMaximumDuration").val();
+  var productQuantity = $("#selectQuantity").val(); //Product Quantity (Quantity)
+  var productAmount = $("#productAmount").val(); //Cost Per Unit * Qty
+  var amountUnit = $("#amountUnit").text(); // Cost Per Unit {Inside Span}
+  var amountTotalUnit = $("#amountTotalUnit").text(); //Cost Per Unit  * Qty {Inside Span}
+  var initialAmountPerUnit = $("#initialAmountPerUnit").text(); // least deposit Per Unit
+  var minInitialAmountSpan = $("#minInitialAmountSpan").text(); // Least deposit per Unit * Qty
+  var productMinimumInitialAmount = $("#productMinimumInitialAmount").val(); // First deposited amount(Initial_Deposit)
+  var amountLeft = $("#amountLeft").val(); // Amount to be completed/Serviced
+  var payDurationPerUnit = $("#payDurationPerUnit").text(); // Pay Duration Per Unit
+  var payDurationPerQuantity = $("#payDurationPerQuantity").text(); // Pay Duration Per Unit * Qty
+  var productMaximumDuration = $("#productMaximumDuration").val(); //Product Max Pay Duration
   var monthlyPayPerUnit = $("#monthlyPayPerUnit").text();
   var monthlyPayPerQuantity = $("#monthlyPayPerQuantity").text();
-  var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val();
+  var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
   
   //alert(productName+" "+productId+" "+productUnitName+" "+productUnitId+" "+productQuantity);
   
@@ -231,15 +338,31 @@ function addToCart(event){
   var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuanity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
   productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment}
+  
+  /**
+   * 
+   * Push Cart item Object into cart array,
+   * Stringify cart item Object and insert into cart table column with  id {tr<id>}
+   * where <id> is the position of the cart row in the table.
+   */
+  
+  var cartItemObject = dataArray;
   var jsonData = JSON.stringify(dataArray);
-  //alert(jsonData);
-  var id = $('#productCart tr:last').attr('id');
+  
+  var id = $('#productCart tr:last').attr('id'); // Get the id of the last row in the cart table
+  
   if(id == null){
       id = 0;
   }
   if(id < 1 || isNaN(id)){
       id = 0;
   }
+  
+  /**
+   * Check if the user clicked the cart item edit button,
+   * so as to replace the edited item, with the item presently
+   * in the cart.
+   */ 
   
   if($("#editMode").val()=="" || $("#editMode").val()== null){
           var newId = parseInt(id) + 1;
@@ -270,15 +393,15 @@ function addToCart(event){
       //alert($("#editMode").val());
     //$("#" + id).html();
       $("#productCart tbody").focus();
-         if($("#editMode").val()==""){
-          //no be edit mode
-         // alert("This is where the data is lauched into the database");
-       $("#productCart tbody").append(dataTr);
-      }else{
-          //alert("We do update the padi padi here");
-          //na edit mode we dey
-          
+      if($("#editMode").val() == "")
+      {  
+          $("#productCart tbody").append(dataTr);
+          cartArray.push(cartItemObject);
+      }
+      else
+      {
           $("tr#"+newId).replaceWith(dataTr);
+          cartArray[newId - 1] = cartItemObject;
       }
       
       $('#'+newId + ',#'+newId + ' td').addClass("adding",1000,"easeInOutBack");
@@ -459,6 +582,7 @@ function deleteDataFromCart(id){
        $('#'+id + ',#'+id + ' td').addClass("deleting");
        $('#'+id).fadeOut(1000); 
        $("tr#"+id).remove();
+       cartArray.splice(id -1, 1);
        calculateSum();
     
     $("#productCart tbody").focus();
@@ -492,23 +616,36 @@ function checkOutOfCart(){
         return false;
     }
     $('#productCart > tbody').focus();
-    var cartDataArray = [];
+    var cartDataArray = {};
      var data = new Array();
        var dataArray  = "";
        var id = "";
        var dataCenter = [];
+       var i = 0;
     $('#productCart > tbody  > tr').each(function() {
           id = $(this).attr("id");
-         dataArray =$("#tr"+id).val();
-         cartDataArray.push(dataArray);
+         dataArray = $("#tr"+id).val();
+         //dataCenter.push(dataArray);
          
     });
-    alert(cartDataArray);
+    
+    cartDataArray.sales = cartArray;
+    console.log(JSON.stringify(cartDataArray));
+    
+    var cartDataArrays = JSON.stringify(cartDataArray);
+    
+//    cartDataArrays = cartDataArrays.replace('"{','{');
+//    cartDataArrays = cartDataArrays.replace('}"','}');
+//    cartDataArrays = cartDataArrays.replace('"sales"','sales');
+    $("#cartDataJson").val(cartDataArrays);
+    alert(cartDataArrays);
     $("#paymentCheckout:hidden").toggle();
     $("#shoppingCart:visible").toggle();
     
     
-    
+    $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
+    $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
+    $("#process-step-3").removeClass('btn-default').removeAttr('disabled').addClass('btn-primary');
     
    
     return false;
@@ -731,23 +868,20 @@ resetForm();
            alert(data);
            var resp = JSON.parse(data);
            $('#selectUnit').empty();
-           $('#selectUnit').append($('<option>', {
-    value: "",
-    text: "-- choose --"
-}));
+           $('#selectUnit').append($('<option>', {value: "",text: "-- choose --"}));
 
            $.each( resp, function( key, value ) {
-              // $('#selectUnit').empty();
-              //alert(value);
-        
-               $('#selectUnit').append($('<option>', {
-    value: value.id,
-    text: value.title,
-    
-    
-}));
+          // $('#selectUnit').empty();
+          //alert(value);
 
-});
+           $('#selectUnit').append($('<option>', {
+            value: value.id,
+            text: value.title,
+
+
+        }));
+
+        });
 
            console.log("Loading project Units Successful");
 
@@ -1119,4 +1253,88 @@ function submitPostForm(url, formData){
            //processSubmitError(xHr.responseText);
        }
     });
+}
+
+
+/**
+ * Validate Customer Form
+ */
+
+function validateCustomerRegForm()
+{
+    var errors = [];
+    
+    if($("#customerFirstname").val().trim() == '')
+    {
+        errors.push("Please enter first name");
+    }
+    if($("#customerMiddlename").val().trim() == '')
+    {
+        errors.push("Please enter middle name");
+    }
+    if($("#customerLastname").val().trim() == '')
+    {
+        errors.push("Please enter last name");
+    }
+    if($("#customerEmail").val().trim() == '')
+    {
+        errors.push("Please enter email");
+    }
+    if($("#customerPassword").val().trim() == '')
+    {
+        errors.push("Please enter password");
+    }
+    else
+    {
+        if($("#customerPassword").val().trim() != $("#customerConfirmPassword").val().trim())
+        {
+            errors.push("Password mismatch");
+        }
+    }
+    if($("#customerStreet").val().trim() == '')
+    {
+        errors.push("Please enter street");
+    }
+    if($("#customerCity").val().trim() == '')
+    {
+        errors.push("Please enter city");
+    }
+    if($("#customerState").val().trim() == '')
+    {
+        errors.push("Please select state");
+    }
+    if($("#customerPhone").val().trim() == '')
+    {
+        errors.push("Please enter Phone Number");
+    }
+    if($("#customerKinNames").val().trim() == '')
+    {
+        errors.push("Please enter kin name");
+    }
+    if($("#customerKinPhone").val().trim() == '')
+    {
+        errors.push("Please enter kin Phone Number");
+    }
+    if($("#customerKinAddress").val().trim() == '')
+    {
+        errors.push("Please enter kin Address");
+    }
+    
+    $("#customerErrorModal .modal-body").html("");
+    
+    if(errors.length > 0)
+    {
+        var errorText = '';
+        
+        for(var key in errors){
+            var errorText = '' + errors[key] + '<br />';
+            $("#customerErrorModal .modal-body").append(errorText);
+        }
+        $("#customerErrorModal").modal();
+        return false;
+    }
+    else{
+        return true
+    }
+    
 }

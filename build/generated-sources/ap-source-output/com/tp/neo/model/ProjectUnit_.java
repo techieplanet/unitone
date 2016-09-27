@@ -1,15 +1,18 @@
 package com.tp.neo.model;
 
 import com.tp.neo.model.Project;
+import com.tp.neo.model.SaleItem;
 import java.util.Date;
 import javax.annotation.Generated;
+import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
-@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-09-16T21:32:37")
+@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-09-26T09:53:44")
 @StaticMetamodel(ProjectUnit.class)
 public class ProjectUnit_ { 
 
+    public static volatile CollectionAttribute<ProjectUnit, SaleItem> saleItemCollection;
     public static volatile SingularAttribute<ProjectUnit, Integer> quantity;
     public static volatile SingularAttribute<ProjectUnit, Integer> maxPaymentDuration;
     public static volatile SingularAttribute<ProjectUnit, Double> amountPayable;
