@@ -12,7 +12,7 @@ import com.tp.neo.model.Customer;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementPK;
-import com.tp.neo.model.Sale;
+import com.tp.neo.model.SaleItem;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -172,7 +172,7 @@ public class LodgementController extends AppController {
         }
         
         
-        Sale sale = em.find(Sale.class, new Long(1));
+        SaleItem sale = em.find(SaleItem.class, new Long(1));
         
         //validation is done here
         validate(request,response);
@@ -187,17 +187,17 @@ public class LodgementController extends AppController {
         lodgement.setBankName(request.getParameter("bankName"));
         lodgement.setDepositorsName(request.getParameter("depositorsName"));
         lodgement.setTellerNo(request.getParameter("tellerNumber"));
-        lodgement.setTransAmount(transAmount);
+        //lodgement.setTransAmount(transAmount);
         lodgement.setVerificationStatus((short) verificationStatus );
         Date date = new Date();
         lodgement.setLodgmentDate(date);
         lodgement.setSale(sale);
         
         new TrailableManager(lodgement).registerInsertTrailInfo((long)1);
-        LodgementPK pk = new LodgementPK();
-        pk.setSaleId(new Long(1));
-        pk.setLodgementId(new Long(1));
-        lodgement.setLodgementPK(pk);
+//        LodgementPK pk = new LodgementPK();
+//        pk.setSaleId(new Long(1));
+//        pk.setLodgementId(new Long(1));
+//        lodgement.setLodgementPK(pk);
         
         sale.getLodgementCollection().add(lodgement);
        

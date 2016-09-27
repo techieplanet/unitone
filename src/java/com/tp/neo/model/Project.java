@@ -55,10 +55,10 @@ public class Project extends BaseModel{
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+
     
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "project")
     private Collection<ProjectUnit> projectUnitCollection;
-
 
     @Basic(optional = false)
     @Column(name = "deleted")
@@ -250,4 +250,9 @@ public class Project extends BaseModel{
     public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
         this.projectUnitCollection = projectUnitCollection;
     }
+
+
+
+
+    
 }
