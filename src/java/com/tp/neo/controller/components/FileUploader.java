@@ -23,6 +23,9 @@ public class FileUploader {
     final String windowsUploadDir = "windows.upload.directory";
     final String windowsAccessDir = "windows.file.access.path";
     
+    final String macUploadDir = "mac.upload.directory";
+    final String macAccessDir = "mac.file.access.path";
+    
     final String linuxUploadDir = "linux.upload.directory";
     
     private String fileTypeUploadDirectory = "";
@@ -148,6 +151,11 @@ public class FileUploader {
             fileSeparator = "\\";
         }
         
+        if(checker.isMac()){
+            dir = properties.getProperty(this.macUploadDir);
+            fileSeparator = "/";
+        }
+        
         if(fileType.equalsIgnoreCase(fileTypesEnum.IMAGE.toString())){
                 return dir + fileSeparator + "images";
         }
@@ -161,6 +169,10 @@ public class FileUploader {
         
         if(checker.isWindows()){
             dir = properties.getProperty(this.windowsAccessDir);
+        }
+        
+        if(checker.isMac()){
+            dir = properties.getProperty(this.macAccessDir);
         }
         
         if(fileType.equalsIgnoreCase(fileTypesEnum.IMAGE.toString())){

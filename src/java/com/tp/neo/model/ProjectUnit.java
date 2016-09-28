@@ -6,10 +6,8 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,12 +17,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -55,13 +51,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProjectUnit.findLastInserted", query = "SELECT p FROM ProjectUnit p ORDER BY p.createdDate DESC")})
     
 public class ProjectUnit extends BaseModel {
-
-    @Column(name = "created_by")
-    private Long createdBy;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "unitId")
-    private Collection<SaleItem> saleItemCollection;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -96,9 +85,13 @@ public class ProjectUnit extends BaseModel {
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
+    @Column(name = "created_by")
+    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
     @JoinColumn(name = "project_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Project project;
@@ -275,16 +268,6 @@ public class ProjectUnit extends BaseModel {
     @Override
     public String toString() {
         return "com.tp.neo.model.ProjectUnit[ id=" + id + " ]";
-    }
-
-
-    @XmlTransient
-    public Collection<SaleItem> getSaleItemCollection() {
-        return saleItemCollection;
-    }
-
-    public void setSaleItemCollection(Collection<SaleItem> saleItemCollection) {
-        this.saleItemCollection = saleItemCollection;
     }
     
 }
