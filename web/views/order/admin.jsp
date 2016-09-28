@@ -27,9 +27,9 @@
           <div class="box">
                 <div class="box-header">
                   <h3 class="box-title block">
-                      Customer List
+                      Order List
                       <span class="pull-right">
-                          <a class="btn btn-primary" href="Customer?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Customer</a>
+                          <a class="btn btn-primary" href="Order?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Order</a>
                       </span>
                   </h3>
                 </div><!-- /.box-header -->
@@ -38,55 +38,37 @@
                   <table id="entitylist" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
-                        <th>Image</th>
                         <th>ID</th>
-                        <th>First Name</th>
-                        <th>Middle Name</th>
-                        <th>Last Name</th>
-                        <th>Phone No</th>
-                        <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
-                        <th>State</th>
+                        <th>Customer Name</th>
+                        <th>Agent Name</th>
+                        <th>Customer Phone No</th>
+                        <th>Customer Email</th>
                         <th>Action</th>
-                        
                       </tr>
                     </thead>
                     <tbody>
-                        <c:forEach items="${customers}" var="customer">
-                            <tr id="row<c:out value="${customer.customerId}" />">
-                                <td><img src="${pageContext.request.contextPath}/images/uploads/customers/${customer.photoPath}" width='55' height='50'/></td>
-                                <td><c:out value="${customer.customerId}" /></td>
-                                <td><c:out value="${customer.firstname}" /></td>
-                                <td><c:out value="${customer.middlename}" /></td>
-                                <td><c:out value="${customer.lastname}" /></td>
-                                <td><c:out value="${customer.phone}" /></td>
-                                <td><c:out value="${customer.email}" /></td>
-                                <td><c:out value="${customer.street}" /></td>
-                                <td><c:out value="${customer.city}" /></td>
-                                <td><c:out value="${customer.state}" /></td>
+                        <c:forEach items="${orders}" var="order">
+                            <tr id="row<c:out value="${order.id}" />">
+                                
+                                <td><c:out value="${order.id}" /></td>
+                                <td><c:out value="${order.getCustomerId().getLastname()} ${order.getCustomerId().getFirstname()} " /></td>
+                                <td><c:out value="${order.getAgentId().getLastname()} ${order.getAgentId().getFirstname()} " /></td>
+                                <td><c:out value="${order.getCustomerId().getPhone()}" /></td>
+                                <td><c:out value="${order.getCustomerId().getEmail()}" /></td>
                               
                                 <td>
-                                    <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
-                                     
-                                    <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
-                                      
+                                    <a class="btn btn-primary" href="Order?action=view&orderId=${order.id}" role="button">View <i class="fa fa-eye"></i> </a>
                                 </td>
                             </tr>
                         </c:forEach>
                   </tbody>
                     <tfoot>
                       <tr>
-                        <th>Image</th>
                         <th>ID</th>
-                        <th>First Name</th>
-                        <th>Middle Name</th>
-                        <th>Last Name</th>
-                        <th>Phone No</th>
-                        <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
-                        <th>State</th>
+                        <th>Customer Name</th>
+                        <th>Agent Name</th>
+                        <th>Customer Phone No</th>
+                        <th>Customer Email</th>
                         <th>Action</th>
                       </tr>
                     </tfoot>
@@ -94,7 +76,7 @@
                   
                     <div class="box-header">
                         <h3 class="box-title block">
-                            <span class="pull-right"><a class="btn btn-primary" href="Customer?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Customer</a></span>
+                            <span class="pull-right"><a class="btn btn-primary" href="Order?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Order</a></span>
                         </h3>
                     </div><!-- /.box-header -->
                 </div><!-- /.box-body -->

@@ -97,7 +97,7 @@ public class Lodgement implements Serializable, ITrailable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     
-    @JoinColumn(name = "sale_id", referencedColumnName = "sale_id", insertable = false, updatable = false)
+    @JoinColumn(name = "sale_id", referencedColumnName = "sale_id")
     @ManyToOne(optional = false)
     private SaleItem sale;
 

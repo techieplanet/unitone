@@ -32,7 +32,9 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Order1.findAll", query = "SELECT o FROM Order1 o"),
-    @NamedQuery(name = "Order1.findById", query = "SELECT o FROM Order1 o WHERE o.id = :id")})
+    @NamedQuery(name = "Order1.findById", query = "SELECT o FROM Order1 o WHERE o.id = :id"),
+    @NamedQuery(name = "Order1.JoinCustomer", query="SELECT o , c FROM Order1 o LEFT JOIN o.customerId c")
+})
 public class Order1 implements Serializable {
 
     private static final long serialVersionUID = 1L;

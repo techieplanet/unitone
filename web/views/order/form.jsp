@@ -113,6 +113,9 @@
                 <!-- form start -->
                <div class="box box-primary">
                <form role="form" name="customerRegistration" method="POST" action="Order" enctype="multipart/form-data">
+                
+                <input type="hidden" name="agent_id" id="agent_id" value="" />
+                   
                 <div class="box-header with-border">
                   <h3 class="box-title">Product Order Form 
                       
@@ -372,7 +375,7 @@
                  -->
                  <div class="col-md-1 pull-right">
                      <div class="form-group">
-                        <a href="#" class="btn btn-success" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i> Proceed to payment</a>
+                        <a href="#" class="btn btn-success" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i> Checkout</a>
                     </div> 
 
                  </div>
@@ -404,6 +407,7 @@
                                             <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
                                             <input type="radio" name="paymentMethod" value="2" id="paywithcard" onclick="showNecessaryMenu(2)"/>&nbsp; <label for="paywithcard" style="display:inline !important;cursor:pointer !important;">Credit/Debit Card <img src="${pageContext.request.contextPath}/images/img/paywithcard.png" /></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             <input type="radio" name="paymentMethod" value="3" id="paywithcash" onclick="showNecessaryMenu(3)"/>&nbsp;<label for="paywithcash" style="display:inline !important;"> Cash</label>
+                                            <input type="radio" name="paymentMethod" value="4" id="bankTransfer" onclick="showNecessaryMenu(4)"/>&nbsp; <label for="" style="display:inline !important;cursor:pointer !important;">Bank Transfer </label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         </div>
                                     </div>
                                 </div>
@@ -477,6 +481,47 @@
                                         </div>
                                 </div>
                                 <!-- End of Pay with Cash Div Container -->
+                                
+                                
+                                <!-- Start of Bank Transfer Div -->
+                                
+                                   <div class='row' id='pwBankTransfer'>
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="bankName">Bank Name</label>
+                                            <input type="text" class="form-control" id="transfer_bankName" name="transfer_bankName" style="width: 100%;">
+                                        </div> 
+                                    </div>
+                                    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="depositorsName">Depositor's Name</label>
+                                            <input type="text" class="form-control" id="transfer_depositorsName" name="transfer_depositorsName" style="width: 100%;">
+                                        </div> 
+                                    </div>
+                                    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="tellerNumber">Transaction ID</label>
+                                            <input type="text" class="form-control" id="transfer_transactionId" name="transfer_transactionId" style="width: 100%;">
+                                        </div> 
+                                    </div>
+                             
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="tellerAmount">Amount</label>
+                                            <input type="text" class="form-control" id="transfer_amount" name="transfer_amount" style="width: 100%;">
+                                        </div>      
+                                    </div>
+                                    
+                                    <div class="col-md-2">
+                                    	<div class="form-group" style="padding-top:25px !important;">
+                                            <input type="submit"  name="Pay" class="btn btn-success" value="Pay with Bank Transfer"/>
+                                        </div>      
+                                    </div>
+                                </div>
+                                
+                               <!-- End of Bank Transfer Div -->
                                              
                               </div>
                              </div>
@@ -501,9 +546,7 @@
       <input type="hidden" name="customer_id" id="id" value="${customerId}">
       <input type="hidden" name="id" id="id" value="${customerId}">
       <input type="hidden" name="cartDataJson" id="cartDataJson" />
-      <div class="box-footer" style="background-color:transparent;">
-          <input type="submit" class="btn btn-primary" name="customerCreate" value="Save"/>
-      </div>
+      
       </form>
     </div>
 

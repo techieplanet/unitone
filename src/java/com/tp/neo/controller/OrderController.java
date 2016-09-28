@@ -8,6 +8,7 @@ package com.tp.neo.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.tp.neo.controller.components.MailSender;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
@@ -15,8 +16,8 @@ import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.Order1;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.SaleItem;
-import com.tp.neo.model.utils.Sales;
-import com.tp.neo.model.utils.SalesObject;
+import com.tp.neo.controller.helpers.SaleItemObject;
+import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
@@ -42,6 +43,7 @@ import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpSession;
+import javax.xml.bind.PropertyException;
 /**
  *
  * @author John
@@ -55,7 +57,10 @@ public class OrderController extends HttpServlet {
     private final static Logger LOGGER = 
             Logger.getLogger(Customer.class.getCanonicalName());
     
-
+    private double totalAmountDeposited = 0;
+    
+    
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -131,7 +136,12 @@ public class OrderController extends HttpServlet {
         
         
         HttpSession session = request.getSession();
-        SystemUser user = (SystemUser)session.getAttribute("user");
+        SystemUser user = null;
+        
+        if(session.getAttribute("user") != null && !session.getAttribute("user").equals(""))
+        {
+           user = (SystemUser)session.getAttribute("user");
+        }
         
         if(user != null)
         {
@@ -149,7 +159,7 @@ public class OrderController extends HttpServlet {
      
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = ORDER_ADMIN;
-           // request.setAttribute("customers", listCustomers());
+            request.setAttribute("orders", listOrders());
         }
         request.setAttribute("projects", project.listProjects());
         request.setAttribute("customers",customer.listCustomers());
@@ -172,21 +182,27 @@ public class OrderController extends HttpServlet {
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
        
-        SalesObject salesObj = this.processJsonData(request.getParameter("cartDataJson").toString());
-        //this.createOrder(request, salesObj);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        this.createOrder(request, getCartData(request),em);
     }
     
-    private SalesObject processJsonData(String json)
+    public SaleItemObjectsList getCartData(HttpServletRequest request)
     {
+        SaleItemObjectsList saleObj = this.processJsonData(request.getParameter("cartDataJson").toString());
+        return saleObj;
+    }
+    
+    private SaleItemObjectsList processJsonData(String json) {
         Gson gson = new GsonBuilder().create();
         System.out.println(json);
         //String str = "{sales:[{\"productName\":\"Kali Homes\",productId:1,productUnitName:\"2 Bedroom Duplex\",productUnitId:5,productQuanity:1,productAmount:1500000,amountUnit:1500000,amountTotalUnit:1500000,initialAmountPerUnit:250000,minInitialAmountSpan:250000,productMinimumInitialAmount:250000,amountLeft:1250000,payDurationPerUnit:\"24 months\",payDurationPerQuantity:\"24 months\",productMaximumDuration:5,monthlyPayPerUnit:250000,monthlyPayPerQuantity:250000,productMinimumMonthlyPayment:250000}]}";
         //Type collectionType = new TypeToken<ArrayList<SalesObject>>(){}.getType();
-        SalesObject salesObj = gson.fromJson(json,SalesObject.class);
+        SaleItemObjectsList salesObj = gson.fromJson(json,SaleItemObjectsList.class);
         
-        ArrayList<Sales> sales = salesObj.sales;
+        ArrayList<SaleItemObject> sales = salesObj.sales;
         
-        for(Sales s : sales) {
+        for(SaleItemObject s : sales) {
             System.out.println("Product Name : " + s.productName);
             System.out.println("Product Qty : " + s.productQuanity);
             System.out.println("Product Amount Per Unit " + s.amountUnit);
@@ -197,136 +213,219 @@ public class OrderController extends HttpServlet {
     }
     
     
-    private void createOrder(HttpServletRequest request, SalesObject sales)
+    public void createOrder(HttpServletRequest request, SaleItemObjectsList sales,EntityManager em)
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        Order1 order = new Order1();
+        try {
+                Customer customer = null;
+                Agent agent = null;
+                boolean isRequestFromCustomer = false;
+
+                if(request.getAttribute("customer") == null || request.getAttribute("customer") == "")
+                {
+                    Long customerId = Long.parseLong(request.getParameter("customer_id"));
+                    customer  = em.find(Customer.class, customerId);
+                    
+                }
+                else{
+                    customer = (Customer) request.getAttribute("customer");
+                    isRequestFromCustomer = true;
+                }
+
+                Long agentId = 0L;
+
+                if(request.getParameter("agent_id").equals("") || request.getParameter("agent_id") == null)
+                {
+                    agentId = getAgentId(request);
+                    agent = em.find(Agent.class, agentId);
+                }
+                else{
+
+                    agentId = Long.parseLong(request.getParameter("agent_id"));
+                    agent = em.find(Agent.class, agentId);
+                }
+
+                Order1 order = new Order1();
+
+                //Prepare Order Entity
+                order.setAgentId(agent);
+                order.setCustomerId(customer);
+                
+                if(!isRequestFromCustomer) {
+                    // Begin Transaction
+                    em.getTransaction().begin();
+                }
+                em.persist(order);
+                em.flush();
+                
+                createSales(request, sales, em, order, agent);
+
+                em.getTransaction().commit();
+
+                creditCustomerAccount(customer, totalAmountDeposited);
+                CreateNewOrderAlert(order);
+                //sendNewOrderEmail(order, customer);
+        }
+        catch(Exception ex){
+            
+            em.getTransaction().rollback();
+            System.out.println("Exception NeoForce: " + ex.getMessage());
+        }
     }   
     
     
-    private void createSales(HttpServletRequest request, SalesObject salesObject, EntityManager em, Order1 order, Agent agent)
+    private void createSales(HttpServletRequest request, SaleItemObjectsList salesObject, EntityManager em, Order1 order, Agent agent)
     {
         /**
          * Loop through each of the sales item
          * create a sale record, and get the sale id
          * create a new lodgement for the sale.
          **/
+        
+        ArrayList<SaleItemObject> sales = salesObject.sales;
+        Date date = this.getDateTime();
+        
+        double totalAmountPaid = 0;
+        for(SaleItemObject sale : sales) 
+        {
+            
+            SaleItem saleItem = new SaleItem();
+            
+            long unitId = sale.productUnitId;
+            ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
+            
+            
+            saleItem.setOrderId(order);
+            saleItem.setUnitId(projectUnit);
+            saleItem.setQuantity(sale.productQuanity);
+            saleItem.setInitialDep(sale.productMinimumInitialAmount);
+            saleItem.setDiscountAmt(projectUnit.getDiscount());
+            saleItem.setDiscountPercentage(projectUnit.getCommissionPercentage());
+            saleItem.setCreatedBy(agent.getAgentId());
+            saleItem.setCreatedDate(date);
+            
+            
+            
+            em.persist(saleItem);
+            em.flush();
+            System.out.println("Sale Id : " + saleItem.getSaleId());
+            
+            lodgePayment(request, em, saleItem, agent, sale.productMinimumInitialAmount);
+        }
     }
     
-    private void lodgePayment(HttpServletRequest request, EntityManager em, SaleItem saleItem, Agent agent)
+     private void lodgePayment(HttpServletRequest request, EntityManager em, SaleItem saleItemObj, Agent agent, double amtPaid)
     {
+        Lodgement lodgement = new Lodgement();
+        System.out.println("From Lodgement, Sale ID : " + saleItemObj.getSaleId());
+        SaleItem saleItem = em.find(SaleItem.class, saleItemObj.getSaleId());
+        Short paymentMethod = Short.parseShort(request.getParameter("paymentMethod"));
+       
+        lodgement.setPaymentMode(paymentMethod);
+        lodgement.setCreatedDate(this.getDateTime());
+        lodgement.setCreatedBy(agent.getAgentId());
+        lodgement.setSale(saleItem); 
+        lodgement.setAmount(amtPaid);
+        
+        if(paymentMethod == 1)
+        {
+            lodgement.setBankName(request.getParameter("bankName"));
+            lodgement.setDepositorsName(request.getParameter("depositiorsName"));
+            lodgement.setTellerNo(request.getParameter("tellerNumber"));
+//            lodgement.setAmount(Double.parseDouble(request.getParameter("tellerAmount")));
+            
+        }
+        else if(paymentMethod == 3)
+        {
+//            lodgement.setAmount(Double.parseDouble(request.getParameter("cashAmount")));
+            
+        }
+        else if(paymentMethod == 4)
+        {
+            lodgement.setBankName(request.getParameter("transfer_bankName"));
+            lodgement.setDepositorsName(request.getParameter("transfer_depositiorsName"));
+            lodgement.setTellerNo(request.getParameter("transfer_transactionId"));
+//            lodgement.setAmount(Double.parseDouble(request.getParameter("transfer_amount")));
+        }
+        
+        em.persist(lodgement);
+        em.flush();
+    }
+    
+    
+    private void creditCustomerAccount(Customer customer, double amount) {
         
     }
     
-//    private void createOrder(HttpServletRequest request, SalesObject sales)
-//    {
-//        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-//        EntityManager em = emf.createEntityManager();
-//        
-//        HttpSession session = request.getSession();
-//        SystemUser user = (SystemUser)session.getAttribute("user");
-//        
-//        Long customerId = Long.parseLong(request.getParameter("customer_id"));
-//        Long agentId = user.getSystemUserId();
-//        //int userType = user.getSystemUserTypeId();
-//        
-//        //Check if user is an Agent
-//        
-//        Order1 order = new Order1();
-//        
-//        Agent agent = em.find(Agent.class, new Long(1));
-//        Customer customer  = em.find(Customer.class, customerId);
-//        
-//        //Prepare Order Entity
-//        order.setAgentId(agent);
-//        order.setCustomerId(customer);
-//        
-//        
-//        
-//        // Begin Transaction
-//        em.getTransaction().begin();
-//        
-//        System.out.println("Transaction Begined");
-//        
-//        em.persist(order);
-//        em.flush();
-//        System.out.println("Transaction flushed");
-//        this.insertSales(request, sales, em, order, agent);
-//        System.out.println("About to commit");
-//        em.getTransaction().commit();
-//        
-//    }
+    private void CreateNewOrderAlert(Order1 order) {
+        
+    }
+    
+    private void sendNewOrderEmail(Order1 order, Customer customer) {
+        
+        
+        MailSender mail = new MailSender();
+        
+        Agent agent = customer.getAgentId();
+        
+        String msgSubject = "New Order Request";
+        String msgBody = "";
+        
+        String customerEmail = customer.getEmail();
+        String agentEmail = agent.getEmail();
+        String adminEmail = "admin@tplocalhost.com";
+        
+        mail.sendHtmlEmail(customerEmail, adminEmail, msgSubject, msgBody);
+        mail.sendHtmlEmail(agentEmail, adminEmail, msgSubject, msgBody);
+        mail.sendHtmlEmail(adminEmail, adminEmail, msgSubject, msgBody);
+        
+    }
+    
+    private long getAgentId(HttpServletRequest request)
+    {
+        HttpSession session = request.getSession();
+        SystemUser user = (SystemUser)session.getAttribute("user");
+        Long agentId = user.getSystemUserId();
+        
+        return agentId;
+    }
+    
+    private double getTotalOrderAmountPaid(HttpServletRequest request)
+    {
+        double totalOrderAmountPaid = 0;
+        
+        if(request.getParameter("tellerAmount") != null & request.getParameter("tellerAmount") != "")
+        {
+            totalOrderAmountPaid =  Double.parseDouble(request.getParameter("tellerAmount"));
+        }
+        else if(request.getParameter("cashAmount") != null && !request.getParameter("cashAmount").equals("")) {
+            totalOrderAmountPaid =  Double.parseDouble(request.getParameter("cashAmount"));
+        }
+        else if(request.getParameter("transfer_amount") != null && !request.getParameter("transfer_amount").equals("")) {
+            totalOrderAmountPaid =  Double.parseDouble(request.getParameter("transfer_amount"));
+        }
+        
+        return totalOrderAmountPaid;
+    }
 //    
-//    private void insertSales(HttpServletRequest request, SalesObject salesObject, EntityManager em, Order1 order, Agent agent)
-//    {
-//        ArrayList<Sales> sales = salesObject.sales;
-//        Date date = this.getDateTime();
-//        
-//        for(Sales sale : sales) {
-//            
-//            SaleItem saleItem = new SaleItem();
-//            
-//            long unitId = sale.productUnitId;
-//            ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
-//            
-//            
-//            saleItem.setOrderId(order);
-//            saleItem.setUnitId(projectUnit);
-//            saleItem.setQuantity(sale.productQuanity);
-//            saleItem.setInitialDep(sale.productMinimumInitialAmount);
-//            saleItem.setDiscountAmt(projectUnit.getDiscount());
-//            saleItem.setDiscountPercentage(projectUnit.getCommissionPercentage());
-//            saleItem.setCreatedBy(agent.getAgentId());
-//            saleItem.setCreatedDate(date);
-//            
-//            em.persist(saleItem);
-//            em.flush();
-//            this.lodgePayment(request, em, saleItem, agent);
-//        }
-//        
-//    }
-//    
-//    
-//    private void lodgePayment(HttpServletRequest request, EntityManager em, SaleItem saleItem, Agent agent)
-//    {
-//        Lodgement lodgement = new Lodgement();
-//        Short paymentMethod = Short.parseShort(request.getParameter("paymentMethod"));
-//        
-//        System.out.println("Sale Id : " + saleItem.getSaleId());
-//       
-//        lodgement.setPaymentMode(paymentMethod);
-//        lodgement.setCreatedDate(this.getDateTime());
-//        lodgement.setCreatedBy(agent.getAgentId());
-//        lodgement.setSale(saleItem);
-//        
-//        if(paymentMethod == 1)
-//        {
-//            lodgement.setBankName(request.getParameter("bankName"));
-//            lodgement.setDepositorsName(request.getParameter("depositiorsName"));
-//            lodgement.setTellerNo(request.getParameter("tellerNumber"));
-//            lodgement.setAmount(Double.parseDouble(request.getParameter("tellerAmount")));
-//            
-//        }
-//        else if(paymentMethod == 2)
-//        {
-//            lodgement.setAmount(Double.parseDouble(request.getParameter("cashAmount")));
-//            
-//        }
-//        else
-//        {
-//            
-//        }
-//        
-//        em.persist(lodgement);
-//    }
     
     private Date getDateTime()
     {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
         Date date = calendar.getTime();
         return date;
+    }
+    
+    public List<Order1> listOrders()
+    {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Order1.findAll");
+        List<Order1> orderList = jplQuery.getResultList();
+        
+        
+        
+        return orderList;
     }
 
 }
