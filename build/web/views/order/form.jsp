@@ -166,7 +166,7 @@
                                     	<div class="form-group">
                                             <label for="selectProdcut">Select Customer</label>
                                             
-                                            <select class="form-control select2" id="selectCustomer" style="width: 100%;" onchange="" <c:if test="${customer.customerId != null && customer.customerId!=''}">disabled</c:if>>
+                                            <select class="form-control select2" id="selectCustomer" name="customer_id" style="width: 100%;" onchange="" <c:if test="${customer.customerId != null && customer.customerId!=''}">disabled</c:if>>
                                                 <option value="" selected="selected">-- choose --</option>
                                                 
                                               <c:forEach items="${customers}" var="customer" >  

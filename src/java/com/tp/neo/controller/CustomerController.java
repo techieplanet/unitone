@@ -15,6 +15,7 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.controller.ProjectController;
 import com.tp.neo.controller.components.FileUploader;
+import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
@@ -27,12 +28,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -163,9 +166,7 @@ public class CustomerController extends AppController  {
                  * so if the customer_id parameter is empty, control is transfered here
                  * 
                 **/
-                if(!(request.getParameter("customer_id").equals(""))) { //edit mode
-                    customer = em.find(Customer.class, new Long(Integer.parseInt(request.getParameter("customer_id"))));
-                }
+                
                
 //               Date date = new Date();
 //               SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
@@ -243,15 +244,16 @@ public class CustomerController extends AppController  {
                                 
                 em.persist(customerAgent);
                 
+                em.getTransaction().commit();
+                em.close();
+                emf.close();
                 
-                request.setAttribute("customer",customer);
                 OrderController order = new OrderController();
-                order.createOrder(request, order.getCartData(request),em);
+                SaleItemObjectsList saleItemObjectList = order.getCartData(request);
+                Map requestParameters = order.getRequestParameters(request);
                 
-//                em.getTransaction().commit();
-//                
-//                em.close();
-//                emf.close();
+                order.createOrder(customer, agent, saleItemObjectList, requestParameters);
+
                 
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
@@ -262,7 +264,7 @@ public class CustomerController extends AppController  {
                 
             }
             catch (PropertyException err){
-            err.printStackTrace();
+                err.printStackTrace();
                 //System.out.println("inside catch area: " + err.getMessage());
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
@@ -270,6 +272,11 @@ public class CustomerController extends AppController  {
                 request.setAttribute("customer", customer);
                 request.setAttribute("errors", errorMessages);    
                 SystemLogger.logSystemIssue("Customer", gson.toJson(customer), err.getMessage());
+            }
+            catch(RollbackException rollExcept) {
+                
+                em.getTransaction().rollback();
+                
             }
             catch(Exception e){
                 e.printStackTrace();

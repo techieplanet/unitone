@@ -182,9 +182,7 @@ public class OrderController extends HttpServlet {
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
        
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        this.createOrder(request, getCartData(request),em);
+        initOrderProcess(request);
     }
     
     public SaleItemObjectsList getCartData(HttpServletRequest request)
@@ -212,68 +210,80 @@ public class OrderController extends HttpServlet {
         return salesObj;
     }
     
+    public void initOrderProcess(HttpServletRequest request) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Agent agent = null;
+        Customer customer = null;
+        
+        Long customerId = Long.parseLong(request.getParameter("customer_id"));
+        customer  = em.find(Customer.class, customerId);
+        
+        long agentId = Long.parseLong(request.getParameter("agent_id"));
+        agent = em.find(Agent.class, agentId);
+        
+        SaleItemObjectsList saleItemObject = getCartData(request);
+        
+        createOrder(customer,agent,saleItemObject,getRequestParameters(request));
+        
+    }
     
-    public void createOrder(HttpServletRequest request, SaleItemObjectsList sales,EntityManager em)
+    /**
+     * @param HttpServletRequest 
+     * @return  Map 
+     * This method returns the parameters of an HTTP request as a Map object 
+     */
+    public Map getRequestParameters(HttpServletRequest request)
     {
+        Map<String, String> map = new HashMap();
+        Enumeration params = request.getParameterNames();
+        while(params.hasMoreElements())
+        {
+            String elem = params.nextElement().toString();
+            map.put(elem, request.getParameter(elem));
+        }
+        
+        return map;
+    }
+    
+    public void createOrder(Customer customer, Agent agent, SaleItemObjectsList saleItemObject,Map request)
+    {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
         try {
-                Customer customer = null;
-                Agent agent = null;
-                boolean isRequestFromCustomer = false;
-
-                if(request.getAttribute("customer") == null || request.getAttribute("customer") == "")
-                {
-                    Long customerId = Long.parseLong(request.getParameter("customer_id"));
-                    customer  = em.find(Customer.class, customerId);
-                    
-                }
-                else{
-                    customer = (Customer) request.getAttribute("customer");
-                    isRequestFromCustomer = true;
-                }
-
-                Long agentId = 0L;
-
-                if(request.getParameter("agent_id").equals("") || request.getParameter("agent_id") == null)
-                {
-                    agentId = getAgentId(request);
-                    agent = em.find(Agent.class, agentId);
-                }
-                else{
-
-                    agentId = Long.parseLong(request.getParameter("agent_id"));
-                    agent = em.find(Agent.class, agentId);
-                }
-
+                
                 Order1 order = new Order1();
 
                 //Prepare Order Entity
                 order.setAgentId(agent);
                 order.setCustomerId(customer);
-                
-                if(!isRequestFromCustomer) {
-                    // Begin Transaction
-                    em.getTransaction().begin();
-                }
+               
+                em.getTransaction().begin();
+              
                 em.persist(order);
-                em.flush();
+                em.flush(); 
                 
-                createSales(request, sales, em, order, agent);
+                createSaleItems(request, saleItemObject, em, order, agent);
 
                 em.getTransaction().commit();
 
                 creditCustomerAccount(customer, totalAmountDeposited);
                 CreateNewOrderAlert(order);
-                //sendNewOrderEmail(order, customer);
         }
         catch(Exception ex){
             
             em.getTransaction().rollback();
+            
             System.out.println("Exception NeoForce: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }   
     
     
-    private void createSales(HttpServletRequest request, SaleItemObjectsList salesObject, EntityManager em, Order1 order, Agent agent)
+    private void createSaleItems(Map request, SaleItemObjectsList salesObject, EntityManager em, Order1 order, Agent agent)
     {
         /**
          * Loop through each of the sales item
@@ -281,44 +291,46 @@ public class OrderController extends HttpServlet {
          * create a new lodgement for the sale.
          **/
         
-        ArrayList<SaleItemObject> sales = salesObject.sales;
+        ArrayList<SaleItemObject> saleItems = salesObject.sales;
         Date date = this.getDateTime();
         
         double totalAmountPaid = 0;
-        for(SaleItemObject sale : sales) 
+        for(SaleItemObject saleItem : saleItems) 
         {
             
-            SaleItem saleItem = new SaleItem();
+            SaleItem saleItemObject = new SaleItem();
             
-            long unitId = sale.productUnitId;
+            long unitId = saleItem.productUnitId;
             ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
             
             
-            saleItem.setOrderId(order);
-            saleItem.setUnitId(projectUnit);
-            saleItem.setQuantity(sale.productQuanity);
-            saleItem.setInitialDep(sale.productMinimumInitialAmount);
-            saleItem.setDiscountAmt(projectUnit.getDiscount());
-            saleItem.setDiscountPercentage(projectUnit.getCommissionPercentage());
-            saleItem.setCreatedBy(agent.getAgentId());
-            saleItem.setCreatedDate(date);
+            saleItemObject.setOrderId(order);
+            saleItemObject.setUnitId(projectUnit);
+            saleItemObject.setQuantity(saleItem.productQuanity);
+            saleItemObject.setInitialDep(saleItem.productMinimumInitialAmount);
+            saleItemObject.setDiscountAmt(projectUnit.getDiscount());
+            saleItemObject.setDiscountPercentage(projectUnit.getCommissionPercentage());
+            saleItemObject.setCreatedBy(agent.getAgentId());
+            saleItemObject.setCreatedDate(date);
             
             
             
-            em.persist(saleItem);
+            em.persist(saleItemObject);
             em.flush();
-            System.out.println("Sale Id : " + saleItem.getSaleId());
+            System.out.println("Sale Id : " + saleItemObject.getSaleId());
             
-            lodgePayment(request, em, saleItem, agent, sale.productMinimumInitialAmount);
+            lodgePayment(request, em, saleItemObject, agent, saleItem.productMinimumInitialAmount);
         }
     }
     
-     private void lodgePayment(HttpServletRequest request, EntityManager em, SaleItem saleItemObj, Agent agent, double amtPaid)
+     private void lodgePayment(Map request, EntityManager em, SaleItem saleItemObj, Agent agent, double amtPaid)
     {
+        
         Lodgement lodgement = new Lodgement();
         System.out.println("From Lodgement, Sale ID : " + saleItemObj.getSaleId());
         SaleItem saleItem = em.find(SaleItem.class, saleItemObj.getSaleId());
-        Short paymentMethod = Short.parseShort(request.getParameter("paymentMethod"));
+        System.out.println("Payment method : " + request.get("paymentMethod").toString());
+        Short paymentMethod = Short.parseShort(request.get("paymentMethod").toString());
        
         lodgement.setPaymentMode(paymentMethod);
         lodgement.setCreatedDate(this.getDateTime());
@@ -328,9 +340,9 @@ public class OrderController extends HttpServlet {
         
         if(paymentMethod == 1)
         {
-            lodgement.setBankName(request.getParameter("bankName"));
-            lodgement.setDepositorsName(request.getParameter("depositiorsName"));
-            lodgement.setTellerNo(request.getParameter("tellerNumber"));
+            lodgement.setBankName(request.get("bankName").toString());
+            lodgement.setDepositorsName(request.get("depositorsName").toString());
+            lodgement.setTellerNo(request.get("tellerNumber").toString());
 //            lodgement.setAmount(Double.parseDouble(request.getParameter("tellerAmount")));
             
         }
@@ -341,9 +353,9 @@ public class OrderController extends HttpServlet {
         }
         else if(paymentMethod == 4)
         {
-            lodgement.setBankName(request.getParameter("transfer_bankName"));
-            lodgement.setDepositorsName(request.getParameter("transfer_depositiorsName"));
-            lodgement.setTellerNo(request.getParameter("transfer_transactionId"));
+            lodgement.setBankName(request.get("transfer_bankName").toString());
+            lodgement.setDepositorsName(request.get("transfer_depositiorsName").toString());
+            lodgement.setTellerNo(request.get("transfer_transactionId").toString());
 //            lodgement.setAmount(Double.parseDouble(request.getParameter("transfer_amount")));
         }
         
