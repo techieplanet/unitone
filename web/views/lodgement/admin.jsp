@@ -45,7 +45,7 @@
                         
                       
                       <span class="pull-right">
-                          <a class="btn btn-primary" href="Lodgement?invoice_id=112023&lodge=declare" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Make New Lodgment</a>
+                          <a class="btn btn-primary" href="Lodgement?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Make New Lodgment</a>
                       </span>
                   </h3>
                 </div><!-- /.box-header -->
@@ -54,7 +54,7 @@
                   <table id="entitylist" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
-                          <th>Agent Id</th>
+                        <th>Agent Id</th>
                         <th>Customer Id</th>
                         <th>Amount</th>
                         <th>Payment Mode</th>
@@ -63,42 +63,40 @@
                         <th>Depositors Name</th>
                         <th>Teller Number</th>
                         <th>Lodgement Date</th>
-                        <th>Verification Status</th>
-                        
-                                        
+                        <th>Verification Status</th>                      
                       </tr>
                     </thead>
                     <tbody>
                         
                         <c:forEach items="${lodgements}" var="lodgement">
                            
-                            <tr id="row<c:out value="${lodgement.sale.customerId}" />"
-                                <c:if test="${lodgement.verificationStatus==0}">class="danger"</c:if>
-                                <c:if test="${lodgement.verificationStatus==-1}">class="warning"</c:if>
-                                <c:if test="${lodgement.verificationStatus==-1}">class="success"</c:if>
+                            <tr id="row<c:out value="${lodgement.getLodgementId()}" />"
+                                <c:if test="${lodgement.verificationStatus == 0 || lodgement.verificationStatus == null}">class="danger"</c:if>
+                                <c:if test="${lodgement.verificationStatus == -1}">class="warning"</c:if>
+                                <c:if test="${lodgement.verificationStatus== 1}">class="success"</c:if>
                                 >
-                                 <td><a href="Agent?action=edit&agentId=${lodgement.sale.agentId.agentId}&id=${lodgement.sale.agentId.agentId}"><c:out value="${lodgement.sale.agentId.agentId}" /></a></td>
+                                 <td><a href="Agent?action=edit&agentId=${lodgement.sale.orderId.agentId.agentId}&id=${lodgement.sale.orderId.agentId.agentId}"><c:out value="${lodgement.sale.orderId.agentId.agentId}" /></a></td>
                                 
-                                    <td><a href="Customer?action=edit&customerId=${lodgement.sale.customerId.customerId}&id=${lodgement.sale.customerId.customerId}"><c:out value="${lodgement.sale.customerId.customerId}" /></a></td>
+                                    <td><a href="Customer?action=edit&customerId=${lodgement.sale.orderId.customerId.customerId}"><c:out value="${lodgement.sale.orderId.customerId.customerId}" /></a></td>
                                 <td><c:out value="${lodgement.amount}" /></td>
                                 <td>
                                     <c:if test="${lodgement.paymentMode==1}">Bank Deposit</c:if>
                                     <c:if test="${lodgement.paymentMode==2}">Credit/Debit Card</c:if>
                                     <c:if test="${lodgement.paymentMode==3}">Cash / Cheque</c:if>
                                    </td>
-                                <td><c:out value="${lodgement.transAmount}" /></td>
+                                <td><c:out value="${lodgement.amount}" /></td>
                                 <td><c:out value="${lodgement.bankName}" /></td>
                                 <td><c:out value="${lodgement.depositorsName}" /></td>
                                 <td><c:out value="${lodgement.tellerNo}" /></td>
-                                <td><c:out value="${lodgement.lodgmentDate}" /></td>
+                                <td><c:out value="${lodgement.createdDate}" /></td>
                                 <td>
-                                    <c:if test="${lodgement.verificationStatus==1}">
-                                        <a class="btn btn-danger btn-xs" href="#"  role="button" title="deactivate"><i class="fa fa-remove"></i></a>
-                                    
+                                    <c:if test="${lodgement.verificationStatus == 1}">
+                                        <a class="btn btn-danger btn-xs" href="#"  role="button" title="deactivate">Decline <i class="fa fa-remove"></i></a>
+                                        <a class="btn btn-success btn-xs" href="#"  role="button" title="activate">Approve <i class="fa fa-check"></i></a> &nbsp;
                                     </c:if>
-                                         <c:if test="${lodgement.verificationStatus==0 || lodgement.verificationStatus==-1}">
-                                        <a class="btn btn-success btn-xs" href="#"  role="button" title="activate"><i class="fa fa-check"></i></a>
-                                    
+                                    <c:if test="${lodgement.verificationStatus == 0 || lodgement.verificationStatus==-1 || lodgement.verificationStatus == null}">
+                                            <a class="btn btn-success btn-xs" href="#"  role="button" title="activate">Approve <i class="fa fa-check"></i></a> &nbsp;
+                                            <a class="btn btn-danger btn-xs" href="#"  role="button" title="deactivate">Decline <i class="fa fa-remove"></i></a>
                                     </c:if>
                                 </td>
                               
@@ -123,7 +121,7 @@
                   
                     <div class="box-header">
                         <h3 class="box-title block">
-                            <span class="pull-right"><a class="btn btn-primary" href="Lodgement?invoice_id=112023&lodge=declare" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Make New Lodgement</a></span>
+                            <span class="pull-right"><a class="btn btn-primary" href="Lodgement?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Make New Lodgement</a></span>
                         </h3>
                     </div><!-- /.box-header -->
                 </div><!-- /.box-body -->

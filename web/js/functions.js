@@ -14,6 +14,7 @@ var cartArray = []; // holds cart item objects
         $("#pwCard" ).hide();
         $("#pwCash").hide();
         $("#paymentCheckout").hide();
+        $("#pwBankTransfer").hide();
         setTimeout(function(){
    agreementStatusChecked();
 }, 450);
@@ -52,6 +53,8 @@ function selectAgent(id)
         $("#agentSpinnerContainer").toggle();
         $("#agentDetailContainer").toggle();
     },1500);
+    
+    $("#agent_id").val(id);
 }
 
 function showAgentList()
@@ -437,18 +440,27 @@ function showNecessaryMenu(pmtMethod){
     if(pmtMethod==1){
         $("#pwCard:visible" ).toggle();
         $("#pwCash:visible").toggle();
+        $("#pwBankTransfer:visible").toggle();
          $( "#pwBankdeposit:hidden").toggle();
           
     }else if(pmtMethod==2){
-       $("#pwCard:hidden" ).toggle();
        $("#pwCash:visible").toggle();
        $( "#pwBankdeposit:visible").toggle();
+       $("#pwBankTransfer:visible").toggle();
+       $("#pwCard:hidden" ).toggle();
         //alert("You have selected pay online");
     }
     else if(pmtMethod==3){
+        $( "#pwBankdeposit:visible").toggle();
         $("#pwCard:visible" ).toggle();
-       $("#pwCash:hidden").toggle();
-       $( "#pwBankdeposit:visible").toggle();
+        $("#pwBankTransfer:visible").toggle();
+        $("#pwCash:hidden").toggle();
+    }
+    else if(pmtMethod==4){
+        $( "#pwBankdeposit:visible").toggle();
+        $("#pwCard:visible" ).toggle();
+        $("#pwCash:visible").toggle();
+        $("#pwBankTransfer:hidden").toggle();
     }
 }
 
@@ -1322,19 +1334,20 @@ function validateCustomerRegForm()
     
     $("#customerErrorModal .modal-body").html("");
     
-    if(errors.length > 0)
-    {
-        var errorText = '';
-        
-        for(var key in errors){
-            var errorText = '' + errors[key] + '<br />';
-            $("#customerErrorModal .modal-body").append(errorText);
-        }
-        $("#customerErrorModal").modal();
-        return false;
-    }
-    else{
-        return true
-    }
+//    if(errors.length > 0)
+//    {
+//        var errorText = '';
+//        
+//        for(var key in errors){
+//            var errorText = '' + errors[key] + '<br />';
+//            $("#customerErrorModal .modal-body").append(errorText);
+//        }
+//        $("#customerErrorModal").modal();
+//        return false;
+//    }
+//    else{
+//        return true
+//    }
     
+    return true;
 }
