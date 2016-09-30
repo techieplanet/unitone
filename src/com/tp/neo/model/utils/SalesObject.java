@@ -5,6 +5,7 @@
  */
 package com.tp.neo.model.utils;
 
+import com.tp.neo.model.utils.Sales;
 import java.util.ArrayList;
 
 /**

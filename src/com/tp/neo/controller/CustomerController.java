@@ -13,7 +13,6 @@ import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
-import com.tp.neo.controller.ProjectController;
 import com.tp.neo.controller.components.FileUploader;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.interfaces.SystemUser;
