@@ -9,7 +9,7 @@ import com.tp.neo.model.Agent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.components.AuditLogger;
-import com.tp.neo.controller.components.FileUploader;
+import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.utils.TrailableManager;

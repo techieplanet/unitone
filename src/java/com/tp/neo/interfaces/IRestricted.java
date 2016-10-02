@@ -10,5 +10,5 @@ package com.tp.neo.interfaces;
  * @author Swedge
  */
 public interface IRestricted {
-    public String getPermissionName(String action);
+    default String getPermissionName(String action){return "";}
 }

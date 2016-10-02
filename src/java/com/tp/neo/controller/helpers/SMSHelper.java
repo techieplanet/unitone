@@ -5,7 +5,7 @@
  */
 package com.tp.neo.controller.helpers;
 
-import com.tp.neo.controller.components.SMSSender;
+import com.tp.neo.model.utils.SMSSender;
 import com.tp.neo.model.Agent;
 
 /**
@@ -34,5 +34,6 @@ public class SMSHelper {
         
         new SMSSender(phone,message).start();
     }
+
     
 }

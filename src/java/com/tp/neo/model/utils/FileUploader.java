@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.tp.neo.controller.components;
+package com.tp.neo.model.utils;
 
+import com.tp.neo.model.utils.OSChecker;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
