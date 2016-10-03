@@ -1,5 +1,9 @@
 #Ignore the following files and folders
 nbproject/
 build/
+<<<<<<< HEAD
 dist/
 .DS_Store
+=======
+dist/
+>>>>>>> orderplumbing

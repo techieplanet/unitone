@@ -14,7 +14,7 @@ import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.Order1;
 import com.tp.neo.model.ProjectUnit;
-import com.tp.neo.model.SaleItem;
+import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.Sales;
 import com.tp.neo.model.utils.SalesObject;
 import java.io.IOException;
@@ -215,7 +215,7 @@ public class OrderController extends HttpServlet {
          **/
     }
     
-    private void lodgePayment(HttpServletRequest request, EntityManager em, SaleItem saleItem, Agent agent)
+    private void lodgePayment(HttpServletRequest request, EntityManager em, OrderItem saleItem, Agent agent)
     {
         
     }
