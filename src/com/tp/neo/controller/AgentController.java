@@ -9,7 +9,7 @@ import com.tp.neo.model.Agent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.components.AuditLogger;
-import com.tp.neo.controller.components.FileUploader;
+import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.utils.TrailableManager;
@@ -168,15 +168,18 @@ public class AgentController extends AppController {
             Query jpqlQuery  = em.createNamedQuery("Agent.findByAgentId");
             jpqlQuery.setParameter("agentId", id);
             List<Agent> agentList = jpqlQuery.getResultList();
-//            
+            log("agentsList gotten");
+            
             request.setAttribute("agent", agentList.get(0));
             request.setAttribute("action", "edit");
             if(addstat == 1) request.setAttribute("success", true);
             
             String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
-            log("imageAccessDirPath: " + imageAccessDirPath);
+            
             request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
             request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agentkins");
+            
+            log("imageAccessDirPath: " + imageAccessDirPath);
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listagents")){
             viewFile = AGENTS_ADMIN;

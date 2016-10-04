@@ -10,7 +10,7 @@ and open the template in the editor.
 
 .homebackdrop{
 
-    height: 280px;
+    height: auto;
     padding: 0;
 }
 .homebackdrop img { width: 100% !important; }
@@ -100,6 +100,11 @@ and open the template in the editor.
 }
 
 
+
+/*Bootstrap form-control class override*/
+.form-control{
+    color: #000 !important;
+}
 /**
  Css for process step
 **/

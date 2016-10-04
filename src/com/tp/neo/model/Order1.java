@@ -7,6 +7,7 @@ package com.tp.neo.model;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -20,12 +21,14 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Prestige
+ * @author swedge-mac
  */
 @Entity
 @Table(name = "\"order\"")
@@ -33,9 +36,28 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Order1.findAll", query = "SELECT o FROM Order1 o"),
     @NamedQuery(name = "Order1.findById", query = "SELECT o FROM Order1 o WHERE o.id = :id"),
-    @NamedQuery(name = "Order1.findByCustomer", query="SELECT o FROM Order1 o WHERE o.customerId = :customerId")
-})
-public class Order1 implements Serializable {
+    @NamedQuery(name = "Order1.findByCustomer", query="SELECT o FROM Order1 o WHERE o.customerId = :customerId"),
+    @NamedQuery(name = "Order1.findByCreatedBy", query = "SELECT o FROM Order1 o WHERE o.createdBy = :createdBy"),
+    @NamedQuery(name = "Order1.findByCreatedDate", query = "SELECT o FROM Order1 o WHERE o.createdDate = :createdDate"),
+    @NamedQuery(name = "Order1.findByModifiedBy", query = "SELECT o FROM Order1 o WHERE o.modifiedBy = :modifiedBy"),
+    @NamedQuery(name = "Order1.findByModifiedDate", query = "SELECT o FROM Order1 o WHERE o.modifiedDate = :modifiedDate"),
+    @NamedQuery(name = "Order1.findByCreatorUserType", query = "SELECT o FROM Order1 o WHERE o.creatorUserType = :creatorUserType"),
+    @NamedQuery(name = "Order1.findByModifierUserType", query = "SELECT o FROM Order1 o WHERE o.modifierUserType = :modifierUserType"),
+    @NamedQuery(name = "Order1.findByApprovedBy", query = "SELECT o FROM Order1 o WHERE o.approvedBy = :approvedBy"),
+    @NamedQuery(name = "Order1.findByApprovedDate", query = "SELECT o FROM Order1 o WHERE o.approvedDate = :approvedDate"),
+    @NamedQuery(name = "Order1.findByApprovalStatus", query = "SELECT o FROM Order1 o WHERE o.approvalStatus = :approvalStatus"),
+    @NamedQuery(name = "Order1.findLastInsertedId", query = "SELECT o FROM Order1 o ORDER BY o.id DESC")})
+
+public class Order1 extends BaseModel {
+
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @Column(name = "approved_by")
+    private Long approvedBy;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "orderId")
+    private Collection<OrderItem> orderItemCollection;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -43,8 +65,21 @@ public class Order1 implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Long id;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "orderId")
-    private Collection<SaleItem> saleItemCollection;
+    @Column(name = "created_date")
+    @Temporal(TemporalType.TIME)
+    private Date createdDate;
+    @Column(name = "modified_date")
+    @Temporal(TemporalType.TIME)
+    private Date modifiedDate;
+    @Column(name = "creator_user_type")
+    private Integer creatorUserType;
+    @Column(name = "modifier_user_type")
+    private Integer modifierUserType;
+    @Column(name = "approved_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date approvedDate;
+    @Column(name = "approval_status")
+    private Short approvalStatus;
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
     private Agent agentId;
@@ -67,13 +102,68 @@ public class Order1 implements Serializable {
         this.id = id;
     }
 
-    @XmlTransient
-    public Collection<SaleItem> getSaleItemCollection() {
-        return saleItemCollection;
+    public Long getCreatedBy() {
+        return createdBy;
     }
 
-    public void setSaleItemCollection(Collection<SaleItem> saleItemCollection) {
-        this.saleItemCollection = saleItemCollection;
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Long getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(Long modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    public Integer getCreatorUserType() {
+        return creatorUserType;
+    }
+
+    public void setCreatorUserType(Integer creatorUserType) {
+        this.creatorUserType = creatorUserType;
+    }
+
+    public Integer getModifierUserType() {
+        return modifierUserType;
+    }
+
+    public void setModifierUserType(Integer modifierUserType) {
+        this.modifierUserType = modifierUserType;
+    }
+
+    public Date getApprovedDate() {
+        return approvedDate;
+    }
+
+    public void setApprovedDate(Date approvedDate) {
+        this.approvedDate = approvedDate;
+    }
+
+    public Short getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(Short approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
 
     public Agent getAgentId() {
@@ -115,6 +205,20 @@ public class Order1 implements Serializable {
     @Override
     public String toString() {
         return "com.tp.neo.model.Order1[ id=" + id + " ]";
+    }
+    
+    public String getPermissionName(String alias){
+        return "";
+    }
+
+
+    @XmlTransient
+    public Collection<OrderItem> getOrderItemCollection() {
+        return orderItemCollection;
+    }
+
+    public void setOrderItemCollection(Collection<OrderItem> orderItemCollection) {
+        this.orderItemCollection = orderItemCollection;
     }
     
 }

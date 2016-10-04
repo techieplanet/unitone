@@ -6,10 +6,14 @@
 package com.tp.neo.controller.helpers;
 
 import com.tp.neo.model.Agent;
-import com.tp.neo.controller.components.MailSender;
-import com.tp.neo.controller.components.AppController;
+import com.tp.neo.model.utils.MailSender;
 import static com.tp.neo.controller.components.AppController.defaultEmail;
 import static com.tp.neo.controller.components.AppController.APP_NAME;
+import com.tp.neo.model.Customer;
+import com.tp.neo.model.Order1;
+import com.tp.neo.model.User;
+import java.util.List;
+import sun.management.resources.agent;
 
 /**
  *
@@ -40,5 +44,28 @@ public class EmailHelper {
         new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, emailSubject, message);
     }
     
+    
+   /*********************************** ORDERS ***********************************/
+    public void sendNewOrderEmail(Order1 order, Customer customer, List<User> recipientsList){
+        String waitingOrdersPageLink = "xyz";
+        String messageBody =   "Dear Admin,"
+                      + "<br/>" + "A new order, ID: <b>" + order.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() 
+                      + " has been created and needs approval from you."
+                      + "<br/>" + "Customer: " 
+                      + "<br/>" 
+                      + "<br/>"  
+                      + "<br/>" + "Please follow the link below to take necessary action."
+                      + "<br/>" +  waitingOrdersPageLink
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Order Waiting for Approval";
+        
+        for(int i=0; i < recipientsList.size(); i++){
+            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+        }
+        
+    }
     
 }

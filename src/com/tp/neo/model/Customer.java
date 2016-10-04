@@ -1,4 +1,4 @@
-/*
+/**
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -66,9 +66,9 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<Order1> order1Collection;
-
     
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
@@ -400,9 +400,5 @@ public class Customer implements Serializable, ITrailable, SystemUser {
 
     public void setOrder1Collection(Collection<Order1> order1Collection) {
         this.order1Collection = order1Collection;
-    }
-
-
-
-    
+    }   
 }

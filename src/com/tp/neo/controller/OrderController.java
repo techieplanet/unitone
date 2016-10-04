@@ -8,7 +8,6 @@ package com.tp.neo.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.tp.neo.controller.components.MailSender;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
@@ -18,6 +17,7 @@ import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.SaleItem;
 import com.tp.neo.controller.helpers.SaleItemObject;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
+import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
@@ -335,14 +335,14 @@ public class OrderController extends HttpServlet {
         lodgement.setPaymentMode(paymentMethod);
         lodgement.setCreatedDate(this.getDateTime());
         lodgement.setCreatedBy(agent.getAgentId());
-        lodgement.setSale(saleItem); 
+//        lodgement.setSale(saleItem); 
         lodgement.setAmount(amtPaid);
         
         if(paymentMethod == 1)
         {
-            lodgement.setBankName(request.get("bankName").toString());
-            lodgement.setDepositorsName(request.get("depositorsName").toString());
-            lodgement.setTellerNo(request.get("tellerNumber").toString());
+//            lodgement.setBankName(request.get("bankName").toString());
+//            lodgement.setDepositorsName(request.get("depositorsName").toString());
+//            lodgement.setTellerNo(request.get("tellerNumber").toString());
 //            lodgement.setAmount(Double.parseDouble(request.getParameter("tellerAmount")));
             
         }
@@ -353,9 +353,9 @@ public class OrderController extends HttpServlet {
         }
         else if(paymentMethod == 4)
         {
-            lodgement.setBankName(request.get("transfer_bankName").toString());
-            lodgement.setDepositorsName(request.get("transfer_depositiorsName").toString());
-            lodgement.setTellerNo(request.get("transfer_transactionId").toString());
+//            lodgement.setBankName(request.get("transfer_bankName").toString());
+//            lodgement.setDepositorsName(request.get("transfer_depositiorsName").toString());
+//            lodgement.setTellerNo(request.get("transfer_transactionId").toString());
 //            lodgement.setAmount(Double.parseDouble(request.getParameter("transfer_amount")));
         }
         

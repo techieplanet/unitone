@@ -28,7 +28,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.PropertyException;
-import com.tp.neo.controller.components.MailSender;
+import com.tp.neo.model.utils.MailSender;
 import com.tp.neo.model.Permission;
 import java.util.ArrayList;
 import javax.persistence.RollbackException;

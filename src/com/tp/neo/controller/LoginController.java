@@ -121,7 +121,7 @@ public class LoginController extends HttpServlet {
     public void processLoginRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String email = request.getParameter("email") != null ? request.getParameter("email") : "";
-        String password = request.getParameter("password") != null ? request.getParameter("password") : "";
+        String password = request.getParameter("password") != null ? request.getParameter("password") : "";//[B@3c9a818d
         String userType = request.getParameter("usertype") != null ? request.getParameter("usertype") : "";
         
         System.out.println("Password: " + password);
@@ -184,8 +184,7 @@ public class LoginController extends HttpServlet {
             e.printStackTrace();
             System.out.println(e.getMessage());
         } finally{
-            if(em != null)
-                em.close();
+            em.close();
         }
     }
 
@@ -273,5 +272,6 @@ public class LoginController extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
 
 }

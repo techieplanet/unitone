@@ -70,6 +70,7 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
     private Collection<Order1> order1Collection;
 
@@ -451,9 +452,6 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
         this.customerCollection = customerCollection;
     }
 
-    
-
-    
 
     @XmlTransient
     public Collection<Order1> getOrder1Collection() {
@@ -463,24 +461,6 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
     public void setOrder1Collection(Collection<Order1> order1Collection) {
         this.order1Collection = order1Collection;
     }
-
-//    public Integer getCreatedBy() {
-//        return createdBy;
-//    }
-//
-//    public void setCreatedBy(Integer createdBy) {
-//        this.createdBy = createdBy;
-//    }
-//
-//    public Integer getModifiedBy() {
-//        return modifiedBy;
-//    }
-//
-//    public void setModifiedBy(Integer modifiedBy) {
-//        this.modifiedBy = modifiedBy;
-//    }
-
-
 
     
 }
