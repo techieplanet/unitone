@@ -65,7 +65,7 @@ function prepareOrderListTable(jsonString)
             rows += tr;
         }
         
-        var table = "<table class='table'>";
+        var table = "<table class='table table-bordered table-striped table-hover'>";
         table += "<thead><tr>";
         table += "<th>Project</th><th>Unit Name</th><th>Amount Payable</th><th>Unit Qty</th><th>Action</th>";
         table += "</tr></thead>";

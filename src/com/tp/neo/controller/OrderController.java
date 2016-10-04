@@ -17,6 +17,9 @@ import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.SaleItem;
 import com.tp.neo.controller.helpers.SaleItemObject;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
+import com.tp.neo.model.CompanyAccount;
+import com.tp.neo.model.Lodgement_;
+import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -282,6 +285,74 @@ public class OrderController extends HttpServlet {
         }
     }   
     
+    public List<OrderItem> prepareOrderItem(SaleItemObjectsList salesItemObject, Agent agent){
+        List<OrderItem> orderItemList = new ArrayList();
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<SaleItemObject> salesItem = salesItemObject.sales;
+        for(SaleItemObject saleItem : salesItem) {
+            
+            OrderItem orderItem = new OrderItem();
+            
+            long unitId = saleItem.productUnitId;
+            ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
+            
+            orderItem.setQuantity(saleItem.productQuanity);
+            orderItem.setInitialDep((double)(saleItem.productMinimumInitialAmount));
+            orderItem.setDiscountAmt(projectUnit.getDiscount());
+            orderItem.setDiscountPercentage(projectUnit.getDiscount());
+            orderItem.setCreatedDate(getDateTime());
+            orderItem.setCreatedBy(agent.getAgentId());
+            
+            orderItemList.add(orderItem);
+        }
+        
+        return orderItemList;
+    }
+    
+    public Lodgement prepareLodgement(Map request, Agent agent) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Lodgement lodgement = new Lodgement();
+        
+        Short paymentMethod = Short.parseShort(request.get("paymentMethod").toString());
+        
+        CompanyAccount companyAccount = em.find(CompanyAccount.class, Integer.parseInt(request.get("companyAccount").toString()));
+        
+        lodgement.setPaymentMode(paymentMethod);
+        lodgement.setCreatedDate(this.getDateTime());
+        lodgement.setCreatedBy(agent.getAgentId());
+        lodgement.setCompanyAccountId(companyAccount);
+        
+        if(paymentMethod == 1) {
+            lodgement.setTransactionId(request.get("tellerNumber").toString());
+            lodgement.setAmount(Double.parseDouble(request.get("tellerAmount").toString()));
+            lodgement.setDepositorName(request.get("depositorsName").toString());
+            lodgement.setOriginAccountName(request.get("accountName").toString());
+            lodgement.setOriginAccountNumber(request.get("accountNo").toString());
+            lodgement.setLodgmentDate(getDateTime());
+        }
+        else if(paymentMethod == 3){
+            
+            lodgement.setAmount(Double.parseDouble(request.get("cashAmount").toString()));
+            
+        }
+        else if(paymentMethod == 4) {
+            
+            lodgement.setDepositorName(request.get("transfer_depositiorsName").toString());
+            lodgement.setTransactionId(request.get("transfer_transactionId").toString());
+            lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
+            lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
+            lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
+            lodgement.setLodgmentDate(getDateTime());
+        }
+        
+        return lodgement;
+    }
     
     private void createSaleItems(Map request, SaleItemObjectsList salesObject, EntityManager em, Order1 order, Agent agent)
     {
@@ -330,6 +401,7 @@ public class OrderController extends HttpServlet {
         System.out.println("From Lodgement, Sale ID : " + saleItemObj.getSaleId());
         SaleItem saleItem = em.find(SaleItem.class, saleItemObj.getSaleId());
         System.out.println("Payment method : " + request.get("paymentMethod").toString());
+        
         Short paymentMethod = Short.parseShort(request.get("paymentMethod").toString());
        
         lodgement.setPaymentMode(paymentMethod);

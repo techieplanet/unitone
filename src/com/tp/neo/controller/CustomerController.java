@@ -8,6 +8,7 @@ package com.tp.neo.controller;
 import com.tp.neo.controller.components.AppController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.Customer;
@@ -15,6 +16,9 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.CompanyAccount;
+import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
@@ -24,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -158,6 +163,10 @@ public class CustomerController extends AppController  {
         request.setAttribute("success", false);
         Gson gson = new GsonBuilder().create();
         
+        HttpSession session = request.getSession();
+        SystemUser user = (SystemUser)session.getAttribute("user");
+        
+        
             try{                                
 
                 /**
@@ -251,7 +260,12 @@ public class CustomerController extends AppController  {
                 SaleItemObjectsList saleItemObjectList = order.getCartData(request);
                 Map requestParameters = order.getRequestParameters(request);
                 
-                order.createOrder(customer, agent, saleItemObjectList, requestParameters);
+                List<OrderItem> orderItem =  order.prepareOrderItem(saleItemObjectList, agent);
+                Lodgement lodgement = order.prepareLodgement(requestParameters, agent);
+                
+                OrderManager orderManager = new OrderManager(user);
+                
+                orderManager.processOrder(agent, customer, lodgement, orderItem);
 
                 
                 viewFile = CUSTOMER_NEW;
@@ -419,6 +433,7 @@ public class CustomerController extends AppController  {
                request.setAttribute("agents", agent.listAgents());
                request.setAttribute("projects", project.listProjects());
                request.setAttribute("action","new");
+               request.setAttribute("companyAccount",getCompanyAccount());
                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
                dispatcher.forward(request, response);
                
@@ -578,7 +593,16 @@ public class CustomerController extends AppController  {
         } 
     }
     
-    
+    private List<CompanyAccount> getCompanyAccount() {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("CompanyAccount.findAll");
+        List<CompanyAccount> resultSet = jplQuery.getResultList();
+        
+        return resultSet;
+    }
     /*Validate the customers details*/
     /*TP: Validation is done here*/
     private void validate(Customer customer, HttpServletRequest request) throws PropertyException, ServletException, IOException{

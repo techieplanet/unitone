@@ -44,6 +44,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "OrderItem.findByCreatedDate", query = "SELECT o FROM OrderItem o WHERE o.createdDate = :createdDate"),
     @NamedQuery(name = "OrderItem.findByCreatedBy", query = "SELECT o FROM OrderItem o WHERE o.createdBy = :createdBy"),
     @NamedQuery(name = "OrderItem.findByModifiedDate", query = "SELECT o FROM OrderItem o WHERE o.modifiedDate = :modifiedDate"),
+    @NamedQuery(name="OrderItem.findByOrder", query = "SELECT o FROM OrderItem o WHERE o.orderId = :orderId"),
     @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy")})
 public class OrderItem extends BaseModel {
 

@@ -441,17 +441,17 @@ public class LodgementController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Query jplQuery = em.createNamedQuery("SaleItem.findByOrderId");
+        Query jplQuery = em.createNamedQuery("OrderItem.findByOrder");
         jplQuery.setParameter("orderId", order);
         
-        List<SaleItem> resultSet = jplQuery.getResultList();
+        List<OrderItem> resultSet = jplQuery.getResultList();
         
-        for(SaleItem orderItem : resultSet) {
+        for(OrderItem orderItem : resultSet) {
             Map<String, String> map = new HashMap();
             
-            map.put("saleId",orderItem.getSaleId().toString());
-            map.put("project", orderItem.getUnitId().getProject().getName());
-            map.put("unitName", orderItem.getUnitId().getTitle());
+            map.put("saleId",orderItem.getId().toString());
+//            map.put("project", orderItem.getUnitId().getProject().getName());
+//            map.put("unitName", orderItem.getUnitId().getTitle());
             map.put("unitQty",orderItem.getQuantity().toString());
             map.put("amountPayable",orderItem.getInitialDep().toString());
             

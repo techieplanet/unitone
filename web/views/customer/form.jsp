@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <!--
@@ -740,16 +741,44 @@
                                             <input type="radio" name="paymentMethod" value="4" id="bankTransfer" onclick="showNecessaryMenu(4)"/>&nbsp; <label for="" style="display:inline !important;cursor:pointer !important;">Bank Transfer </label>
                                         </div>
                                     </div>
+                                    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="companyAccount">Company Account</label>
+                                            <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
+                                                <option value="">--Select Account--</option>
+                                                <c:forEach items="${companyAccount}" var="CA">
+                                                    <option value="${CA.getId()}">${CA.getAccountName()}</option>
+                                                </c:forEach>
+                                            </select>
+                                        </div> 
+                                    </div>
                                 </div>
                                 <!-- End of Payment Method Container -->        
                                             
                                 <!-- Pay via Bank Deposit Div Container -->            
                                 <div class='row' id='pwBankdeposit'>
                                     
+                                    
+                                    
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="bankName">Bank Name</label>
                                             <input type="text" class="form-control" id="bankName" name="bankName" style="width: 100%;">
+                                        </div> 
+                                    </div>
+                                    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="accountNo">Account No</label>
+                                            <input type="text" class="form-control" id="accountNo" name="accountNo" style="width: 100%;">
+                                        </div> 
+                                    </div>
+                                    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="accountNo">Account Name</label>
+                                            <input type="text" class="form-control" id="accountName" name="accountName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
@@ -821,6 +850,20 @@
                                     	<div class="form-group">
                                             <label for="bankName">Bank Name</label>
                                             <input type="text" class="form-control" id="transfer_bankName" name="transfer_bankName" style="width: 100%;">
+                                        </div> 
+                                    </div>
+                                    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="accountNo">Account No</label>
+                                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
+                                        </div> 
+                                    </div>
+                                    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="accountNo">Account Name</label>
+                                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     

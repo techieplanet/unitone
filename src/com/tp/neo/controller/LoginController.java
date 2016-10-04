@@ -184,7 +184,8 @@ public class LoginController extends HttpServlet {
             e.printStackTrace();
             System.out.println(e.getMessage());
         } finally{
-            em.close();
+            if(em != null)
+                em.close();
         }
     }
 
