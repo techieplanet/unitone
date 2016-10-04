@@ -219,5 +219,13 @@ public class Order1 extends BaseModel {
     public void setOrderItemCollection(Collection<OrderItem> orderItemCollection) {
         this.orderItemCollection = orderItemCollection;
     }
+
+    public Long getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(Long approvedBy) {
+        this.approvedBy = approvedBy;
+    }
     
 }

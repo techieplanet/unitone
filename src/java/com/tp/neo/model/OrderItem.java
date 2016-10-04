@@ -47,6 +47,13 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy")})
 public class OrderItem extends BaseModel {
 
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @Column(name = "approval_status")
+    private Short approvalStatus;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "orderItem")
     private Collection<LodgementItem> lodgementItemCollection;
 
@@ -70,13 +77,9 @@ public class OrderItem extends BaseModel {
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-    @Column(name = "created_by")
-    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Order1 orderId;
@@ -208,6 +211,14 @@ public class OrderItem extends BaseModel {
 
     public void setLodgementItemCollection(Collection<LodgementItem> lodgementItemCollection) {
         this.lodgementItemCollection = lodgementItemCollection;
+    }
+
+    public Short getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(Short approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
     
 }
