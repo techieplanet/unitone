@@ -401,4 +401,6 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public void setOrder1Collection(Collection<Order1> order1Collection) {
         this.order1Collection = order1Collection;
     }   
+
+   
 }

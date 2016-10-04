@@ -100,6 +100,7 @@ public class OrderManager {
      */
     private OrderItem createOrderItem(OrderItem orderItem, Order1 order){
             orderItem.setOrderId(order);
+            orderItem.setApprovalStatus((short)0);
             new TrailableManager(orderItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
             
             em.persist(orderItem);
@@ -119,6 +120,7 @@ public class OrderManager {
         lodgementItem.setAmount(orderItem.getInitialDep());
         lodgementItem.setItemId(orderItem);
         lodgementItem.setLodgementId(lodgement);
+        lodgementItem.setApprovalStatus((short)0);
         new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
         em.persist(lodgementItem);
