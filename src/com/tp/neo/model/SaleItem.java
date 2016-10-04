@@ -48,7 +48,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SaleItem.findByCreatedDate", query = "SELECT s FROM SaleItem s WHERE s.createdDate = :createdDate"),
     @NamedQuery(name = "SaleItem.findByCreatedBy", query = "SELECT s FROM SaleItem s WHERE s.createdBy = :createdBy"),
     @NamedQuery(name = "SaleItem.findByModifiedDate", query = "SELECT s FROM SaleItem s WHERE s.modifiedDate = :modifiedDate"),
-    @NamedQuery(name = "SaleItem.findByModifiedBy", query = "SELECT s FROM SaleItem s WHERE s.modifiedBy = :modifiedBy")})
+    @NamedQuery(name = "SaleItem.findByModifiedBy", query = "SELECT s FROM SaleItem s WHERE s.modifiedBy = :modifiedBy"),
+    @NamedQuery(name ="SaleItem.findByOrderId", query="SELECT s FROM SaleItem s WHERE s.orderId = :orderId") })
 public class SaleItem implements Serializable {
 
     @Column(name = "created_by")

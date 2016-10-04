@@ -416,6 +416,7 @@ public class LodgementController extends AppController {
             map.put("id", order.getId().toString());
             map.put("customerName", order.getCustomerId().getLastname() + " " + order.getCustomerId().getFirstname());
             map.put("agentName", order.getAgentId().getLastname() + " " + order.getAgentId().getFirstname());
+            map.put("sales",gson.toJson(getSalesByOrder(order)));
             
             mapList.add(map);
         }
@@ -431,6 +432,32 @@ public class LodgementController extends AppController {
         System.out.println("jsonResponse: " + jsonResponse);
        
         
+    }
+    
+    private List<Map> getSalesByOrder(Order1 order) {
+        List<Map >OrderItemsList = new ArrayList();
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("SaleItem.findByOrderId");
+        jplQuery.setParameter("orderId", order);
+        
+        List<SaleItem> resultSet = jplQuery.getResultList();
+        
+        for(SaleItem orderItem : resultSet) {
+            Map<String, String> map = new HashMap();
+            
+            map.put("saleId",orderItem.getSaleId().toString());
+            map.put("project", orderItem.getUnitId().getProject().getName());
+            map.put("unitName", orderItem.getUnitId().getTitle());
+            map.put("unitQty",orderItem.getQuantity().toString());
+            map.put("amountPayable",orderItem.getInitialDep().toString());
+            
+            OrderItemsList.add(map);
+        }
+        
+        return OrderItemsList;
     }
     /**
      * Returns a short description of the servlet.

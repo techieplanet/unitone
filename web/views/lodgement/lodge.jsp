@@ -16,11 +16,9 @@
       </h1>
     </section>
        
-<div class="row" id="customerListContainer">
 
-<section class="content-header">
-
-
+<section class="content" id="customerListContainer">
+<div class="row" >
 <div class="box">
     <div class="box-header">
       <h3 class="box-title block">
@@ -48,7 +46,7 @@
             <c:forEach items="${customers}" var="customer">
                 <tr id='row<c:out value="${customer.customerId}" />'>
                     <td><img alt="No Image" class="img-responsive img-thumbnail" width="55" height="50" src="<c:out value='/uploads/NeoForce/images/customer/${customer.photoPath}'></c:out>" /></td>
-                    <td class="customerId"><c:out value="${customer.agentId.agentId}" /></td>
+                    <td class="agentId"><c:out value="${customer.agentId.agentId}" /></td>
                     <td class="customerFname"><c:out value="${customer.firstname}" /></td>
                     <td class="customerMname"><c:out value="${customer.middlename}" /></td>
                     <td class="customerLname"><c:out value="${customer.lastname}" /></td>
@@ -57,7 +55,8 @@
                     <td class="customerState"><c:out value="${customer.state}" /></td>
 
                     <td>
-                        <input type="hidden" class="agentImg" value='<c:out value="${customer.agentId.photoPath}"></c:out>' />
+                        <input type="hidden" class="customerImg" value='<c:out value="/uploads/NeoForce/images/customer/${customer.photoPath}"></c:out>' />
+                        <input type="hidden" class="agentImg" value='<c:out value="/uploads/NeoForce/images/agent/${customer.agentId.photoPath}"></c:out>' />
                         <input type="hidden" class="agentName" value='<c:out value="${customer.agentId.lastname} ${customer.agentId.firstname}"></c:out>' />
                         <input type="hidden" class="agentPhone" value='<c:out value="${customer.agentId.phone}"></c:out>' />
                         <a class="btn btn-primary" href="#" onclick="selectCustomer('${pageContext.request.contextPath}','${customer.customerId}')" role="button">Choose</a>
@@ -72,20 +71,21 @@
       <div><span><a href="#" onclick="showSelectedCustomer()">View selected customer</a></span></div>
     </div><!-- /.box-body -->
   </div><!-- /.box -->
-
-</section>
-
 </div>
-
-<div class="row" id="agentSpinnerContainer" style='display:none'>
+</section>
+    
+<!-- Spinner goes here -->
+<div class="row" id="SpinnerContainer" style='display:none'>
 <div class="spinner" >
 <img class='img-responsive' src="${pageContext.request.contextPath}/images/uploadProgress.gif" style="margin: 10px auto" />
 </div>
 </div>
 
+
+<section class="">
 <div class="row" id="customerDetailContainer"  style='display:none'>
      
-     <div class="col-md-10 pull-right">
+     <div class="col-md-7 pull-right">
          
          <div class="box box-solid">
              
@@ -97,14 +97,30 @@
                  
                  <div class="row">
                      
-                     <div class="col-md-3">
-                         <img src="" alt="No image" />
+                     <!-- Customer Details Box-->
+                     <div class="col-md-6">
+                         
+                         <div class="row">
+                             <div class="col-md-3"><img src="" id="customerImage" alt="No Image" class="img-thumbnail img-responsive"></div>
+                             <div class="col-md-9">
+                                 <span id="customerName"></span> <br />
+                                 <span id="customerPhone"></span> <br />
+                                 <span id="customerEmail"></span> <br />
+                                 <span id="customerState"></span> <br />
+                             </div>
+                         </div>
+                         
                      </div>
                      
-                     <div class="col-md-9">
-                         <span class="agent_name"></span><br/>
-                         <span class="agent_moible"></span><br/>
-                         <span class="agent_state"></span>
+                     <!-- Agents Details Box -->
+                     <div class="col-md-6">
+                         <div class="row">
+                             <div class="col-md-3"><img src="" id="agentImage" alt="No Image" class="img-thumbnail img-responsive"></div>
+                             <div class="col-md-9">
+                                 <span id="agentName"></span> <br />
+                                 <span id="agentPhone"></span> <br />
+                             </div>
+                         </div>
                      </div>
                      
                  </div>
@@ -120,6 +136,8 @@
      </div>
      
  </div>
+</section>
+
 
 <div class="row" id="orderContainer"  style='display:none'>
 
@@ -152,7 +170,7 @@
  </div>
 
  <div class="box-footer">
-     <a href="#" onclick="showCustomerList()">Show customer List<<</a>
+     
  </div>
 
 </div>
@@ -161,8 +179,13 @@
 
 </div>
 
- 
-        <!-- Main content -->
+<!-- Order items container goes here -->
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    
+</div>
+
+<!-- Main content -->
         <section class="content" id="lodgementForm" style="display:none">
           <!-- Your Page Content Here -->
           <div class="box">
@@ -215,7 +238,22 @@
               </div><!-- /.box -->
           
         </section><!-- /.content -->
-      </div><!-- /.content-wrapper -->
+        
+        
+</div><!-- /.content-wrapper -->
+
+
+
+
+
+
+
+
+
+
+
+
+        
       
       <!--MODAL-->
       <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
