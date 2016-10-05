@@ -18,7 +18,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -64,7 +66,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByCreatedBy", query = "SELECT a FROM Agent a WHERE a.createdBy = :createdBy"),
     @NamedQuery(name = "Agent.findByModifiedDate", query = "SELECT a FROM Agent a WHERE a.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy")})
-public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
+public class Agent extends BaseModel implements SystemUser  {
+
+    @JoinColumn(name = "account_id", referencedColumnName = "id")
+    @ManyToOne
+    private Account account;
 
     @Column(name = "created_by")
     private Long createdBy;
@@ -72,7 +78,7 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
     private Long modifiedBy;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
-    private Collection<Order1> order1Collection;
+    private Collection<ProductOrder> productOrderCollection;
 
     @Basic(optional = false)
     @Column(name = "generic_id")
@@ -454,12 +460,20 @@ public class Agent implements Serializable, ITrailable,SystemUser, IRestricted {
 
 
     @XmlTransient
-    public Collection<Order1> getOrder1Collection() {
-        return order1Collection;
+    public Collection<ProductOrder> getProductOrderCollection() {
+        return productOrderCollection;
     }
 
-    public void setOrder1Collection(Collection<Order1> order1Collection) {
-        this.order1Collection = order1Collection;
+    public void setProductOrderCollection(Collection<ProductOrder> productOrderCollection) {
+        this.productOrderCollection = productOrderCollection;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     

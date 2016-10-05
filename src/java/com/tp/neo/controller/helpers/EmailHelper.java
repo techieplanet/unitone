@@ -10,10 +10,9 @@ import com.tp.neo.model.utils.MailSender;
 import static com.tp.neo.controller.components.AppController.defaultEmail;
 import static com.tp.neo.controller.components.AppController.APP_NAME;
 import com.tp.neo.model.Customer;
-import com.tp.neo.model.Order1;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.User;
 import java.util.List;
-import sun.management.resources.agent;
 
 /**
  *
@@ -46,7 +45,7 @@ public class EmailHelper {
     
     
    /*********************************** ORDERS ***********************************/
-    public void sendNewOrderEmail(Order1 order, Customer customer, List<User> recipientsList){
+    public void sendNewOrderEmail(ProductOrder order, Customer customer, List<User> recipientsList){
         String waitingOrdersPageLink = "xyz";
         String messageBody =   "Dear Admin,"
                       + "<br/>" + "A new order, ID: <b>" + order.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() 

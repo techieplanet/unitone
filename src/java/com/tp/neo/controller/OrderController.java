@@ -12,7 +12,7 @@ import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
-import com.tp.neo.model.Order1;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.Sales;
@@ -202,11 +202,11 @@ public class OrderController extends HttpServlet {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Order1 order = new Order1();
+        ProductOrder order = new ProductOrder();
     }   
     
     
-    private void createSales(HttpServletRequest request, SalesObject salesObject, EntityManager em, Order1 order, Agent agent)
+    private void createSales(HttpServletRequest request, SalesObject salesObject, EntityManager em, ProductOrder order, Agent agent)
     {
         /**
          * Loop through each of the sales item
@@ -234,7 +234,7 @@ public class OrderController extends HttpServlet {
 //        
 //        //Check if user is an Agent
 //        
-//        Order1 order = new Order1();
+//        ProductOrder order = new ProductOrder();
 //        
 //        Agent agent = em.find(Agent.class, new Long(1));
 //        Customer customer  = em.find(Customer.class, customerId);
@@ -259,7 +259,7 @@ public class OrderController extends HttpServlet {
 //        
 //    }
 //    
-//    private void insertSales(HttpServletRequest request, SalesObject salesObject, EntityManager em, Order1 order, Agent agent)
+//    private void insertSales(HttpServletRequest request, SalesObject salesObject, EntityManager em, ProductOrder order, Agent agent)
 //    {
 //        ArrayList<Sales> sales = salesObject.sales;
 //        Date date = this.getDateTime();

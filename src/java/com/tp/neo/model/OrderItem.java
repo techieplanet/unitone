@@ -51,10 +51,13 @@ public class OrderItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @JoinColumn(name = "unit_id", referencedColumnName = "id")
+    @ManyToOne
+    private ProjectUnit unitId;
     @Column(name = "approval_status")
     private Short approvalStatus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "orderItem")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "itemId")
     private Collection<LodgementItem> lodgementItemCollection;
 
     private static final long serialVersionUID = 1L;
@@ -82,7 +85,7 @@ public class OrderItem extends BaseModel {
     private Date modifiedDate;
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Order1 orderId;
+    private ProductOrder orderId;
 
     public OrderItem() {
     }
@@ -171,11 +174,11 @@ public class OrderItem extends BaseModel {
         this.modifiedBy = modifiedBy;
     }
 
-    public Order1 getOrderId() {
+    public ProductOrder getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(Order1 orderId) {
+    public void setOrderId(ProductOrder orderId) {
         this.orderId = orderId;
     }
 
@@ -219,6 +222,14 @@ public class OrderItem extends BaseModel {
 
     public void setApprovalStatus(Short approvalStatus) {
         this.approvalStatus = approvalStatus;
+    }
+
+    public ProjectUnit getUnitId() {
+        return unitId;
+    }
+
+    public void setUnitId(ProjectUnit unitId) {
+        this.unitId = unitId;
     }
     
 }
