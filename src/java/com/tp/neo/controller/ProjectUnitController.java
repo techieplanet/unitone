@@ -10,6 +10,8 @@ import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.controller.helpers.AccountManager;
+import com.tp.neo.model.Account;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
@@ -207,9 +209,17 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setProject(project);
                 project.getProjectUnitCollection().add(projectUnit);
                 
-
-
-                em.persist(project);
+                em.persist(projectUnit);
+                
+                em.flush();
+                                
+                //set up the account for this unit
+                Account account = new AccountManager().createUnitAccount(projectUnit);
+                
+                //now link the unit and the account by updating the unit
+                em.refresh(projectUnit);
+                projectUnit.setAccount(account);
+                em.flush();
                 
                 em.getTransaction().commit();
                 
@@ -359,27 +369,39 @@ public class ProjectUnitController extends AppController {
     
     
     public void delete(int id){
+        log("starting to delete: " + id);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
-        ProjectUnit projectUnit = (ProjectUnit)query.getSingleResult();
-        
-        //get the project before deleting. We will reload the units in this project 
-        Project project = em.find(Project.class, projectUnit.getProject().getId());
-        
-        em.getTransaction().begin();
-        new TrailableManager(projectUnit).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.remove(projectUnit);
-                
-        em.getTransaction().commit();
-        
-        em.merge(project);
-        
-        
+        try{
+            Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
+            ProjectUnit projectUnit = (ProjectUnit)query.getSingleResult();
 
-        em.close();
-        emf.close();
+            Project project = em.find(Project.class, projectUnit.getProject().getId());
+
+            em.getTransaction().begin();
+
+            projectUnit.setDeleted((short)1);
+            new TrailableManager(projectUnit).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+
+            em.getTransaction().commit();
+
+            em.merge(project);
+            
+            //deactivate the account associated with the unit
+            new AccountManager().deactivateAccount(projectUnit.getAccount());
+
+            em.merge(projectUnit);
+            
+            em.close();
+            emf.close();
+            
+        } catch(PropertyException e){
+               log("Property: " + e.getMessage());
+            }
+            catch(Exception e){
+              log("Exception: " + e.getMessage());
+            }
     }
     
     

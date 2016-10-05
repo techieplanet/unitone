@@ -6,16 +6,21 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
+import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -26,87 +31,52 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Account.findAll", query = "SELECT a FROM Account a"),
-    @NamedQuery(name = "Account.findById", query = "SELECT a FROM Account a WHERE a.id = :id"),
-    @NamedQuery(name = "Account.findByAccountName", query = "SELECT a FROM Account a WHERE a.accountName = :accountName"),
-    @NamedQuery(name = "Account.findByAccountAlias", query = "SELECT a FROM Account a WHERE a.accountAlias = :accountAlias"),
-    @NamedQuery(name = "Account.findByDescription", query = "SELECT a FROM Account a WHERE a.description = :description"),
-    @NamedQuery(name = "Account.findByWeight", query = "SELECT a FROM Account a WHERE a.weight = :weight")})
+    @NamedQuery(name = "Account.findById", query = "SELECT a FROM Account a WHERE a.id = :id")})
 public class Account implements Serializable {
+
+    @OneToMany(mappedBy = "account")
+    private Collection<Agent> agentCollection;
+    @OneToMany(mappedBy = "account")
+    private Collection<ProjectUnit> projectUnitCollection;
+    @OneToMany(mappedBy = "account")
+    private Collection<Customer> customerCollection;
+
+    @Basic(optional = false)
+    @Column(name = "account_code")
+    private String accountCode;
+    @Basic(optional = false)
+    @Column(name = "remote_id")
+    private long remoteId;
+    @Basic(optional = false)
+    @Column(name = "active")
+    private short active;
+    @JoinColumn(name = "account_type_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private AccountType accountTypeId;
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
-    private Integer id;
-    @Basic(optional = false)
-    @Column(name = "account_name")
-    private String accountName;
-    @Basic(optional = false)
-    @Column(name = "account_alias")
-    private String accountAlias;
-    @Basic(optional = false)
-    @Column(name = "description")
-    private String description;
-    @Basic(optional = false)
-    @Column(name = "weight")
-    private int weight;
+    private Long id;
 
     public Account() {
     }
 
-    public Account(Integer id) {
+    public Account(Long id) {
         this.id = id;
     }
 
-    public Account(Integer id, String accountName, String accountAlias, String description, int weight) {
-        this.id = id;
-        this.accountName = accountName;
-        this.accountAlias = accountAlias;
-        this.description = description;
-        this.weight = weight;
-    }
-
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
-    public String getAccountAlias() {
-        return accountAlias;
-    }
-
-    public void setAccountAlias(String accountAlias) {
-        this.accountAlias = accountAlias;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getWeight() {
-        return weight;
-    }
-
-    public void setWeight(int weight) {
-        this.weight = weight;
-    }
-
+    
     @Override
     public int hashCode() {
         int hash = 0;
@@ -130,6 +100,65 @@ public class Account implements Serializable {
     @Override
     public String toString() {
         return "com.tp.neo.model.Account[ id=" + id + " ]";
+    }
+
+    public String getAccountCode() {
+        return accountCode;
+    }
+
+    public void setAccountCode(String accountCode) {
+        this.accountCode = accountCode;
+    }
+
+    public long getRemoteId() {
+        return remoteId;
+    }
+
+    public void setRemoteId(long remoteId) {
+        this.remoteId = remoteId;
+    }
+
+    public short getActive() {
+        return active;
+    }
+
+    public void setActive(short active) {
+        this.active = active;
+    }
+
+    public AccountType getAccountTypeId() {
+        return accountTypeId;
+    }
+
+    public void setAccountTypeId(AccountType accountTypeId) {
+        this.accountTypeId = accountTypeId;
+    }
+
+    @XmlTransient
+    public Collection<Agent> getAgentCollection() {
+        return agentCollection;
+    }
+
+    public void setAgentCollection(Collection<Agent> agentCollection) {
+        this.agentCollection = agentCollection;
+    }
+
+    @XmlTransient
+    public Collection<ProjectUnit> getProjectUnitCollection() {
+        return projectUnitCollection;
+    }
+
+    public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
+        this.projectUnitCollection = projectUnitCollection;
+    }
+
+    @XmlTransient
+    public Collection<Customer> getCustomerCollection() {
+        return customerCollection;
+    }
+
+    public void setCustomerCollection(Collection<Customer> customerCollection) {
+        this.customerCollection = customerCollection;
     }
     
 }

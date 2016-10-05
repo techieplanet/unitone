@@ -10,7 +10,7 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
-import com.tp.neo.model.Order1;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.TrailableManager;
 import java.util.List;
@@ -42,13 +42,13 @@ public class OrderManager {
      * @param orderItems List of items being purchased
      * @return 1 - if all the operations are successful, 0 otherwise
      */
-    public Order1 processOrder(Agent agent, Customer customer, Lodgement lodgement, List<OrderItem> orderItems)
+    public ProductOrder processOrder(Agent agent, Customer customer, Lodgement lodgement, List<OrderItem> orderItems)
     throws PropertyException, RollbackException{
         
         em.getTransaction().begin();
         
         //create the order 
-        Order1 order = createOrder(agent, customer);
+        ProductOrder order = createOrder(agent, customer);
         
         //process the sale items
         for(int i=0; i < orderItems.size(); i++){
@@ -71,9 +71,9 @@ public class OrderManager {
      * @throws PropertyException
      * @throws RollbackException 
      */
-    private Order1 createOrder(Agent agentId, Customer customerId) throws PropertyException, RollbackException{
+    private ProductOrder createOrder(Agent agentId, Customer customerId) throws PropertyException, RollbackException{
         
-        Order1 order = new Order1();
+        ProductOrder order = new ProductOrder();
         
         order.setAgentId(agentId);
         order.setCustomerId(customerId);
@@ -98,7 +98,7 @@ public class OrderManager {
      * @param order the order that the item is mapped to
      * @return OrderItem
      */
-    private OrderItem createOrderItem(OrderItem orderItem, Order1 order){
+    private OrderItem createOrderItem(OrderItem orderItem, ProductOrder order){
             orderItem.setOrderId(order);
             orderItem.setApprovalStatus((short)0);
             new TrailableManager(orderItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
