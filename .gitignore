@@ -3,7 +3,11 @@ nbproject/
 build/
 <<<<<<< HEAD
 dist/
+=======
+<<<<<<< HEAD
+dist/
 .DS_Store
 =======
 dist/
 >>>>>>> orderplumbing
+>>>>>>> neoforce/master
