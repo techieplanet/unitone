@@ -153,7 +153,7 @@ public class LoginController extends HttpServlet {
                 Auditlog auditlog = new Auditlog();
                 auditlog.setActionName("User Login");
                 
-                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));                
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));             
                 
                 auditlog.setLogDate(calendar.getTime());
                 auditlog.setNote(String.format("User %s %s logged in as %s user at %s.",user.getFirstname(),user.getLastname(), userType, calendar.getTime()));

@@ -28,6 +28,7 @@
     <class>com.tp.neo.model.Notification</class>
     <class>com.tp.neo.model.AccountType</class>
     <class>com.tp.neo.model.ProductOrder</class>
+    <class>com.tp.neo.model.Transaction</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/xforce"/>

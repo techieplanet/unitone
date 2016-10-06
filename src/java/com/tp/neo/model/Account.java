@@ -31,8 +31,14 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Account.findAll", query = "SELECT a FROM Account a"),
-    @NamedQuery(name = "Account.findById", query = "SELECT a FROM Account a WHERE a.id = :id")})
+    @NamedQuery(name = "Account.findById", query = "SELECT a FROM Account a WHERE a.id = :id"),
+    @NamedQuery(name = "Account.findByAccountCode", query = "SELECT a FROM Account a WHERE a.accountCode = :accountCode")})
 public class Account implements Serializable {
+
+    @OneToMany(mappedBy = "creditAccount")
+    private Collection<Transaction> transactionCollection;
+    @OneToMany(mappedBy = "debitAccount")
+    private Collection<Transaction> transactionCollection1;
 
     @OneToMany(mappedBy = "account")
     private Collection<Agent> agentCollection;
@@ -159,6 +165,24 @@ public class Account implements Serializable {
 
     public void setCustomerCollection(Collection<Customer> customerCollection) {
         this.customerCollection = customerCollection;
+    }
+
+    @XmlTransient
+    public Collection<Transaction> getTransactionCollection() {
+        return transactionCollection;
+    }
+
+    public void setTransactionCollection(Collection<Transaction> transactionCollection) {
+        this.transactionCollection = transactionCollection;
+    }
+
+    @XmlTransient
+    public Collection<Transaction> getTransactionCollection1() {
+        return transactionCollection1;
+    }
+
+    public void setTransactionCollection1(Collection<Transaction> transactionCollection1) {
+        this.transactionCollection1 = transactionCollection1;
     }
     
 }
