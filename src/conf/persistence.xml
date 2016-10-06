@@ -29,7 +29,7 @@
     <class>com.tp.neo.model.Notification</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://192.168.1.2:5432/xforce"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://192.168.1.6:5432/xforce"/>
       <property name="javax.persistence.jdbc.user" value="postgres"/>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
       <property name="javax.persistence.jdbc.password" value="postgres"/>

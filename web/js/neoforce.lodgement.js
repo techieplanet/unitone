@@ -117,7 +117,7 @@ function prepareOrderListTable(jsonString)
 //    $('#accordion').collapse({
 //      toggle: false
 //    });
-    stopLoading("#customerDetailContainer:hidden");
+    stopLoading("#customerDetailContainer:hidden, #orderItems:hidden");
     
     
     
@@ -147,7 +147,7 @@ function populateCustomerDetails(id){
     $("#agentPhone").text(agentPhone.trim());
 }
 function showCustomerList() {
-    $("#orderContainer:visible, #customerDetailContainer:visible").toggle();
+    $("#orderContainer:visible, #customerDetailContainer:visible, #orderItems:visible").toggle();
     startLoading();
     stopLoading(function(){$("#customerListContainer:hidden").toggle();});
     

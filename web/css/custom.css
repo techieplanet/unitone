@@ -90,7 +90,11 @@ and open the template in the editor.
     width:100% !important;
     display:block !important;
     height:45px !important;
-   
+    overflow: auto;
+}
+
+.productSpan span {
+   display: inline;    
 }
 
 .adding{background: #dff0d8 !important; border-color: #dff0d8 !important;}
