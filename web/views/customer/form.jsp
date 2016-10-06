@@ -738,7 +738,7 @@
                                             <input type="radio" name="paymentMethod" value="2" id="paywithcard" onclick="showNecessaryMenu(2)"/>&nbsp; <label for="paywithcard" style="display:inline !important;cursor:pointer !important;">Credit/Debit Card <img src="${pageContext.request.contextPath}/images/img/paywithcard.png" /></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             </c:if>
                                             <input type="radio" name="paymentMethod" value="3" id="paywithcash" onclick="showNecessaryMenu(3)"/>&nbsp;<label for="paywithcash" style="display:inline !important;"> Cash</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            <input type="radio" name="paymentMethod" value="4" id="bankTransfer" onclick="showNecessaryMenu(4)"/>&nbsp; <label for="" style="display:inline !important;cursor:pointer !important;">Bank Transfer </label>
+                                            <input type="radio" name="paymentMethod" value="4" id="bankTransfer" onclick="showNecessaryMenu(4)"/>&nbsp; <label for="bankTransfer" style="display:inline !important;cursor:pointer !important;">Bank Transfer </label>
                                         </div>
                                     </div>
                                     
@@ -897,14 +897,14 @@
                                 <!-- End of Pay with Cash Div Container -->
                                              
                               </div>
-                             </div>
-                            </div>
+                        </fieldset>
+                         </div>
+         </div>
                                  
                             <div class="col-md-1"></div>
-                    	</fieldset>
                   	</div> <!--/.col-md-12 -->
                  	</div> <!--/.row -->
-                  </div> <!--/.box box-default -->
+ </div> <!--/.box box-default -->
            
           <!-- 
             *****************************************
