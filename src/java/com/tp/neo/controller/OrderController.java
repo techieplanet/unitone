@@ -12,13 +12,13 @@ import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
-import com.tp.neo.model.Order1;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.SaleItem;
 import com.tp.neo.controller.helpers.SaleItemObject;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.model.CompanyAccount;
-import com.tp.neo.model.Lodgement_;
+import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
@@ -255,10 +255,9 @@ public class OrderController extends HttpServlet {
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        
         try {
                 
-                Order1 order = new Order1();
+                ProductOrder order = new ProductOrder();
 
                 //Prepare Order Entity
                 order.setAgentId(agent);
@@ -354,7 +353,7 @@ public class OrderController extends HttpServlet {
         return lodgement;
     }
     
-    private void createSaleItems(Map request, SaleItemObjectsList salesObject, EntityManager em, Order1 order, Agent agent)
+    private void createSaleItems(Map request, SaleItemObjectsList salesObject, EntityManager em, ProductOrder order, Agent agent)
     {
         /**
          * Loop through each of the sales item
@@ -435,16 +434,15 @@ public class OrderController extends HttpServlet {
         em.flush();
     }
     
-    
     private void creditCustomerAccount(Customer customer, double amount) {
         
     }
     
-    private void CreateNewOrderAlert(Order1 order) {
+    private void CreateNewOrderAlert(ProductOrder order) {
         
     }
     
-    private void sendNewOrderEmail(Order1 order, Customer customer) {
+    private void sendNewOrderEmail(ProductOrder order, Customer customer) {
         
         
         MailSender mail = new MailSender();
@@ -489,8 +487,7 @@ public class OrderController extends HttpServlet {
         }
         
         return totalOrderAmountPaid;
-    }
-//    
+    }//    
     
     private Date getDateTime()
     {
@@ -499,13 +496,13 @@ public class OrderController extends HttpServlet {
         return date;
     }
     
-    public List<Order1> listOrders()
+    public List<ProductOrder> listOrders()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Query jplQuery = em.createNamedQuery("Order1.findAll");
-        List<Order1> orderList = jplQuery.getResultList();
+        Query jplQuery = em.createNamedQuery("ProductOrder.findAll");
+        List<ProductOrder> orderList = jplQuery.getResultList();
         
         
         

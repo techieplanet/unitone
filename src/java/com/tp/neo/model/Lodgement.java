@@ -48,6 +48,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Lodgement.findByModifiedBy", query = "SELECT l FROM Lodgement l WHERE l.modifiedBy = :modifiedBy")})
 public class Lodgement extends BaseModel {
 
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+
     @OneToMany(mappedBy = "lodgementId")
     private Collection<LodgementItem> lodgementItemCollection;
 
@@ -77,16 +82,10 @@ public class Lodgement extends BaseModel {
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-    @Column(name = "created_by")
-    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-//    @JoinColumn(name = "sale_id", referencedColumnName = "sale_id")
-//    @ManyToOne(optional = false)
-//    private SaleItem sale;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
+
     @JoinColumn(name = "company_account_id", referencedColumnName = "id")
     @ManyToOne
     private CompanyAccount companyAccountId;
@@ -235,6 +234,5 @@ public class Lodgement extends BaseModel {
     public void setLodgementItemCollection(Collection<LodgementItem> lodgementItemCollection) {
         this.lodgementItemCollection = lodgementItemCollection;
     }
-
     
 }

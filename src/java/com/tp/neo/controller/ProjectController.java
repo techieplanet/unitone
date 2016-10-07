@@ -145,7 +145,9 @@ public class ProjectController extends AppController {
              * So force a hard refresh by querying the db to get the actual set of valid elements 
              * then use that as the valid collection
              */
-            Query query = em.createNamedQuery("ProjectUnit.findByProject").setParameter("project", project);
+            Query query = em.createNamedQuery("ProjectUnit.findByProjectAndActive")
+                                                .setParameter("project", project)
+                                                .setParameter("deleted", 0);
             List<ProjectUnit> projectUnits = query.getResultList();
             
             //good to do this to put every object/entity in sync

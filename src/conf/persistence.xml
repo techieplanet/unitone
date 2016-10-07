@@ -17,9 +17,8 @@
     <class>com.tp.neo.model.Account</class>
     <class>com.tp.neo.model.ProjectUnit1</class>
     <class>com.tp.neo.model.ProjectUnit</class>
-    <class>com.tp.neo.controller.Order1</class>
-    <class>com.tp.neo.model.Order1</class>
-    <class>com.tp.neo.model.Order1_1</class>
+    <class>com.tp.neo.controller.ProductOrder</class>
+    <class>com.tp.neo.model.ProductOrder_1</class>
     <class>com.tp.neo.model.Lodgement1</class>
     <class>com.tp.neo.model.Lodgement</class>
     <class>com.tp.neo.model.CompanyAccount</class>
@@ -27,6 +26,9 @@
     <class>com.tp.neo.model.LodgementItem</class>
     <class>com.tp.neo.model.NotificationType</class>
     <class>com.tp.neo.model.Notification</class>
+    <class>com.tp.neo.model.AccountType</class>
+    <class>com.tp.neo.model.ProductOrder</class>
+    <class>com.tp.neo.model.Transaction</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://192.168.1.6:5432/xforce"/>

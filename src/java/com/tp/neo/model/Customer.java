@@ -59,16 +59,20 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customer.findByCreatedDate", query = "SELECT c FROM Customer c WHERE c.createdDate = :createdDate"),
     @NamedQuery(name = "Customer.findByCreatedBy", query = "SELECT c FROM Customer c WHERE c.createdBy = :createdBy"),
     @NamedQuery(name = "Customer.findByModifiedDate", query = "SELECT c FROM Customer c WHERE c.modifiedDate = :modifiedDate"),
-    @NamedQuery(name = "Customer.findByModifiedBy", query = "SELECT c FROM Customer c WHERE c.modifiedBy = :modifiedBy")})
+    @NamedQuery(name = "Customer.findByModifiedBy", query = "SELECT c FROM Customer c WHERE c.modifiedBy = :modifiedBy"),
+    @NamedQuery(name = "Customer.findAllCount", query = "SELECT COUNT(c) FROM Customer c")})
 public class Customer implements Serializable, ITrailable, SystemUser {
 
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @JoinColumn(name = "account_id", referencedColumnName = "id")
+    @ManyToOne
+    private Account account;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
-    private Collection<Order1> order1Collection;
+    private Collection<ProductOrder> productOrderCollection;
     
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
@@ -394,11 +398,19 @@ public class Customer implements Serializable, ITrailable, SystemUser {
 
     
     @XmlTransient
-    public Collection<Order1> getOrder1Collection() {
-        return order1Collection;
+    public Collection<ProductOrder> getProductOrderCollection() {
+        return productOrderCollection;
     }
 
-    public void setOrder1Collection(Collection<Order1> order1Collection) {
-        this.order1Collection = order1Collection;
-    }   
+    public void setProductOrderCollection(Collection<ProductOrder> productOrderCollection) {
+        this.productOrderCollection = productOrderCollection;
+    }  
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 }
