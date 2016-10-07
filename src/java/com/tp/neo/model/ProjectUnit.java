@@ -6,6 +6,7 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -17,10 +18,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -31,6 +34,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "ProjectUnit.findAll", query = "SELECT p FROM ProjectUnit p"),
+    @NamedQuery(name = "ProjectUnit.findAllActive", query = "SELECT p FROM ProjectUnit p WHERE p.deleted = :deleted"),
     @NamedQuery(name = "ProjectUnit.findById", query = "SELECT p FROM ProjectUnit p WHERE p.id = :id"),
     @NamedQuery(name = "ProjectUnit.findByTitle", query = "SELECT p FROM ProjectUnit p WHERE p.title = :title"),
     @NamedQuery(name = "ProjectUnit.findByCpu", query = "SELECT p FROM ProjectUnit p WHERE p.cpu = :cpu"),
@@ -48,9 +52,24 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "ProjectUnit.findByModifiedBy", query = "SELECT p FROM ProjectUnit p WHERE p.modifiedBy = :modifiedBy"),
     //@NamedQuery(name = "ProjectUnit.findProject", query = "SELECT p.project FROM ProjectUnit p WHERE p.project = :project"),
     @NamedQuery(name = "ProjectUnit.findByProject", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project"),
+    @NamedQuery(name = "ProjectUnit.findByProjectAndActive", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project AND p.deleted = :deleted"),
     @NamedQuery(name = "ProjectUnit.findLastInserted", query = "SELECT p FROM ProjectUnit p ORDER BY p.createdDate DESC")})
     
 public class ProjectUnit extends BaseModel {
+
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @JoinColumn(name = "account_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Account account;
+
+    @Basic(optional = false)
+    @Column(name = "deleted")
+    private short deleted;
+    @OneToMany(mappedBy = "unitId")
+    private Collection<OrderItem> orderItemCollection;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -80,18 +99,12 @@ public class ProjectUnit extends BaseModel {
     @Basic(optional = false)
     @Column(name = "quantity")
     private int quantity;
-    @Column(name = "deleted")
-    private Short deleted;
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-    @Column(name = "created_by")
-    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
     @JoinColumn(name = "project_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Project project;
@@ -190,13 +203,6 @@ public class ProjectUnit extends BaseModel {
         this.quantity = quantity;
     }
 
-    public Short getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Short deleted) {
-        this.deleted = deleted;
-    }
 
     public Date getCreatedDate() {
         return createdDate;
@@ -268,6 +274,31 @@ public class ProjectUnit extends BaseModel {
     @Override
     public String toString() {
         return "com.tp.neo.model.ProjectUnit[ id=" + id + " ]";
+    }
+
+    public short getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(short deleted) {
+        this.deleted = deleted;
+    }
+
+    @XmlTransient
+    public Collection<OrderItem> getOrderItemCollection() {
+        return orderItemCollection;
+    }
+
+    public void setOrderItemCollection(Collection<OrderItem> orderItemCollection) {
+        this.orderItemCollection = orderItemCollection;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
     }
     
 }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * To change this license header, choose License Headers in Agent Properties.
  * To change this template file, choose Tools | Templates
@@ -9,8 +10,10 @@ import com.tp.neo.model.Agent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.components.AuditLogger;
+import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
+import com.tp.neo.model.Account;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.utils.AuthManager;
@@ -28,7 +31,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.OrderBy;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.servlet.RequestDispatcher;
@@ -345,7 +347,16 @@ public class AgentController extends AppController {
                //persist only on save mode
                 em.persist(agent);   
                 
-                //if(true) return;
+                em.flush(); //flush so you can have agent id
+                
+                //set up the account for this unit
+                Account account = new AccountManager().createAgentAccount(agent);
+                
+                //now link the unit and the account by updating the agent
+                em.refresh(agent);
+                agent.setAccount(account);
+                em.flush();
+                
                 em.getTransaction().commit();
                 
                 insertStatus = true;
@@ -920,17 +931,29 @@ public class AgentController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
          
-        agent = em.find(Agent.class, id);
-        
-        em.getTransaction().begin();
-        agent.setDeleted((short)1);
-        
-        new TrailableManager(agent).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        
-        em.getTransaction().commit();
+        try{
+            agent = em.find(Agent.class, id);
 
-        em.close();
-        emf.close();
+            em.getTransaction().begin();
+            agent.setDeleted((short)1);
+            new TrailableManager(agent).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+
+            em.getTransaction().commit();
+                        
+            //deactivate the account associated with the unit
+            new AccountManager().deactivateAccount(agent.getAccount());
+
+            em.merge(agent);
+
+            em.close();
+            emf.close();
+            
+         } catch(PropertyException e){
+               log("Property: " + e.getMessage());
+            }
+            catch(Exception e){
+              log("Exception: " + e.getMessage());
+            }
         
     }
     

@@ -39,6 +39,13 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "LodgementItem.findByModifiedBy", query = "SELECT l FROM LodgementItem l WHERE l.modifiedBy = :modifiedBy")})
 public class LodgementItem extends BaseModel {
 
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @Column(name = "approval_status")
+    private Short approvalStatus;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,13 +58,9 @@ public class LodgementItem extends BaseModel {
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-    @Column(name = "created_by")
-    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
     @JoinColumn(name = "lodgement_id", referencedColumnName = "id")
     @ManyToOne
     private Lodgement lodgementId;
@@ -159,6 +162,14 @@ public class LodgementItem extends BaseModel {
     @Override
     public String toString() {
         return "com.tp.neo.model.LodgementItem[ id=" + id + " ]";
+    }
+
+    public Short getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(Short approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
     
 }
