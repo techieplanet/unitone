@@ -10,11 +10,17 @@ import com.google.gson.GsonBuilder;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Customer;
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.Order1;
+import com.tp.neo.model.SaleItem;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +36,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.bind.PropertyException;
 
 /**
@@ -41,7 +48,7 @@ public class LodgementController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String LODGEMENT_ADMIN = "/views/lodgement/admin.jsp"; 
     private static String LODGEMENT_NEW_AGENT = "/views/lodgement/customer_orders.jsp";
-    private static String LODGEMENT_NEW_CUSTOMER = "/views/lodgement/lodge.jsp";
+    private static String LODGEMENT_NEW = "/views/lodgement/lodge.jsp";
     private final static Logger LOGGER = 
             Logger.getLogger(Lodgement.class.getCanonicalName());
     
@@ -97,34 +104,42 @@ public class LodgementController extends AppController {
     
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-         String invoiceID = request.getParameter("invoice_id") != null ? request.getParameter("invoice_id") : "";
-         String lodge = request.getParameter("lodge")!=null ? request.getParameter("lodge"): "";
-         String viewFile = LODGEMENT_NEW_AGENT;
-         if(!lodge.isEmpty() && !invoiceID.isEmpty()){
-            viewFile = LODGEMENT_NEW_CUSTOMER; 
-            Map<String, String> map = new HashMap<String, String>();
-            map.put("monthlyPay", "10000");
-            map.put("amountLeft", "90000");
-            map.put("monthsPaid", "1");
-            map.put("durationLeft", "9");
+        
+        HttpSession session = request.getSession();
+        SystemUser user = (SystemUser) session.getAttribute("user");
+        
+        String action = request.getParameter("action") != null?request.getParameter("action"):"";
+        
+        long userTypeId = user.getSystemUserTypeId();
+        
+         
+         String viewFile = LODGEMENT_ADMIN;
+         
+         if(action.equals("new")){
+             
+             viewFile = LODGEMENT_NEW;
+             
+             request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
+             
+             if(userTypeId == 1)
+                 request.setAttribute("customers", listCustomers());
+             else if(userTypeId == 2)
+                 request.setAttribute("customers", listAgentCustomers(user.getSystemUserId()));
+             
             
-         request.setAttribute("invoiceId", invoiceID);
-         request.setAttribute("paymentPlan",map);
-//         request.setAttribute("lodgements",listLodgements());
-//         request.setAttribute("resultList","hello");
-         }else{
-         viewFile = LODGEMENT_ADMIN;
-//         request.setAttribute("lodgementList",listLodgements());
-//        request.setAttribute("lodgements",listLodgements());
-//        request.setAttribute("resultList","hello");
+            
+         }
+         else if(action.equals("getOrders")) {
+             
+             listCustomerOrders(request, response);
+         }
+         else{
+            viewFile = LODGEMENT_ADMIN;
+            request.setAttribute("lodgements",listLodgements());;
          }
         
-         //System.out.println("This is the lodgement details "+listLodgements());
-        request.setAttribute("lodgementList",listLodgements());
-        request.setAttribute("lodgements",listLodgements());
-        request.setAttribute("resultList","hello");
-        RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-        dispatcher.forward(request, response);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+            dispatcher.forward(request, response);
             
     }
     
@@ -149,7 +164,7 @@ public class LodgementController extends AppController {
              
              EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
              EntityManager em = emf.createEntityManager();
-             String viewFile = LODGEMENT_NEW_CUSTOMER;
+             String viewFile = LODGEMENT_NEW;
              Lodgement lodgement = new Lodgement();
               Gson gson = new GsonBuilder().create();
     
@@ -233,7 +248,7 @@ public class LodgementController extends AppController {
     }catch(PropertyException err){
                 err.printStackTrace();
                 System.out.println("inside catch area: " + err.getMessage());
-                viewFile = LODGEMENT_NEW_CUSTOMER;
+                viewFile = LODGEMENT_NEW;
              
                 request.setAttribute("errors", errorMessages);    
                 SystemLogger.logSystemIssue("Lodgement", gson.toJson(lodgement), err.getMessage());
@@ -345,7 +360,110 @@ public class LodgementController extends AppController {
         return lodgementList;
     }
     
+    public List<Customer> listCustomers(){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Customer.findAll");
+        
+        List<Customer> custResultList = jplQuery.getResultList();
+        
+        return custResultList;
+    }
     
+    public List<Customer> listAgentCustomers(long agentId) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("CustomerAgent.findByAgentId");
+        jplQuery.setParameter("agentId", agentId);
+        
+        List<CustomerAgent> customerAgentResultList = jplQuery.getResultList();
+        
+        List<Customer> customerList = new ArrayList<Customer>();
+        
+        for(CustomerAgent custAgent : customerAgentResultList){
+            
+            customerList.add(custAgent.getCustomerId());
+        }
+        
+        return customerList;
+        
+    }
+    
+    public void listCustomerOrders(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+    
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Gson gson = new GsonBuilder().create();
+        
+        long customerId = Long.parseLong(request.getParameter("customerId"));
+        
+        Customer customer = em.find(Customer.class, customerId);
+        
+        Query jplQuery = em.createNamedQuery("Order1.findByCustomer");
+        
+        jplQuery.setParameter("customerId", customer);
+        
+        System.out.println("Query : " + jplQuery.toString());
+        List<Order1> orderResultSet = jplQuery.getResultList();
+        
+        List<Map> mapList = new ArrayList<Map>();
+        
+        for(Order1 order : orderResultSet)
+        {
+            Map<String, String> map = new HashMap<String, String>();
+            
+            map.put("id", order.getId().toString());
+            map.put("customerName", order.getCustomerId().getLastname() + " " + order.getCustomerId().getFirstname());
+            map.put("agentName", order.getAgentId().getLastname() + " " + order.getAgentId().getFirstname());
+            map.put("sales",gson.toJson(getSalesByOrder(order)));
+            
+            mapList.add(map);
+        }
+        
+        String jsonResponse = gson.toJson(mapList);
+        
+       
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush(); 
+        response.getWriter().close();
+        System.out.println("jsonResponse: " + jsonResponse);
+       
+        
+    }
+    
+    private List<Map> getSalesByOrder(Order1 order) {
+        List<Map >OrderItemsList = new ArrayList();
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("OrderItem.findByOrder");
+        jplQuery.setParameter("orderId", order);
+        
+        List<OrderItem> resultSet = jplQuery.getResultList();
+        
+        for(OrderItem orderItem : resultSet) {
+            Map<String, String> map = new HashMap();
+            
+            map.put("saleId",orderItem.getId().toString());
+//            map.put("project", orderItem.getUnitId().getProject().getName());
+//            map.put("unitName", orderItem.getUnitId().getTitle());
+            map.put("unitQty",orderItem.getQuantity().toString());
+            map.put("amountPayable",orderItem.getInitialDep().toString());
+            
+            OrderItemsList.add(map);
+        }
+        
+        return OrderItemsList;
+    }
     /**
      * Returns a short description of the servlet.
      *

@@ -1,5 +1,5 @@
 #Ignore the following files and folders
 nbproject/
 build/
-dist/*
+dist/
 .DS_Store
