@@ -85,6 +85,7 @@ public class Lodgement extends BaseModel {
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
+
     @JoinColumn(name = "company_account_id", referencedColumnName = "id")
     @ManyToOne
     private CompanyAccount companyAccountId;

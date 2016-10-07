@@ -50,12 +50,16 @@ public class OrderManager {
         //create the order 
         ProductOrder order = createOrder(agent, customer);
         
+        em.persist(lodgement);
+        em.flush();
+        
         //process the sale items
         for(int i=0; i < orderItems.size(); i++){
             OrderItem orderItem = createOrderItem(orderItems.get(i), order);    //insert sale item
             createLodgementItem(lodgement, orderItem);                          //insert the lodgment items
         }
         
+        em.getTransaction().commit();
         em.close();
         emf.close();
         

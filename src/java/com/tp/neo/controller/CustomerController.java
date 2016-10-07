@@ -8,13 +8,19 @@ package com.tp.neo.controller;
 import com.tp.neo.controller.components.AppController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
-import com.tp.neo.controller.ProjectController;
+import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.CompanyAccount;
+import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,15 +29,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -155,36 +164,33 @@ public class CustomerController extends AppController  {
         request.setAttribute("success", false);
         Gson gson = new GsonBuilder().create();
         
+        HttpSession session = request.getSession();
+        SystemUser user = (SystemUser)session.getAttribute("user");
+        
+        
             try{                                
 
-                em.getTransaction().begin();
-                
-               
                 /**
                  * Godson: why this, the check has being done on processPostRequest(),
                  * so if the customer_id parameter is empty, control is transfered here
                  * 
                 **/
-                if(!(request.getParameter("customer_id").equals(""))) { //edit mode
-                    customer = em.find(Customer.class, new Long(Integer.parseInt(request.getParameter("customer_id"))));
-                }
+                
                
 //               Date date = new Date();
 //               SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
 //               String formattedDate = sdf.format(date);
                
                
-                String path = root+"/images/uploads/customers/";
+                //String path = root+"/images/uploads/customers/";
+                
                 long unixTime = System.currentTimeMillis() / 1000L;
                 
-                 validate(customer,request);
-                 customerFileName = uploadCustomerPicture(customer,request,customerFileName);
-                 customerKinFileName = uploadCustomerKinPicture(customer,request,customerKinFileName);
-               
-                Integer i = 1; 
-                Long l = new Long(i);
-                Long id = new Long(4);
-                Agent agent = em.find(Agent.class, id);
+                validate(customer,request);
+                
+                long agentId = Long.parseLong(request.getParameter("agent_id"));
+                
+                Agent agent = em.find(Agent.class, agentId);
                 customer.setFirstname(request.getParameter("customerFirstname"));
                 customer.setLastname(request.getParameter("customerLastname"));               
                 customer.setEmail(request.getParameter("customerEmail"));
@@ -200,41 +206,68 @@ public class CustomerController extends AppController  {
                 customer.setKinAddress(request.getParameter("customerKinAddress"));
                 
                 customer.setAgentId(agent);
-                //customer.setCustomerId(l);
-               
-//                if(true) throw new Exception("User triggered exception");
                 
                 new TrailableManager(customer).registerInsertTrailInfo((long)1);
                 customer.setDeleted((short)0);
-//                if(customerFileName!=null){
-//                customer.setPhotoPath(customerFileName);
-//                }
-//                if(customerKinFileName != null){
-//                customer.setKinPhotoPath(customerKinFileName);
-//                }
-                
-              
                 
                 
+                System.out.println("*********************************************");
+                System.out.println("Path : " + request.getPart("customerPhoto").getSubmittedFileName());
+                System.out.println("*********************************************");
+                
+                 //handle the pictures now
+                customerFileName = FileUploader.getSubmittedFileName(request.getPart("customerPhoto"));
+                customerKinFileName = FileUploader.getSubmittedFileName(request.getPart("customerKinPhoto"));
+                 
+                 if(customerFileName != null && !customerFileName.equals("")){
+                    Part filePart = request.getPart("customerPhoto");
+                    String saveName = "customer_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
+                    customer.setPhotoPath(saveName);
+                    customerFileName = saveName;
+                    new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "customer", saveName, true);
+                }
+                else{
+                    customer.setPhotoPath("default");
+                }
+                 
+                if(customerKinFileName != null && !customerKinFileName.equals("")){
+                    Part filePart = request.getPart("customerKinPhoto");
+                    String saveName = "customerKin_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
+                    customer.setKinPhotoPath(saveName);
+                    customerKinFileName = saveName;
+                    new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "customerKin", saveName, true);
+                }
+                else{
+                    customer.setKinPhotoPath("default");
+                }
                 
                //persist only on save mode
-
+                em.getTransaction().begin();
                 
-                    em.persist(customer);
-                   // em.getTransaction().commit();
-//                
+                em.persist(customer);
+                em.flush();  
 //         
                 CustomerAgent customerAgent =  new CustomerAgent();
                 customerAgent.setAgentId(agent);
                 customerAgent.setCustomerId(customer);
-                
-             //em.getTransaction().begin();
-//                
+                                
                 em.persist(customerAgent);
-                em.getTransaction().commit();
                 
+                em.getTransaction().commit();
                 em.close();
                 emf.close();
+                
+                OrderController order = new OrderController();
+                SaleItemObjectsList saleItemObjectList = order.getCartData(request);
+                Map requestParameters = order.getRequestParameters(request);
+                
+                List<OrderItem> orderItem =  order.prepareOrderItem(saleItemObjectList, agent);
+                Lodgement lodgement = order.prepareLodgement(requestParameters, agent);
+                
+                OrderManager orderManager = new OrderManager(user);
+                
+                orderManager.processOrder(agent, customer, lodgement, orderItem);
+
                 
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
@@ -245,7 +278,7 @@ public class CustomerController extends AppController  {
                 
             }
             catch (PropertyException err){
-            err.printStackTrace();
+                err.printStackTrace();
                 //System.out.println("inside catch area: " + err.getMessage());
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
@@ -254,11 +287,13 @@ public class CustomerController extends AppController  {
                 request.setAttribute("errors", errorMessages);    
                 SystemLogger.logSystemIssue("Customer", gson.toJson(customer), err.getMessage());
             }
+            catch(RollbackException rollExcept) {
+                
+                em.getTransaction().rollback();
+                
+            }
             catch(Exception e){
-                
-                
                 e.printStackTrace();
-                //System.out.println("System Error: " + e.getMessage());
                 SystemLogger.logSystemIssue("Customer", gson.toJson(customer), e.getMessage());
             }
             
@@ -351,6 +386,7 @@ public class CustomerController extends AppController  {
                 request.setAttribute("customers", listCustomers());
                 request.setAttribute("success",true);
                 request.setAttribute("customer", customer);
+                request.setAttribute("action","edit");
                 
             }
             catch(Exception e){
@@ -360,7 +396,8 @@ public class CustomerController extends AppController  {
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
                 request.setAttribute("customer", customer);
-                request.setAttribute("errors", errorMessages);    
+                request.setAttribute("errors", errorMessages);
+                request.setAttribute("action","edit");
                 SystemLogger.logSystemIssue("Customer", gson.toJson(customer), e.getMessage());
             }
            
@@ -397,6 +434,7 @@ public class CustomerController extends AppController  {
                request.setAttribute("agents", agent.listAgents());
                request.setAttribute("projects", project.listProjects());
                request.setAttribute("action","new");
+               request.setAttribute("companyAccount",CompanyAccountHelper.getCompanyAccounts());
                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
                dispatcher.forward(request, response);
                
@@ -418,6 +456,7 @@ public class CustomerController extends AppController  {
             List<Customer> customerList = jpqlQuery.getResultList();
 //            
             request.setAttribute("customer", customerList.get(0));
+            request.setAttribute("action","edit");
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = CUSTOMER_ADMIN;
@@ -555,7 +594,16 @@ public class CustomerController extends AppController  {
         } 
     }
     
-    
+    private List<CompanyAccount> getCompanyAccount() {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("CompanyAccount.findAll");
+        List<CompanyAccount> resultSet = jplQuery.getResultList();
+        
+        return resultSet;
+    }
     /*Validate the customers details*/
     /*TP: Validation is done here*/
     private void validate(Customer customer, HttpServletRequest request) throws PropertyException, ServletException, IOException{

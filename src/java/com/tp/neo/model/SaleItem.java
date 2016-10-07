@@ -6,8 +6,10 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,6 +18,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -28,79 +31,102 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author swedge-mac
+ * @author Prestige
  */
 @Entity
-@Table(name = "order_item")
+@Table(name = "sale_item")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "OrderItem.findAll", query = "SELECT o FROM OrderItem o"),
-    @NamedQuery(name = "OrderItem.findById", query = "SELECT o FROM OrderItem o WHERE o.id = :id"),
-    @NamedQuery(name = "OrderItem.findByQuantity", query = "SELECT o FROM OrderItem o WHERE o.quantity = :quantity"),
-    @NamedQuery(name = "OrderItem.findByInitialDep", query = "SELECT o FROM OrderItem o WHERE o.initialDep = :initialDep"),
-    @NamedQuery(name = "OrderItem.findByDiscountAmt", query = "SELECT o FROM OrderItem o WHERE o.discountAmt = :discountAmt"),
-    @NamedQuery(name = "OrderItem.findByDiscountPercentage", query = "SELECT o FROM OrderItem o WHERE o.discountPercentage = :discountPercentage"),
-    @NamedQuery(name = "OrderItem.findByDeleted", query = "SELECT o FROM OrderItem o WHERE o.deleted = :deleted"),
-    @NamedQuery(name = "OrderItem.findByCreatedDate", query = "SELECT o FROM OrderItem o WHERE o.createdDate = :createdDate"),
-    @NamedQuery(name = "OrderItem.findByCreatedBy", query = "SELECT o FROM OrderItem o WHERE o.createdBy = :createdBy"),
-    @NamedQuery(name = "OrderItem.findByModifiedDate", query = "SELECT o FROM OrderItem o WHERE o.modifiedDate = :modifiedDate"),
-    @NamedQuery(name="OrderItem.findByOrder", query = "SELECT o FROM OrderItem o WHERE o.orderId = :orderId"),
-    @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy")})
-public class OrderItem extends BaseModel {
+    @NamedQuery(name = "SaleItem.findAll", query = "SELECT s FROM SaleItem s"),
+    @NamedQuery(name = "SaleItem.findBySaleId", query = "SELECT s FROM SaleItem s WHERE s.saleId = :saleId"),
+    @NamedQuery(name = "SaleItem.findByDatetime", query = "SELECT s FROM SaleItem s WHERE s.datetime = :datetime"),
+    @NamedQuery(name = "SaleItem.findByQuantity", query = "SELECT s FROM SaleItem s WHERE s.quantity = :quantity"),
+    @NamedQuery(name = "SaleItem.findByInitialDep", query = "SELECT s FROM SaleItem s WHERE s.initialDep = :initialDep"),
+    @NamedQuery(name = "SaleItem.findByDiscountAmt", query = "SELECT s FROM SaleItem s WHERE s.discountAmt = :discountAmt"),
+    @NamedQuery(name = "SaleItem.findByDiscountPercentage", query = "SELECT s FROM SaleItem s WHERE s.discountPercentage = :discountPercentage"),
+    @NamedQuery(name = "SaleItem.findByDeleted", query = "SELECT s FROM SaleItem s WHERE s.deleted = :deleted"),
+    @NamedQuery(name = "SaleItem.findByCreatedDate", query = "SELECT s FROM SaleItem s WHERE s.createdDate = :createdDate"),
+    @NamedQuery(name = "SaleItem.findByCreatedBy", query = "SELECT s FROM SaleItem s WHERE s.createdBy = :createdBy"),
+    @NamedQuery(name = "SaleItem.findByModifiedDate", query = "SELECT s FROM SaleItem s WHERE s.modifiedDate = :modifiedDate"),
+    @NamedQuery(name = "SaleItem.findByModifiedBy", query = "SELECT s FROM SaleItem s WHERE s.modifiedBy = :modifiedBy"),
+    @NamedQuery(name ="SaleItem.findByOrderId", query="SELECT s FROM SaleItem s WHERE s.orderId = :orderId") })
+public class SaleItem implements Serializable {
 
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-    @JoinColumn(name = "unit_id", referencedColumnName = "id")
-    @ManyToOne
-    private ProjectUnit unitId;
-    @Column(name = "approval_status")
-    private Short approvalStatus;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "itemId")
-    private Collection<LodgementItem> lodgementItemCollection;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "saleitem")
+//    private Collection<Lodgement> lodgementCollection;
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "sale_id")
+    private Long saleId;
+    
+    @Column(name = "datetime")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date datetime;
+    
     @Column(name = "quantity")
     private Integer quantity;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "initial_dep")
     private Double initialDep;
+    
     @Column(name = "discount_amt")
     private Double discountAmt;
+    
     @Column(name = "discount_percentage")
     private Double discountPercentage;
+    
     @Column(name = "deleted")
     private Short deleted;
+    
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
+    
+    
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
+    
+    
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private ProductOrder orderId;
-
-    public OrderItem() {
+    private Order1 orderId;
+    
+    
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "unit_id", referencedColumnName = "id")
+    protected ProjectUnit unitId;
+    
+    
+    
+    public SaleItem() {
     }
 
-    public OrderItem(Long id) {
-        this.id = id;
+    public SaleItem(Long saleId) {
+        this.saleId = saleId;
     }
 
-    public Long getId() {
-        return id;
+    public Long getSaleId() {
+        return saleId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setSaleId(Long saleId) {
+        this.saleId = saleId;
+    }
+
+    public Date getDatetime() {
+        return datetime;
+    }
+
+    public void setDatetime(Date datetime) {
+        this.datetime = datetime;
     }
 
     public Integer getQuantity() {
@@ -175,54 +201,12 @@ public class OrderItem extends BaseModel {
         this.modifiedBy = modifiedBy;
     }
 
-    public ProductOrder getOrderId() {
+    public Order1 getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(ProductOrder orderId) {
+    public void setOrderId(Order1 orderId) {
         this.orderId = orderId;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof OrderItem)) {
-            return false;
-        }
-        OrderItem other = (OrderItem) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "com.tp.neo.model.OrderItem[ id=" + id + " ]";
-    }
-
-    @XmlTransient
-    public Collection<LodgementItem> getLodgementItemCollection() {
-        return lodgementItemCollection;
-    }
-
-    public void setLodgementItemCollection(Collection<LodgementItem> lodgementItemCollection) {
-        this.lodgementItemCollection = lodgementItemCollection;
-    }
-
-    public Short getApprovalStatus() {
-        return approvalStatus;
-    }
-
-    public void setApprovalStatus(Short approvalStatus) {
-        this.approvalStatus = approvalStatus;
     }
 
     public ProjectUnit getUnitId() {
@@ -231,6 +215,57 @@ public class OrderItem extends BaseModel {
 
     public void setUnitId(ProjectUnit unitId) {
         this.unitId = unitId;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (saleId != null ? saleId.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof SaleItem)) {
+            return false;
+        }
+        SaleItem other = (SaleItem) object;
+        if ((this.saleId == null && other.saleId != null) || (this.saleId != null && !this.saleId.equals(other.saleId))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "com.tp.neo.model.SaleItem[ saleId=" + saleId + " ]";
+    }
+
+//    public Integer getCreatedBy() {
+//        return createdBy;
+//    }
+//
+//    public void setCreatedBy(Integer createdBy) {
+//        this.createdBy = createdBy;
+//    }
+//
+//    public Integer getModifiedBy() {
+//        return modifiedBy;
+//    }
+//
+//    public void setModifiedBy(Integer modifiedBy) {
+//        this.modifiedBy = modifiedBy;
+//    }
+
+    @XmlTransient
+    public Collection<Lodgement> getLodgementCollection() {
+        List<Lodgement> lodgement = new ArrayList(); 
+        return lodgement;
+    }
+
+    public void setLodgementCollection(Collection<Lodgement> lodgementCollection) {
+        //this.lodgementCollection = lodgementCollection;
     }
     
 }

@@ -5,7 +5,6 @@
  */
 package com.tp.neo.model.utils;
 
-import com.tp.neo.model.utils.OSChecker;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
