@@ -15,7 +15,6 @@ import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.Order1;
-import com.tp.neo.model.SaleItem;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;

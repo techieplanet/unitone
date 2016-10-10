@@ -67,10 +67,10 @@ function prepareOrderListTable(jsonString)
         
         var table = "<table class='table table-bordered table-striped table-hover'>";
         table += "<thead><tr>";
-        table += "<th>Project</th><th>Unit Name</th><th>Amount Payable</th><th>Unit Qty</th><th>Action</th>";
+        table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>Action</th>";
         table += "</tr></thead>";
         table += rows  + "</table>";
-        var div = "<div><button class='btn btn-primary'>Proceed</button></div>";
+        var div = "<div><button class='btn btn-primary pull-right'>Proceed</button></div>";
         
         table += div;
         createOrderItemList(orderId,count,table,agentName);

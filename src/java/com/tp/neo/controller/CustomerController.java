@@ -30,10 +30,12 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -204,6 +206,9 @@ public class CustomerController extends AppController  {
                 customer.setKinName(request.getParameter("customerKinName"));
                 customer.setKinPhone(request.getParameter("customerKinPhone"));
                 customer.setKinAddress(request.getParameter("customerKinAddress"));
+                customer.setCreatedBy(agentId);
+                customer.setCreatedDate(getDateTime().getTime());
+                
                 
                 customer.setAgentId(agent);
                 
@@ -327,23 +332,16 @@ public class CustomerController extends AppController  {
                     customer = em.find(Customer.class, new Long(Integer.parseInt(request.getParameter("customer_id"))));
                 }
                
-              Long id = new Long(3);
-               Agent agent = em.find(Agent.class, id);
-               Date date = new Date();
-//               SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
-//               String formattedDate = sdf.format(date);
-              
                
-                String path = root+"/images/uploads/customers/";
-                long unixTime = System.currentTimeMillis() / 1000L;
+               Long id = Long.parseLong(request.getParameter("customerId"));
+               customer = em.find(Customer.class, id);
+ 
+                validate(customer,request);
+                customerFileName = uploadCustomerPicture(customer,request,customerFileName);
+                customerKinFileName = uploadCustomerKinPicture(customer,request,customerKinFileName);
+               
                 
-                 validate(customer,request);
-                 customerFileName = uploadCustomerPicture(customer,request,customerFileName);
-                 customerKinFileName = uploadCustomerKinPicture(customer,request,customerKinFileName);
-               
-                Integer i = 2; 
-                Long l = new Long(i);
-               new TrailableManager(customer).registerUpdateTrailInfo((long)1);
+                new TrailableManager(customer).registerUpdateTrailInfo(id);
                
                 customer.setFirstname(request.getParameter("customerFirstname"));
                 customer.setLastname(request.getParameter("customerLastname"));               
@@ -700,6 +698,12 @@ public class CustomerController extends AppController  {
         em.close();
         emf.close();
         
+    }
+    
+    private Calendar getDateTime()
+    {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        return calendar;
     }
     
       /*TP: Getting the customer Id for public use*/

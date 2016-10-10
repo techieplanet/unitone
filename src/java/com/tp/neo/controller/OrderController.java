@@ -8,13 +8,15 @@ package com.tp.neo.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.OrderManager;
+import com.tp.neo.controller.helpers.OrderObjectWrapper;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.Order1;
 import com.tp.neo.model.ProjectUnit;
-import com.tp.neo.model.SaleItem;
 import com.tp.neo.controller.helpers.SaleItemObject;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.model.CompanyAccount;
@@ -43,6 +45,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpSession;
@@ -57,6 +60,7 @@ public class OrderController extends HttpServlet {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String ORDER_ADMIN = "/views/order/admin.jsp"; 
     private static String ORDER_NEW = "/views/order/add.jsp";
+    private final  String ORDER_APPROVAL = "/views/order/approval.jsp";
     private final static Logger LOGGER = 
             Logger.getLogger(Customer.class.getCanonicalName());
     
@@ -157,9 +161,13 @@ public class OrderController extends HttpServlet {
         //Project listprojects = project.listProjects();
         if (action.equalsIgnoreCase("new")){
                viewFile = ORDER_NEW;
+               request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
         }
         
-     
+        else if(action.equalsIgnoreCase("approval")) {
+            viewFile = ORDER_APPROVAL; 
+            request.setAttribute("pendingOrders", listPendingOrders());
+        }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = ORDER_ADMIN;
             request.setAttribute("orders", listOrders());
@@ -213,23 +221,37 @@ public class OrderController extends HttpServlet {
         return salesObj;
     }
     
-    public void initOrderProcess(HttpServletRequest request) {
+    public void initOrderProcess(HttpServletRequest request)  {
         
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        Agent agent = null;
-        Customer customer = null;
-        
-        Long customerId = Long.parseLong(request.getParameter("customer_id"));
-        customer  = em.find(Customer.class, customerId);
-        
-        long agentId = Long.parseLong(request.getParameter("agent_id"));
-        agent = em.find(Agent.class, agentId);
-        
-        SaleItemObjectsList saleItemObject = getCartData(request);
-        
-        createOrder(customer,agent,saleItemObject,getRequestParameters(request));
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            Agent agent = null;
+            Customer customer = null;
+            
+            Long customerId = Long.parseLong(request.getParameter("customer_id"));
+            customer  = em.find(Customer.class, customerId);
+            
+            long agentId = Long.parseLong(request.getParameter("agent_id"));
+            agent = em.find(Agent.class, agentId);
+            
+            SaleItemObjectsList saleItemObject = getCartData(request);
+            
+            //Get Session User
+            HttpSession session = request.getSession();
+            SystemUser user  = (SystemUser) session.getAttribute("user");
+            
+            List<OrderItem> orderItems = prepareOrderItem(saleItemObject, agent);
+            Lodgement lodgement = prepareLodgement(getRequestParameters(request), agent);
+            
+            OrderManager orderManager = new OrderManager(user);
+            orderManager.processOrder(agent, customer, lodgement, orderItems);
+        } catch (PropertyException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RollbackException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }
     
@@ -251,40 +273,7 @@ public class OrderController extends HttpServlet {
         return map;
     }
     
-    public void createOrder(Customer customer, Agent agent, SaleItemObjectsList saleItemObject,Map request)
-    {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        try {
-                
-                Order1 order = new Order1();
 
-                //Prepare Order Entity
-                order.setAgentId(agent);
-                order.setCustomerId(customer);
-               
-                em.getTransaction().begin();
-              
-                em.persist(order);
-                em.flush(); 
-                
-                createSaleItems(request, saleItemObject, em, order, agent);
-
-                em.getTransaction().commit();
-
-                creditCustomerAccount(customer, totalAmountDeposited);
-                CreateNewOrderAlert(order);
-        }
-        catch(Exception ex){
-            
-            em.getTransaction().rollback();
-            
-            System.out.println("Exception NeoForce: " + ex.getMessage());
-            ex.printStackTrace();
-        }
-    }   
-    
     public List<OrderItem> prepareOrderItem(SaleItemObjectsList salesItemObject, Agent agent){
         List<OrderItem> orderItemList = new ArrayList();
         
@@ -303,7 +292,7 @@ public class OrderController extends HttpServlet {
             orderItem.setInitialDep((double)(saleItem.productMinimumInitialAmount));
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
-            orderItem.setCreatedDate(getDateTime());
+            orderItem.setCreatedDate(getDateTime().getTime());
             orderItem.setCreatedBy(agent.getAgentId());
             
             orderItemList.add(orderItem);
@@ -324,7 +313,7 @@ public class OrderController extends HttpServlet {
         CompanyAccount companyAccount = em.find(CompanyAccount.class, Integer.parseInt(request.get("companyAccount").toString()));
         
         lodgement.setPaymentMode(paymentMethod);
-        lodgement.setCreatedDate(this.getDateTime());
+        lodgement.setCreatedDate(this.getDateTime().getTime());
         lodgement.setCreatedBy(agent.getAgentId());
         lodgement.setCompanyAccountId(companyAccount);
         
@@ -334,7 +323,7 @@ public class OrderController extends HttpServlet {
             lodgement.setDepositorName(request.get("depositorsName").toString());
             lodgement.setOriginAccountName(request.get("accountName").toString());
             lodgement.setOriginAccountNumber(request.get("accountNo").toString());
-            lodgement.setLodgmentDate(getDateTime());
+            lodgement.setLodgmentDate(getDateTime().getTime());
         }
         else if(paymentMethod == 3){
             
@@ -348,94 +337,13 @@ public class OrderController extends HttpServlet {
             lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
             lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
             lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
-            lodgement.setLodgmentDate(getDateTime());
+            lodgement.setLodgmentDate(getDateTime().getTime());
         }
         
         return lodgement;
     }
     
-    private void createSaleItems(Map request, SaleItemObjectsList salesObject, EntityManager em, Order1 order, Agent agent)
-    {
-        /**
-         * Loop through each of the sales item
-         * create a sale record, and get the sale id
-         * create a new lodgement for the sale.
-         **/
-        
-        ArrayList<SaleItemObject> saleItems = salesObject.sales;
-        Date date = this.getDateTime();
-        
-        double totalAmountPaid = 0;
-        for(SaleItemObject saleItem : saleItems) 
-        {
-            
-            SaleItem saleItemObject = new SaleItem();
-            
-            long unitId = saleItem.productUnitId;
-            ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
-            
-            
-            saleItemObject.setOrderId(order);
-            saleItemObject.setUnitId(projectUnit);
-            saleItemObject.setQuantity(saleItem.productQuanity);
-            saleItemObject.setInitialDep(saleItem.productMinimumInitialAmount);
-            saleItemObject.setDiscountAmt(projectUnit.getDiscount());
-            saleItemObject.setDiscountPercentage(projectUnit.getCommissionPercentage());
-            saleItemObject.setCreatedBy(agent.getAgentId());
-            saleItemObject.setCreatedDate(date);
-            
-            
-            
-            em.persist(saleItemObject);
-            em.flush();
-            System.out.println("Sale Id : " + saleItemObject.getSaleId());
-            
-            lodgePayment(request, em, saleItemObject, agent, saleItem.productMinimumInitialAmount);
-        }
-    }
-    
-     private void lodgePayment(Map request, EntityManager em, SaleItem saleItemObj, Agent agent, double amtPaid)
-    {
-        
-        Lodgement lodgement = new Lodgement();
-        System.out.println("From Lodgement, Sale ID : " + saleItemObj.getSaleId());
-        SaleItem saleItem = em.find(SaleItem.class, saleItemObj.getSaleId());
-        System.out.println("Payment method : " + request.get("paymentMethod").toString());
-        
-        Short paymentMethod = Short.parseShort(request.get("paymentMethod").toString());
-       
-        lodgement.setPaymentMode(paymentMethod);
-        lodgement.setCreatedDate(this.getDateTime());
-        lodgement.setCreatedBy(agent.getAgentId());
-//        lodgement.setSale(saleItem); 
-        lodgement.setAmount(amtPaid);
-        
-        if(paymentMethod == 1)
-        {
-//            lodgement.setBankName(request.get("bankName").toString());
-//            lodgement.setDepositorsName(request.get("depositorsName").toString());
-//            lodgement.setTellerNo(request.get("tellerNumber").toString());
-//            lodgement.setAmount(Double.parseDouble(request.getParameter("tellerAmount")));
-            
-        }
-        else if(paymentMethod == 3)
-        {
-//            lodgement.setAmount(Double.parseDouble(request.getParameter("cashAmount")));
-            
-        }
-        else if(paymentMethod == 4)
-        {
-//            lodgement.setBankName(request.get("transfer_bankName").toString());
-//            lodgement.setDepositorsName(request.get("transfer_depositiorsName").toString());
-//            lodgement.setTellerNo(request.get("transfer_transactionId").toString());
-//            lodgement.setAmount(Double.parseDouble(request.getParameter("transfer_amount")));
-        }
-        
-        em.persist(lodgement);
-        em.flush();
-    }
-    
-    
+  
     private void creditCustomerAccount(Customer customer, double amount) {
         
     }
@@ -492,11 +400,10 @@ public class OrderController extends HttpServlet {
     }
 //    
     
-    private Date getDateTime()
+    private Calendar getDateTime()
     {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
-        Date date = calendar.getTime();
-        return date;
+        return calendar;
     }
     
     public List<Order1> listOrders()
@@ -510,6 +417,50 @@ public class OrderController extends HttpServlet {
         
         
         return orderList;
+    }
+    
+     public List<OrderObjectWrapper> listPendingOrders() throws IOException
+    {
+    
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Order1.findByApprovalStatus");
+        Short s = 0; // Orders not approved
+        jplQuery.setParameter("approvalStatus", s);
+        
+        System.out.println("Query : " + jplQuery.toString());
+        List<Order1> orderResultSet = jplQuery.getResultList();
+        
+        List<OrderObjectWrapper> orderWrapperList = new ArrayList();
+        
+        for(Order1 order : orderResultSet)
+        {
+            List<OrderItem> orderItems = getSalesByOrder(order);
+            
+            OrderObjectWrapper orders = new OrderObjectWrapper(order, orderItems);
+            orderWrapperList.add(orders);
+        }
+        
+        
+       return orderWrapperList;
+        
+    }
+    
+    private List<OrderItem> getSalesByOrder(Order1 order) {
+        List<Map >OrderItemsList = new ArrayList();
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("OrderItem.findByOrder");
+        jplQuery.setParameter("orderId", order);
+        
+        List<OrderItem> resultSet = jplQuery.getResultList();
+        
+       
+        
+        return resultSet;
     }
 
 }
