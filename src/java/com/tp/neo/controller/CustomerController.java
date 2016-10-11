@@ -156,7 +156,7 @@ public class CustomerController extends AppController  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         String viewFile = CUSTOMER_NEW;
-//        Customer customer = new Customer();
+        Customer customer = new Customer();
         String customerFileName = null;
         String customerKinFileName = null;
         
@@ -205,7 +205,7 @@ public class CustomerController extends AppController  {
                 customer.setKinPhone(request.getParameter("customerKinPhone"));
                 customer.setKinAddress(request.getParameter("customerKinAddress"));
                 
-                customer.setAgentId(agent);
+                customer.setAgent(agent);
                 
                 new TrailableManager(customer).registerInsertTrailInfo((long)1);
                 customer.setDeleted((short)0);
@@ -266,8 +266,8 @@ public class CustomerController extends AppController  {
                 
                 OrderManager orderManager = new OrderManager(user);
                 
-                orderManager.processOrder(agent, customer, lodgement, orderItem);
-
+                orderManager.processOrder(customer, lodgement, orderItem, request.getServletContext().toString());
+                
                 
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);

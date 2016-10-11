@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
  * To change this license header, choose License Headers in Agent Properties.
  * To change this template file, choose Tools | Templates
@@ -11,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.components.AuditLogger;
 import com.tp.neo.controller.helpers.AccountManager;
+import com.tp.neo.controller.helpers.AlertManager;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Account;
@@ -565,13 +565,10 @@ public class AgentController extends AppController {
 //                while(request.getSession().getAttributeNames().hasMoreElements()){
 //                    System.out.println("request attribute: " + request.getAttributeNames().nextElement());
 //                }
+
                 //log, send email, send SMS
-                new AuditLogger().logAction("Agent Approval", 
-                                            String.format("Agent %s %s, Agent ID: %d was approved as an agent.", agent.getFirstname(),agent.getLastname(), agent.getAgentId()), 
-                                            agent.getSystemUserTypeId(), 
-                                            ((User)request.getSession().getAttribute("user")).getUserId());
-                //EmailHelper.sendAgentApprovalEmail(agent, status);
-                //SMSHelper.sendAgentApprovalSMS(agent, status);
+                new AuditLogger(sessionUser).logAgentApprovalAction(agent);
+                new AlertManager().sendAgentApprovalAlerts(agent);
                 
                 
                 

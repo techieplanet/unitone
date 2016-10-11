@@ -81,10 +81,10 @@ public class ProductOrder extends BaseModel {
     private Short approvalStatus;
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
-    private Agent agentId;
+    private Agent agent;
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     @ManyToOne(optional = false)
-    private Customer customerId;
+    private Customer customer;
 
     public ProductOrder() {
     }
@@ -165,20 +165,20 @@ public class ProductOrder extends BaseModel {
         this.approvalStatus = approvalStatus;
     }
 
-    public Agent getAgentId() {
-        return agentId;
+    public Agent getAgent() {
+        return agent;
     }
 
-    public void setAgentId(Agent agentId) {
-        this.agentId = agentId;
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
-    public Customer getCustomerId() {
-        return customerId;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setCustomerId(Customer customerId) {
-        this.customerId = customerId;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     @Override

@@ -5,6 +5,10 @@
  */
 package com.tp.neo.controller.helpers;
 
+import com.tp.neo.model.Agent;
+import com.tp.neo.model.Customer;
+import com.tp.neo.model.ProjectUnit;
+
 /**
  *
  * @author swedge-mac
@@ -19,6 +23,28 @@ public class AlertManager {
         return new SMSHelper();
     }
     
+    public NotificationsManager getNotificationsManager(String route){
+        return new NotificationsManager(route);
+    }
     
+    public void sendAgentApprovalAlerts(Agent agent){
+        new EmailHelper().sendAgentApprovalEmail(agent, 1);
+        new SMSHelper().sendAgentApprovalSMS(agent, 1);
+    }
     
+    public void sendAgentWalletCreditAlerts(Customer customer, ProjectUnit unit, double amount){
+        new EmailHelper().sendAgentWalletCreditAlert(customer, unit, amount);
+        new SMSHelper().sendAgentWalletCreditAlert(customer, unit, amount);
+    }
+    
+    public void sendOrderApprovalAlerts(Customer customer, ProjectUnit unit, double amount){
+        //emails
+        new EmailHelper().sendOrderApprovalEmailToCustomer(customer, unit, amount);
+        new EmailHelper().sendOrderApprovalEmailToAgent(customer, unit, amount);
+        
+        //sms
+        new SMSHelper().sendOrderApprovalSMSToCustomer(customer, unit, amount);
+        new SMSHelper().sendOrderApprovalSMSToAgent(customer, unit, amount);
+    }
+       
 }

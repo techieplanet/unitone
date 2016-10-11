@@ -281,6 +281,19 @@ public class User extends BaseModel implements SystemUser{
         else if(action.toUpperCase().equals("DELETE")) return "delete_user";
         else return "view_user";
     }
+    
+    public boolean hasActionPermission(String action){
+        String[] permissions = this.getPermissions().split(",");
+        
+        for(String p : permissions){
+            //log("p: " + p); log("action: " + action);
+            if(p.equalsIgnoreCase(action))
+                return true;
+        }
+        return false;
+    }
+    
+  
 
     @Override
     public boolean equals(Object object) {

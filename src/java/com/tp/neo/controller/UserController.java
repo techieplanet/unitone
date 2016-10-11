@@ -33,7 +33,6 @@ import com.tp.neo.model.Permission;
 import java.util.ArrayList;
 import javax.persistence.RollbackException;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.eclipse.persistence.internal.libraries.antlr.runtime.misc.Stats;
 
 /**
  *

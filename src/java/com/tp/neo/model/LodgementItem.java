@@ -66,7 +66,7 @@ public class LodgementItem extends BaseModel {
     private Lodgement lodgementId;
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private OrderItem itemId;
+    private OrderItem item;
 
     public LodgementItem() {
     }
@@ -131,12 +131,12 @@ public class LodgementItem extends BaseModel {
         this.lodgementId = lodgementId;
     }
 
-    public OrderItem getItemId() {
-        return itemId;
+    public OrderItem getItem() {
+        return item;
     }
 
-    public void setItemId(OrderItem itemId) {
-        this.itemId = itemId;
+    public void setItem(OrderItem item) {
+        this.item = item;
     }
 
     @Override

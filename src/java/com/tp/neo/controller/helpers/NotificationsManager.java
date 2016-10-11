@@ -28,7 +28,7 @@ public class NotificationsManager {
         this.route = route;
     }
 
-    public int createOrderNotification(Customer customer){
+    protected Notification createNewOrderNotification(Customer customer){
         String title = String.format("New order for % %", customer.getFirstname(), customer.getLastname());
         
         Notification notification = new Notification();
@@ -41,9 +41,6 @@ public class NotificationsManager {
         notification.setClearOnClick((short)0);
         notification.setTypeId((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_ORDER").getSingleResult());
         
-        em.persist(notification);
-        em.flush();
-        
-        return 1;
+        return notification;
     }
 }
