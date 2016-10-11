@@ -292,8 +292,6 @@ public class User extends BaseModel implements SystemUser{
         }
         return false;
     }
-    
-  
 
     @Override
     public boolean equals(Object object) {

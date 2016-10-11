@@ -9,8 +9,11 @@ import static com.tp.neo.controller.components.AppController.APP_NAME;
 import com.tp.neo.model.utils.SMSSender;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.ProjectUnit;
+import com.tp.neo.model.User;
 import com.tp.neo.model.utils.MailSender;
+import java.util.List;
 
 /**
  *
@@ -54,6 +57,11 @@ public class SMSHelper {
         new SMSSender(phone,message).start(); 
     }
     
+    
+    
+    
+    
+    
     /************** ORDER *******************/
     protected void sendOrderApprovalSMSToCustomer(Customer customer, ProjectUnit unit, double amount){
         String phone = "";
@@ -69,6 +77,36 @@ public class SMSHelper {
         new SMSSender(phone,message).start();        
     }
     
+    protected void sendNewOrderSMSToCustomer(Lodgement lodgement, Customer customer){
+        String phone ="";
+        String message =   "New Order of value " + lodgement.getAmount() + " has been received and is being processed."
+                            + "Customer: " + customer.getFirstname() + " " + customer.getLastname();
+                          
+        if(customer.getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + customer.getPhone().substring(1);
+        
+        new SMSSender(phone,message).start();  
+    }
+    
+    protected void sendNewOrderSMSToAgent(Lodgement lodgement, Customer customer){
+            String phone ="";
+            String message =   "Acct: " + customer.getAgent().getAccount().getAccountCode()
+                               + "New Order of value " + lodgement.getAmount() + " has been received and is being processed."
+                               + "Customer: " + customer.getFirstname() + " " + customer.getLastname();
+
+            if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
+                phone = "234" + customer.getAgent().getPhone().substring(1);
+        
+            new SMSSender(phone,message).start();  
+    }
+    
+    
+    
+    
+    
+    
+    
+    /************** ORDER APPROVALS *******************/
     protected void sendOrderApprovalSMSToAgent(Customer customer, ProjectUnit unit, double amount){
         String phone ="";
         String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
@@ -84,4 +122,32 @@ public class SMSHelper {
     }
 
     
+    
+    
+    
+    
+    
+    /*********************************** LODGEMENT ***********************************/
+    protected void sendNewLodgementSMSToCustomer(Lodgement lodgement, Customer customer){
+        String phone ="";
+        String message =   "Acct: " + customer.getAccount().getAccountCode()
+                                    + "Lodgement of " + lodgement.getAmount() + " has been received and is awaiting processing.";
+                          
+        if(customer.getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + customer.getPhone().substring(1);
+        
+        new SMSSender(phone,message).start();  
+    }
+    
+    protected void sendNewLodgementEmailToAgent(Lodgement lodgement, Customer customer){
+            String phone ="";
+            String message =   "Acct: " + customer.getAgent().getAccount().getAccountCode()
+                          + "Lodgement received for customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
+                          + "Amount: " + lodgement.getAmount();
+
+            if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
+                phone = "234" + customer.getAgent().getPhone().substring(1);
+        
+            new SMSSender(phone,message).start();  
+    }
 }

@@ -68,7 +68,8 @@ public class OrderManager {
         }
         
         //create new order system notification
-        Notification notification = new AlertManager().getNotificationsManager(applicationContext).createNewOrderNotification(customer);
+        String route = applicationContext + "/order?action=notification&id=" + order.getId();
+        Notification notification = new AlertManager().getNotificationsManager(route).createNewOrderNotification(customer);
         em.persist(notification);
         
         em.getTransaction().commit();
@@ -81,7 +82,7 @@ public class OrderManager {
             if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
                 recipientsList.remove(i);
         }
-        new AlertManager().getEmailManager().sendNewOrderEmail(order, customer, recipientsList);
+        new AlertManager().sendNewOrderAlerts(order, lodgement, customer, recipientsList);
         
         
         
@@ -145,7 +146,7 @@ public class OrderManager {
         
         lodgementItem.setAmount(orderItem.getInitialDep());
         lodgementItem.setItem(orderItem);
-        lodgementItem.setLodgementId(lodgement);
+        lodgementItem.setLodgement(lodgement);
         lodgementItem.setApprovalStatus((short)0);
         new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
@@ -200,10 +201,16 @@ public class OrderManager {
             }
             
             //set the resultant status of the order based on the statuses of the items in it
-            if(allItemsApproveDeclineFlag == 1) //at least one item was approved
-                setOrderStatus(order, (short)2); //approved order
-            else
+            if(allItemsApproveDeclineFlag == 1){ //at least one item was approved
+                setOrderStatus(order, (short)2); //approve order
+                List<LodgementItem> lodgementItems = (List)orderItemsList.get(0).getLodgementItemCollection();
+                setLodgementStatus(lodgementItems.get(0).getLodgement(), (short)1); //approve lodgement
+            }
+            else{
                 setOrderStatus(order, (short)3); //decline order
+                List<LodgementItem> lodgementItems = (List)orderItemsList.get(0).getLodgementItemCollection();
+                setLodgementStatus(lodgementItems.get(0).getLodgement(), (short)0); //decline lodgement
+            }
             
         }//end for
 
@@ -219,6 +226,12 @@ public class OrderManager {
     
     private void setOrderItemStatus(OrderItem orderItem) throws PropertyException, RollbackException{
         new TrailableManager(orderItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+        em.flush();
+    }
+    
+    private void setLodgementStatus(Lodgement lodgement, short status) throws PropertyException, RollbackException{
+        lodgement.setApprovalStatus(status);
+        new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         em.flush();
     }
     

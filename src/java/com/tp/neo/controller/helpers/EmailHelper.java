@@ -10,6 +10,7 @@ import com.tp.neo.model.utils.MailSender;
 import static com.tp.neo.controller.components.AppController.defaultEmail;
 import static com.tp.neo.controller.components.AppController.APP_NAME;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
@@ -58,6 +59,12 @@ public class EmailHelper {
     }
     
     
+    
+    
+    
+    
+    
+    
    /*********************************** ORDERS ***********************************/
     /**
      * This email goes to the admin when a new order is created in the system
@@ -65,12 +72,11 @@ public class EmailHelper {
      * @param customer the customer that owns the order 
      * @param recipientsList the list of admins that can receive that email. One of them can now process the order
      */
-    protected void sendNewOrderEmail(ProductOrder order, Customer customer, List<User> recipientsList){
+    protected void sendNewOrderEmailToAdmins(ProductOrder order, Customer customer, List<User> recipientsList){
         String waitingOrdersPageLink = "xyz";
         String messageBody =   "Dear Admin,"
                       + "<br/>" + "A new order, ID: <b>" + order.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() 
                       + " has been created and needs approval from you."
-                      + "<br/>" + "Customer: " 
                       + "<br/>" 
                       + "<br/>"  
                       + "<br/>" + "Please follow the link below to take necessary action."
@@ -79,7 +85,7 @@ public class EmailHelper {
                       + "<br/>"  
                       + "<br/>" + APP_NAME;
         
-        String emailSubject = APP_NAME + ": New Order Waiting for Approval";
+        String emailSubject = APP_NAME + ": New Order Awaiting Approval";
         
         for(int i=0; i < recipientsList.size(); i++){
             new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
@@ -87,6 +93,39 @@ public class EmailHelper {
         
     }
     
+    
+    protected void sendNewOrderEmailToCustomer(Lodgement lodgement, Customer customer){
+            String messageBody =   "Dear " + customer.getFirstname() + " " + customer.getLastname() + ","
+                          + "<br/>" + "Your order of value " + lodgement.getAmount() + " has been received and is being processed." 
+                          + "<br/>"  
+                          + "<br/>"  
+                          + "<br/>" + APP_NAME;
+
+            String emailSubject = APP_NAME + ": New Order";
+
+            new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    protected void sendNewOrderEmailToAgent(Lodgement lodgement, Customer customer){
+            String messageBody =   "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + ")," 
+                          + "<br/>" + "Your new customer order has been received and is being processed."
+                          + "<br/>" + "Customer: " + customer.getFirstname() + " " + customer.getLastname() 
+                          + "<br/>" + "Order Amount: " + lodgement.getAmount() 
+                          + "<br/>"  
+                          + "<br/>"  
+                          + "<br/>" + APP_NAME;
+
+            String emailSubject = APP_NAME + ": New Order";
+
+            new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    
+    
+    
+    
+    
+    /*********************************** ORDER APPROVALS ***********************************/
     protected void sendOrderApprovalEmailToCustomer(Customer customer, ProjectUnit unit, double amount){
         String messageBody =   "Dear " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
                       + "<br/>" + "Your order for " + unit.getTitle() + " in " + unit.getProject().getName() + " has been approved " 
@@ -121,4 +160,57 @@ public class EmailHelper {
     
     
     
+    
+    
+    
+    
+    
+    /*********************************** LODGEMENT ***********************************/
+    protected void sendNewLodgementEmailToAdmins(Lodgement lodgement, Customer customer, List<User> recipientsList){
+        String waitingLodgementPageLink = "xyz";
+        String messageBody =   "Dear Admin,"
+                      + "<br/>" + "A new lodgement, ID: <b>" + lodgement.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
+                      + " has been created and needs approval."
+                      + "<br/>" 
+                      + "<br/>"  
+                      + "<br/>" + "Please follow the link below to take necessary action."
+                      + "<br/>" +  waitingLodgementPageLink
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Lodgement Awaiting Approval";
+        
+        for(int i=0; i < recipientsList.size(); i++){
+            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+        }
+        
+    }
+    
+    
+    protected void sendNewLodgementEmailToCustomer(Lodgement lodgement, Customer customer){
+            String messageBody =   "Dear " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
+                          + "<br/>" + "Your lodgement of value " + lodgement.getAmount() + " has been received and is being processed." 
+                          + "<br/>"  
+                          + "<br/>"  
+                          + "<br/>" + APP_NAME;
+
+            String emailSubject = APP_NAME + ": New Lodgement";
+
+            new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    protected void sendNewLodgementEmailToAgent(Lodgement lodgement, Customer customer){
+            String messageBody =   "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + ")," 
+                          + "<br/>" + "Your customer's lodgement has been received and is being processed."
+                          + "<br/>" + "Customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
+                          + "<br/>" + "Amount: " + lodgement.getAmount() 
+                          + "<br/>"  
+                          + "<br/>"  
+                          + "<br/>" + APP_NAME;
+
+            String emailSubject = APP_NAME + ": New Lodgement";
+
+            new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+    }
 }

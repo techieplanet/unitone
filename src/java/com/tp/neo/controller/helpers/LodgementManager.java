@@ -6,12 +6,15 @@
 package com.tp.neo.controller.helpers;
 
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
+import com.tp.neo.model.Notification;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -42,7 +45,7 @@ public class LodgementManager {
      * @param orderItems List of items being purchased
      * @return 1 - if all the operations are successful, 0 otherwise
      */
-    public ProductOrder processLodgement(ProductOrder order, Customer customer, Lodgement lodgement, List<LodgementItem> lodgementItems)
+    public Lodgement processLodgement(Customer customer, Lodgement lodgement, List<LodgementItem> lodgementItems, String applicationContext)
     throws PropertyException, RollbackException{
         
         em.getTransaction().begin();
@@ -51,47 +54,37 @@ public class LodgementManager {
         em.persist(lodgement);
         em.flush();
         
+        //credit the customer account to the tune of the lodgment 
+        Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
+        
         //process the lodgenent items
         for(int i=0; i < lodgementItems.size(); i++){
             LodgementItem lodgementItem = createLodgementItem(lodgement, lodgementItems.get(i).getItem());    //insert sale item
         }
         
+        //create system notification for the lodgement
+        String route = applicationContext + "/lodgement?action=notification&id=" + lodgement.getId();
+        Notification notification = new AlertManager().getNotificationsManager(route).createNewLodgementNotification(customer);
+        em.persist(notification);
+        
         em.getTransaction().commit();
         em.close();
         emf.close();
         
-        return order;
+        //now send alerts on the lodgement to customer, agent and admin
+        //email alert will be sent to all Admins with approve_order permisison
+        List<User> recipientsList = em.createNamedQuery("User.findAll").getResultList();
+        for(int i=0; i < recipientsList.size(); i++){
+            if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
+                recipientsList.remove(i);
+        }
+        new AlertManager().sendNewLodgementAlerts(lodgement, customer, recipientsList);
+        
+        return lodgement;
     }
     
-    /**
-     * Insert the order record 
-     * 
-     * @param agentId
-     * @param customerId
-     * @return
-     * @throws PropertyException
-     * @throws RollbackException 
-     */
-    private ProductOrder createOrder(Agent agentId, Customer customerId) throws PropertyException, RollbackException{
-        
-        ProductOrder order = new ProductOrder();
-        
-        order.setAgent(agentId);
-        order.setCustomer(customerId);
-        order.setCreatorUserType(sessionUser.getSystemUserTypeId());
-        order.setApprovalStatus((short)0);
-        new TrailableManager(order).registerInsertTrailInfo(sessionUser.getSystemUserId());
-        
-        em.persist(order);
-        
-        em.flush();
-                
-        //get the last element in the database table. This will be the one you just inserted
-        //em.refresh(order);
-  
-        return order;
-        
-    }
+   
     
     /**
      * Create an order item.Usually when processing a new order
@@ -120,7 +113,7 @@ public class LodgementManager {
         
         lodgementItem.setAmount(orderItem.getInitialDep());
         lodgementItem.setItem(orderItem);
-        lodgementItem.setLodgementId(lodgement);
+        lodgementItem.setLodgement(lodgement);
         lodgementItem.setApprovalStatus((short)0);
         new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
         

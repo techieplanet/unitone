@@ -7,7 +7,11 @@ package com.tp.neo.controller.helpers;
 
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
+import com.tp.neo.model.User;
+import java.util.List;
 
 /**
  *
@@ -37,6 +41,24 @@ public class AlertManager {
         new SMSHelper().sendAgentWalletCreditAlert(customer, unit, amount);
     }
     
+    
+    
+    
+    
+    
+    public void sendNewOrderAlerts(ProductOrder order, Lodgement lodgement, Customer customer, List<User> recipientsList){
+        //emails
+        new EmailHelper().sendNewOrderEmailToAdmins(order, customer, recipientsList);
+        new EmailHelper().sendNewOrderEmailToCustomer(lodgement, customer);
+        new EmailHelper().sendNewOrderEmailToAgent(lodgement, customer);
+        
+        //SMS
+        new SMSHelper().sendNewOrderSMSToCustomer(lodgement, customer);
+        new SMSHelper().sendNewOrderSMSToAgent(lodgement, customer);
+    }
+    
+    
+    
     public void sendOrderApprovalAlerts(Customer customer, ProjectUnit unit, double amount){
         //emails
         new EmailHelper().sendOrderApprovalEmailToCustomer(customer, unit, amount);
@@ -45,6 +67,17 @@ public class AlertManager {
         //sms
         new SMSHelper().sendOrderApprovalSMSToCustomer(customer, unit, amount);
         new SMSHelper().sendOrderApprovalSMSToAgent(customer, unit, amount);
+    }
+    
+    public void sendNewLodgementAlerts(Lodgement lodgement, Customer customer, List<User> recipientsList){
+        //emails
+        new EmailHelper().sendNewLodgementEmailToAdmins(lodgement, customer, recipientsList);
+        new EmailHelper().sendNewLodgementEmailToCustomer(lodgement, customer);
+        new EmailHelper().sendNewLodgementEmailToAgent(lodgement, customer);
+        
+        //SMS
+        new SMSHelper().sendNewLodgementSMSToCustomer(lodgement, customer);
+        new SMSHelper().sendNewLodgementEmailToAgent(lodgement, customer);
     }
        
 }

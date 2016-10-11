@@ -29,10 +29,9 @@ public class NotificationsManager {
     }
 
     protected Notification createNewOrderNotification(Customer customer){
-        String title = String.format("New order for % %", customer.getFirstname(), customer.getLastname());
+        String title = String.format("New order for %s %s (%s)", customer.getFirstname(), customer.getLastname(), customer.getAccount().getAccountCode());
         
         Notification notification = new Notification();
-        NotificationType notificationType = new NotificationType();
         
         notification.setTitle(title);
         notification.setRoute(route);
@@ -40,6 +39,21 @@ public class NotificationsManager {
         notification.setCreatedDate(new Date());
         notification.setClearOnClick((short)0);
         notification.setTypeId((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_ORDER").getSingleResult());
+        
+        return notification;
+    }
+    
+    protected Notification createNewLodgementNotification(Customer customer){
+        String title = String.format("New Lodgement for %s %s (%s)", customer.getFirstname(), customer.getLastname(), customer.getAccount().getAccountCode());
+        
+        Notification notification = new Notification();
+        
+        notification.setTitle(title);
+        notification.setRoute(route);
+        notification.setStatus((short)0);
+        notification.setCreatedDate(new Date());
+        notification.setClearOnClick((short)0);
+        notification.setTypeId((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_LODGE").getSingleResult());
         
         return notification;
     }
