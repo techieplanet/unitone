@@ -8,7 +8,9 @@ package com.tp.neo.controller;
 import com.tp.neo.controller.components.AppController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.NotificationsManager;
 import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.utils.AuthManager;
@@ -17,9 +19,11 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.Account;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
@@ -65,6 +69,7 @@ public class CustomerController extends AppController  {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String CUSTOMER_ADMIN = "/views/customer/admin.jsp"; 
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";
+    private final String ORDER_NOTIFICATION_ROUTE = "/Order?action=notification&id=";
     private Customer customer = new Customer();
     private final static Logger LOGGER = 
             Logger.getLogger(Customer.class.getCanonicalName());
@@ -251,6 +256,13 @@ public class CustomerController extends AppController  {
                 
                 em.persist(customer);
                 em.flush();  
+                
+                Account account = new AccountManager().createCustomerAccount(customer);
+                
+                em.refresh(customer);
+                customer.setAccount(account);
+                
+                em.flush();
 //         
                 CustomerAgent customerAgent =  new CustomerAgent();
                 customerAgent.setAgentId(agent);
@@ -258,7 +270,7 @@ public class CustomerController extends AppController  {
                                 
                 em.persist(customerAgent);
                 
-                em.getTransaction().commit();
+                em.getTransaction().commit(); 
                 em.close();
                 emf.close();
                 
@@ -271,8 +283,21 @@ public class CustomerController extends AppController  {
                 
                 OrderManager orderManager = new OrderManager(user);
                 
-                orderManager.processOrder(agent, customer, lodgement, orderItem);
-
+                ProductOrder productOrder = orderManager.processOrder(agent, customer, lodgement, orderItem);
+                
+                if(productOrder != null){
+                    if(productOrder.getId() != null){
+//                        String notificationRoute = ORDER_NOTIFICATION_ROUTE + productOrder.getId();
+//                        NotificationsManager notification = new NotificationsManager(notificationRoute);
+//                        notification.createOrderNotification(customer);
+                    }
+                    else{
+                            //Delete Customer and Customer Account
+                    }
+                }
+                else{
+                    //Delete Customer and Customer
+                }
                 
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
@@ -284,7 +309,6 @@ public class CustomerController extends AppController  {
             }
             catch (PropertyException err){
                 err.printStackTrace();
-                //System.out.println("inside catch area: " + err.getMessage());
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
@@ -697,6 +721,10 @@ public class CustomerController extends AppController  {
 
         em.close();
         emf.close();
+        
+    }
+    
+    public void deleteAccount(){
         
     }
     

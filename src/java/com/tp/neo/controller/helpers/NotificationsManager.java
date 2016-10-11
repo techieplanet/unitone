@@ -29,7 +29,7 @@ public class NotificationsManager {
     }
 
     public int createOrderNotification(Customer customer){
-        String title = String.format("New order for % %", customer.getFirstname(), customer.getLastname());
+        String title = String.format("New order for %s %s", customer.getFirstname(), customer.getLastname());
         
         Notification notification = new Notification();
         NotificationType notificationType = new NotificationType();

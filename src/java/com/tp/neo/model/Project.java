@@ -250,9 +250,5 @@ public class Project extends BaseModel{
     public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
         this.projectUnitCollection = projectUnitCollection;
     }
-
-
-
-
     
 }

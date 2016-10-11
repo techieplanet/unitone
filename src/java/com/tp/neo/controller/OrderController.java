@@ -9,18 +9,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.NotificationsManager;
 import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.controller.helpers.OrderObjectWrapper;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
-import com.tp.neo.model.Order1;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.controller.helpers.SaleItemObject;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.model.CompanyAccount;
-import com.tp.neo.model.Lodgement_;
+import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
@@ -61,6 +62,8 @@ public class OrderController extends HttpServlet {
     private static String ORDER_ADMIN = "/views/order/admin.jsp"; 
     private static String ORDER_NEW = "/views/order/add.jsp";
     private final  String ORDER_APPROVAL = "/views/order/approval.jsp";
+    private final String ORDER_NOTIFICATION_ROUTE = "/Order?action=notification&id=";
+    
     private final static Logger LOGGER = 
             Logger.getLogger(Customer.class.getCanonicalName());
     
@@ -236,6 +239,8 @@ public class OrderController extends HttpServlet {
             long agentId = Long.parseLong(request.getParameter("agent_id"));
             agent = em.find(Agent.class, agentId);
             
+            System.out.println("Customer id :" + customerId + ", Agent id: " + agentId);
+            
             SaleItemObjectsList saleItemObject = getCartData(request);
             
             //Get Session User
@@ -246,7 +251,16 @@ public class OrderController extends HttpServlet {
             Lodgement lodgement = prepareLodgement(getRequestParameters(request), agent);
             
             OrderManager orderManager = new OrderManager(user);
-            orderManager.processOrder(agent, customer, lodgement, orderItems);
+            ProductOrder productOrder = orderManager.processOrder(agent, customer, lodgement, orderItems);
+            
+            if(productOrder != null){
+                    if(productOrder.getId() != null){
+                        String notificationRoute = ORDER_NOTIFICATION_ROUTE + productOrder.getId();
+                        NotificationsManager notification = new NotificationsManager(notificationRoute);
+                        notification.createOrderNotification(customer);
+                    }
+             }
+            
         } catch (PropertyException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RollbackException ex) {
@@ -343,16 +357,17 @@ public class OrderController extends HttpServlet {
         return lodgement;
     }
     
-  
+
+    
     private void creditCustomerAccount(Customer customer, double amount) {
         
     }
     
-    private void CreateNewOrderAlert(Order1 order) {
+    private void CreateNewOrderAlert(ProductOrder order) {
         
     }
     
-    private void sendNewOrderEmail(Order1 order, Customer customer) {
+    private void sendNewOrderEmail(ProductOrder order, Customer customer) {
         
         
         MailSender mail = new MailSender();
@@ -397,8 +412,7 @@ public class OrderController extends HttpServlet {
         }
         
         return totalOrderAmountPaid;
-    }
-//    
+    }//    
     
     private Calendar getDateTime()
     {
@@ -406,13 +420,13 @@ public class OrderController extends HttpServlet {
         return calendar;
     }
     
-    public List<Order1> listOrders()
+    public List<ProductOrder> listOrders()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Query jplQuery = em.createNamedQuery("Order1.findAll");
-        List<Order1> orderList = jplQuery.getResultList();
+        Query jplQuery = em.createNamedQuery("ProductOrder.findAll");
+        List<ProductOrder> orderList = jplQuery.getResultList();
         
         
         
@@ -425,16 +439,16 @@ public class OrderController extends HttpServlet {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Query jplQuery = em.createNamedQuery("Order1.findByApprovalStatus");
+        Query jplQuery = em.createNamedQuery("ProductOrder.findByApprovalStatus");
         Short s = 0; // Orders not approved
         jplQuery.setParameter("approvalStatus", s);
         
         System.out.println("Query : " + jplQuery.toString());
-        List<Order1> orderResultSet = jplQuery.getResultList();
+        List<ProductOrder> orderResultSet = jplQuery.getResultList();
         
         List<OrderObjectWrapper> orderWrapperList = new ArrayList();
         
-        for(Order1 order : orderResultSet)
+        for(ProductOrder order : orderResultSet)
         {
             List<OrderItem> orderItems = getSalesByOrder(order);
             
@@ -447,7 +461,7 @@ public class OrderController extends HttpServlet {
         
     }
     
-    private List<OrderItem> getSalesByOrder(Order1 order) {
+    private List<OrderItem> getSalesByOrder(ProductOrder order) {
         List<Map >OrderItemsList = new ArrayList();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");

@@ -5,8 +5,8 @@
  */
 package com.tp.neo.controller.helpers;
 
-import com.tp.neo.model.Order1;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.ProductOrder;
 import java.util.List;
 
 /**
@@ -15,10 +15,10 @@ import java.util.List;
  */
 public class OrderObjectWrapper {
     
-    private Order1 order;
+    private ProductOrder order;
     private List<OrderItem> orderItems;
     
-    public OrderObjectWrapper(Order1 order, List<OrderItem> orderItems) {
+    public OrderObjectWrapper(ProductOrder order, List<OrderItem> orderItems) {
         this.order = order;
         this.orderItems = orderItems;
     }

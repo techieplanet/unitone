@@ -99,17 +99,23 @@
     function checkAllOrderItem(id,chkboxId){
         
         var isChecked = $("#"+chkboxId).prop('checked');
-        console.log("Checked " + isChecked);
+        
         
         $("#"+id+" table").find(".order-item").each(function(){
             
-            if(isChecked === false){
-              $(this).removeAttr("checked");
-          }
-          else{
-              $(this).attr("checked","checked");
-          }
+            var chkbox = $(this);
+            if($("#"+chkboxId).is(":checked")){
+                console.log("Checked true");
+                chkbox.attr("checked",true);
+            }
+            else{
+                console.log("Checked false");
+                chkbox.attr("checked",false);
+            }
+            
         });
+        
+        isChecked = null;
     }
     
 </script>
