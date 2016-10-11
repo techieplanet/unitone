@@ -46,9 +46,9 @@ public class AlertManager {
     
     
     
-    public void sendNewOrderAlerts(ProductOrder order, Lodgement lodgement, Customer customer, List<User> recipientsList){
+    public void sendNewOrderAlerts(ProductOrder order, Lodgement lodgement, Customer customer, List<User> recipientsList, String applicationContext){
         //emails
-        new EmailHelper().sendNewOrderEmailToAdmins(order, customer, recipientsList);
+        new EmailHelper().sendNewOrderEmailToAdmins(order, customer, recipientsList, applicationContext);
         new EmailHelper().sendNewOrderEmailToCustomer(lodgement, customer);
         new EmailHelper().sendNewOrderEmailToAgent(lodgement, customer);
         

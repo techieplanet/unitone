@@ -72,17 +72,20 @@ public class EmailHelper {
      * @param customer the customer that owns the order 
      * @param recipientsList the list of admins that can receive that email. One of them can now process the order
      */
-    protected void sendNewOrderEmailToAdmins(ProductOrder order, Customer customer, List<User> recipientsList){
-        String waitingOrdersPageLink = "xyz";
+    protected void sendNewOrderEmailToAdmins(ProductOrder order, Customer customer, List<User> recipientsList, String applicationContext){
+        String waitingOrdersPageLink = applicationContext + "/order?action=approval";
+        String thisOrderPageLink = applicationContext + "/order?action=notification&id=" + order.getId();
+        
         String messageBody =   "Dear Admin,"
                       + "<br/>" + "A new order, ID: <b>" + order.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() 
                       + " has been created and needs approval from you."
                       + "<br/>" 
                       + "<br/>"  
                       + "<br/>" + "Please follow the link below to take necessary action."
-                      + "<br/>" +  waitingOrdersPageLink
-                      + "<br/>"  
-                      + "<br/>"  
+                      + "<br/>"  + "<a href=" + thisOrderPageLink + ">" + thisOrderPageLink + "</a>"
+                      + "<br/>"
+                      + "<br/>"  + "You can also follow this link to view all waiting orders"
+                      + "<br/>"  + "<a href=" + waitingOrdersPageLink + ">" + waitingOrdersPageLink + "</a>"
                       + "<br/>" + APP_NAME;
         
         String emailSubject = APP_NAME + ": New Order Awaiting Approval";

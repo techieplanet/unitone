@@ -82,8 +82,7 @@ public class OrderManager {
             if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
                 recipientsList.remove(i);
         }
-        new AlertManager().sendNewOrderAlerts(order, lodgement, customer, recipientsList);
-        
+        new AlertManager().sendNewOrderAlerts(order, lodgement, customer, recipientsList, applicationContext);
         
         
         return order;
@@ -132,8 +131,9 @@ public class OrderManager {
             
             em.persist(orderItem);
             em.flush();
-            return orderItem;            
+            return orderItem;
     }
+    
     
     /**
      * Record lodgment items for new orders (NOT mortgage lodgements)
