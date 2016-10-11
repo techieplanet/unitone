@@ -63,10 +63,10 @@ public class LodgementItem extends BaseModel {
     private Date modifiedDate;
     @JoinColumn(name = "lodgement_id", referencedColumnName = "id")
     @ManyToOne
-    private Lodgement lodgementId;
+    private Lodgement lodgement;
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private OrderItem itemId;
+    private OrderItem item;
 
     public LodgementItem() {
     }
@@ -123,20 +123,20 @@ public class LodgementItem extends BaseModel {
         this.modifiedBy = modifiedBy;
     }
 
-    public Lodgement getLodgementId() {
-        return lodgementId;
+    public Lodgement getLodgement() {
+        return lodgement;
     }
 
-    public void setLodgementId(Lodgement lodgementId) {
-        this.lodgementId = lodgementId;
+    public void setLodgement(Lodgement lodgement) {
+        this.lodgement = lodgement;
     }
 
-    public OrderItem getItemId() {
-        return itemId;
+    public OrderItem getItem() {
+        return item;
     }
 
-    public void setItemId(OrderItem itemId) {
-        this.itemId = itemId;
+    public void setItem(OrderItem item) {
+        this.item = item;
     }
 
     @Override

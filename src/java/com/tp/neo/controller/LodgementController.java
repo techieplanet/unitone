@@ -14,8 +14,7 @@ import com.tp.neo.controller.helpers.CompanyAccountHelper;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.model.Lodgement;
-import com.tp.neo.model.Order1;
-import com.tp.neo.model.SaleItem;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
@@ -405,22 +404,22 @@ public class LodgementController extends AppController {
         
         Customer customer = em.find(Customer.class, customerId);
         
-        Query jplQuery = em.createNamedQuery("Order1.findByCustomer");
+        Query jplQuery = em.createNamedQuery("ProductOrder.findByCustomer");
         
         jplQuery.setParameter("customerId", customer);
         
         System.out.println("Query : " + jplQuery.toString());
-        List<Order1> orderResultSet = jplQuery.getResultList();
+        List<ProductOrder> orderResultSet = jplQuery.getResultList();
         
         List<Map> mapList = new ArrayList<Map>();
         
-        for(Order1 order : orderResultSet)
+        for(ProductOrder order : orderResultSet)
         {
             Map<String, String> map = new HashMap<String, String>();
             
             map.put("id", order.getId().toString());
-            map.put("customerName", order.getCustomerId().getLastname() + " " + order.getCustomerId().getFirstname());
-            map.put("agentName", order.getAgentId().getLastname() + " " + order.getAgentId().getFirstname());
+            map.put("customerName", order.getCustomer().getLastname() + " " + order.getCustomer().getFirstname());
+            map.put("agentName", order.getAgent().getLastname() + " " + order.getAgent().getFirstname());
             map.put("sales",gson.toJson(getSalesByOrder(order)));
             
             mapList.add(map);
@@ -439,7 +438,7 @@ public class LodgementController extends AppController {
         
     }
     
-    private List<Map> getSalesByOrder(Order1 order) {
+    private List<Map> getSalesByOrder(ProductOrder order) {
         List<Map >OrderItemsList = new ArrayList();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
