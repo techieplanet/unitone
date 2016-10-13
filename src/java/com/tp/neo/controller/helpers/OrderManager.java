@@ -204,6 +204,10 @@ public class OrderManager {
                 
                 //double entry
                 TransactionManager transactionManager = new TransactionManager(sessionUser);
+                System.out.println("Customer Account = " + customer.getAccount());
+                System.out.println("Unit Account = " + thisItem.getUnit().getAccount());
+                System.out.println("Initial Deposit = " + thisItem.getInitialDep() );
+                
                 transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getUnit().getAccount(), thisItem.getInitialDep());
                 
                 //send approval alerts (email and SMS) to agent and customer
