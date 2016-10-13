@@ -216,4 +216,42 @@ public class EmailHelper {
 
             new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
+    
+    
+    
+    
+    
+    
+    /*********************************** LODGEMENT APPROVALS ***********************************/
+    protected void sendLodgementApprovalEmailToCustomer(Customer customer, ProjectUnit unit, double amount){
+        String messageBody =   "Dear " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
+                      + "<br/>" + "Your lodgement for " + unit.getTitle() + " in " + unit.getProject().getName() + " has been approved " 
+                      + "and your purchase has been advanced by the sum of " + String.format("%.2f", amount) + "."
+                      + "<br/>"  
+                      + "<br/>" + "Congratulations " 
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Lodgement Approval";
+        
+        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    protected void sendLodgementApprovalEmailToAgent(Customer customer, ProjectUnit unit, double amount){
+        String messageBody =   "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
+                      + "<br/>" + "A lodgement has been approved for your customer - " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "," 
+                      + "Item: " + unit.getTitle() + " in " + unit.getProject().getName() + "."
+                      + "Number of Units: " + unit.getQuantity()
+                      + "This sale has been advanced by the sum of " + String.format("%.2f", amount) + "."
+                      + "<br/>"  
+                      + "<br/>" + "Congratulations " 
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Lodgement Approval";
+        
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+    }
 }

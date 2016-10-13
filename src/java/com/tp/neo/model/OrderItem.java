@@ -44,7 +44,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "OrderItem.findByCreatedDate", query = "SELECT o FROM OrderItem o WHERE o.createdDate = :createdDate"),
     @NamedQuery(name = "OrderItem.findByCreatedBy", query = "SELECT o FROM OrderItem o WHERE o.createdBy = :createdBy"),
     @NamedQuery(name = "OrderItem.findByModifiedDate", query = "SELECT o FROM OrderItem o WHERE o.modifiedDate = :modifiedDate"),
-    @NamedQuery(name="OrderItem.findByOrder", query = "SELECT o FROM OrderItem o WHERE o.orderId = :orderId"),
+    @NamedQuery(name="OrderItem.findByOrder", query = "SELECT o FROM OrderItem o WHERE o.order = :order"),
     @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy")})
 public class OrderItem extends BaseModel {
 
@@ -58,7 +58,7 @@ public class OrderItem extends BaseModel {
     @Column(name = "approval_status")
     private Short approvalStatus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "itemId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "item")
     private Collection<LodgementItem> lodgementItemCollection;
 
     private static final long serialVersionUID = 1L;
@@ -86,7 +86,7 @@ public class OrderItem extends BaseModel {
     private Date modifiedDate;
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private ProductOrder orderId;
+    private ProductOrder order;
 
     public OrderItem() {
     }
@@ -175,12 +175,12 @@ public class OrderItem extends BaseModel {
         this.modifiedBy = modifiedBy;
     }
 
-    public ProductOrder getOrderId() {
-        return orderId;
+    public ProductOrder getOrder() {
+        return order;
     }
 
-    public void setOrderId(ProductOrder orderId) {
-        this.orderId = orderId;
+    public void setOrder(ProductOrder order) {
+        this.order = order;
     }
 
     @Override
@@ -233,12 +233,14 @@ public class OrderItem extends BaseModel {
         this.unit = unit;
     }
     
-    /****** UTIL ********/
+    /****************** UTIL ********************/
     public double getCommissionAmount(){
         DecimalFormat df = new DecimalFormat(".##");
         double amount = this.getUnit().getCpu() * this.getUnit().getCommissionPercentage() / 100;
         String amountString = df.format(amount); //rounded to two decimal places
         return Double.parseDouble(amountString); //change back to double and return
     }
+    
+    
     
 }

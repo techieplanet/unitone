@@ -71,7 +71,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @ManyToOne
     private Account account;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private Collection<ProductOrder> productOrderCollection;
     
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")

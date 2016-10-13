@@ -55,7 +55,7 @@ public class Lodgement extends BaseModel {
     @Column(name = "approval_status")
     private Short approvalStatus;
 
-    @OneToMany(mappedBy = "lodgementId")
+    @OneToMany(mappedBy = "lodgement")
     private Collection<LodgementItem> lodgementItemCollection;
 
 

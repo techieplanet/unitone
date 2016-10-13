@@ -16,6 +16,8 @@ import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -125,7 +127,7 @@ public class OrderManager {
      * @return OrderItem
      */
     private OrderItem createOrderItem(OrderItem orderItem, ProductOrder order) throws PropertyException, RollbackException{
-            orderItem.setOrderId(order);
+            orderItem.setOrder(order);
             orderItem.setApprovalStatus((short)0);
             new TrailableManager(orderItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
             
@@ -161,19 +163,30 @@ public class OrderManager {
         
         em.getTransaction().begin();
         
-        int allItemsApproveDeclineFlag = 0;
+        //get the unapproved order items for this order
+        List<OrderItem> allItems = (List)order.getOrderItemCollection();
+        List<OrderItem> approvedItems = new ArrayList<OrderItem>();
+        List<OrderItem> waitingItems = new ArrayList<OrderItem>();
+        List<OrderItem> declinedItems = new ArrayList<OrderItem>();
+        
+        for(int i=0; i < allItems.size(); i++){
+            if(allItems.get(i).getApprovalStatus().intValue() > 0) waitingItems.add(allItems.get(i));
+            if(allItems.get(i).getApprovalStatus().intValue() > 1) approvedItems.add(allItems.get(i));
+            if(allItems.get(i).getApprovalStatus().intValue() > 2) declinedItems.add(allItems.get(i));
+        }
+        
         for(int i=0; i < orderItemsList.size(); i++){
             OrderItem thisItem = orderItemsList.get(i);
-            System.out.println("Item status: " + thisItem.getApprovalStatus());
             
             if(thisItem.getApprovalStatus() == 1){//approve
-                allItemsApproveDeclineFlag = 1;
+                approvedItems.add(thisItem);
                 
                 //if(order.getApprovalStatus() != 2) approveOrder(order);
                 setOrderItemStatus(thisItem);
                 
                 //get/set corresponding lodgment item
-                LodgementItem lodgementItem = ((List<LodgementItem>)thisItem.getLodgementItemCollection()).get(0);
+                List list = (List)thisItem.getLodgementItemCollection();
+                LodgementItem lodgementItem = (LodgementItem) list.get(0);
                 setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
                 
                 //double entry
@@ -191,8 +204,10 @@ public class OrderManager {
                 alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
             }
+            
             if(thisItem.getApprovalStatus() == 2){//decline
-                if(allItemsApproveDeclineFlag  == 0) allItemsApproveDeclineFlag = 2;
+                declinedItems.add(thisItem);
+                
                 setOrderItemStatus(thisItem);
                 
                 //get/set corresponding lodgment item
@@ -200,19 +215,26 @@ public class OrderManager {
                 setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
             }
             
-            //set the resultant status of the order based on the statuses of the items in it
-            if(allItemsApproveDeclineFlag == 1){ //at least one item was approved
-                setOrderStatus(order, (short)2); //approve order
-                List<LodgementItem> lodgementItems = (List)orderItemsList.get(0).getLodgementItemCollection();
-                setLodgementStatus(lodgementItems.get(0).getLodgement(), (short)1); //approve lodgement
-            }
-            else{
-                setOrderStatus(order, (short)3); //decline order
-                List<LodgementItem> lodgementItems = (List)orderItemsList.get(0).getLodgementItemCollection();
-                setLodgementStatus(lodgementItems.get(0).getLodgement(), (short)0); //decline lodgement
-            }
+            
             
         }//end for
+        
+        //set the resultant status of the order based on the statuses of the items in it
+        if(approvedItems.size() + declinedItems.size()  == allItems.size()){ //each item has either approved or declined status
+            setOrderStatus(order, (short)2); //complete the order
+            //List<LodgementItem> lodgementItems = (List)orderItemsList.get(0).getLodgementItemCollection();
+            //setLodgementStatus(lodgementItems.get(0).getLodgement(), (short)1); //approve lodgement
+        }
+        else if(declinedItems.size() == allItems.size()){
+            setOrderStatus(order, (short)3); //decline order
+            //List<LodgementItem> lodgementItems = (List)orderItemsList.get(0).getLodgementItemCollection();
+            //setLodgementStatus(lodgementItems.get(0).getLodgement(), (short)0); //decline lodgement
+        }
+        else if(approvedItems.size() + declinedItems.size() < allItems.size()){
+            setOrderStatus(order, (short)1); //processing status
+            //no nee to treat lodgement items
+            
+        }
 
         em.getTransaction().commit();
     }
@@ -240,7 +262,6 @@ public class OrderManager {
         new TrailableManager(lodgementItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         em.flush();
     }
-    
     
     
     
