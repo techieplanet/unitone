@@ -55,7 +55,7 @@ public class ProductOrder extends BaseModel {
     private Long modifiedBy;
     @Column(name = "approved_by")
     private Long approvedBy;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "orderId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private Collection<OrderItem> orderItemCollection;
 
     private static final long serialVersionUID = 1L;

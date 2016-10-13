@@ -83,24 +83,7 @@ public class LodgementManager {
         
         return lodgement;
     }
-    
-   
-    
-    /**
-     * Create an order item.Usually when processing a new order
-     * @param orderItem the item to process
-     * @param order the order that the item is mapped to
-     * @return OrderItem
-     */
-    private OrderItem createOrderItem(OrderItem orderItem, ProductOrder order) throws PropertyException, RollbackException{
-            orderItem.setOrderId(order);
-            orderItem.setApprovalStatus((short)0);
-            new TrailableManager(orderItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
-            
-            em.persist(orderItem);
-            em.flush();
-            return orderItem;            
-    }
+
     
     /**
      * Record lodgment items for mortgage lodgements
@@ -127,68 +110,53 @@ public class LodgementManager {
     
     
     /********************* APPROVAL **********************/
-    public void processOrderApproval(ProductOrder order, List<OrderItem> orderItemsList, Customer customer) throws PropertyException, RollbackException{
+    public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer) throws PropertyException, RollbackException{
         
         em.getTransaction().begin();
         
         int allItemsApproveDeclineFlag = 0;
-        for(int i=0; i < orderItemsList.size(); i++){
-            OrderItem thisItem = orderItemsList.get(i);
-            System.out.println("Item status: " + thisItem.getApprovalStatus());
+        for(int i=0; i < lodgementItems.size(); i++){
+            LodgementItem thisItem = lodgementItems.get(i);
             
             if(thisItem.getApprovalStatus() == 1){//approve
                 allItemsApproveDeclineFlag = 1;
                 
-                //if(order.getApprovalStatus() != 2) approveOrder(order);
-                setOrderItemStatus(thisItem);
+                setLodgementItemStatus(thisItem, thisItem.getApprovalStatus());
                 
-                //get/set corresponding lodgment item
-                LodgementItem lodgementItem = ((List<LodgementItem>)thisItem.getLodgementItemCollection()).get(0);
-                setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
-                
-                //double entry
+                //double entry - take the money out of ther customert account and fund the project unit
                 TransactionManager transactionManager = new TransactionManager(sessionUser);
-                transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getUnit().getAccount(), thisItem.getInitialDep());
+                transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
                 
                 //send approval alerts (email and SMS) to agent and customer
                 AlertManager alertManager = new AlertManager();
-                alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
+                alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
                 
                 //credit agent wallet - double entry
-                transactionManager.doDoubleEntry(thisItem.getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getCommissionAmount());
+                transactionManager.doDoubleEntry(thisItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getItem().getCommissionAmount());
                 
                 //send wallet credit alert
-                alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
+                alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
                 
             }
-            if(thisItem.getApprovalStatus() == 2){//decline
+            else if(thisItem.getApprovalStatus() == 2){//decline
                 if(allItemsApproveDeclineFlag  == 0) allItemsApproveDeclineFlag = 2;
-                setOrderItemStatus(thisItem);
-                
-                //get/set corresponding lodgment item
-                LodgementItem lodgementItem = ((List<LodgementItem>)thisItem.getLodgementItemCollection()).get(0);
-                setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
+                setLodgementItemStatus(thisItem, thisItem.getApprovalStatus());
             }
             
             //set the resultant status of the order based on the statuses of the items in it
             if(allItemsApproveDeclineFlag == 1) //at least one item was approved
-                setOrderStatus(order, (short)2); //approved order
+                setLodgementStatus(lodgement, (short)2); //approved order
             else
-                setOrderStatus(order, (short)3); //decline order
+                setLodgementStatus(lodgement, (short)3); //decline order
             
         }//end for       
         
         em.getTransaction().commit();
     }
     
-    private void setOrderStatus(ProductOrder order, short status) throws PropertyException, RollbackException{
-        order.setApprovalStatus(status);
-        new TrailableManager(order).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.flush();
-    }
-    
-    private void setOrderItemStatus(OrderItem orderItem) throws PropertyException, RollbackException{
-        new TrailableManager(orderItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+    private void setLodgementStatus(Lodgement lodgement, short status) throws PropertyException, RollbackException{
+        lodgement.setApprovalStatus(status);
+        new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         em.flush();
     }
     
@@ -197,8 +165,5 @@ public class LodgementManager {
         new TrailableManager(lodgementItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         em.flush();
     }
-    
-    
-    
-    
+       
 }

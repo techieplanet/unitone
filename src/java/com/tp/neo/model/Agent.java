@@ -77,7 +77,7 @@ public class Agent extends BaseModel implements SystemUser  {
     @Column(name = "modified_by")
     private Long modifiedBy;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
     private Collection<ProductOrder> productOrderCollection;
 
     @Basic(optional = false)
