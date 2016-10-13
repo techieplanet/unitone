@@ -5,7 +5,7 @@
  */
 package com.tp.neo.model;
 
-import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -45,6 +45,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "OrderItem.findByCreatedBy", query = "SELECT o FROM OrderItem o WHERE o.createdBy = :createdBy"),
     @NamedQuery(name = "OrderItem.findByModifiedDate", query = "SELECT o FROM OrderItem o WHERE o.modifiedDate = :modifiedDate"),
     @NamedQuery(name="OrderItem.findByOrder", query = "SELECT o FROM OrderItem o WHERE o.orderId = :orderId"),
+    @NamedQuery(name="OrderItem.findByOrderAndUattendedItem", query = "SELECT o FROM OrderItem o WHERE o.orderId = :orderId AND o.approvalStatus = :approvalStatus "),
     @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy")})
 public class OrderItem extends BaseModel {
 
@@ -54,11 +55,11 @@ public class OrderItem extends BaseModel {
     private Long modifiedBy;
     @JoinColumn(name = "unit_id", referencedColumnName = "id")
     @ManyToOne
-    private ProjectUnit unitId;
+    private ProjectUnit unit;
     @Column(name = "approval_status")
     private Short approvalStatus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "itemId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "item")
     private Collection<LodgementItem> lodgementItemCollection;
 
     private static final long serialVersionUID = 1L;
@@ -225,12 +226,20 @@ public class OrderItem extends BaseModel {
         this.approvalStatus = approvalStatus;
     }
 
-    public ProjectUnit getUnitId() {
-        return unitId;
+    public ProjectUnit getUnit() {
+        return unit;
     }
 
-    public void setUnitId(ProjectUnit unitId) {
-        this.unitId = unitId;
+    public void setUnit(ProjectUnit unit) {
+        this.unit = unit;
+    }
+    
+    /****** UTIL ********/
+    public double getCommissionAmount(){
+        DecimalFormat df = new DecimalFormat(".##");
+        double amount = this.getUnit().getCpu() * this.getUnit().getCommissionPercentage() / 100;
+        String amountString = df.format(amount); //rounded to two decimal places
+        return Double.parseDouble(amountString); //change back to double and return
     }
     
 }

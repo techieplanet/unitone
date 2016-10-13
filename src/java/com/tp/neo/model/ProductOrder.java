@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProductOrder.findById", query = "SELECT o FROM ProductOrder o WHERE o.id = :id"),
     @NamedQuery(name = "ProductOrder.findByCreatedBy", query = "SELECT o FROM ProductOrder o WHERE o.createdBy = :createdBy"),
     @NamedQuery(name = "ProductOrder.findByCreatedDate", query = "SELECT o FROM ProductOrder o WHERE o.createdDate = :createdDate"),
-    @NamedQuery(name = "ProductOrder.findByCustomer", query = "SELECT o FROM ProductOrder o WHERE o.customerId = :customerId "),
+    @NamedQuery(name = "ProductOrder.findByCustomer", query = "SELECT o FROM ProductOrder o WHERE o.customer = :customerId "),
     @NamedQuery(name = "ProductOrder.findByModifiedBy", query = "SELECT o FROM ProductOrder o WHERE o.modifiedBy = :modifiedBy"),
     @NamedQuery(name = "ProductOrder.findByModifiedDate", query = "SELECT o FROM ProductOrder o WHERE o.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "ProductOrder.findByCreatorUserType", query = "SELECT o FROM ProductOrder o WHERE o.creatorUserType = :creatorUserType"),
@@ -46,6 +46,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProductOrder.findByApprovedBy", query = "SELECT o FROM ProductOrder o WHERE o.approvedBy = :approvedBy"),
     @NamedQuery(name = "ProductOrder.findByApprovedDate", query = "SELECT o FROM ProductOrder o WHERE o.approvedDate = :approvedDate"),
     @NamedQuery(name = "ProductOrder.findByApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus"),
+    @NamedQuery(name = "ProductOrder.findByNotApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus != :approvalStatus"),
     @NamedQuery(name = "ProductOrder.findLastInsertedId", query = "SELECT o FROM ProductOrder o ORDER BY o.id DESC")})
 
 public class ProductOrder extends BaseModel {
@@ -82,10 +83,10 @@ public class ProductOrder extends BaseModel {
     private Short approvalStatus;
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
-    private Agent agentId;
+    private Agent agent;
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     @ManyToOne(optional = false)
-    private Customer customerId;
+    private Customer customer;
 
     public ProductOrder() {
     }
@@ -166,20 +167,20 @@ public class ProductOrder extends BaseModel {
         this.approvalStatus = approvalStatus;
     }
 
-    public Agent getAgentId() {
-        return agentId;
+    public Agent getAgent() {
+        return agent;
     }
 
-    public void setAgentId(Agent agentId) {
-        this.agentId = agentId;
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
-    public Customer getCustomerId() {
-        return customerId;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setCustomerId(Customer customerId) {
-        this.customerId = customerId;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     @Override

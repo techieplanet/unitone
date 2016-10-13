@@ -68,7 +68,7 @@ public class ProjectUnit extends BaseModel {
     @Basic(optional = false)
     @Column(name = "deleted")
     private short deleted;
-    @OneToMany(mappedBy = "unitId")
+    @OneToMany(mappedBy = "unit")
     private Collection<OrderItem> orderItemCollection;
 
     private static final long serialVersionUID = 1L;

@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class OrderObjectWrapper {
     
-    private ProductOrder order;
-    private List<OrderItem> orderItems;
+    public ProductOrder order;
+    public List<OrderItem> orderItems;
     
     public OrderObjectWrapper(ProductOrder order, List<OrderItem> orderItems) {
         this.order = order;
@@ -24,11 +24,11 @@ public class OrderObjectWrapper {
     }
     
     public String getCustomerName() {
-        return order.getCustomerId().getLastname() + " " + order.getCustomerId().getFirstname();
+        return order.getCustomer().getLastname() + " " + order.getCustomer().getFirstname();
     }
     
     public String getAgentName() {
-        return order.getAgentId().getLastname() + " " + order.getAgentId().getFirstname();
+        return order.getAgent().getLastname() + " " + order.getAgent().getFirstname();
     }
     
     public Long getOrderId(){
@@ -39,9 +39,21 @@ public class OrderObjectWrapper {
         return orderItems;
     }
     
-    public String getProjectName(){
+    public String getProjectName(int index){
         
-        return "";
+        OrderItem orderItem = orderItems.get(index);
+        if(orderItem.getUnit() == null){
+            return "";
+        }
+        return orderItem.getUnit().getProject().getName();
+    }
+    
+    public String getUnitTitle(int index){
+        OrderItem orderItem = orderItems.get(index);
+        if(orderItem.getUnit() == null){
+            return "";
+        }
+        return orderItem.getUnit().getTitle();
     }
     
 }

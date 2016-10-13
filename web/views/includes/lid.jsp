@@ -20,7 +20,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css" type="text/css" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/custom.css" type="text/css" />
+    
     
     
     <!-- Font Awesome -->
@@ -51,7 +51,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/css/skin-blue.min.css" type="text/css" />-->
     <link rel="stylesheet" href="css/skins/skin-blue.min.css" type="text/css" />
 
-    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/custom.css" type="text/css" />
     <!-- jQuery 2.1.4 -->
     <!--<script src="plugins/jQuery/jQuery-2.1.4.min.js"></script>-->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-2.1.4.min.js"></script>

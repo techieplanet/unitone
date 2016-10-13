@@ -52,8 +52,10 @@ public class Lodgement extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "approval_status")
+    private Short approvalStatus;
 
-    @OneToMany(mappedBy = "lodgementId")
+    @OneToMany(mappedBy = "lodgement")
     private Collection<LodgementItem> lodgementItemCollection;
 
 
@@ -233,6 +235,14 @@ public class Lodgement extends BaseModel {
 
     public void setLodgementItemCollection(Collection<LodgementItem> lodgementItemCollection) {
         this.lodgementItemCollection = lodgementItemCollection;
+    }
+
+    public Short getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(Short approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
     
 }

@@ -23,5 +23,5 @@ public abstract class BaseModel implements Serializable, ITrailable, IRestricted
     * into this class as abstract methods. Subclasses will have to implement them                   *
     *                                                                                               *
     * **********************************************************************************************/
-    
+   
 }

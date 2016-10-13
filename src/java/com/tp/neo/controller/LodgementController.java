@@ -14,6 +14,7 @@ import com.tp.neo.controller.helpers.CompanyAccountHelper;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.utils.TrailableManager;
@@ -418,8 +419,8 @@ public class LodgementController extends AppController {
             Map<String, String> map = new HashMap<String, String>();
             
             map.put("id", order.getId().toString());
-            map.put("customerName", order.getCustomerId().getLastname() + " " + order.getCustomerId().getFirstname());
-            map.put("agentName", order.getAgentId().getLastname() + " " + order.getAgentId().getFirstname());
+            map.put("customerName", order.getCustomer().getLastname() + " " + order.getCustomer().getFirstname());
+            map.put("agentName", order.getAgent().getLastname() + " " + order.getAgent().getFirstname());
             map.put("sales",gson.toJson(getSalesByOrder(order)));
             
             mapList.add(map);

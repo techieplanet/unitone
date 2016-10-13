@@ -71,12 +71,12 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @ManyToOne
     private Account account;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private Collection<ProductOrder> productOrderCollection;
     
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
-    private Agent agentId;
+    private Agent agent;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -388,12 +388,12 @@ public class Customer implements Serializable, ITrailable, SystemUser {
 
   
 
-    public Agent getAgentId() {
-        return agentId;
+    public Agent getAgent() {
+        return agent;
     }
 
-    public void setAgentId(Agent agentId) {
-        this.agentId = agentId;
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
     
