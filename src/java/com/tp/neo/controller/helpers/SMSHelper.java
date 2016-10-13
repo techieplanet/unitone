@@ -63,20 +63,6 @@ public class SMSHelper {
     
     
     /************** ORDER *******************/
-    protected void sendOrderApprovalSMSToCustomer(Customer customer, ProjectUnit unit, double amount){
-        String phone = "";
-        String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
-                      + "Order approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
-                      + "Amount advanced: " + String.format("%d2", amount) + "."
-                      + "Congratulations";
-              
-        
-        if(customer.getPhone().matches("^[0-9]{8,11}$"))
-            phone = "234" + customer.getPhone().substring(1);
-        
-        new SMSSender(phone,message).start();        
-    }
-    
     protected void sendNewOrderSMSToCustomer(Lodgement lodgement, Customer customer){
         String phone ="";
         String message =   "New Order of value " + lodgement.getAmount() + " has been received and is being processed."
@@ -107,20 +93,35 @@ public class SMSHelper {
     
     
     /************** ORDER APPROVALS *******************/
+    protected void sendOrderApprovalSMSToCustomer(Customer customer, ProjectUnit unit, double amount){
+        String phone = "";
+        String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
+                      + "Order approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
+                      + "Amount advanced: " + String.format("%.2f", amount) + "."
+                      + "Congratulations";
+              
+        
+        if(customer.getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + customer.getPhone().substring(1);
+        
+        new SMSSender(phone,message).start();        
+    }
+    
     protected void sendOrderApprovalSMSToAgent(Customer customer, ProjectUnit unit, double amount){
         String phone ="";
         String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
                       + "Order approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
                       + "Customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
-                      + "Amount advanced: " + String.format("%d2", amount) + "."
+                      + "Amount advanced: " + String.format("%.2f", amount) + "."
                       + "<br/>" + "Congratulations"; 
         
-        if(customer.getPhone().matches("^[0-9]{8,11}$"))
-            phone = "234" + customer.getPhone().substring(1);
+        if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + customer.getAgent().getPhone().substring(1);
         
         new SMSSender(phone,message).start();      
     }
 
+  
     
     
     
@@ -149,5 +150,39 @@ public class SMSHelper {
                 phone = "234" + customer.getAgent().getPhone().substring(1);
         
             new SMSSender(phone,message).start();  
+    }
+    
+    
+    
+    
+    
+    
+    /************** LODGEMENT APPROVALS *******************/
+    protected void sendLodgementApprovalSMSToCustomer(Customer customer, ProjectUnit unit, double amount){
+        String phone = "";
+        String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
+                      + "Lodgement approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
+                      + "Amount advanced: " + String.format("%.2f", amount) + "."
+                      + "Congratulations";
+              
+        
+        if(customer.getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + customer.getPhone().substring(1);
+        
+        new SMSSender(phone,message).start();        
+    }
+    
+    protected void sendLodgementApprovalSMSToAgent(Customer customer, ProjectUnit unit, double amount){
+        String phone ="";
+        String message =   "Customer: " + customer.getFirstname() + " " + customer.getLastname() + customer.getAccount().getAccountCode() + ","
+                      + "Lodgement approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
+                      + "Customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
+                      + "Amount advanced: " + String.format("%.2f", amount) + "."
+                      + "<br/>" + "Congratulations"; 
+        
+        if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + customer.getAgent().getPhone().substring(1);
+        
+        new SMSSender(phone,message).start();      
     }
 }

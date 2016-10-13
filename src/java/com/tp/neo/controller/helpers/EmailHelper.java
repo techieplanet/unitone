@@ -72,17 +72,20 @@ public class EmailHelper {
      * @param customer the customer that owns the order 
      * @param recipientsList the list of admins that can receive that email. One of them can now process the order
      */
-    protected void sendNewOrderEmailToAdmins(ProductOrder order, Customer customer, List<User> recipientsList){
-        String waitingOrdersPageLink = "xyz";
+    protected void sendNewOrderEmailToAdmins(ProductOrder order, Customer customer, List<User> recipientsList, String applicationContext){
+        String waitingOrdersPageLink = applicationContext + "/order?action=approval";
+        String thisOrderPageLink = applicationContext + "/order?action=notification&id=" + order.getId();
+        
         String messageBody =   "Dear Admin,"
                       + "<br/>" + "A new order, ID: <b>" + order.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() 
                       + " has been created and needs approval from you."
                       + "<br/>" 
                       + "<br/>"  
                       + "<br/>" + "Please follow the link below to take necessary action."
-                      + "<br/>" +  waitingOrdersPageLink
-                      + "<br/>"  
-                      + "<br/>"  
+                      + "<br/>"  + "<a href=" + thisOrderPageLink + ">" + thisOrderPageLink + "</a>"
+                      + "<br/>"
+                      + "<br/>"  + "You can also follow this link to view all waiting orders"
+                      + "<br/>"  + "<a href=" + waitingOrdersPageLink + ">" + waitingOrdersPageLink + "</a>"
                       + "<br/>" + APP_NAME;
         
         String emailSubject = APP_NAME + ": New Order Awaiting Approval";
@@ -212,5 +215,43 @@ public class EmailHelper {
             String emailSubject = APP_NAME + ": New Lodgement";
 
             new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    
+    
+    
+    
+    
+    /*********************************** LODGEMENT APPROVALS ***********************************/
+    protected void sendLodgementApprovalEmailToCustomer(Customer customer, ProjectUnit unit, double amount){
+        String messageBody =   "Dear " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
+                      + "<br/>" + "Your lodgement for " + unit.getTitle() + " in " + unit.getProject().getName() + " has been approved " 
+                      + "and your purchase has been advanced by the sum of " + String.format("%.2f", amount) + "."
+                      + "<br/>"  
+                      + "<br/>" + "Congratulations " 
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Lodgement Approval";
+        
+        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    protected void sendLodgementApprovalEmailToAgent(Customer customer, ProjectUnit unit, double amount){
+        String messageBody =   "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
+                      + "<br/>" + "A lodgement has been approved for your customer - " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "," 
+                      + "Item: " + unit.getTitle() + " in " + unit.getProject().getName() + "."
+                      + "Number of Units: " + unit.getQuantity()
+                      + "This sale has been advanced by the sum of " + String.format("%.2f", amount) + "."
+                      + "<br/>"  
+                      + "<br/>" + "Congratulations " 
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Lodgement Approval";
+        
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
 }
