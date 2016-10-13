@@ -510,8 +510,8 @@ public class OrderController extends AppController {
         if(orderItemList.size() > 0){
             
             OrderItem item = orderItemList.get(0);
-            customer = item.getOrderId().getCustomer();
-            productOrder = item.getOrderId();
+            customer = item.getOrder().getCustomer();
+            productOrder = item.getOrder();
             
             OrderManager orderManager = new OrderManager(sessionUser);
             orderManager.processOrderApproval(productOrder, orderItemList, customer);

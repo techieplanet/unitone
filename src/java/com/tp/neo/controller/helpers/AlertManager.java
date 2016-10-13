@@ -46,9 +46,9 @@ public class AlertManager {
     
     
     
-    public void sendNewOrderAlerts(ProductOrder order, Lodgement lodgement, Customer customer, List<User> recipientsList){
+    public void sendNewOrderAlerts(ProductOrder order, Lodgement lodgement, Customer customer, List<User> recipientsList, String applicationContext){
         //emails
-        new EmailHelper().sendNewOrderEmailToAdmins(order, customer, recipientsList);
+        new EmailHelper().sendNewOrderEmailToAdmins(order, customer, recipientsList, applicationContext);
         new EmailHelper().sendNewOrderEmailToCustomer(lodgement, customer);
         new EmailHelper().sendNewOrderEmailToAgent(lodgement, customer);
         
@@ -78,6 +78,17 @@ public class AlertManager {
         //SMS
         new SMSHelper().sendNewLodgementSMSToCustomer(lodgement, customer);
         new SMSHelper().sendNewLodgementEmailToAgent(lodgement, customer);
+    }
+    
+    
+    public void sendLodgementApprovalAlerts(Customer customer, ProjectUnit unit, double amount){
+        //emails
+        new EmailHelper().sendLodgementApprovalEmailToCustomer(customer, unit, amount);
+        new EmailHelper().sendLodgementApprovalEmailToCustomer(customer, unit, amount);
+        
+        //sms
+        new SMSHelper().sendLodgementApprovalSMSToCustomer(customer, unit, amount);
+        new SMSHelper().sendLodgementApprovalSMSToAgent(customer, unit, amount);
     }
        
 }
