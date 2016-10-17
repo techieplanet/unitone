@@ -21,7 +21,7 @@
 <div class="box">
     <div class="box-header">
       <h3 class="box-title block">
-          Select a customer
+          Select customer
       </h3>
     </div><!-- /.box-header -->
 
@@ -45,7 +45,7 @@
             <c:forEach items="${customers}" var="customer">
                 <tr id='row<c:out value="${customer.customerId}" />'>
                     <td><img alt="No Image" class="img-responsive img-thumbnail" width="55" height="50" src="<c:out value='/uploads/NeoForce/images/customer/${customer.photoPath}'></c:out>" /></td>
-                    <td class="agentId"><c:out value="${customer.agentId.agentId}" /></td>
+                    <td class="agentId"><c:out value="${customer.agent.agentId}" /></td>
                     <td class="customerFname"><c:out value="${customer.firstname}" /></td>
                     <td class="customerMname"><c:out value="${customer.middlename}" /></td>
                     <td class="customerLname"><c:out value="${customer.lastname}" /></td>
@@ -55,9 +55,9 @@
 
                     <td>
                         <input type="hidden" class="customerImg" value='<c:out value="/uploads/NeoForce/images/customer/${customer.photoPath}"></c:out>' />
-                        <input type="hidden" class="agentImg" value='<c:out value="/uploads/NeoForce/images/agent/${customer.agentId.photoPath}"></c:out>' />
-                        <input type="hidden" class="agentName" value='<c:out value="${customer.agentId.lastname} ${customer.agentId.firstname}"></c:out>' />
-                        <input type="hidden" class="agentPhone" value='<c:out value="${customer.agentId.phone}"></c:out>' />
+                        <input type="hidden" class="agentImg" value='<c:out value="/uploads/NeoForce/images/agent/${customer.agent.photoPath}"></c:out>' />
+                        <input type="hidden" class="agentName" value='<c:out value="${customer.agent.lastname} ${customer.agent.firstname}"></c:out>' />
+                        <input type="hidden" class="agentPhone" value='<c:out value="${customer.agent.phone}"></c:out>' />
                         <a class="btn btn-primary" href="#" onclick="selectCustomer('${pageContext.request.contextPath}','${customer.customerId}')" role="button">Choose</a>
                     </td>
                 </tr>
@@ -142,59 +142,52 @@
 </section>
 
 <!-- Main content -->
-        <section class="content" id="lodgementForm" style="display:none">
+        <section class="content" id="lodgementCart" style="display:none">
           <!-- Your Page Content Here -->
           <div class="box">
                 <div class="box-header">
                   <h3 class="box-title block">
-                      Customer Lodgement
-                      <span class="pull-right">
-                          <a class="btn btn-primary" href="Order?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp; Place new Order</a>
-                      </span>
+                      Lodgement Cart
                   </h3>
                 </div><!-- /.box-header -->
-                <form name="lodgementForm" method="post" action="" onSubmit="return checkFormRequired()">
                  <div class="box-body">
-                       <c:if test="${fn:length(errors) > 0 }">
-                <div class="row">
-                    <div class="col-md-12 ">
-                        <p class="bg-danger padding10" style="width:100%; margin:0 auto !important">
-                          <c:forEach items="${errors}" var="error">
-                              <c:out value="${error.value}" /><br/>
-                          </c:forEach>
-                        </p>
-                    </div>
-                </div>
-            </c:if>
-          <c:if test="${success}">
-              <div class="row">
-                    <div class="col-md-12 ">
-                        <p class="bg-success padding10" style="width:95%">
-                          <i class="fa fa-check"></i>Saved Successfully
-                          <span class="pull-right">
-                              
-                              <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Customer">Back to list</a>
-                              
-                          </span>
-                        </p>
-                    </div>
-                </div>
-          </c:if>   
-                            
-                  
-                  
-                       
-                    <div class="box-header">
-                        <h3 class="box-title block">
-                            <span class="pull-right"><a class="btn btn-primary" href="Order?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Place new Order</a></span>
-                        </h3>
-                    </div><!-- /.box-header -->
+                     
+                     <!-- Lodgement cart -->
+                     <div>
+                         <table id="lodgementCartTable" class='table table-bordered table-striped table-hover'>
+                             <thead>
+                                 <tr>
+                                     <th>SN</th>
+                                     <th>Project</th>
+                                     <th>Unit</th>
+                                     <th style="text-align: center">Qty</th>
+                                     <th style="text-align: center">Amount</th>
+                                     <th>Action</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 
+                             </tbody>
+                             <tfoot>
+                                 <tr>
+                                     <td style="text-align: right" colspan="5" id="cart-total"></td>
+                                     <td></td>
+                                 </tr>
+                             </tfoot>
+                         </table>
+                     </div>
+                     <div class="text-right">
+                         <button class="btn btn-success" id="checkOutBtn" onclick="checkOut()" disabled="true"><i class="fa fa-cart-plus"></i> Checkout</button>
+                     </div>
+                      
                 </div><!-- /.box-body -->
-                </form>
               </div><!-- /.box -->
           
         </section><!-- /.content -->
         
+        
+        
+        <!-- Lodgement Payment checkout starts here --->
         <div class="row">
           <section class="content" id="checkout" style="display: none">
             
@@ -202,7 +195,7 @@
                       <div class="box box-default">
                     	<fieldset>
                         <legend style="padding-left:20px !important;">Check Out</legend>
-                                
+                        <form name="lodgementCart" method="post" action="${pageContext.request.contextPath}/Lodgement?action=morgage" >    
                             <div class="col-md-11" >
                             	
                                 <!-- Start of Payment Method Container -->
@@ -274,7 +267,7 @@
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="tellerAmount">Amount</label>
-                                            <input type="text" class="form-control" id="tellerAmount" name="tellerAmount" style="width: 100%;">
+                                            <input type="text" class="form-control amount-box" id="tellerAmount" name="tellerAmount" style="width: 100%;">
                                         </div>      
                                     </div>
                                     
@@ -293,7 +286,7 @@
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="cashAmount">Amount</label>
-                                            <input type="text" class="form-control" id="cashAmount" name="cashAmount" style="width: 100%;">
+                                            <input type="text" class="form-control amount-box" id="cashAmount" name="cashAmount" style="width: 100%;">
                                         </div>      
                                     </div>
                                     <div class="col-md-2">
@@ -359,7 +352,7 @@
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="tellerAmount">Amount</label>
-                                            <input type="text" class="form-control" id="transfer_amount" name="transfer_amount" style="width: 100%;">
+                                            <input type="text" class="form-control amount-box" id="transfer_amount" name="transfer_amount" style="width: 100%;">
                                         </div>      
                                     </div>
                                     
@@ -370,8 +363,9 @@
                                     </div>
                                 </div>
                                 <!-- End of Pay with Cash Div Container -->
-                                             
+                                <div><input type="hidden" name="orderItemsJson" id="orderItemsJson" value="" /></div>            
                               </div>
+                        </form>
                         </fieldset>
                        </div>
             </div>
@@ -434,8 +428,14 @@
                 "columnDefs": [
                     { "sortable": false, "width":"50px", "targets": 4 }
                 ]
-        });
+            });
     
+        $("#lodgementCartTable").DataTable({
+                "autoWidth": false,
+                "columnDefs": [
+                    { "sortable": false}
+                ]
+        });
       
           });
           

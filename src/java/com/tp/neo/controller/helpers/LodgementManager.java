@@ -59,8 +59,14 @@ public class LodgementManager {
         new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
         
         //process the lodgenent items
-        for(int i=0; i < lodgementItems.size(); i++){
-            LodgementItem lodgementItem = createLodgementItem(lodgement, lodgementItems.get(i).getItem());    //insert sale item
+        for(LodgementItem lodgementItem : lodgementItems){
+            
+               lodgementItem.setLodgement(lodgement);
+               lodgementItem.setApprovalStatus((short)0);
+                 new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
+        
+                em.persist(lodgementItem);
+                em.flush();
         }
         
         //create system notification for the lodgement
@@ -69,12 +75,14 @@ public class LodgementManager {
         em.persist(notification);
         
         em.getTransaction().commit();
-        em.close();
-        emf.close();
+        
         
         //now send alerts on the lodgement to customer, agent and admin
         //email alert will be sent to all Admins with approve_order permisison
         List<User> recipientsList = em.createNamedQuery("User.findAll").getResultList();
+        em.close();
+        emf.close();
+        
         for(int i=0; i < recipientsList.size(); i++){
             if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
                 recipientsList.remove(i);
@@ -91,21 +99,21 @@ public class LodgementManager {
      * @param orderItem the order item for the lodgment item that is being created
      * 
      */
-    private LodgementItem createLodgementItem(Lodgement lodgement, OrderItem orderItem) throws PropertyException, RollbackException{
-        LodgementItem lodgementItem = new LodgementItem();
-        
-        lodgementItem.setAmount(orderItem.getInitialDep());
-        lodgementItem.setItem(orderItem);
-        lodgementItem.setLodgement(lodgement);
-        lodgementItem.setApprovalStatus((short)0);
-        new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
-        
-        em.persist(lodgementItem);
-        em.flush();
-        
-        return lodgementItem;
-        
-    }
+//    private LodgementItem createLodgementItem(Lodgement lodgement, OrderItem orderItem) throws PropertyException, RollbackException{
+//        LodgementItem lodgementItem = new LodgementItem();
+//        
+//        //lodgementItem.setAmount(orderItem.getInitialDep());
+//        lodgementItem.setItem(orderItem);
+//        lodgementItem.setLodgement(lodgement);
+//        lodgementItem.setApprovalStatus((short)0);
+//        new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
+//        
+//        em.persist(lodgementItem);
+//        em.flush();
+//        
+//        return lodgementItem;
+//        
+//    }
     
     
     

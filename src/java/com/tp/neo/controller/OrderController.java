@@ -321,6 +321,7 @@ public class OrderController extends AppController {
             orderItem.setCreatedDate(getDateTime().getTime());
             orderItem.setCreatedBy(agent.getAgentId());
             orderItem.setApprovalStatus(approval);
+            orderItem.setUnit(projectUnit);
             
             orderItemList.add(orderItem);
         }
