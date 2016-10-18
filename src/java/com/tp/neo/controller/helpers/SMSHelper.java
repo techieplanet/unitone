@@ -176,9 +176,8 @@ public class SMSHelper {
         String phone ="";
         String message =   "Customer: " + customer.getFirstname() + " " + customer.getLastname() + customer.getAccount().getAccountCode() + ","
                       + "Lodgement approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
-                      + "Customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
                       + "Amount advanced: " + String.format("%.2f", amount) + "."
-                      + "<br/>" + "Congratulations"; 
+                      + "Congratulations"; 
         
         if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getAgent().getPhone().substring(1);

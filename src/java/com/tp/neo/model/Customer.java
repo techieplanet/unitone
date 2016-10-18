@@ -67,6 +67,8 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @OneToMany(mappedBy = "customerId")
+    private Collection<Lodgement> lodgementCollection;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     @ManyToOne
     private Account account;
@@ -130,6 +132,9 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Date modifiedDate;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<CustomerAgent> customerAgentCollection;
+    
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer")
+    private CustomerBalance customerBalance;
 
     //Extra
     transient final Integer USERTYPEID = 3;
@@ -412,5 +417,22 @@ public class Customer implements Serializable, ITrailable, SystemUser {
 
     public void setAccount(Account account) {
         this.account = account;
+    }
+    
+    public CustomerBalance getCustomerBalance() {
+        return customerBalance;
+    }
+
+    public void setCustomerBalance(CustomerBalance customerBalance) {
+        this.customerBalance = customerBalance;
+    }
+
+    @XmlTransient
+    public Collection<Lodgement> getLodgementCollection() {
+        return lodgementCollection;
+    }
+
+    public void setLodgementCollection(Collection<Lodgement> lodgementCollection) {
+        this.lodgementCollection = lodgementCollection;
     }
 }

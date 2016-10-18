@@ -72,9 +72,8 @@ public class EmailHelper {
      * @param customer the customer that owns the order 
      * @param recipientsList the list of admins that can receive that email. One of them can now process the order
      */
-    protected void sendNewOrderEmailToAdmins(ProductOrder order, Customer customer, List<User> recipientsList, String applicationContext){
-        String waitingOrdersPageLink = applicationContext + "/order?action=approval";
-        String thisOrderPageLink = applicationContext + "/order?action=notification&id=" + order.getId();
+    protected void sendNewOrderEmailToAdmins(ProductOrder order, Customer customer, List<User> recipientsList, String thisOrderPageLink){
+        
         
         String messageBody =   "Dear Admin,"
                       + "<br/>" + "A new order, ID: <b>" + order.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() 
@@ -84,8 +83,6 @@ public class EmailHelper {
                       + "<br/>" + "Please follow the link below to take necessary action."
                       + "<br/>"  + "<a href=" + thisOrderPageLink + ">" + thisOrderPageLink + "</a>"
                       + "<br/>"
-                      + "<br/>"  + "You can also follow this link to view all waiting orders"
-                      + "<br/>"  + "<a href=" + waitingOrdersPageLink + ">" + waitingOrdersPageLink + "</a>"
                       + "<br/>" + APP_NAME;
         
         String emailSubject = APP_NAME + ": New Order Awaiting Approval";
@@ -169,15 +166,14 @@ public class EmailHelper {
     
     
     /*********************************** LODGEMENT ***********************************/
-    protected void sendNewLodgementEmailToAdmins(Lodgement lodgement, Customer customer, List<User> recipientsList){
-        String waitingLodgementPageLink = "xyz";
+    protected void sendNewLodgementEmailToAdmins(Lodgement lodgement, Customer customer, List<User> recipientsList, String waitingLodgementsPageLink){
         String messageBody =   "Dear Admin,"
                       + "<br/>" + "A new lodgement, ID: <b>" + lodgement.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
                       + " has been created and needs approval."
                       + "<br/>" 
                       + "<br/>"  
                       + "<br/>" + "Please follow the link below to take necessary action."
-                      + "<br/>" +  waitingLodgementPageLink
+                      + "<br/>" +  waitingLodgementsPageLink
                       + "<br/>"  
                       + "<br/>"  
                       + "<br/>" + APP_NAME;

@@ -43,6 +43,8 @@ public class LodgementItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "created_by_user_type")
+    private Short createdByUserType;
     @Column(name = "approval_status")
     private Short approvalStatus;
 
@@ -170,6 +172,16 @@ public class LodgementItem extends BaseModel {
 
     public void setApprovalStatus(Short approvalStatus) {
         this.approvalStatus = approvalStatus;
+    }
+
+    
+
+    public Short getCreatedByUserType() {
+        return createdByUserType;
+    }
+
+    public void setCreatedByUserType(Short createdByUserType) {
+        this.createdByUserType = createdByUserType;
     }
     
 }

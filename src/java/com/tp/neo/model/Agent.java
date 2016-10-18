@@ -68,14 +68,17 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy")})
 public class Agent extends BaseModel implements SystemUser  {
 
-    @JoinColumn(name = "account_id", referencedColumnName = "id")
-    @ManyToOne
-    private Account account;
-
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
+    private Collection<Withdrawal> withdrawalCollection;
+
+    @JoinColumn(name = "account_id", referencedColumnName = "id")
+    @ManyToOne
+    private Account account;
+
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
     private Collection<ProductOrder> productOrderCollection;
@@ -475,6 +478,17 @@ public class Agent extends BaseModel implements SystemUser  {
     public void setAccount(Account account) {
         this.account = account;
     }
+    
+    
+    @XmlTransient
+    public Collection<Withdrawal> getWithdrawalCollection() {
+        return withdrawalCollection;
+    }
+
+    public void setWithdrawalCollection(Collection<Withdrawal> withdrawalCollection) {
+        this.withdrawalCollection = withdrawalCollection;
+    }
+
 
     
 

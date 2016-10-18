@@ -46,9 +46,9 @@ public class AlertManager {
     
     
     
-    public void sendNewOrderAlerts(ProductOrder order, Lodgement lodgement, Customer customer, List<User> recipientsList, String applicationContext){
+    public void sendNewOrderAlerts(ProductOrder order, Lodgement lodgement, Customer customer, List<User> recipientsList, String thisOrderPageLink){
         //emails
-        new EmailHelper().sendNewOrderEmailToAdmins(order, customer, recipientsList, applicationContext);
+        new EmailHelper().sendNewOrderEmailToAdmins(order, customer, recipientsList, thisOrderPageLink);
         new EmailHelper().sendNewOrderEmailToCustomer(lodgement, customer);
         new EmailHelper().sendNewOrderEmailToAgent(lodgement, customer);
         
@@ -69,9 +69,9 @@ public class AlertManager {
         new SMSHelper().sendOrderApprovalSMSToAgent(customer, unit, amount);
     }
     
-    public void sendNewLodgementAlerts(Lodgement lodgement, Customer customer, List<User> recipientsList){
+    public void sendNewLodgementAlerts(Lodgement lodgement, Customer customer, List<User> recipientsList, String waitingLodgementsPageLink){
         //emails
-        new EmailHelper().sendNewLodgementEmailToAdmins(lodgement, customer, recipientsList);
+        new EmailHelper().sendNewLodgementEmailToAdmins(lodgement, customer, recipientsList, waitingLodgementsPageLink);
         new EmailHelper().sendNewLodgementEmailToCustomer(lodgement, customer);
         new EmailHelper().sendNewLodgementEmailToAgent(lodgement, customer);
         
@@ -84,7 +84,7 @@ public class AlertManager {
     public void sendLodgementApprovalAlerts(Customer customer, ProjectUnit unit, double amount){
         //emails
         new EmailHelper().sendLodgementApprovalEmailToCustomer(customer, unit, amount);
-        new EmailHelper().sendLodgementApprovalEmailToCustomer(customer, unit, amount);
+        new EmailHelper().sendLodgementApprovalEmailToAgent(customer, unit, amount);
         
         //sms
         new SMSHelper().sendLodgementApprovalSMSToCustomer(customer, unit, amount);
