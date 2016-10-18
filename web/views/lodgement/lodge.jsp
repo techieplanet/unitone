@@ -67,7 +67,7 @@
 
         </tfoot>
       </table>
-      <div><span><a href="#" onclick="showSelectedCustomer()">View selected customer</a></span></div>
+      <div><span><a href="#" onclick="showSelectedCustomer()">View selected customer <i class="fa fa-chevron-right"></i></a> </span></div>
     </div><!-- /.box-body -->
   </div><!-- /.box -->
 </section>
@@ -87,7 +87,12 @@
          <div class="box box-solid">
              
              <div class="box-header with-border">
-                 <h3 class="box-title">Customer Details</h3>
+                 <div class='col-md-6'>
+                    <h4>Customer Details</h4>
+                 </div>
+                 <div class='col-md-6'>
+                    <h4>Agent Details</h4>
+                 </div>
              </div>
              
              <div class="box-body ">
@@ -125,7 +130,7 @@
              </div>
              
              <div class="box-footer">
-                 <a href="#" onclick="showCustomerList()">Show Customer List<<</a>
+                 <a href="#" onclick="showCustomerList()"><i class="fa fa-chevron-left"></i> Show Customer List</a>
              </div>
              
          </div>
@@ -177,7 +182,7 @@
                          </table>
                      </div>
                      <div class="text-right">
-                         <button class="btn btn-success" id="checkOutBtn" onclick="checkOut()" disabled="true"><i class="fa fa-cart-plus"></i> Checkout</button>
+                         <button class="btn btn-orange" id="checkOutBtn" onclick="checkOut()" disabled="true"><i class="fa fa-cart-plus"></i> Checkout</button>
                      </div>
                       
                 </div><!-- /.box-body -->
@@ -201,7 +206,7 @@
                                 <!-- Start of Payment Method Container -->
                                 <div class="row" > 
                                     <div class="col-md-12">
-                                        <span style="color:green;font-weight:bold;">You'd be paying N<span id='paySum'></span></span>
+                                        
                                     	<div class="form-group">
                                             <label for="paymentMethod">Payment method:</label><br/>
                                             <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -231,27 +236,6 @@
                                     
                                     <div class="col-md-2">
                                     	<div class="form-group">
-                                            <label for="bankName">Bank Name</label>
-                                            <input type="text" class="form-control" id="bankName" name="bankName" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                                    
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="accountNo">Account No</label>
-                                            <input type="text" class="form-control" id="accountNo" name="accountNo" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                                    
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="accountNo">Account Name</label>
-                                            <input type="text" class="form-control" id="accountName" name="accountName" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                                    
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
                                             <label for="depositorsName">Depositor's Name</label>
                                             <input type="text" class="form-control" id="depositorsName" name="depositorsName" style="width: 100%;">
                                         </div> 
@@ -273,7 +257,7 @@
                                     
                                     <div class="col-md-2">
                                     	<div class="form-group" style="padding-top:25px !important;">
-                                            <input type="submit"  name="Pay" class="btn btn-orange" value="Pay with Bank Deposit"/>
+                                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge"/>
                                         </div>      
                                     </div>
                                     
@@ -291,7 +275,7 @@
                                     </div>
                                     <div class="col-md-2">
                                     	<div class="form-group" style="padding-top:25px !important;">
-                                            <input type="submit"  name="Pay" class="btn btn-orange" value="Pay with cash" style="vertical-align:bottom !important;"/>
+                                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge" style="vertical-align:bottom !important;"/>
                                         </div>      
                                     </div>
                                 </div>
@@ -305,7 +289,7 @@
                                             <div class="form-group">
                                                 <label for="tellerNumber">Click to proceed to payment</label>
                                                 <!--<a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
-                                                --> <button type="submit"  name="Pay" class="btn btn-orange"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
+                                                --> <button type="submit"  name="Pay" class="btn btn-success"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
                                             </div> 
                                         </div>
                                 </div>
@@ -316,39 +300,25 @@
                                 <div class='row' id='pwBankTransfer'>
                                     <div class="col-md-2">
                                     	<div class="form-group">
-                                            <label for="bankName">Bank Name</label>
+                                            <label for="bankName">Depositor's Bank Name</label>
                                             <input type="text" class="form-control" id="transfer_bankName" name="transfer_bankName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
                                     <div class="col-md-2">
                                     	<div class="form-group">
-                                            <label for="accountNo">Account No</label>
+                                            <label for="accountNo">Depositor's Account No</label>
                                             <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                     	<div class="form-group">
-                                            <label for="accountNo">Account Name</label>
+                                            <label for="accountNo">Depositor's Account Name</label>
                                             <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="depositorsName">Depositor's Name</label>
-                                            <input type="text" class="form-control" id="transfer_depositorsName" name="transfer_depositorsName" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                                    
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="tellerNumber">Transaction ID</label>
-                                            <input type="text" class="form-control" id="transfer_transactionId" name="transfer_transactionId" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                             
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="tellerAmount">Amount</label>
@@ -358,7 +328,7 @@
                                     
                                     <div class="col-md-2">
                                     	<div class="form-group" style="padding-top:25px !important;">
-                                            <input type="submit"  name="Pay" class="btn btn-orange" value="Pay with Bank Transfer"/>
+                                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge"/>
                                         </div>      
                                     </div>
                                 </div>

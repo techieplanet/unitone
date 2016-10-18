@@ -344,13 +344,12 @@ public class OrderController extends AppController {
         lodgement.setCreatedDate(this.getDateTime().getTime());
         lodgement.setCreatedBy(agent.getAgentId());
         lodgement.setCompanyAccountId(companyAccount);
+        lodgement.setApprovalStatus((short)0);
         
         if(paymentMethod == 1) {
             lodgement.setTransactionId(request.get("tellerNumber").toString());
             lodgement.setAmount(Double.parseDouble(request.get("tellerAmount").toString()));
             lodgement.setDepositorName(request.get("depositorsName").toString());
-            lodgement.setOriginAccountName(request.get("accountName").toString());
-            lodgement.setOriginAccountNumber(request.get("accountNo").toString());
             lodgement.setLodgmentDate(getDateTime().getTime());
         }
         else if(paymentMethod == 3){
@@ -360,12 +359,11 @@ public class OrderController extends AppController {
         }
         else if(paymentMethod == 4) {
             
-            lodgement.setDepositorName(request.get("transfer_depositiorsName").toString());
-            lodgement.setTransactionId(request.get("transfer_transactionId").toString());
             lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
             lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
             lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
             lodgement.setLodgmentDate(getDateTime().getTime());
+            
         }
         
         return lodgement;

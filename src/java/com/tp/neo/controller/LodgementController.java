@@ -62,6 +62,7 @@ public class LodgementController extends AppController {
     private static String LODGEMENT_NEW_AGENT = "/views/lodgement/customer_orders.jsp";
     private static String LODGEMENT_NEW = "/views/lodgement/lodge.jsp";
     private static String LODGEMENT_APPROVAL = "/views/lodgement/approval.jsp";
+    private static String LODGEMENT_SUCCESS = "/views/lodgement/success.jsp";
     private final static Logger LOGGER = 
             Logger.getLogger(Lodgement.class.getCanonicalName());
     
@@ -115,8 +116,7 @@ public class LodgementController extends AppController {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
     
-        HttpSession session = request.getSession();
-        SystemUser user = (SystemUser) session.getAttribute("user");
+        SystemUser user = sessionUser;
         
         String action = request.getParameter("action") != null?request.getParameter("action"):"";
         
@@ -144,8 +144,13 @@ public class LodgementController extends AppController {
              listCustomerOrders(request, response);
          }
          else if(action.equalsIgnoreCase("approval")){
+             
              viewFile = LODGEMENT_APPROVAL;
              getUnapprovedLodgement(request);
+             
+         }
+         else if(action.equals("success")){
+             viewFile = LODGEMENT_SUCCESS;
          }
          else{
             viewFile = LODGEMENT_ADMIN;
@@ -177,7 +182,7 @@ public class LodgementController extends AppController {
              String viewFile = LODGEMENT_NEW;
              payMorgage(request);
              String contextPath = request.getContextPath();
-             response.sendRedirect(contextPath + "/Lodgement?action=new");
+             response.sendRedirect(contextPath + "/Lodgement?action=success");
          }
         else{
             processInsertRequest(request, response);
@@ -370,6 +375,8 @@ public class LodgementController extends AppController {
             OrderItemsList.add(map);
         }
         
+        
+        emf.getCache().evictAll();
         em.close();
         emf.close();
         
@@ -412,6 +419,7 @@ public class LodgementController extends AppController {
         jplQuery.setParameter("approvalStatus", (short)0);
         List<Lodgement> lodgementList = jplQuery.getResultList();
         
+        request.setAttribute("notificationLodgementId",0);
         request.setAttribute("lodgements", lodgementList);
     }
     
@@ -453,7 +461,12 @@ public class LodgementController extends AppController {
             }
             
             LodgementManager lodgementManager = new LodgementManager(user);
-            lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath());
+            lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath());
+            
+            Map map = prepareMorgageInvoice(lodgement, lodgementItemList);
+            
+            HttpSession session = request.getSession(false);
+            session.setAttribute("invoice",map);
             
             em.close();
             emf.close();
@@ -467,6 +480,30 @@ public class LodgementController extends AppController {
     }
     
     
+    private Map prepareMorgageInvoice(Lodgement lodgement, List<LodgementItem> lodgementItems){
+        Map<String,Object> map = new HashMap();
+        
+        List<Map> itemList = new ArrayList();
+        
+        for(LodgementItem item : lodgementItems){
+            
+            Map<String, String> itemMap = new HashMap();
+            
+            String title = item.getItem().getUnit().getTitle();
+            Double amount = item.getAmount();
+            
+            itemMap.put("title",title);
+            itemMap.put("amount", amount.toString());
+            
+            itemList.add(itemMap);
+        }
+       
+        System.out.println("Lenght of items : " + itemList.size());
+        map.put("total",lodgement.getAmount());
+        map.put("items",itemList);
+        
+        return map;
+    }
     
     private List<MorgageList> processJson(String jsonString){
         
@@ -511,23 +548,20 @@ public class LodgementController extends AppController {
             lodgement.setTransactionId(request.get("tellerNumber").toString());
             lodgement.setAmount(Double.parseDouble(request.get("tellerAmount").toString()));
             lodgement.setDepositorName(request.get("depositorsName").toString());
-            lodgement.setOriginAccountName(request.get("accountName").toString());
-            lodgement.setOriginAccountNumber(request.get("accountNo").toString());
             lodgement.setLodgmentDate(getDateTime().getTime());
         }
         else if(paymentMethod == 3){
             
             lodgement.setAmount(Double.parseDouble(request.get("cashAmount").toString()));
-            
+            lodgement.setLodgmentDate(getDateTime().getTime());
         }
         else if(paymentMethod == 4) {
             
-            lodgement.setDepositorName(request.get("transfer_depositiorsName").toString());
-            lodgement.setTransactionId(request.get("transfer_transactionId").toString());
             lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
             lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
             lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
             lodgement.setLodgmentDate(getDateTime().getTime());
+            
         }
         
         return lodgement;

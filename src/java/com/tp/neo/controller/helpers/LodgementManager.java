@@ -74,8 +74,8 @@ public class LodgementManager {
         Notification notification = new AlertManager().getNotificationsManager(route).createNewLodgementNotification(customer);
         em.persist(notification);
         
-        em.getTransaction().commit();
         
+        em.getTransaction().commit();
         
         //now send alerts on the lodgement to customer, agent and admin
         //email alert will be sent to all Admins with approve_order permisison

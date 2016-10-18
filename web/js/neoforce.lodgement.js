@@ -81,13 +81,13 @@ function prepareOrderListTable(jsonString){
             tr += "<td>" + amountPaid.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
             tr += "<td>" + amountPayable.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
             tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' value='' /></td>";
-            tr += "<td><button class='btn btn-primary' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add</button></td>";
+            tr += "<td><button class='btn btn-success' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add</button></td>";
             rows += tr;
         }
         
         var table = "<table class='table table-bordered table-striped table-hover'>";
         table += "<thead><tr>";
-        table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th>";
+        table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th></th>";
         table += "</tr></thead>";
         table += rows  + "</table>";
      

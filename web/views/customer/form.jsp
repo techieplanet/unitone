@@ -20,7 +20,7 @@
 </c:if>
 
  <c:if test="${userTypeId != null && userTypeId == 1 }">
- <div class="row" id="agentListContainer">
+ <div class="row margin-bottom" id="agentListContainer">
      
      <section class="content-header">
          
@@ -114,7 +114,7 @@
              </div>
              
              <div class="box-footer">
-                 <a href="#" onclick="showAgentList()">Show agent List<<</a>
+                 <a href="#" onclick="showAgentList()"><i class='fa fa-chevron-left'></i> Show agent List</a>
              </div>
              
          </div>
