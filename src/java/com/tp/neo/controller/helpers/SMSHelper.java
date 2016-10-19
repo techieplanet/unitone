@@ -12,6 +12,7 @@ import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
+import com.tp.neo.model.Withdrawal;
 import com.tp.neo.model.utils.MailSender;
 import java.util.List;
 
@@ -183,5 +184,21 @@ public class SMSHelper {
             phone = "234" + customer.getAgent().getPhone().substring(1);
         
         new SMSSender(phone,message).start();      
+    }
+    
+    
+    
+    
+    /************************************  WITHDRAWAL ********************************/
+    protected void sendWithdrawalRequestEmailToAgent(Withdrawal w){
+        String phone = "";
+        String message =   "Acct: " + w.getAgent().getFirstname() + " " + w.getAgent().getLastname() + " (" + w.getAgent().getAccount().getAccountCode() + "),"
+                      + "Withdrawal request received and processing"
+                      + "Amount: " + w.getAmount();
+        
+         if(w.getAgent().getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + w.getAgent().getPhone().substring(1);
+        
+        new SMSSender(phone,message).start(); 
     }
 }

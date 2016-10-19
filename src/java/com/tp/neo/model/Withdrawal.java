@@ -39,7 +39,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Withdrawal.findByCreatedBy", query = "SELECT w FROM Withdrawal w WHERE w.createdBy = :createdBy"),
     @NamedQuery(name = "Withdrawal.findByModifiedDate", query = "SELECT w FROM Withdrawal w WHERE w.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Withdrawal.findByModifiedBy", query = "SELECT w FROM Withdrawal w WHERE w.modifiedBy = :modifiedBy")})
-public class Withdrawal implements Serializable {
+
+public class Withdrawal extends BaseModel{
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -61,15 +62,15 @@ public class Withdrawal implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     @Column(name = "created_by")
-    private String createdBy;
+    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     @Column(name = "modified_by")
-    private String modifiedBy;
+    private Long modifiedBy;
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
-    private Agent agentId;
+    private Agent agent;
 
     public Withdrawal() {
     }
@@ -125,11 +126,11 @@ public class Withdrawal implements Serializable {
         this.createdDate = createdDate;
     }
 
-    public String getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(String createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -141,20 +142,20 @@ public class Withdrawal implements Serializable {
         this.modifiedDate = modifiedDate;
     }
 
-    public String getModifiedBy() {
+    public Long getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(String modifiedBy) {
+    public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
-    public Agent getAgentId() {
-        return agentId;
+    public Agent getAgent() {
+        return agent;
     }
 
-    public void setAgentId(Agent agentId) {
-        this.agentId = agentId;
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
     @Override

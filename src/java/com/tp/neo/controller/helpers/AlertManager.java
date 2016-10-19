@@ -11,6 +11,7 @@ import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
+import com.tp.neo.model.Withdrawal;
 import java.util.List;
 
 /**
@@ -91,4 +92,15 @@ public class AlertManager {
         new SMSHelper().sendLodgementApprovalSMSToAgent(customer, unit, amount);
     }
        
+    
+    /************************************  WITHDRAWAL ********************************/
+    public void sendNewWithdrawalRequestAlerts(Withdrawal w, List<User> recipientsList, String withdrawalPageLink){
+        //email to admin
+        new EmailHelper().sendWithdrawalRequestEmailToAdmin(w, recipientsList, withdrawalPageLink);
+        
+        //agent
+        new EmailHelper().sendWithdrawalRequestEmailToAgent(w);
+        
+        new SMSHelper().sendWithdrawalRequestEmailToAgent(w);
+    }
 }

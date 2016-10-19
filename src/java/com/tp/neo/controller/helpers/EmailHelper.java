@@ -14,6 +14,7 @@ import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
+import com.tp.neo.model.Withdrawal;
 import java.util.List;
 
 /**
@@ -249,5 +250,38 @@ public class EmailHelper {
         String emailSubject = APP_NAME + ": New Lodgement Approval";
         
         new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    
+    
+    /************************************  WITHDRAWAL ********************************/
+    protected void sendWithdrawalRequestEmailToAgent(Withdrawal w){
+        String messageBody =   "Dear " + w.getAgent().getFirstname() + " " + w.getAgent().getLastname() + " (" + w.getAgent().getAccount().getAccountCode() + "),"
+                      + "<br/>" + "Your withdrawal request has been received and is being processed."
+                      + "<br/>Amount: " + w.getAmount()
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Withdrawal Request";
+        
+        new MailSender().sendHtmlEmail(w.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    
+    protected void sendWithdrawalRequestEmailToAdmin(Withdrawal w, List<User> recipientsList, String withdrawalPageLink){
+        String messageBody =   "New withdrawal request waiting for approval." 
+                      + "<br/>" + "Agent: " + w.getAgent().getFirstname() + " " + w.getAgent().getLastname() + " (" + w.getAgent().getAccount().getAccountCode() + "),"
+                      + "<br/>Amount: " + w.getAmount()
+                      + "<br/>" + "Please follow the link below to take necessary action."
+                      + "<br/>"  + "<a href=" + withdrawalPageLink + ">" + withdrawalPageLink + "</a>"
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Withdrawal Request";
+        
+        for(int i=0; i < recipientsList.size(); i++)
+            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
     }
 }
