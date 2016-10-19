@@ -8,6 +8,11 @@ package com.tp.neo.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.tp.neo.controller.components.AppController;
+import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.NotificationsManager;
+import com.tp.neo.controller.helpers.OrderManager;
+import com.tp.neo.controller.helpers.OrderObjectWrapper;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
@@ -42,6 +47,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpSession;
@@ -51,11 +57,14 @@ import javax.xml.bind.PropertyException;
  * @author John
  */
 @MultipartConfig
-@WebServlet(name = "OrderController", urlPatterns = {"/Order"})
-public class OrderController extends HttpServlet {
+@WebServlet(name = "OrderController", urlPatterns = {"/Order","/order"})
+public class OrderController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String ORDER_ADMIN = "/views/order/admin.jsp"; 
     private static String ORDER_NEW = "/views/order/add.jsp";
+    private final  String ORDER_APPROVAL = "/views/order/approval.jsp";
+    private final String ORDER_NOTIFICATION_ROUTE = "/Order?action=notification&id=";
+    
     private final static Logger LOGGER = 
             Logger.getLogger(Customer.class.getCanonicalName());
     
@@ -156,9 +165,19 @@ public class OrderController extends HttpServlet {
         //Project listprojects = project.listProjects();
         if (action.equalsIgnoreCase("new")){
                viewFile = ORDER_NEW;
+               request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
         }
         
-     
+        else if(action.equalsIgnoreCase("approval")) {
+            viewFile = ORDER_APPROVAL; 
+            request.setAttribute("pendingOrders", listPendingOrders());
+            request.setAttribute("singleOrderId",0);
+        }
+        else if(action.equals("notification")) {
+            viewFile = ORDER_APPROVAL; 
+            approveSingleOrder(request,response);
+            
+        }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = ORDER_ADMIN;
             request.setAttribute("orders", listOrders());
@@ -183,12 +202,20 @@ public class OrderController extends HttpServlet {
     }// </editor-fold>
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
-       
-        initOrderProcess(request);
+        
+        String action = request.getParameter("action");
+        
+        if(action.equals("approveOrder")){
+            
+            approveOrder(request,response,ORDER_APPROVAL);
+            
+        }else{
+        
+            initOrderProcess(request);
+        }
     }
     
-    public SaleItemObjectsList getCartData(HttpServletRequest request)
-    {
+    public SaleItemObjectsList getCartData(HttpServletRequest request) {
         SaleItemObjectsList saleObj = this.processJsonData(request.getParameter("cartDataJson").toString());
         return saleObj;
     }
@@ -212,22 +239,47 @@ public class OrderController extends HttpServlet {
         return salesObj;
     }
     
-    public void initOrderProcess(HttpServletRequest request) {
+    public void initOrderProcess(HttpServletRequest request)  {
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            Agent agent = null;
+            Customer customer = null;
+            
+            Long customerId = Long.parseLong(request.getParameter("customer_id"));
+            customer  = em.find(Customer.class, customerId);
+            
+            long agentId = Long.parseLong(request.getParameter("agent_id"));
+            agent = em.find(Agent.class, agentId);
+            
+            System.out.println("Customer id :" + customer.getCustomerId() + ", Agent id: " + agent.getAgentId());
+            
+            SaleItemObjectsList saleItemObject = getCartData(request);
+            
+            //Get Session User
+            HttpSession session = request.getSession();
+            SystemUser user  = (SystemUser) session.getAttribute("user");
+            
+            List<OrderItem> orderItems = prepareOrderItem(saleItemObject, agent);
+            Lodgement lodgement = prepareLodgement(getRequestParameters(request), agent);
+            
+            OrderManager orderManager = new OrderManager(user);
+            ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, request.getContextPath());
+            
+            if(productOrder != null){
+                    if(productOrder.getId() != null){
+                        
+                    }
+             }
+            
+        } catch (PropertyException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RollbackException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        Agent agent = null;
-        Customer customer = null;
-        
-        Long customerId = Long.parseLong(request.getParameter("customer_id"));
-        customer  = em.find(Customer.class, customerId);
-        
-        long agentId = Long.parseLong(request.getParameter("agent_id"));
-        agent = em.find(Agent.class, agentId);
-        
-        SaleItemObjectsList saleItemObject = getCartData(request);
-                
+
     }
     
     /**
@@ -235,8 +287,7 @@ public class OrderController extends HttpServlet {
      * @return  Map 
      * This method returns the parameters of an HTTP request as a Map object 
      */
-    public Map getRequestParameters(HttpServletRequest request)
-    {
+    public Map getRequestParameters(HttpServletRequest request) {
         Map<String, String> map = new HashMap();
         Enumeration params = request.getParameterNames();
         while(params.hasMoreElements())
@@ -259,6 +310,7 @@ public class OrderController extends HttpServlet {
             
             OrderItem orderItem = new OrderItem();
             
+            short approval = 0;
             long unitId = saleItem.productUnitId;
             ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
             
@@ -266,8 +318,10 @@ public class OrderController extends HttpServlet {
             orderItem.setInitialDep((double)(saleItem.productMinimumInitialAmount));
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
-            orderItem.setCreatedDate(getDateTime());
+            orderItem.setCreatedDate(getDateTime().getTime());
             orderItem.setCreatedBy(agent.getAgentId());
+            orderItem.setApprovalStatus(approval);
+            orderItem.setUnit(projectUnit);
             
             orderItemList.add(orderItem);
         }
@@ -287,17 +341,16 @@ public class OrderController extends HttpServlet {
         CompanyAccount companyAccount = em.find(CompanyAccount.class, Integer.parseInt(request.get("companyAccount").toString()));
         
         lodgement.setPaymentMode(paymentMethod);
-        lodgement.setCreatedDate(this.getDateTime());
+        lodgement.setCreatedDate(this.getDateTime().getTime());
         lodgement.setCreatedBy(agent.getAgentId());
         lodgement.setCompanyAccountId(companyAccount);
+        lodgement.setApprovalStatus((short)0);
         
         if(paymentMethod == 1) {
             lodgement.setTransactionId(request.get("tellerNumber").toString());
             lodgement.setAmount(Double.parseDouble(request.get("tellerAmount").toString()));
             lodgement.setDepositorName(request.get("depositorsName").toString());
-            lodgement.setOriginAccountName(request.get("accountName").toString());
-            lodgement.setOriginAccountNumber(request.get("accountNo").toString());
-            lodgement.setLodgmentDate(getDateTime());
+            lodgement.setLodgmentDate(getDateTime().getTime());
         }
         else if(paymentMethod == 3){
             
@@ -306,48 +359,17 @@ public class OrderController extends HttpServlet {
         }
         else if(paymentMethod == 4) {
             
-            lodgement.setDepositorName(request.get("transfer_depositiorsName").toString());
-            lodgement.setTransactionId(request.get("transfer_transactionId").toString());
             lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
             lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
             lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
-            lodgement.setLodgmentDate(getDateTime());
+            lodgement.setLodgmentDate(getDateTime().getTime());
+            
         }
         
         return lodgement;
     }
-  
     
-    private void creditCustomerAccount(Customer customer, double amount) {
-        
-    }
-    
-    private void CreateNewOrderAlert(ProductOrder order) {
-        
-    }
-    
-    private void sendNewOrderEmail(ProductOrder order, Customer customer) {
-        
-        
-        MailSender mail = new MailSender();
-        
-        Agent agent = customer.getAgent();
-        
-        String msgSubject = "New Order Request";
-        String msgBody = "";
-        
-        String customerEmail = customer.getEmail();
-        String agentEmail = agent.getEmail();
-        String adminEmail = "admin@tplocalhost.com";
-        
-        mail.sendHtmlEmail(customerEmail, adminEmail, msgSubject, msgBody);
-        mail.sendHtmlEmail(agentEmail, adminEmail, msgSubject, msgBody);
-        mail.sendHtmlEmail(adminEmail, adminEmail, msgSubject, msgBody);
-        
-    }
-    
-    private long getAgentId(HttpServletRequest request)
-    {
+    private long getAgentId(HttpServletRequest request) {
         HttpSession session = request.getSession();
         SystemUser user = (SystemUser)session.getAttribute("user");
         Long agentId = user.getSystemUserId();
@@ -355,8 +377,7 @@ public class OrderController extends HttpServlet {
         return agentId;
     }
     
-    private double getTotalOrderAmountPaid(HttpServletRequest request)
-    {
+    private double getTotalOrderAmountPaid(HttpServletRequest request){
         double totalOrderAmountPaid = 0;
         
         if(request.getParameter("tellerAmount") != null & request.getParameter("tellerAmount") != "")
@@ -373,15 +394,12 @@ public class OrderController extends HttpServlet {
         return totalOrderAmountPaid;
     }//    
     
-    private Date getDateTime()
-    {
+    private Calendar getDateTime(){
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
-        Date date = calendar.getTime();
-        return date;
+        return calendar;
     }
     
-    public List<ProductOrder> listOrders()
-    {
+    public List<ProductOrder> listOrders() {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
@@ -392,5 +410,158 @@ public class OrderController extends HttpServlet {
         
         return orderList;
     }
+    
+     public List<OrderObjectWrapper> listPendingOrders() throws IOException {
+    
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("ProductOrder.findByNotApprovalStatus");
+        Short s = 3; // Get Orders that are not declined approved
+        jplQuery.setParameter("approvalStatus", s);
+        
+        System.out.println("Query : " + jplQuery.toString());
+        List<ProductOrder> orderResultSet = jplQuery.getResultList();
+        
+        List<OrderObjectWrapper> orderWrapperList = new ArrayList();
+        
+        for(ProductOrder order : orderResultSet)
+        {
+            List<OrderItem> orderItems = getSalesByOrder(order);
+            if(orderItems.size() < 1){
+                continue;
+            }
+            OrderObjectWrapper orders = new OrderObjectWrapper(order, orderItems);
+            orderWrapperList.add(orders);
+        }
+        
+        
+       return orderWrapperList;
+        
+    }
+    
+    private List<OrderItem> getSalesByOrder(ProductOrder order) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("OrderItem.findByOrderAndUattendedItem");
+        
+        short unattended = 0;
+        
+        jplQuery.setParameter("orderId", order);
+        jplQuery.setParameter("approvalStatus", unattended);
+        
+        List<OrderItem> resultSet = jplQuery.getResultList();
+        
+       
+        
+        return resultSet;
+    }
+    
+   
+    
+    private void approveOrder(HttpServletRequest request,HttpServletResponse response, String viewFile){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        try{
+        
+        em.getTransaction().begin();
+        
+        String[] approveOrders = request.getParameterValues("order-item-approve");
+        String[] declineOrders = request.getParameterValues("order-item-decline");
+        
+        List<OrderItem> orderItemList = new ArrayList();
+        Customer customer = null;
+        ProductOrder productOrder = null;
+        
+        if(approveOrders != null) {
+            for(int i=0; i < approveOrders.length;i++){
+                
+                long id = Long.parseLong(approveOrders[i]);
+                OrderItem orderItem = em.find(OrderItem.class, id);
+                short s = 1;
+                orderItem.setApprovalStatus(s);
+                em.merge(orderItem);
+                em.persist(orderItem);
+                orderItemList.add(orderItem);
+              
+            }
+        }
+        
+        if(declineOrders != null) {
+            for(int i=0; i < declineOrders.length; i++){
+                
+                long id = Long.parseLong(declineOrders[i]);
+                OrderItem orderItem = em.find(OrderItem.class, id);
+                short s = 2;
+                orderItem.setApprovalStatus(s);
+                em.merge(orderItem);
+                orderItemList.add(orderItem);
+            }
+        }
+        
+        em.getTransaction().commit();
+        em.close();
+        emf.close();
+        
+        if(orderItemList.size() > 0){
+            
+            OrderItem item = orderItemList.get(0);
+            customer = item.getOrder().getCustomer();
+            productOrder = item.getOrder();
+            
+            OrderManager orderManager = new OrderManager(sessionUser);
+            orderManager.processOrderApproval(productOrder, orderItemList, customer);
+            System.out.println("Successful");
+            
+        }
+        
+            redirectToPendingOrder(request, response, viewFile);
+    }
+    catch(PropertyException pe){
+        pe.printStackTrace();
+    }
+    catch(RollbackException rollBack){
+        em.getTransaction().rollback();
+    }
+   }
+    
+    private void approveSingleOrder(HttpServletRequest request,HttpServletResponse response){
+        
+        try {
+            EntityManagerFactory emf =  Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            long productOrderId = Long.parseLong(request.getParameter("id"));
+            ProductOrder productOrder = em.find(ProductOrder.class, productOrderId);
+            
+            request.setAttribute("pendingOrders", listPendingOrders());
+            request.setAttribute("singleOrderId",productOrder.getId());
+            
+            
+            
+        } catch (IOException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
+   private void redirectToPendingOrder(HttpServletRequest request,HttpServletResponse response, String viewFile){
+       
+        try {
+            
+            request.setAttribute("pendingOrders", listPendingOrders());
+            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+            dispatcher.forward(request, response);
+            
+        } catch (IOException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ServletException ex) {
+            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+   }
+    
 
 }
