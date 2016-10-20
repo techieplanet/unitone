@@ -240,8 +240,6 @@ public class OrderItem extends BaseModel {
         double amount = this.getUnit().getCpu() * this.getUnit().getCommissionPercentage() / 100;
         String amountString = df.format(amount); //rounded to two decimal places
         return Double.parseDouble(amountString); //change back to double and return
-    }
-    
-    
+    } 
     
 }

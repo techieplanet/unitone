@@ -52,13 +52,24 @@ public class OrderManager {
         
         em.getTransaction().begin();
         
-        //persist the lodgement
+        //persist the lodgement and notify admin about it
         em.persist(lodgement);
         em.flush();
         
-        //credit the customer account to the tune of the lodgment 
-        Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
+        //log the notification in the database
+        String route = "Lodgement?action=notification&id=" + lodgement.getId();
+        Notification notification = new AlertManager().getNotificationsManager(route).createNewLodgementNotification(customer);
+        
+        //send the alert to customer, agent and admin
+        AlertManager alertManager = new AlertManager();
+        List<User> recipientsList = em.createNamedQuery("User.findAll").getResultList();
+        for(int i=0; i < recipientsList.size(); i++){
+            if( !(recipientsList.get(i).hasActionPermission("approve_lodgement")) )
+                recipientsList.remove(i);
+        }
+        String waitingLodgementsPageLink = applicationContext + "Lodgement?action=approval";
+        alertManager.sendNewLodgementAlerts(lodgement, customer, recipientsList, waitingLodgementsPageLink);
+        
         
         //create the order 
         ProductOrder order = createOrder(customer.getAgent(), customer);
@@ -69,34 +80,8 @@ public class OrderManager {
             createLodgementItem(lodgement, orderItem);                          //insert the lodgment items
         }
         
-        //create new order system notification
-        String route = applicationContext + "/order?action=notification&id=" + order.getId();
-        Notification notification = new AlertManager().getNotificationsManager(route).createNewOrderNotification(customer);
-        em.persist(notification);
-        
         em.getTransaction().commit();
         
-        //send email alert to all Admins with approve_order permisison
-        List<User> recipientsList = em.createNamedQuery("User.findAll").getResultList();
-        for(int i=0; i < recipientsList.size(); i++){
-            
-            if(recipientsList.get(i).getPermissions() == null){
-                continue;
-            }
-            
-            if(recipientsList.get(i).getPermissions().equals("")){
-                continue;
-            }
-            
-            if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
-                recipientsList.remove(i);
-        }
-        
-        em.close();
-        emf.close();
-        
-        new AlertManager().sendNewOrderAlerts(order, lodgement, customer, recipientsList, applicationContext);
-                
         return order;
     }
     
@@ -202,7 +187,7 @@ public class OrderManager {
 
                 setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
                 
-                //double entry
+                //double entry: debit customer, credit unit
                 TransactionManager transactionManager = new TransactionManager(sessionUser);
                 System.out.println("Customer Account = " + customer.getAccount());
                 System.out.println("Unit Account = " + thisItem.getUnit().getAccount());
@@ -214,7 +199,7 @@ public class OrderManager {
                 AlertManager alertManager = new AlertManager();
                 //alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
-                //credit agent wallet - double entry
+                //double entry (credit agent wallet): credit agent, debit unit
                 transactionManager.doDoubleEntry(thisItem.getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getCommissionAmount());
                 
                 //send wallet credit alert
@@ -257,6 +242,32 @@ public class OrderManager {
         }
         em.merge(order);
         em.getTransaction().commit();
+    }
+    
+    
+    public void processOrderLevelLodgementApproval(Lodgement lodgement, ProductOrder order, Customer customer, String applicationContext){
+        em.getTransaction().begin();
+        
+        //credit the customer account to the tune of the lodgment 
+        Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
+        
+        //create new order system notification
+        String route =  applicationContext + "Order?action=notification&id=" + order.getId();
+        Notification notification = new AlertManager().getNotificationsManager(route).createNewOrderNotification(customer);
+        em.persist(notification);
+        
+        //send email alert to all Admins with approve_order permisison
+        List<User> recipientsList = em.createNamedQuery("User.findAll").getResultList();
+        for(int i=0; i < recipientsList.size(); i++){
+            if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
+                recipientsList.remove(i);
+        }
+        String thisOrderPageLink = applicationContext + "/Order?action=notification&id=" + order.getId();
+        new AlertManager().sendNewOrderAlerts(order, lodgement, customer, recipientsList, thisOrderPageLink);
+        
+        em.getTransaction().commit();
+        
     }
     
     

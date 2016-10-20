@@ -53,6 +53,9 @@ public class Lodgement extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
+    @ManyToOne
+    private Customer customer;
     @Column(name = "approval_status")
     private Short approvalStatus;
 
@@ -244,6 +247,14 @@ public class Lodgement extends BaseModel {
 
     public void setApprovalStatus(Short approvalStatus) {
         this.approvalStatus = approvalStatus;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
     
 }

@@ -29,6 +29,8 @@
     <class>com.tp.neo.model.AccountType</class>
     <class>com.tp.neo.model.ProductOrder</class>
     <class>com.tp.neo.model.Transaction</class>
+    <class>com.tp.neo.model.CustomerBalance</class>
+    <class>com.tp.neo.model.Withdrawal</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/xforce"/>

@@ -43,7 +43,7 @@ public class CustomerAgent implements Serializable {
     private Agent agentId;
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     @ManyToOne(optional = false)
-    private Customer customerId;
+    private Customer customer;
 
     public CustomerAgent() {
     }
@@ -68,12 +68,12 @@ public class CustomerAgent implements Serializable {
         this.agentId = agentId;
     }
 
-    public Customer getCustomerId() {
-        return customerId;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setCustomerId(Customer customerId) {
-        this.customerId = customerId;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     @Override
