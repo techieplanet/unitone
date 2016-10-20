@@ -72,7 +72,7 @@ public class Agent extends BaseModel implements SystemUser  {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agentId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
     private Collection<Withdrawal> withdrawalCollection;
 
     @JoinColumn(name = "account_id", referencedColumnName = "id")

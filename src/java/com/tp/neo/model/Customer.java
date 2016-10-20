@@ -67,7 +67,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-    @OneToMany(mappedBy = "customerId")
+    @OneToMany(mappedBy = "customer")
     private Collection<Lodgement> lodgementCollection;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     @ManyToOne
@@ -130,7 +130,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private Collection<CustomerAgent> customerAgentCollection;
     
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer")

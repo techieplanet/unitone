@@ -249,7 +249,7 @@ public class CustomerController extends AppController  {
 //         
                 CustomerAgent customerAgent =  new CustomerAgent();
                 customerAgent.setAgentId(agent);
-                customerAgent.setCustomerId(customer);
+                customerAgent.setCustomer(customer);
                                 
                 em.persist(customerAgent);
                 

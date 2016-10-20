@@ -37,7 +37,7 @@ public class CustomerBalance implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "customer_id")
     private Long customerId;
@@ -50,9 +50,9 @@ public class CustomerBalance implements Serializable {
     @Column(name = "totalcredit")
     private Double totalcredit;
     
-    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
-    @OneToOne
-    private Customer customer;
+   @JoinColumn(name = "customer_id", referencedColumnName = "customer_id", insertable = false, updatable = false)
+   @OneToOne
+   private Customer customer;
 
     public CustomerBalance() {
     }
