@@ -1,4 +1,5 @@
- <!-- Main Header -->
+ <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!-- Main Header -->
       <header class="main-header">
 
         <!-- Logo -->
@@ -30,18 +31,20 @@
                 <!-- Menu toggle button -->
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                   <i class="fa fa-bell-o"></i>
-                  <span class="label label-warning">10</span>
+                  <span class="label label-warning">${notifications.size()}</span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li class="header">You have 10 notifications</li>
+                  <li class="header">You have ${notifications.size()} new notifications</li>
                   <li>
                     <!-- Inner Menu: contains the notifications -->
                     <ul class="menu">
+                     <c:forEach items="${notifications}" var="notificationObject">
                       <li><!-- start notification -->
-                        <a href="#">
-                          <i class="fa fa-users text-aqua"></i> 5 new members joined today
+                        <a href="${notificationObject.getRoute()}">
+                            <i class="fa fa-users text-aqua"></i> <c:out value="${notificationObject.getTitle()}"></c:out>
                         </a>
                       </li><!-- end notification -->
+                     </c:forEach>
                     </ul>
                   </li>
                   <li class="footer"><a href="#">View all</a></li>

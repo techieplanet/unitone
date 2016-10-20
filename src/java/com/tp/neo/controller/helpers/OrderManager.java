@@ -75,18 +75,28 @@ public class OrderManager {
         em.persist(notification);
         
         em.getTransaction().commit();
-        em.close();
-        emf.close();
         
         //send email alert to all Admins with approve_order permisison
         List<User> recipientsList = em.createNamedQuery("User.findAll").getResultList();
         for(int i=0; i < recipientsList.size(); i++){
+            
+            if(recipientsList.get(i).getPermissions() == null){
+                continue;
+            }
+            
+            if(recipientsList.get(i).getPermissions().equals("")){
+                continue;
+            }
+            
             if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
                 recipientsList.remove(i);
         }
+        
+        em.close();
+        emf.close();
+        
         new AlertManager().sendNewOrderAlerts(order, lodgement, customer, recipientsList, applicationContext);
-        
-        
+                
         return order;
     }
     
@@ -184,24 +194,31 @@ public class OrderManager {
                 //if(order.getApprovalStatus() != 2) approveOrder(order);
                 setOrderItemStatus(thisItem);
                 
+                
                 //get/set corresponding lodgment item
+
                 List list = (List)thisItem.getLodgementItemCollection();
                 LodgementItem lodgementItem = (LodgementItem) list.get(0);
+
                 setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
                 
                 //double entry
                 TransactionManager transactionManager = new TransactionManager(sessionUser);
+                System.out.println("Customer Account = " + customer.getAccount());
+                System.out.println("Unit Account = " + thisItem.getUnit().getAccount());
+                System.out.println("Initial Deposit = " + thisItem.getInitialDep() );
+                
                 transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getUnit().getAccount(), thisItem.getInitialDep());
                 
                 //send approval alerts (email and SMS) to agent and customer
                 AlertManager alertManager = new AlertManager();
-                alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
+                //alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
                 //credit agent wallet - double entry
                 transactionManager.doDoubleEntry(thisItem.getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getCommissionAmount());
                 
                 //send wallet credit alert
-                alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
+                //alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
             }
             
@@ -220,6 +237,9 @@ public class OrderManager {
         }//end for
         
         //set the resultant status of the order based on the statuses of the items in it
+
+        
+        
         if(approvedItems.size() + declinedItems.size()  == allItems.size()){ //each item has either approved or declined status
             setOrderStatus(order, (short)2); //complete the order
             //List<LodgementItem> lodgementItems = (List)orderItemsList.get(0).getLodgementItemCollection();
@@ -235,7 +255,7 @@ public class OrderManager {
             //no nee to treat lodgement items
             
         }
-
+        em.merge(order);
         em.getTransaction().commit();
     }
     

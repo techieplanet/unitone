@@ -175,3 +175,15 @@ and open the template in the editor.
     background-color: #FF8800;
     color: #000000;
 }
+
+.table-bordered {
+    border: 1px solid #ccc !important;
+}
+
+.table-bordered > thead > tr > th, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > td {
+    border: 1px solid #ccc !important;
+}
+
+span.lodgementTitleSpan{
+    font-weight: bold;
+}

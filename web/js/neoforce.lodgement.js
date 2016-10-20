@@ -7,8 +7,9 @@
 var orderTable = null;
 var cid = 1;
 var countId = 1;
-function selectCustomer(contextPath,id)
-{
+var cartData = {};
+
+function selectCustomer(contextPath,id) {
    $("#customerListContainer:visible").toggle();
    $("#customerDetailContainer:visible").toggle();
    populateCustomerDetails(id);
@@ -33,94 +34,71 @@ function selectCustomer(contextPath,id)
     });
 }
 
-function prepareOrderListTable(jsonString)
-{
+
+
+function prepareOrderListTable(jsonString){
+    
     $("#accordion").html("");
+    
+    refreshCartDetails();
+    
     var orders = JSON.parse(jsonString);
     var count = 1;
     
-    for(var k in orders)
-    {
+    for(var k in orders) {
+        
         var rows = "";
         
         var orderId = orders[k].id;
         var agentName = orders[k].agentName;
         var customerName = orders[k].customerName;
+        
         var sales = JSON.parse(orders[k].sales);
         
+        //Skip if orderItems is empty
+        if(sales.length < 1){
+            continue;
+        }
+        
         for(var j in sales) {
+            
             var project = sales[j].project;
             var unitName = sales[j].unitName;
-            var amountPayable = sales[j].amountPayable;
+            var initialDeposit = parseFloat(sales[j].initialDeposit);
             var unitQty = sales[j].unitQty;
-            var saleId = sales[j].saleId;
+            var monthlyPay = sales[j].monthlyPay;
+            var orderItemId = sales[j].saleId;
+            var amountPaid = parseFloat(sales[j].amountPaid);
+            var amountPayable = parseFloat(sales[j].amountPayable);
             
-            var tr = "<tr id='row"+j+"' >";
+            var rowId = "row"+k+"_"+j;
+            var tr = "<tr id='"+rowId+"' >";
             tr += "<td>" + project + "</td>";
             tr += "<td>" + unitName + "</td>";
-            tr += "<td>" + amountPayable + "</td>";
+            tr += "<td>" + initialDeposit.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
             tr += "<td>" + unitQty + "</td>";
-            tr += "<td><input type='checkbox' value='" + saleId + "' /></td>";
-
+            tr += "<td>" + monthlyPay.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
+            tr += "<td>" + amountPaid.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
+            tr += "<td>" + amountPayable.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
+            tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' value='' /></td>";
+            tr += "<td><button class='btn btn-success' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add</button></td>";
             rows += tr;
         }
         
         var table = "<table class='table table-bordered table-striped table-hover'>";
         table += "<thead><tr>";
-        table += "<th>Project</th><th>Unit Name</th><th>Amount Payable</th><th>Unit Qty</th><th>Action</th>";
+        table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th></th>";
         table += "</tr></thead>";
         table += rows  + "</table>";
-        var div = "<div><button class='btn btn-primary'>Proceed</button></div>";
-        
-        table += div;
+     
         createOrderItemList(orderId,count,table,agentName);
        
         count += 1;
         
     }
     
-    
-    
-//    if(orderTable === null) {
-//        if(orders.length > 0)
-//        {
-//            $("#orderList tbody").html("");
-//            $("#orderList tbody").append(rows);      
-//        }
-//        else
-//        {
-//            //Empty the table
-//            $("#orderList tbody").html("");
-//        }
-//        orderTable = $("#orderList").DataTable({
-//                "autoWidth": false
-//        });
-//    }
-//    else {
-//        orderTable.destroy();
-//        if(orders.length > 0)
-//        {
-//            $("#orderList tbody").html("");
-//            $("#orderList tbody").append(rows);      
-//        }
-//        else
-//        {
-//            //Empty the table
-//            $("#orderList tbody").html("");
-//        }
-//        orderTable = $("#orderList").DataTable({
-//                "autoWidth": false
-//        });
-//    }
-    
-    
-//    $('#accordion').collapse({
-//      toggle: false
-//    });
-    stopLoading("#customerDetailContainer:hidden, #orderItems:hidden");
-    
-    
-    
+    stopLoading("#customerDetailContainer:hidden, #orderItems:hidden, #lodgementCart:hidden");
+  
 }
 
 function populateCustomerDetails(id){
@@ -147,14 +125,16 @@ function populateCustomerDetails(id){
     $("#agentPhone").text(agentPhone.trim());
 }
 function showCustomerList() {
-    $("#orderContainer:visible, #customerDetailContainer:visible, #orderItems:visible").toggle();
+    $("#orderContainer:visible, #customerDetailContainer:visible, #orderItems:visible, #lodgementCart:visible").toggle();
+    
     startLoading();
     stopLoading(function(){$("#customerListContainer:hidden").toggle();});
     
 }
 
 function showSelectedCustomer() {
-    
+    $("#customerListContainer:visible").toggle();
+    $("#customerDetailContainer:hidden, #orderContainer:hidden, #orderItems:hidden, #lodgementCart:hidden").toggle();
 }
 
 function createOrderItemList(id, count, table, agentName) {
@@ -166,6 +146,7 @@ function createOrderItemList(id, count, table, agentName) {
     panelHeading.setAttribute("id","heading"+id);
     panelHeading.setAttribute("class","panel-heading");
     panelHeading.setAttribute("role","tab");
+    panelHeading.setAttribute("style","background-color: #357CA5 !important;");
     
     var panelTitle = document.createElement("h4");
     panelTitle.setAttribute("class","panel-title");
@@ -175,6 +156,7 @@ function createOrderItemList(id, count, table, agentName) {
     titleButton.setAttribute("data-toggle","collapse");
     titleButton.setAttribute("data-parent","#accordion");
     titleButton.setAttribute("href","#collapse"+id);
+    titleButton.setAttribute("style","display:block;color: #fff !important");
     titleButton.innerHTML = "Order id : " + id + ", Agent : " + agentName;
     if(count > 1) {
         titleButton.setAttribute("class","collapsed");
@@ -204,6 +186,152 @@ function createOrderItemList(id, count, table, agentName) {
     panel.appendChild(panelCollapse);
     
     $("#accordion").append(panel);
+}
+
+
+
+function addToCart(project,unitName,qty,orderItemId,rowId){
+    
+    
+    
+    var amountFieldSelector = "#" + rowId + " .lodgement-amount";
+    var amount = $(amountFieldSelector).val();
+    var amountFormatted = amount.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ");
+    
+    var item = {"orderItemId":orderItemId,"amount":amount};
+    if(!cartData.lodgements)
+        cartData.lodgements = [];
+    
+    if(isItemInCart(orderItemId)){
+        alert("Item is already in cart, Please choose a different item");
+        return;
+    }
+    
+    cartData.lodgements.push(item);
+    console.log("Cart : " + JSON.stringify(cartData));
+    
+    
+    var id = $("#lodgementCartTable tbody tr:last").attr("id");
+    
+    if(id == null){
+        id = 0;
+    }
+    if(isNaN(id)){
+        id = 0;
+    }
+    
+    var newId = parseInt(id) + 1;
+    
+    var tr = "<tr id='" + newId + "'>";
+    tr += "<td>" + newId + "</td>";
+    tr += "<td>" + project + "</td>";
+    tr += "<td>" + unitName + "</td>";
+    tr += "<td style='text-align: right'>" + qty + "</td>";
+    tr += "<td style='text-align: right'>" + amountFormatted + "</td>";
+    tr += "<td><button class='btn btn-sm btn-danger' onclick='removeFromCart("+ newId +","+ orderItemId +")'><i class='fa fa-remove'></i> Remove</button></td>";
+    
+    $("#lodgementCartTable tbody").append(tr);
+    
+    calculateLodgementCartTotal()
+    
+    if($("#checkOutBtn").prop("disabled")){
+        $("#checkOutBtn").prop("disabled",false);
+    }
+}
+
+function calculateLodgementCartTotal(){
+    
+    var cart = cartData.lodgements;
+    
+    var total = 0;
+    
+    for(var k in cart){
+        
+        total = total +  parseFloat(cart[k].amount);
+    }
+    
+    console.log("Total = " + total);
+    
+    var totalFormatted = total.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ");
+    $("#lodgementCartTable tfoot td#cart-total").html("<b>Total = " + totalFormatted + "</b>");
+}
+
+function isItemInCart(itemId){
+    
+    var bool = false;
+    
+    var cart = cartData.lodgements;
+    
+    for(var k in cart){
+        if(cart[k].orderItemId == itemId){
+            bool = true;
+            break;
+        }
+    }
+    
+    return bool;
+}
+
+function removeFromCart(id,itemId){
+    
+    var cart = cartData.lodgements;
+    var pos = -1;
+    
+    for(var k in cart){
+        
+        if(cart[k].orderItemId == itemId){
+            pos = k;
+            break;
+        }
+    }
+    
+    $("#lodgementCartTable tbody #"+id).addClass('deleting');
+    $("#lodgementCartTable tbody #"+id).fadeOut(1000);
+    $("#lodgementCartTable tbody #"+id).remove();
+    console.log("before : " + JSON.stringify(cartData));
+    cartData.lodgements.splice(pos, 1);
+    console.log("after : " + JSON.stringify(cartData));
+    
+    if(cartData.lodgements.length < 1){
+        $("#checkOutBtn").prop("disabled",true);
+    }
+    
+    calculateLodgementCartTotal();
+}
+
+function checkOut(){
+    
+    $("#orderItems:visible").toggle();
+    $("#checkout:hidden").toggle();
+    
+    var orderItems = JSON.stringify(cartData.lodgements);
+    
+    $("#orderItemsJson").val(orderItems);
+    console.log($("#orderItemsJson").val());
+    
+    $("#checkOutBtn").prop("disabled",true);
+    
+    var cart = cartData.lodgements;
+    
+    var total = 0;
+    
+    for(var k in cart){
+        
+        total = total +  parseFloat(cart[k].amount);
+    }
+    
+    $("#checkout .amount-box").each(function(){
+        $(this).val(total.toString());
+        $(this).prop("readonly",true);
+    });
+    
+}
+
+function refreshCartDetails(){
+    $("#lodgementCartTable tbody").html("");
+    $("#lodgementCartTable tfoot td#cart-total").html("");
+    $("#checkOutBtn").prop("disabled",true);
+    cartData.lodgements = [];
 }
 
 function stopLoading(elem){
