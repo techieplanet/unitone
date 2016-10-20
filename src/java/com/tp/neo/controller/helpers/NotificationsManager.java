@@ -28,11 +28,10 @@ public class NotificationsManager {
         this.route = route;
     }
 
+
     protected Notification createNewOrderNotification(Customer customer){
-        String title = String.format("New order for %s %s (%s)", customer.getFirstname(), customer.getLastname(), customer.getAccount().getAccountCode());
-        
+        String title = String.format("New order for %s %s (%s)", customer.getFirstname(), customer.getLastname(), customer.getAccount().getAccountCode());        
         Notification notification = new Notification();
-        
         notification.setTitle(title);
         notification.setRoute(route);
         notification.setStatus((short)0);

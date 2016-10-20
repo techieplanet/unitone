@@ -8,7 +8,9 @@ package com.tp.neo.controller;
 import com.tp.neo.controller.components.AppController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.NotificationsManager;
 import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.utils.AuthManager;
@@ -17,9 +19,11 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.Account;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
@@ -30,10 +34,12 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -63,6 +69,7 @@ public class CustomerController extends AppController  {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String CUSTOMER_ADMIN = "/views/customer/admin.jsp"; 
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";
+    private final String ORDER_NOTIFICATION_ROUTE = "/Order?action=notification&id=";
     private Customer customer = new Customer();
     private final static Logger LOGGER = 
             Logger.getLogger(Customer.class.getCanonicalName());
@@ -204,6 +211,9 @@ public class CustomerController extends AppController  {
                 customer.setKinName(request.getParameter("customerKinName"));
                 customer.setKinPhone(request.getParameter("customerKinPhone"));
                 customer.setKinAddress(request.getParameter("customerKinAddress"));
+                customer.setCreatedBy(agentId);
+                customer.setCreatedDate(getDateTime().getTime());
+                
                 
                 customer.setAgent(agent);
                 
@@ -246,6 +256,13 @@ public class CustomerController extends AppController  {
                 
                 em.persist(customer);
                 em.flush();  
+                
+                Account account = new AccountManager().createCustomerAccount(customer);
+                
+                em.refresh(customer);
+                customer.setAccount(account);
+                
+                em.flush();
 //         
                 CustomerAgent customerAgent =  new CustomerAgent();
                 customerAgent.setAgentId(agent);
@@ -253,7 +270,7 @@ public class CustomerController extends AppController  {
                                 
                 em.persist(customerAgent);
                 
-                em.getTransaction().commit();
+                em.getTransaction().commit(); 
                 em.close();
                 emf.close();
                 
@@ -266,8 +283,23 @@ public class CustomerController extends AppController  {
                 
                 OrderManager orderManager = new OrderManager(user);
                 
-                orderManager.processOrder(customer, lodgement, orderItem, request.getServletContext().toString());
+               
+                ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItem, request.getContextPath());
                 
+                if(productOrder != null){
+                    if(productOrder.getId() != null){
+//                        String notificationRoute = ORDER_NOTIFICATION_ROUTE + productOrder.getId();
+//                        NotificationsManager notification = new NotificationsManager(notificationRoute);
+//                        notification.createOrderNotification(customer);
+                    }
+                    else{
+                            //Delete Customer and Customer Account
+                    }
+                }
+                else{
+                    //Delete Customer and Customer
+                }
+
                 
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
@@ -279,7 +311,6 @@ public class CustomerController extends AppController  {
             }
             catch (PropertyException err){
                 err.printStackTrace();
-                //System.out.println("inside catch area: " + err.getMessage());
                 viewFile = CUSTOMER_NEW;
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
@@ -327,23 +358,16 @@ public class CustomerController extends AppController  {
                     customer = em.find(Customer.class, new Long(Integer.parseInt(request.getParameter("customer_id"))));
                 }
                
-              Long id = new Long(3);
-               Agent agent = em.find(Agent.class, id);
-               Date date = new Date();
-//               SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
-//               String formattedDate = sdf.format(date);
-              
                
-                String path = root+"/images/uploads/customers/";
-                long unixTime = System.currentTimeMillis() / 1000L;
+               Long id = Long.parseLong(request.getParameter("customerId"));
+               customer = em.find(Customer.class, id);
+ 
+                validate(customer,request);
+                customerFileName = uploadCustomerPicture(customer,request,customerFileName);
+                customerKinFileName = uploadCustomerKinPicture(customer,request,customerKinFileName);
+               
                 
-                 validate(customer,request);
-                 customerFileName = uploadCustomerPicture(customer,request,customerFileName);
-                 customerKinFileName = uploadCustomerKinPicture(customer,request,customerKinFileName);
-               
-                Integer i = 2; 
-                Long l = new Long(i);
-               new TrailableManager(customer).registerUpdateTrailInfo((long)1);
+                new TrailableManager(customer).registerUpdateTrailInfo(id);
                
                 customer.setFirstname(request.getParameter("customerFirstname"));
                 customer.setLastname(request.getParameter("customerLastname"));               
@@ -700,6 +724,16 @@ public class CustomerController extends AppController  {
         em.close();
         emf.close();
         
+    }
+    
+    public void deleteAccount(){
+        
+    }
+    
+    private Calendar getDateTime()
+    {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        return calendar;
     }
     
       /*TP: Getting the customer Id for public use*/

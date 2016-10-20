@@ -11,11 +11,14 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Customer;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.MorgageList;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -37,6 +40,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.PropertyException;
+import com.google.gson.reflect.TypeToken;
+import com.tp.neo.controller.helpers.LodgementManager;
+import com.tp.neo.model.Agent;
+import com.tp.neo.model.CompanyAccount;
+import java.lang.reflect.Type;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.TimeZone;
+import java.util.logging.Level;
+import javax.persistence.RollbackException;
 
 /**
  *
@@ -48,6 +61,8 @@ public class LodgementController extends AppController {
     private static String LODGEMENT_ADMIN = "/views/lodgement/admin.jsp"; 
     private static String LODGEMENT_NEW_AGENT = "/views/lodgement/customer_orders.jsp";
     private static String LODGEMENT_NEW = "/views/lodgement/lodge.jsp";
+    private static String LODGEMENT_APPROVAL = "/views/lodgement/approval.jsp";
+    private static String LODGEMENT_SUCCESS = "/views/lodgement/success.jsp";
     private final static Logger LOGGER = 
             Logger.getLogger(Lodgement.class.getCanonicalName());
     
@@ -101,11 +116,7 @@ public class LodgementController extends AppController {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
     
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        HttpSession session = request.getSession();
-        SystemUser user = (SystemUser) session.getAttribute("user");
+        SystemUser user = sessionUser;
         
         String action = request.getParameter("action") != null?request.getParameter("action"):"";
         
@@ -132,6 +143,15 @@ public class LodgementController extends AppController {
              
              listCustomerOrders(request, response);
          }
+         else if(action.equalsIgnoreCase("approval")){
+             
+             viewFile = LODGEMENT_APPROVAL;
+             getUnapprovedLodgement(request);
+             
+         }
+         else if(action.equals("success")){
+             viewFile = LODGEMENT_SUCCESS;
+         }
          else{
             viewFile = LODGEMENT_ADMIN;
             request.setAttribute("lodgements",listLodgements());;
@@ -154,159 +174,33 @@ public class LodgementController extends AppController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processInsertRequest(request, response);
+        
+        String action = request.getParameter("action");
+        
+        if(action.equalsIgnoreCase("morgage")){
+             
+             String viewFile = LODGEMENT_NEW;
+             payMorgage(request);
+             String contextPath = request.getContextPath();
+             response.sendRedirect(contextPath + "/Lodgement?action=success");
+         }
+        else{
+            processInsertRequest(request, response);
+        }
     }
 
     
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)
                 throws ServletException, IOException{
              
-             EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-             EntityManager em = emf.createEntityManager();
-             String viewFile = LODGEMENT_NEW;
-             Lodgement lodgement = new Lodgement();
-              Gson gson = new GsonBuilder().create();
-    
-        try{
-            em.getTransaction().begin();
             
-        String invoiceID = request.getParameter("invoice_id") != null ? request.getParameter("invoice_id") : "";
-        String paymentMethod = request.getParameter("paymentMethod") != null ? request.getParameter("paymentMethod") : "";
-        int verificationStatus = -1;
-        Double transAmount = Double.valueOf(request.getParameter("productAmountToPay"));
-        if(Integer.parseInt(paymentMethod) == 2){
-          verificationStatus = 1;
-          transAmount = Double.valueOf(request.getParameter("productAmountToPay")); //for online transaction leave it at the amount entered 
-        }else if(Integer.parseInt(paymentMethod) == 3){
-           transAmount = Double.valueOf(request.getParameter("cashAmount"));
-        }
-        else if(Integer.parseInt(paymentMethod) == 1){
-        transAmount = Double.valueOf(request.getParameter("tellerAmount"));
-        }
-        
-        
-        OrderItem sale = em.find(OrderItem.class, new Long(1));
-        
-        //validation is done here
-        validate(request,response);
-        
-        //this is where the proper processing is done
-        processLodgementPayment(request,response);
-        
-        
-        
-        lodgement.setAmount(Double.valueOf(request.getParameter("productAmountToPay")));
-        lodgement.setPaymentMode((Short.parseShort(paymentMethod)));
-//        lodgement.setBankName(request.getParameter("bankName"));
-//        lodgement.setDepositorsName(request.getParameter("depositorsName"));
-//        lodgement.setTellerNo(request.getParameter("tellerNumber"));
-        //lodgement.setTransAmount(transAmount);
-//        lodgement.setVerificationStatus((short) verificationStatus );
-        Date date = new Date();
-        lodgement.setLodgmentDate(date);
-//        lodgement.setSale(sale);
-        
-        new TrailableManager(lodgement).registerInsertTrailInfo((long)1);
-//        LodgementPK pk = new LodgementPK();
-//        pk.setSaleId(new Long(1));
-//        pk.setLodgementId(new Long(1));
-//        lodgement.setLodgementPK(pk);
-        
-//        sale.getLodgementCollection().add(lodgement);
-       
-        em.persist(sale);
-        em.getTransaction().commit();
-        em.close();
-        emf.close();
-        
-         Map<String, String> map = new HashMap<String, String>();
-            map.put("monthlyPay", "10000");
-            map.put("amountLeft", "90000");
-            map.put("monthsPaid", "1");
-            map.put("durationLeft", "9");
-            
-         viewFile = LODGEMENT_ADMIN;
-         request.setAttribute("paymentPlan",map);
-         request.setAttribute("invoiceId",invoiceID);
-         
-         //System.out.println("This is the object we want to print out"+lodgement);
-//         System.out.println("Lodgement object "+gson.toJson(lodgement));    
-        if(Integer.parseInt(paymentMethod) == 2){ // we have to redirect to the image page from here
-          response.sendRedirect("images/img/webpay.png");
-        }else{
-            
-       
-        request.setAttribute("success",true);
-        request.setAttribute("lodgements",listLodgements());
-        request.setAttribute("resultList","hello");
-        RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-        dispatcher.forward(request, response);
-        }
-               
-        
-    }catch(PropertyException err){
-                err.printStackTrace();
-                System.out.println("inside catch area: " + err.getMessage());
-                viewFile = LODGEMENT_NEW;
-             
-                request.setAttribute("errors", errorMessages);    
-                SystemLogger.logSystemIssue("Lodgement", gson.toJson(lodgement), err.getMessage());
-                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-            dispatcher.forward(request, response);
-    }
-     catch(Exception e){
-                e.printStackTrace();
-                request.setAttribute("errors", errorMessages);
-                System.out.println("System Error: " + e.getMessage());
-                SystemLogger.logSystemIssue("Lodgement", gson.toJson(lodgement), e.getMessage());
-                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-            dispatcher.forward(request, response);
-        }
     }
     
-    private void processLodgementPayment(HttpServletRequest request, HttpServletResponse response) throws PropertyException, ServletException, IOException{
-        errorMessages.clear();
-        int productAmountToPay = Integer.parseInt(request.getParameter("productAmountToPay"));
-          int defAmount = Integer.parseInt(request.getParameter("defAmount"));
-          int amountLeft = Integer.parseInt(request.getParameter("amountLeft"));
-    if(productAmountToPay>defAmount && amountLeft==productAmountToPay){
-        //this is the part of the last payment of the user
-        
-     
-    }
-    else if(productAmountToPay<=defAmount && amountLeft==productAmountToPay){
-        //this is the system's last payment 
-        
-    }
-    else if((productAmountToPay>defAmount) && (productAmountToPay <= amountLeft)){
-//        alert("This is the product amount "+productAmountToPay);
-//        alert("This is the amount left amount "+amountLeft);
-        
-        //this is the part where the multiples of the amount user is paying is needed
-        if((productAmountToPay%defAmount) >0){
-             errorMessages.put("1","You need to input an amount that is a multiple of the preset monthly payment, or you stick to the default muonthly payment plan" );
-             
-         
-       }else{
-   
-        }
-        
-    }else if(productAmountToPay==defAmount){
-     
-    }
-    else if(productAmountToPay<defAmount){
-       // alert("The amount cant be lss than the normal point");
-     errorMessages.put("2","The amount you can pay cannot be less than the preset monthly payment" );
     
-   }else{
-       errorMessages.put("3","The amount you want to pay has exceeded the amount you have left" );
-    }   
-        
-        if(!(errorMessages.isEmpty())) throw new PropertyException("");
-    }
     
     /*TP: Validation is done here*/
     private void validate(HttpServletRequest request, HttpServletResponse response) throws PropertyException, ServletException, IOException{
+         
          errorMessages.clear();
          if(request.getParameter("productAmountToPay").isEmpty()){
          errorMessages.put("1","Amount to pay field is required");
@@ -439,29 +333,243 @@ public class LodgementController extends AppController {
     }
     
     private List<Map> getSalesByOrder(ProductOrder order) {
-        List<Map >OrderItemsList = new ArrayList();
+        List<Map>OrderItemsList = new ArrayList();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
+        
         Query jplQuery = em.createNamedQuery("OrderItem.findByOrder");
-        jplQuery.setParameter("orderId", order);
+        jplQuery.setParameter("order", order);
         
         List<OrderItem> resultSet = jplQuery.getResultList();
         
         for(OrderItem orderItem : resultSet) {
-            Map<String, String> map = new HashMap();
             
+            short status = orderItem.getApprovalStatus();
+            
+            Map orderItemDetail = isOrderItemPaymentCompleted(orderItem);
+            //If order is declined skip
+            if(status == 2){
+                continue;    
+            }
+            
+            if((boolean)orderItemDetail.get("isComplete")){
+                continue;
+            }
+            
+            //Check if the OrderItem payment has been completed
+            
+            
+            Map<String, String> map = new HashMap();
+            Double remainingAmt = (orderItem.getUnit().getAmountPayable() * orderItem.getQuantity()) - ((Double)orderItemDetail.get("totalPaid"));
             map.put("saleId",orderItem.getId().toString());
-//            map.put("project", orderItem.getUnitId().getProject().getName());
-//            map.put("unitName", orderItem.getUnitId().getTitle());
+            map.put("project", orderItem.getUnit().getProject().getName());
+            map.put("unitName", orderItem.getUnit().getTitle());
             map.put("unitQty",orderItem.getQuantity().toString());
-            map.put("amountPayable",orderItem.getInitialDep().toString());
+            map.put("initialDeposit",orderItem.getInitialDep().toString());
+            map.put("amountPayable", remainingAmt.toString());
+            map.put("amountPaid", ((Double)orderItemDetail.get("totalPaid")).toString());
+            map.put("monthlyPay", ((Double)orderItem.getUnit().getMonthlyPay()).toString());
             
             OrderItemsList.add(map);
         }
         
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        
         return OrderItemsList;
+    }
+    
+    private Map isOrderItemPaymentCompleted(OrderItem orderItem){
+        
+        Map<String, Object> map = new HashMap();
+        
+        List<LodgementItem> lodgementItemList = (List)orderItem.getLodgementItemCollection();
+        
+        boolean isComplete = false;
+        
+        double totalPaid = 0;
+        
+        for(LodgementItem lodgementItem : lodgementItemList){
+            
+            totalPaid += lodgementItem.getAmount();
+        }
+        
+        double unitAmount = orderItem.getUnit().getAmountPayable();
+        
+        if(unitAmount <= totalPaid){
+            isComplete = true;
+        }
+        
+        map.put("isComplete", isComplete);
+        map.put("totalPaid", totalPaid);
+        
+        return map;
+    }
+    
+    private void getUnapprovedLodgement(HttpServletRequest request){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Lodgement.findByApprovalStatus");
+        jplQuery.setParameter("approvalStatus", (short)0);
+        List<Lodgement> lodgementList = jplQuery.getResultList();
+        
+        request.setAttribute("notificationLodgementId",0);
+        request.setAttribute("lodgements", lodgementList);
+    }
+    
+    private void payMorgage(HttpServletRequest request) {
+        
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            String morgageItemJson = request.getParameter("orderItemsJson");
+            List<MorgageList> morgageList = processJson(morgageItemJson);
+            
+            SystemUser user = sessionUser;
+            String type = userType;
+            
+            Customer customer = null;
+            
+            Long userId = user.getSystemUserId();
+            Lodgement lodgement = prepareLodgement(getRequestParameters(request), userId);
+            
+            List<LodgementItem> lodgementItemList = new ArrayList();
+            
+            for(MorgageList morgageItem : morgageList){
+                
+                OrderItem orderItem = em.find(OrderItem.class, (long) morgageItem.getOrderItemId());
+                LodgementItem lodgementItem = new LodgementItem();
+                
+                lodgementItem.setCreatedDate(getDateTime().getTime());
+                lodgementItem.setCreatedBy(userId);
+                lodgementItem.setItem(orderItem);
+                lodgementItem.setAmount(morgageItem.getAmount());
+                
+                lodgementItemList.add(lodgementItem);
+                
+                if(customer == null){
+                    customer = orderItem.getOrder().getCustomer();
+                }
+                
+            }
+            
+            LodgementManager lodgementManager = new LodgementManager(user);
+            lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath());
+            
+            Map map = prepareMorgageInvoice(lodgement, lodgementItemList);
+            
+            HttpSession session = request.getSession(false);
+            session.setAttribute("invoice",map);
+            
+            em.close();
+            emf.close();
+            
+        } catch (PropertyException ex) {
+            Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
+            
+        } catch (RollbackException ex) {
+            Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
+    private Map prepareMorgageInvoice(Lodgement lodgement, List<LodgementItem> lodgementItems){
+        Map<String,Object> map = new HashMap();
+        
+        List<Map> itemList = new ArrayList();
+        
+        for(LodgementItem item : lodgementItems){
+            
+            Map<String, String> itemMap = new HashMap();
+            
+            String title = item.getItem().getUnit().getTitle();
+            Double amount = item.getAmount();
+            
+            itemMap.put("title",title);
+            itemMap.put("amount", amount.toString());
+            
+            itemList.add(itemMap);
+        }
+       
+        System.out.println("Lenght of items : " + itemList.size());
+        map.put("total",lodgement.getAmount());
+        map.put("items",itemList);
+        
+        return map;
+    }
+    
+    private List<MorgageList> processJson(String jsonString){
+        
+        Gson gson = new GsonBuilder().create();
+        Type listType = new TypeToken<ArrayList<MorgageList>>(){}.getType();
+        List<MorgageList> morgageItems = gson.fromJson(jsonString, listType);
+        
+        return morgageItems;
+    }
+    
+    public Map getRequestParameters(HttpServletRequest request) {
+        
+        Map<String, String> map = new HashMap();
+        Enumeration params = request.getParameterNames();
+        while(params.hasMoreElements())
+        {
+            String elem = params.nextElement().toString();
+            map.put(elem, request.getParameter(elem));
+        }
+        
+        return map;
+    }
+    
+    private Lodgement prepareLodgement(Map request, Long userId) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Lodgement lodgement = new Lodgement();
+        
+        Short paymentMethod = Short.parseShort(request.get("paymentMethod").toString());
+        
+        CompanyAccount companyAccount = em.find(CompanyAccount.class, Integer.parseInt(request.get("companyAccount").toString()));
+        
+        lodgement.setPaymentMode(paymentMethod);
+        lodgement.setCreatedDate(this.getDateTime().getTime());
+        lodgement.setCreatedBy(userId);
+        lodgement.setCompanyAccountId(companyAccount);
+        lodgement.setApprovalStatus((short)0);
+        
+        if(paymentMethod == 1) {
+            lodgement.setTransactionId(request.get("tellerNumber").toString());
+            lodgement.setAmount(Double.parseDouble(request.get("tellerAmount").toString()));
+            lodgement.setDepositorName(request.get("depositorsName").toString());
+            lodgement.setLodgmentDate(getDateTime().getTime());
+        }
+        else if(paymentMethod == 3){
+            
+            lodgement.setAmount(Double.parseDouble(request.get("cashAmount").toString()));
+            lodgement.setLodgmentDate(getDateTime().getTime());
+        }
+        else if(paymentMethod == 4) {
+            
+            lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
+            lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
+            lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
+            lodgement.setLodgmentDate(getDateTime().getTime());
+            
+        }
+        
+        return lodgement;
+    }
+    
+    private Calendar getDateTime(){
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        return calendar;
     }
     /**
      * Returns a short description of the servlet.

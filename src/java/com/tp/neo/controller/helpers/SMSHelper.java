@@ -64,6 +64,8 @@ public class SMSHelper {
     
     
     /************** ORDER *******************/
+
+
     protected void sendNewOrderSMSToCustomer(Lodgement lodgement, Customer customer){
         String phone ="";
         String message =   "New Order of value " + lodgement.getAmount() + " has been received and is being processed."

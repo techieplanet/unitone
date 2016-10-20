@@ -50,11 +50,11 @@
                         <c:forEach items="${orders}" var="order">
                             <tr id="row<c:out value="${order.id}" />">
                                 
-                                <td><c:out value="${order.id}" /></td>
-                                <td><c:out value="${order.getCustomerId().getLastname()} ${order.getCustomerId().getFirstname()} " /></td>
-                                <td><c:out value="${order.getAgentId().getLastname()} ${order.getAgentId().getFirstname()} " /></td>
-                                <td><c:out value="${order.getCustomerId().getPhone()}" /></td>
-                                <td><c:out value="${order.getCustomerId().getEmail()}" /></td>
+                                <td><c:out value="${order.getId()}" /></td>
+                                <td><c:out value="${order.getCustomer().getLastname()} ${order.getCustomer().getFirstname()} " /></td>
+                                <td><c:out value="${order.getAgent().getLastname()} ${order.getAgent().getFirstname()} " /></td>
+                                <td><c:out value="${order.getCustomer().getPhone()}" /></td>
+                                <td><c:out value="${order.getCustomer().getEmail()}" /></td>
                               
                                 <td>
                                     <a class="btn btn-primary" href="Order?action=view&orderId=${order.id}" role="button">View <i class="fa fa-eye"></i> </a>
