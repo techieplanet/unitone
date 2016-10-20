@@ -27,26 +27,20 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author swedge-mac
  */
 @Entity
-@Table(name = "lodgement_item")
+@Table(name = "withdrawal")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "LodgementItem.findAll", query = "SELECT l FROM LodgementItem l"),
-    @NamedQuery(name = "LodgementItem.findById", query = "SELECT l FROM LodgementItem l WHERE l.id = :id"),
-    @NamedQuery(name = "LodgementItem.findByAmount", query = "SELECT l FROM LodgementItem l WHERE l.amount = :amount"),
-    @NamedQuery(name = "LodgementItem.findByCreatedDate", query = "SELECT l FROM LodgementItem l WHERE l.createdDate = :createdDate"),
-    @NamedQuery(name = "LodgementItem.findByCreatedBy", query = "SELECT l FROM LodgementItem l WHERE l.createdBy = :createdBy"),
-    @NamedQuery(name = "LodgementItem.findByModifiedDate", query = "SELECT l FROM LodgementItem l WHERE l.modifiedDate = :modifiedDate"),
-    @NamedQuery(name = "LodgementItem.findByModifiedBy", query = "SELECT l FROM LodgementItem l WHERE l.modifiedBy = :modifiedBy")})
-public class LodgementItem extends BaseModel {
+    @NamedQuery(name = "Withdrawal.findAll", query = "SELECT w FROM Withdrawal w"),
+    @NamedQuery(name = "Withdrawal.findById", query = "SELECT w FROM Withdrawal w WHERE w.id = :id"),
+    @NamedQuery(name = "Withdrawal.findByDate", query = "SELECT w FROM Withdrawal w WHERE w.date = :date"),
+    @NamedQuery(name = "Withdrawal.findByAmount", query = "SELECT w FROM Withdrawal w WHERE w.amount = :amount"),
+    @NamedQuery(name = "Withdrawal.findByApproved", query = "SELECT w FROM Withdrawal w WHERE w.approved = :approved"),
+    @NamedQuery(name = "Withdrawal.findByCreatedDate", query = "SELECT w FROM Withdrawal w WHERE w.createdDate = :createdDate"),
+    @NamedQuery(name = "Withdrawal.findByCreatedBy", query = "SELECT w FROM Withdrawal w WHERE w.createdBy = :createdBy"),
+    @NamedQuery(name = "Withdrawal.findByModifiedDate", query = "SELECT w FROM Withdrawal w WHERE w.modifiedDate = :modifiedDate"),
+    @NamedQuery(name = "Withdrawal.findByModifiedBy", query = "SELECT w FROM Withdrawal w WHERE w.modifiedBy = :modifiedBy")})
 
-    @Column(name = "created_by")
-    private Long createdBy;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
-    @Column(name = "created_by_user_type")
-    private Short createdByUserType;
-    @Column(name = "approval_status")
-    private Short approvalStatus;
+public class Withdrawal extends BaseModel{
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -54,27 +48,42 @@ public class LodgementItem extends BaseModel {
     @Basic(optional = false)
     @Column(name = "id")
     private Long id;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Basic(optional = false)
+    @Column(name = "date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date date;
+    @Basic(optional = false)
     @Column(name = "amount")
-    private Double amount;
+    private double amount;
+    @Basic(optional = false)
+    @Column(name = "approved")
+    private short approved;
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
+    @Column(name = "created_by")
+    private Long createdBy;
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @JoinColumn(name = "lodgement_id", referencedColumnName = "id")
-    @ManyToOne
-    private Lodgement lodgement;
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
     @ManyToOne(optional = false)
-    private OrderItem item;
+    private Agent agent;
 
-    public LodgementItem() {
+    public Withdrawal() {
     }
 
-    public LodgementItem(Long id) {
+    public Withdrawal(Long id) {
         this.id = id;
+    }
+
+    public Withdrawal(Long id, Date date, double amount, short approved) {
+        this.id = id;
+        this.date = date;
+        this.amount = amount;
+        this.approved = approved;
     }
 
     public Long getId() {
@@ -85,12 +94,28 @@ public class LodgementItem extends BaseModel {
         this.id = id;
     }
 
-    public Double getAmount() {
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public short getApproved() {
+        return approved;
+    }
+
+    public void setApproved(short approved) {
+        this.approved = approved;
     }
 
     public Date getCreatedDate() {
@@ -125,20 +150,12 @@ public class LodgementItem extends BaseModel {
         this.modifiedBy = modifiedBy;
     }
 
-    public Lodgement getLodgement() {
-        return lodgement;
+    public Agent getAgent() {
+        return agent;
     }
 
-    public void setLodgement(Lodgement lodgement) {
-        this.lodgement = lodgement;
-    }
-
-    public OrderItem getItem() {
-        return item;
-    }
-
-    public void setItem(OrderItem item) {
-        this.item = item;
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
     @Override
@@ -151,10 +168,10 @@ public class LodgementItem extends BaseModel {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof LodgementItem)) {
+        if (!(object instanceof Withdrawal)) {
             return false;
         }
-        LodgementItem other = (LodgementItem) object;
+        Withdrawal other = (Withdrawal) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -163,25 +180,7 @@ public class LodgementItem extends BaseModel {
 
     @Override
     public String toString() {
-        return "com.tp.neo.model.LodgementItem[ id=" + id + " ]";
-    }
-
-    public Short getApprovalStatus() {
-        return approvalStatus;
-    }
-
-    public void setApprovalStatus(Short approvalStatus) {
-        this.approvalStatus = approvalStatus;
-    }
-
-    
-
-    public Short getCreatedByUserType() {
-        return createdByUserType;
-    }
-
-    public void setCreatedByUserType(Short createdByUserType) {
-        this.createdByUserType = createdByUserType;
+        return "com.tp.neo.model.Withdrawal[ id=" + id + " ]";
     }
     
 }

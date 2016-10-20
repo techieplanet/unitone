@@ -12,6 +12,7 @@ import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
+import com.tp.neo.model.Withdrawal;
 import com.tp.neo.model.utils.MailSender;
 import java.util.List;
 
@@ -178,13 +179,28 @@ public class SMSHelper {
         String phone ="";
         String message =   "Customer: " + customer.getFirstname() + " " + customer.getLastname() + customer.getAccount().getAccountCode() + ","
                       + "Lodgement approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
-                      + "Customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
                       + "Amount advanced: " + String.format("%.2f", amount) + "."
-                      + "<br/>" + "Congratulations"; 
+                      + "Congratulations"; 
         
         if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getAgent().getPhone().substring(1);
         
         new SMSSender(phone,message).start();      
+    }
+    
+    
+    
+    
+    /************************************  WITHDRAWAL ********************************/
+    protected void sendWithdrawalRequestEmailToAgent(Withdrawal w){
+        String phone = "";
+        String message =   "Acct: " + w.getAgent().getFirstname() + " " + w.getAgent().getLastname() + " (" + w.getAgent().getAccount().getAccountCode() + "),"
+                      + "Withdrawal request received and processing"
+                      + "Amount: " + w.getAmount();
+        
+         if(w.getAgent().getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + w.getAgent().getPhone().substring(1);
+        
+        new SMSSender(phone,message).start(); 
     }
 }

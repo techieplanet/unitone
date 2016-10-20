@@ -279,7 +279,7 @@ public class LodgementController extends AppController {
         
         for(CustomerAgent custAgent : customerAgentResultList){
             
-            customerList.add(custAgent.getCustomerId());
+            customerList.add(custAgent.getCustomer());
         }
         
         return customerList;
