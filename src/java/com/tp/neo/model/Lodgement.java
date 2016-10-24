@@ -53,6 +53,8 @@ public class Lodgement extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "created_by_user_type")
+    private Short createdByUserType;
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     @ManyToOne
     private Customer customer;
@@ -255,6 +257,14 @@ public class Lodgement extends BaseModel {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
+    }
+
+    public Short getCreatedByUserType() {
+        return createdByUserType;
+    }
+
+    public void setCreatedByUserType(Short createdByUserType) {
+        this.createdByUserType = createdByUserType;
     }
     
 }

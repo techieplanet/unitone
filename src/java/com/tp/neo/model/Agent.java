@@ -154,6 +154,7 @@ public class Agent extends BaseModel implements SystemUser  {
 
     //Extra
     transient final Integer USERTYPEID = 2;
+    transient String permissions = "";
     
     public Agent() {
     }
@@ -418,6 +419,7 @@ public class Agent extends BaseModel implements SystemUser  {
     @Override
     public String getUsername() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
@@ -427,13 +429,14 @@ public class Agent extends BaseModel implements SystemUser  {
 
     @Override
     public String getPermissions() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return permissions;
     }
 
     @Override
-    public void setPermissions(String permissions) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setPermissions(String permission) {
+        this.permissions = permission;
     }
+    
 
     public long getGenericId() {
         return genericId;
@@ -489,8 +492,6 @@ public class Agent extends BaseModel implements SystemUser  {
         this.withdrawalCollection = withdrawalCollection;
     }
 
-
-    
-
+  
     
 }
