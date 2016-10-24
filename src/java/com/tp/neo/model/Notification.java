@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Notification.findById", query = "SELECT n FROM Notification n WHERE n.id = :id"),
     @NamedQuery(name = "Notification.findByTitle", query = "SELECT n FROM Notification n WHERE n.title = :title"),
     @NamedQuery(name = "Notification.findByRoute", query = "SELECT n FROM Notification n WHERE n.route = :route"),
-    @NamedQuery(name = "Notification.findByStatus", query = "SELECT n FROM Notification n WHERE n.status = :status"),
+    @NamedQuery(name = "Notification.findByStatus", query = "SELECT n FROM Notification n WHERE n.status = :status ORDER BY n.id DESC"),
     @NamedQuery(name = "Notification.findByClearOnClick", query = "SELECT n FROM Notification n WHERE n.clearOnClick = :clearOnClick"),
     @NamedQuery(name = "Notification.findByAccessedBy", query = "SELECT n FROM Notification n WHERE n.accessedBy = :accessedBy"),
     @NamedQuery(name = "Notification.findByCreatedDate", query = "SELECT n FROM Notification n WHERE n.createdDate = :createdDate"),
@@ -67,7 +67,7 @@ public class Notification implements Serializable {
     private Date accessedDate;
     @JoinColumn(name = "type_id", referencedColumnName = "id")
     @ManyToOne
-    private NotificationType typeId;
+    private NotificationType type;
 
     public Notification() {
     }
@@ -132,12 +132,12 @@ public class Notification implements Serializable {
         this.accessedDate = accessedDate;
     }
 
-    public NotificationType getTypeId() {
-        return typeId;
+    public NotificationType getType() {
+        return type;
     }
 
-    public void setTypeId(NotificationType typeId) {
-        this.typeId = typeId;
+    public void setType(NotificationType typeId) {
+        this.type = typeId;
     }
 
     @Override

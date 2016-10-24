@@ -28,7 +28,7 @@
               
               <c:forEach items="${lodgements}" var="lodgement" varStatus="lodgementCount">
                   <form action="${pageContext.request.contextPath}/Lodgement?action=approveLodgement" method="post">      
-                  <div class="panel panel-default"   >
+                  <div class="panel panel-default" id="panel${lodgementCount.count}"   >
                             <div class="panel-heading" style="height:40px; background-color: #357CA5 !important;" role="tab" id="heading${lodgementCount.count}">
                               <h4 class="panel-title">
                                 <a role="button" style="display: block;color:#fff !important;" data-toggle="collapse" data-parent="#accordion2" href="#collapse${lodgementCount.count}"  aria-controls="collapse${lodgementCount.count}">
@@ -174,12 +174,35 @@
                                       </div>
                                       <div class="col-md-6">
                                           <div class="row">
+                                              
                                                   <div class="col-md-3">
                                                       <span class="lodgementTitleSpan">Customer Name : </span> 
                                                   </div>
                                                   <div class="col-md-9">
-                                                      <span>${lodgement.getLodgmentDate()}</span>
+                                                      <span>${lodgement.getCustomer().getFullName()}</span>
                                                   </div>
+                                                  
+                                                  <div class="col-md-3">
+                                                      <span class="lodgementTitleSpan">Customer Phone : </span> 
+                                                  </div>
+                                                  <div class="col-md-9">
+                                                      <span>${lodgement.getCustomer().getPhone()}</span>
+                                                  </div>
+                                                  
+                                                  <div class="col-md-3">
+                                                      <span class="lodgementTitleSpan">Agent Name : </span> 
+                                                  </div>
+                                                  <div class="col-md-9">
+                                                      <span>${lodgement.getCustomer().getAgent().getFullName()}</span>
+                                                  </div>
+                                                  
+                                                  <div class="col-md-3">
+                                                      <span class="lodgementTitleSpan">Agent Phone : </span> 
+                                                  </div>
+                                                  <div class="col-md-9">
+                                                      <span>${lodgement.getCustomer().getAgent().getPhone()}</span>
+                                                  </div>
+                                                  
                                           </div>
                                       </div>
                                   </div>

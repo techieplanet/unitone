@@ -11,6 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.components.AuditLogger;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.AlertManager;
+import com.tp.neo.controller.helpers.WithdrawalManager;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Account;
@@ -18,15 +19,19 @@ import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.User;
+import com.tp.neo.model.Withdrawal;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -62,6 +67,8 @@ public class AgentController extends AppController {
     private static String AGENTS_ADMIN = "/views/agent/admin.jsp"; 
     private static String AGENTS_NEW = "/views/agent/add.jsp";
     private static String AGENTS_VIEW = "/views/agent/view.jsp";
+    private static String AGENTS_WITHDRAWAL = "/views/agent/withdrawal.jsp";
+    private static String AGENTS_WITHDRAW_APPROVAL = "/views/agent/withdrawApproval.jsp";
     private static String AGENTS_WAIT = "/views/agent/waiting.jsp";
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
     private Agent agent = new Agent();
@@ -143,6 +150,17 @@ public class AgentController extends AppController {
             request.setAttribute("agents",listWaitingAgents());
             String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
             request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
+        }
+        else if(action.equalsIgnoreCase("withdrawal")){
+                
+            viewFile = AGENTS_WITHDRAWAL;
+            request.setAttribute("agent", getAgentDetails());
+        }
+        else if(action.equalsIgnoreCase("withdrawApproval")){
+            
+            viewFile = AGENTS_WITHDRAW_APPROVAL;
+            request.setAttribute("notificationwithdrawalId", 0);
+            request.setAttribute("withdrawals", getPendingWithdrawalRequest());
         }
         else if (action.equalsIgnoreCase("view")){
                 viewFile = AGENTS_VIEW;
@@ -229,23 +247,38 @@ public class AgentController extends AppController {
               
             String updateStatus = request.getParameter("updateStatus") != null ? request.getParameter("updateStatus") : "";
             String updateStatusWait = request.getParameter("updateStatusWait")!=null ? request.getParameter("updateStatusWait") : "";
+            String amount = request.getParameter("amount") != null ? request.getParameter("amount") : "";
+            String withdrawal_id = request.getParameter("withdrawal_id") != null ? request.getParameter("withdrawal_id") : "";
             
             try{
-                if(!(request.getParameter("agent_id").isEmpty()) ) { //edit mode'
-                    if(!(updateStatus.isEmpty())){
-                    this.processAgentAccountStatus(request,response);
+                     if(!withdrawal_id.equalsIgnoreCase("")){
+
+                          if(request.getParameter("action").equalsIgnoreCase("approveWithdrawal")){
+                              approveWithdrawal(withdrawal_id,request,response);
+                          }
+                          else{
+
+                              declineWithdrawal(withdrawal_id,request,response);
+                          }
                     }
-                    else if(!(updateStatusWait.isEmpty())){
-                        this.processAgentAccountStatusActivateAndApprove(request,response);
+                    else if(!(request.getParameter("agent_id").isEmpty()) ) { //edit mode'
+                        if(!(updateStatus.isEmpty())){
+                        this.processAgentAccountStatus(request,response);
+                        }
+                        else if(!(updateStatusWait.isEmpty())){
+                            this.processAgentAccountStatusActivateAndApprove(request,response);
+                        }
+                        else if(!(amount.isEmpty())){
+                            this.processAgentWithdrawalRequest(request,response);
+                        }
+                        else{
+                            this.processUpdateRequest(request,response);
+                        }
+
                     }
-                    else{
-                        this.processUpdateRequest(request,response);
+                   else{
+                        this.processInsertRequest(request, response);
                     }
-                
-                }
-               else{
-                    this.processInsertRequest(request, response);
-                }
                
             }
             catch(Exception e){
@@ -952,6 +985,104 @@ public class AgentController extends AppController {
               log("Exception: " + e.getMessage());
             }
         
+    }
+    
+    private Agent getAgentDetails(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long agentId = sessionUser.getSystemUserId();
+        Agent agent = em.find(Agent.class, agentId);
+        
+        
+        em.close();
+        emf.close();
+        
+        return agent;
+    }
+    
+    private void processAgentWithdrawalRequest(HttpServletRequest req, HttpServletResponse response) throws IOException{
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        double amount = Double.parseDouble(req.getParameter("amount"));
+        long agentId = Long.parseLong(req.getParameter("agent_id"));
+        
+        Agent agent = em.find(Agent.class, agentId);
+        
+        em.close();
+        emf.close();
+        
+        Withdrawal withdrawal = new Withdrawal();
+        
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        
+        withdrawal.setAgent(agent);
+        withdrawal.setAmount(amount);
+        withdrawal.setCreatedBy(agentId);
+        withdrawal.setCreatedDate(calendar.getTime());
+        withdrawal.setDate(calendar.getTime());
+        withdrawal.setApproved((short)0);
+        
+        WithdrawalManager manager = new WithdrawalManager(sessionUser);
+        manager.processWithdrawalRequest(withdrawal, req.getContextPath());
+        
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write("1");
+        
+    }
+    
+    private List<Withdrawal> getPendingWithdrawalRequest(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Withdrawal.findByApproved");
+        jplQuery.setParameter("approved", (short)0);
+        
+        List<Withdrawal> pendingWithdrawal = jplQuery.getResultList();
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        
+        return pendingWithdrawal;
+    }
+    
+    private void approveWithdrawal(String withdrawal_id,HttpServletRequest req, HttpServletResponse res) throws IOException{
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long id = Long.parseLong(withdrawal_id);
+        
+        Withdrawal withdrawal = em.find(Withdrawal.class,id);
+        
+        WithdrawalManager manager = new WithdrawalManager(sessionUser);
+        manager.processWithdrawalApproval(withdrawal, req.getContextPath());
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        
+        res.setContentType("text/html");
+        res.getWriter().write("1");
+    }
+    
+    
+    private void declineWithdrawal(String withdrawal_id,HttpServletRequest req, HttpServletResponse res) throws IOException{
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long id = Long.parseLong(withdrawal_id);
+        
+        Withdrawal withdrawal = em.find(Withdrawal.class,id);
+        
+        WithdrawalManager manager = new WithdrawalManager(sessionUser);
+        //manager.processWithdrawalApproval(withdrawal, req.getContextPath());
+        
+        res.setContentType("text/html");
+        res.getWriter().write("1");
     }
     
     /*Getting the agent Id for public use*/

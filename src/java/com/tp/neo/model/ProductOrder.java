@@ -46,7 +46,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProductOrder.findByApprovedBy", query = "SELECT o FROM ProductOrder o WHERE o.approvedBy = :approvedBy"),
     @NamedQuery(name = "ProductOrder.findByApprovedDate", query = "SELECT o FROM ProductOrder o WHERE o.approvedDate = :approvedDate"),
     @NamedQuery(name = "ProductOrder.findByApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus"),
-    @NamedQuery(name = "ProductOrder.findByNotApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus != :approvalStatus"),
+    @NamedQuery(name = "ProductOrder.findByNotApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus != :approvalStatus ORDER BY o.id DESC"),
     @NamedQuery(name = "ProductOrder.findLastInsertedId", query = "SELECT o FROM ProductOrder o ORDER BY o.id DESC")})
 
 public class ProductOrder extends BaseModel {

@@ -44,7 +44,7 @@ public class EmailHelper {
             message = String.format(declineMessage, agent.getFirstname(), agent.getLastname(), APP_NAME);
         
         //System.err.println("email " + agent.getEmail() + " email: " + defaultEmail + " subject: " + emailSubject + " message: " + message);
-        new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, emailSubject, message);
+       // new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, emailSubject, message);
     }
     
     protected void sendAgentWalletCreditAlert(Customer customer, ProjectUnit unit, double amount){
@@ -56,7 +56,7 @@ public class EmailHelper {
                       
         String emailSubject = APP_NAME + ": New Wallet Credit";
         
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        //new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     
@@ -89,7 +89,7 @@ public class EmailHelper {
         String emailSubject = APP_NAME + ": New Order Awaiting Approval";
         
         for(int i=0; i < recipientsList.size(); i++){
-            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+            //new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
         }
         
     }
@@ -104,7 +104,7 @@ public class EmailHelper {
 
             String emailSubject = APP_NAME + ": New Order";
 
-            new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+            //new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     protected void sendNewOrderEmailToAgent(Lodgement lodgement, Customer customer){
@@ -118,7 +118,7 @@ public class EmailHelper {
 
             String emailSubject = APP_NAME + ": New Order";
 
-            new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+            //new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     
@@ -139,7 +139,7 @@ public class EmailHelper {
         
         String emailSubject = APP_NAME + ": New Order Approval";
         
-        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+        //new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     protected void sendOrderApprovalEmailToAgent(Customer customer, ProjectUnit unit, double amount){
@@ -156,7 +156,7 @@ public class EmailHelper {
         
         String emailSubject = APP_NAME + ": New Order Approval";
         
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        //new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     
@@ -182,7 +182,7 @@ public class EmailHelper {
         String emailSubject = APP_NAME + ": New Lodgement Awaiting Approval";
         
         for(int i=0; i < recipientsList.size(); i++){
-            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+            //new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
         }
         
     }
@@ -197,7 +197,7 @@ public class EmailHelper {
 
             String emailSubject = APP_NAME + ": New Lodgement";
 
-            new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+            //new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     protected void sendNewLodgementEmailToAgent(Lodgement lodgement, Customer customer){
@@ -211,7 +211,7 @@ public class EmailHelper {
 
             String emailSubject = APP_NAME + ": New Lodgement";
 
-            new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+            //new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     
@@ -232,7 +232,7 @@ public class EmailHelper {
         
         String emailSubject = APP_NAME + ": New Lodgement Approval";
         
-        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+        //new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     protected void sendLodgementApprovalEmailToAgent(Customer customer, ProjectUnit unit, double amount){
@@ -249,7 +249,7 @@ public class EmailHelper {
         
         String emailSubject = APP_NAME + ": New Lodgement Approval";
         
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        //new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     
@@ -265,7 +265,7 @@ public class EmailHelper {
         
         String emailSubject = APP_NAME + ": New Withdrawal Request";
         
-        new MailSender().sendHtmlEmail(w.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        //new MailSender().sendHtmlEmail(w.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
     
     
@@ -281,7 +281,7 @@ public class EmailHelper {
         
         String emailSubject = APP_NAME + ": New Withdrawal Request";
         
-        for(int i=0; i < recipientsList.size(); i++)
-            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+//        for(int i=0; i < recipientsList.size(); i++)
+//            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
     }
 }

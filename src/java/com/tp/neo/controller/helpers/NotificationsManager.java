@@ -37,7 +37,7 @@ public class NotificationsManager {
         notification.setStatus((short)0);
         notification.setCreatedDate(new Date());
         notification.setClearOnClick((short)0);
-        notification.setTypeId((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_ORDER").getSingleResult());
+        notification.setType((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_ORDER").getSingleResult());
         
         return notification;
     }
@@ -52,7 +52,7 @@ public class NotificationsManager {
         notification.setStatus((short)0);
         notification.setCreatedDate(new Date());
         notification.setClearOnClick((short)0);
-        notification.setTypeId((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_LODGE").getSingleResult());
+        notification.setType((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_LODGE").getSingleResult());
         
         return notification;
     }

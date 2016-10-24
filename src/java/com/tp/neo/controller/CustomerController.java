@@ -443,18 +443,10 @@ public class CustomerController extends AppController  {
         
         AgentController agent = new AgentController();
         
-        HttpSession session = request.getSession();
-        SystemUser user = (SystemUser)session.getAttribute("user");
-        int userTypeId = 0;
-        
-        if(user != null)
-        {
-            userTypeId = user.getSystemUserTypeId();
-        }
-        
+ 
         if (action.equalsIgnoreCase("new")){
                viewFile = CUSTOMER_NEW;
-               request.setAttribute("userTypeId", userTypeId);
+               request.setAttribute("userTypeId", userType);
                request.setAttribute("agents", agent.listAgents());
                request.setAttribute("projects", project.listProjects());
                request.setAttribute("action","new");

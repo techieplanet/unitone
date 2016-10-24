@@ -41,7 +41,7 @@ public class SMSHelper {
         if(agent.getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + agent.getPhone().substring(1);
         
-        new SMSSender(phone,message).start();
+        //new SMSSender(phone,message).start();
     }
     
     protected void sendAgentWalletCreditAlert(Customer customer, ProjectUnit unit, double amount){
@@ -55,7 +55,7 @@ public class SMSHelper {
         if(customer.getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getPhone().substring(1);
         
-        new SMSSender(phone,message).start(); 
+        //new SMSSender(phone,message).start(); 
     }
     
     
@@ -74,7 +74,7 @@ public class SMSHelper {
         if(customer.getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getPhone().substring(1);
         
-        new SMSSender(phone,message).start();  
+        //new SMSSender(phone,message).start();  
     }
     
     protected void sendNewOrderSMSToAgent(Lodgement lodgement, Customer customer){
@@ -86,7 +86,7 @@ public class SMSHelper {
             if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
                 phone = "234" + customer.getAgent().getPhone().substring(1);
         
-            new SMSSender(phone,message).start();  
+            //new SMSSender(phone,message).start();  
     }
     
     
@@ -107,7 +107,7 @@ public class SMSHelper {
         if(customer.getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getPhone().substring(1);
         
-        new SMSSender(phone,message).start();        
+        //new SMSSender(phone,message).start();        
     }
     
     protected void sendOrderApprovalSMSToAgent(Customer customer, ProjectUnit unit, double amount){
@@ -121,7 +121,7 @@ public class SMSHelper {
         if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getAgent().getPhone().substring(1);
         
-        new SMSSender(phone,message).start();      
+        //new SMSSender(phone,message).start();      
     }
 
   
@@ -140,7 +140,7 @@ public class SMSHelper {
         if(customer.getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getPhone().substring(1);
         
-        new SMSSender(phone,message).start();  
+        //new SMSSender(phone,message).start();  
     }
     
     protected void sendNewLodgementEmailToAgent(Lodgement lodgement, Customer customer){
@@ -152,7 +152,7 @@ public class SMSHelper {
             if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
                 phone = "234" + customer.getAgent().getPhone().substring(1);
         
-            new SMSSender(phone,message).start();  
+            //new SMSSender(phone,message).start();  
     }
     
     
@@ -172,7 +172,7 @@ public class SMSHelper {
         if(customer.getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getPhone().substring(1);
         
-        new SMSSender(phone,message).start();        
+        //new SMSSender(phone,message).start();        
     }
     
     protected void sendLodgementApprovalSMSToAgent(Customer customer, ProjectUnit unit, double amount){
@@ -185,7 +185,7 @@ public class SMSHelper {
         if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + customer.getAgent().getPhone().substring(1);
         
-        new SMSSender(phone,message).start();      
+        //new SMSSender(phone,message).start();      
     }
     
     
@@ -201,6 +201,6 @@ public class SMSHelper {
          if(w.getAgent().getPhone().matches("^[0-9]{8,11}$"))
             phone = "234" + w.getAgent().getPhone().substring(1);
         
-        new SMSSender(phone,message).start(); 
+        //new SMSSender(phone,message).start(); 
     }
 }

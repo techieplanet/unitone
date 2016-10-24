@@ -65,7 +65,7 @@ public class LodgementManager {
         }
         
         //create system notification for the lodgement
-        String route =  applicationContext + "Lodgement?action=notification&id=" + lodgement.getId();
+        String route =  applicationContext + "/Lodgement?action=notification&id=" + lodgement.getId();
         Notification notification = new AlertManager().getNotificationsManager(route).createNewLodgementNotification(customer);
         em.persist(notification);
         
@@ -126,6 +126,7 @@ public class LodgementManager {
         if(order.getApprovalStatus() == 0){ //unattended, create new order notification
             //this method will handle the process: credit the customer account, create order notification and send new order alerts to admins
             new OrderManager(sessionUser).processOrderLevelLodgementApproval(lodgement, order, lodgement.getCustomer(), applicationContext);
+            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer());
         }
         else{//mortgage lodgement
             processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer());
@@ -168,9 +169,9 @@ public class LodgementManager {
 
             //send wallet credit alert
             alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-            
+            em.merge(thisItem);
         }//end for       
-        
+        em.merge(lodgement);
         em.getTransaction().commit();
     }
     
