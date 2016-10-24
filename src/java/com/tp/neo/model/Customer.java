@@ -435,4 +435,5 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public void setLodgementCollection(Collection<Lodgement> lodgementCollection) {
         this.lodgementCollection = lodgementCollection;
     }
+    
 }
