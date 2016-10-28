@@ -377,7 +377,7 @@ function addToCart(event){
  // alert(id);
  
   //alert(newId);
-  var buttonsData = '<a class="btn btn-primary btn-xs" href="#" role="button" onclick="return editDataFromCart('+newId+')" title="Edit product details"><i class="fa fa-pencil"></i></a>\n\
+  var buttonsData = '<a class="btn btn-success btn-xs" href="#" role="button" onclick="return editDataFromCart('+newId+')" title="Edit product details"><i class="fa fa-pencil"></i></a>\n\
 <a class="btn btn-danger btn-xs" href="#" title="Remove product from cart"  onclick="return showDeleteCartModal('+newId+')" role="button"><i class="fa fa-remove"></i></a>';
 
   //var newId = id + 1;
@@ -394,10 +394,11 @@ function addToCart(event){
       
       var rowId ="tr"+newId;
       
-      dataTr +="<td><input type='hidden' id='"+rowId+"' value='"+jsonData+"'/>"+buttonsData+"</td>";
+      dataTr +="<td class='cart-td'><input type='hidden' id='"+rowId+"' value='"+jsonData+"'/>"+buttonsData+"</td>";
       //alert($("#editMode").val());
     //$("#" + id).html();
       $("#productCart tbody").focus();
+      
       if($("#editMode").val() == "")
       {  
           $("#productCart tbody").append(dataTr);
@@ -413,15 +414,13 @@ function addToCart(event){
           cartArray[newId - 1] = cartItemObject;
       }
       
+      
       $('#'+newId + ',#'+newId + ' td').addClass("adding",1000,"easeInOutBack");
       $('#'+newId).fadeIn(23500,function(){
-          $('#'+newId + ',#'+newId + ' td').removeClass("adding");
-          
+          $('#'+newId + ',#'+newId + ' td').removeClass("adding"); 
       });
-     // var sum = 0;
-// iterate through each td based on class and add the values
+      
      calculateSum();
-//alert("The sum is "+sum);
       
       $("#editMode").val("");
      resetForm();
@@ -430,13 +429,8 @@ function addToCart(event){
      $("#productCart tbody").focus();
      $("#addToCart").text("");
      $("#addToCart").append("<i class='fa fa-cart-plus'></i> Add to Cart");
-//      $('#'+newId).fadeIn(1500);
-//      $('#'+newId + ',#'+newId + ' td').addClass("adding",1000,"easeInBack");
-//$('#'+newId).fadeToggle(2000,"easeInBack",removeClass(newId));
-         //  $('#'+newId).fadeIn(1500);
      
-  //alert(productName);
-    return false;
+     return false;
 }
 
 
@@ -658,7 +652,7 @@ function checkOutOfCart(){
     $("#cartDataJson").val(cartDataArrays);
     alert(cartDataArrays);
     $("#paymentCheckout:hidden").toggle();
-    $("#shoppingCart:visible").toggle();
+    //$("#shoppingCart:visible").toggle();
     
     
     $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
@@ -871,11 +865,8 @@ function getProjectUnits(appName, entityName){
    //url = appName + '/' + entityName;
     $("#addToCart").attr("disabled",false);
     var id =  $('#selectProduct').val();
-   // alert("This is the project Id as the case may be"+id);
      url = appName + '/' + entityName;
     console.log("URL: " + url);
-//    alert(id);
-//   alert(url);
 resetForm();
     $.ajax({
        type : 'GET',
@@ -1215,6 +1206,7 @@ function showDeleteCartModal( id){
     var args = "deleteDataFromCart("+id+")";
     $("#deleteModalCart #ok").attr("onclick", args);
     $('#deleteModalCart').modal();
+    return false;
 }
 
 /*TP: ajax submit form method using get*/

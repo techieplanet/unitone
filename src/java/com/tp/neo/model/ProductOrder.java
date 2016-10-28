@@ -208,8 +208,20 @@ public class ProductOrder extends BaseModel {
         return "com.tp.neo.model.ProductOrder[ id=" + id + " ]";
     }
     
-    public String getPermissionName(String alias){
-        return "";
+    public String getPermissionName(String action){
+        
+        if(action.toUpperCase().equals("NEW"))
+            return "create_order";
+        else if(action.toUpperCase().equals("APPROVAL"))
+            return "approve_order";
+        else if(action.toUpperCase().equals("APPROVEORDER")) 
+            return "approve_order";
+        else if(action.toUpperCase().equals("LIST_ORDERS")) 
+            return "view_order";
+        else if(action.toUpperCase().equals("NEW_ORDER")) 
+            return "create_order";
+        else
+            return "view_order";
     }
 
 
@@ -230,6 +242,6 @@ public class ProductOrder extends BaseModel {
         this.approvedBy = approvedBy;
     }
 
-    
+   
     
 }

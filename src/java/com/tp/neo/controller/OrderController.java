@@ -48,6 +48,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
+import javax.persistence.TypedQuery;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpSession;
@@ -113,7 +114,17 @@ public class OrderController extends AppController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processGetRequest(request, response);
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new ProductOrder().getPermissionName(action), request, response)){
+                    processGetRequest(request, response);
+            }else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+        
+        }
     }
 
     /**
@@ -127,7 +138,16 @@ public class OrderController extends AppController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processPostRequest(request, response);
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new ProductOrder().getPermissionName(action), request, response)){
+                processPostRequest(request, response);
+            }else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+        }
     }
 
      protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
@@ -167,7 +187,12 @@ public class OrderController extends AppController {
                viewFile = ORDER_NEW;
                request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
         }
-        
+        else if(action.equalsIgnoreCase("testAction")){
+            
+            request.setAttribute("products", testAction());
+            request.getRequestDispatcher("views/test.jsp").forward(request, response);
+            return;
+        }
         else if(action.equalsIgnoreCase("approval")) {
             viewFile = ORDER_APPROVAL; 
             request.setAttribute("pendingOrders", listPendingOrders());
@@ -178,14 +203,14 @@ public class OrderController extends AppController {
             approveSingleOrder(request,response);
             
         }
-        else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
+        else if (action.isEmpty() || action.equalsIgnoreCase("list_orders")){
             viewFile = ORDER_ADMIN;
             request.setAttribute("orders", listOrders());
         }
         request.setAttribute("projects", project.listProjects());
         request.setAttribute("customers",customer.listCustomers());
         request.setAttribute("customerId",customerId);
-
+         this.testAction();
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
@@ -351,6 +376,9 @@ public class OrderController extends AppController {
             lodgement.setAmount(Double.parseDouble(request.get("tellerAmount").toString()));
             lodgement.setDepositorName(request.get("depositorsName").toString());
             lodgement.setLodgmentDate(getDateTime().getTime());
+        }
+        else if(paymentMethod == 2){
+            lodgement.setAmount(Double.parseDouble(request.get("cardAmount").toString()));
         }
         else if(paymentMethod == 3){
             
@@ -563,6 +591,37 @@ public class OrderController extends AppController {
         } catch (ServletException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
         }
+   }
+   
+   private List<ProductOrder> testAction(){
+       
+       EntityManagerFactory emf =  Persistence.createEntityManagerFactory("NeoForcePU");
+       EntityManager em = emf.createEntityManager();
+       
+       System.out.println("Entered Test Zone");
+       
+       String q = "SELECT p FROM ProductOrder p "
+
+                    + "JOIN p.orderItemCollection q "
+
+                    + "JOIN q.lodgementItemCollection r "
+
+                    + "WHERE r.approvalStatus = :aps "
+
+                    + "GROUP BY p.id "
+
+                    + "ORDER  BY p.id";
+
+        TypedQuery<ProductOrder> orders =  em.createQuery(q, ProductOrder.class).setParameter("aps", 1);
+
+        List<ProductOrder> ordersList = orders.getResultList();
+
+        return ordersList;
+//        for(ProductOrder order : ordersList){
+//
+//            System.out.println("Order Id: " + order.getId());
+//            System.out.println("Product Order" + order);
+//        }
    }
     
 

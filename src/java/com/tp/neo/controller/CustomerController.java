@@ -116,7 +116,18 @@ public class CustomerController extends AppController  {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processGetRequest(request, response);
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new Customer().getPermissionName(action), request, response)){
+                processGetRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+         }
+        
     }
 
     /**
@@ -130,7 +141,26 @@ public class CustomerController extends AppController  {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        String requestFrom = request.getParameter("from") != null ? request.getParameter("from") : "";
+        
+        /**
+         * Check if the Request is coming from a customer registration page,
+         * No need to check permission.
+         **/
+         
+        if(!requestFrom.equals("")){
+            processInsertRequest(request, response);
+        }
+        
+        if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new Customer().getPermissionName(action), request, response)){
         processPostRequest(request, response);
+            }else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+        }
     }
      /*TP: Processes the post requests in general*/
     protected void processPostRequest(HttpServletRequest request, HttpServletResponse response)
@@ -159,7 +189,7 @@ public class CustomerController extends AppController  {
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         errorMessages.clear();
-        String root = getServletContext().getRealPath("/");
+        
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         String viewFile = CUSTOMER_NEW;
@@ -167,30 +197,16 @@ public class CustomerController extends AppController  {
         String customerFileName = null;
         String customerKinFileName = null;
         
-        root = root.replace("\\", "/");
         request.setAttribute("success", false);
         Gson gson = new GsonBuilder().create();
         
-        HttpSession session = request.getSession();
-        SystemUser user = (SystemUser)session.getAttribute("user");
+        String requestFrom = request.getAttribute("from") != null ? request.getAttribute("from").toString() : "";
+        
+        SystemUser user = sessionUser;
         
         
             try{                                
 
-                /**
-                 * Godson: why this, the check has being done on processPostRequest(),
-                 * so if the customer_id parameter is empty, control is transfered here
-                 * 
-                **/
-                
-               
-//               Date date = new Date();
-//               SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
-//               String formattedDate = sdf.format(date);
-               
-               
-                //String path = root+"/images/uploads/customers/";
-                
                 long unixTime = System.currentTimeMillis() / 1000L;
                 
                 validate(customer,request);
@@ -202,7 +218,6 @@ public class CustomerController extends AppController  {
                 customer.setLastname(request.getParameter("customerLastname"));               
                 customer.setEmail(request.getParameter("customerEmail"));
                 customer.setMiddlename(request.getParameter("customerMiddlename"));
-                //customer.setPassword(request.getParameter("customerPassword"));
                 customer.setPassword(AuthManager.getSaltedHash(request.getParameter("customerPassword")));
                 customer.setStreet(request.getParameter("customerStreet"));
                 customer.setCity(request.getParameter("customerCity"));
@@ -213,6 +228,7 @@ public class CustomerController extends AppController  {
                 customer.setKinAddress(request.getParameter("customerKinAddress"));
                 customer.setCreatedBy(agentId);
                 customer.setCreatedDate(getDateTime().getTime());
+                
                 
                 
                 customer.setAgent(agent);
@@ -280,6 +296,11 @@ public class CustomerController extends AppController  {
                 
                 List<OrderItem> orderItem =  order.prepareOrderItem(saleItemObjectList, agent);
                 Lodgement lodgement = order.prepareLodgement(requestParameters, agent);
+                lodgement.setCustomer(customer);
+                
+                if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
+                    user = (SystemUser)customer;
+                }
                 
                 OrderManager orderManager = new OrderManager(user);
                 
@@ -288,9 +309,6 @@ public class CustomerController extends AppController  {
                 
                 if(productOrder != null){
                     if(productOrder.getId() != null){
-//                        String notificationRoute = ORDER_NOTIFICATION_ROUTE + productOrder.getId();
-//                        NotificationsManager notification = new NotificationsManager(notificationRoute);
-//                        notification.createOrderNotification(customer);
                     }
                     else{
                             //Delete Customer and Customer Account
@@ -302,6 +320,26 @@ public class CustomerController extends AppController  {
 
                 
                 viewFile = CUSTOMER_NEW;
+                
+                if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
+                    if(lodgement.getPaymentMode() == 2){
+                        
+                        Date date = lodgement.getCreatedDate();
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
+                        String dateString = sdf.format(date);
+                        
+                        viewFile = "/views/customer/gateway.jsp";
+                        request.getSession().setAttribute("productOrderInvoice", productOrder);
+                        request.getSession().setAttribute("orderItemInvoice", orderItem);
+                        request.getSession().setAttribute("transactionDate", dateString);
+                        request.getSession().setAttribute("customerInvoice", customer);
+                    }
+                    else{
+                        viewFile = "/views/customer/success.jsp";
+                        request.setAttribute("customer",customer);
+                    }
+                }
+                
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
                 request.setAttribute("customers", listCustomers());
@@ -312,6 +350,11 @@ public class CustomerController extends AppController  {
             catch (PropertyException err){
                 err.printStackTrace();
                 viewFile = CUSTOMER_NEW;
+                
+                if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
+                    viewFile = "/views/customer/registration.jsp";
+                }
+                
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
                 request.setAttribute("customer", customer);
@@ -440,6 +483,7 @@ public class CustomerController extends AppController  {
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         ProjectController project = new ProjectController();
         //Project listprojects = project.listProjects();
+        int userType = sessionUser.getSystemUserTypeId();
         
         AgentController agent = new AgentController();
         

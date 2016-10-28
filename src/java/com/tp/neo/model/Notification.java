@@ -61,7 +61,7 @@ public class Notification implements Serializable {
     @Column(name = "clear_on_click")
     private Short clearOnClick;
     @Column(name = "accessed_by")
-    private BigInteger accessedBy;
+    private Long accessedBy;
     @Column(name = "accessed_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date accessedDate;
@@ -93,7 +93,7 @@ public class Notification implements Serializable {
     }
 
     public String getRoute() {
-        return route;
+        return route + "&nof_id=" + getId();
     }
 
     public void setRoute(String route) {
@@ -116,11 +116,11 @@ public class Notification implements Serializable {
         this.clearOnClick = clearOnClick;
     }
 
-    public BigInteger getAccessedBy() {
+    public Long getAccessedBy() {
         return accessedBy;
     }
 
-    public void setAccessedBy(BigInteger accessedBy) {
+    public void setAccessedBy(Long accessedBy) {
         this.accessedBy = accessedBy;
     }
 

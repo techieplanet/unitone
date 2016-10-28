@@ -44,6 +44,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.helpers.LodgementManager;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.CompanyAccount;
+import com.tp.neo.model.Notification;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -457,8 +458,13 @@ public class LodgementController extends AppController {
             
             Long id = Long.parseLong(request.getParameter("id"));
             Lodgement lodgement = em.find(Lodgement.class,id);
+            
+            Long notificationId = Long.parseLong(request.getParameter("nof_id"));
+            Notification notification = em.find(Notification.class, notificationId);
+            
             LodgementManager manager = new LodgementManager(sessionUser);
             manager.approveLodgement(lodgement, request.getContextPath());
+            
             
         } catch (PropertyException ex) {
             Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
@@ -479,6 +485,10 @@ public class LodgementController extends AppController {
             
             Long id = Long.parseLong(request.getParameter("id"));
             Lodgement lodgement = em.find(Lodgement.class,id);
+            
+            Long notificationId = Long.parseLong(request.getParameter("nof_id"));
+            Notification notification = em.find(Notification.class, notificationId);
+            
             LodgementManager manager = new LodgementManager(sessionUser);
             //manager.declineLodgementApproval(lodgement, request.getContextPath());
             
@@ -523,6 +533,7 @@ public class LodgementController extends AppController {
                 
             }
             
+            lodgement.setCustomer(customer);
             LodgementManager lodgementManager = new LodgementManager(user);
             lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath());
             
@@ -605,6 +616,7 @@ public class LodgementController extends AppController {
         lodgement.setCreatedBy(userId);
         lodgement.setCompanyAccountId(companyAccount);
         lodgement.setApprovalStatus((short)0);
+        lodgement.setCreatedByUserType(Short.parseShort(sessionUser.getSystemUserTypeId().toString()));
         
         if(paymentMethod == 1) {
             lodgement.setTransactionId(request.get("tellerNumber").toString());

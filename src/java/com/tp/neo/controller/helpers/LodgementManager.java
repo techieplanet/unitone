@@ -134,7 +134,14 @@ public class LodgementManager {
     }
     
     
-    
+    /**
+     * 
+     * @param lodgement
+     * @param lodgementItems
+     * @param customer
+     * @throws PropertyException
+     * @throws RollbackException 
+     */
     public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer) throws PropertyException, RollbackException{
         
         em.getTransaction().begin();
@@ -178,37 +185,37 @@ public class LodgementManager {
     
     public void declineLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer) throws PropertyException, RollbackException{
         
-        em.getTransaction().begin();
-        
-        //decline the lodgement
-        lodgement.setApprovalStatus((short)2);
-        new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.flush();
-        
-        for(int i=0; i < lodgementItems.size(); i++){
-            LodgementItem thisItem = lodgementItems.get(i);
-      
-            //set the item as approved
-            thisItem.setApprovalStatus((short)2);
-            new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-            
-            //double entry - take the money out of ther customert account and fund the project unit
-            TransactionManager transactionManager = new TransactionManager(sessionUser);
-            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
-
-            //send approval alerts (email and SMS) to agent and customer
-            AlertManager alertManager = new AlertManager();
-            alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-
-            //credit agent wallet - double entry
-            transactionManager.doDoubleEntry(thisItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getItem().getCommissionAmount());
-
-            //send wallet credit alert
-            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-            
-        }//end for       
-        
-        em.getTransaction().commit();
+//        em.getTransaction().begin();
+//        
+//        //decline the lodgement
+//        lodgement.setApprovalStatus((short)2);
+//        new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+//        em.flush();
+//        
+//        for(int i=0; i < lodgementItems.size(); i++){
+//            LodgementItem thisItem = lodgementItems.get(i);
+//      
+//            //set the item as approved
+//            thisItem.setApprovalStatus((short)2);
+//            new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+//            
+//            //double entry - take the money out of ther customert account and fund the project unit
+//            TransactionManager transactionManager = new TransactionManager(sessionUser);
+//            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
+//
+//            //send approval alerts (email and SMS) to agent and customer
+//            AlertManager alertManager = new AlertManager();
+//            alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+//
+//            //credit agent wallet - double entry
+//            transactionManager.doDoubleEntry(thisItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getItem().getCommissionAmount());
+//
+//            //send wallet credit alert
+//            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+//            
+//        }//end for       
+//        
+//        em.getTransaction().commit();
     }
     
     private void setLodgementStatus(Lodgement lodgement, short status) throws PropertyException, RollbackException{

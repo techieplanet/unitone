@@ -176,13 +176,7 @@ and open the template in the editor.
     color: #000000;
 }
 
-.order-view .table-bordered {
-    border: 1px solid #ccc !important;
-}
 
-.order-view .table-bordered > thead > tr > th, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > td {
-    border: 1px solid #ccc !important;
-}
 
 span.lodgementTitleSpan{
     font-weight: bold;
@@ -190,4 +184,8 @@ span.lodgementTitleSpan{
 
 .navbar-nav > .notifications-menu > .dropdown-menu, .navbar-nav > .messages-menu > .dropdown-menu, .navbar-nav > .tasks-menu > .dropdown-menu {
     width: 380px !important;
+}
+
+.cart-td{
+    min-width: 50px;
 }

@@ -5,18 +5,24 @@
  */
 package com.tp.neo.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Auditlog;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Role;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.AuthManager;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -118,6 +124,7 @@ public class LoginController extends HttpServlet {
         userTypes.put("CUSTOMER", "CUSTOMER");
     }
     
+    
     public void processLoginRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String email = request.getParameter("email") != null ? request.getParameter("email") : "";
@@ -142,8 +149,11 @@ public class LoginController extends HttpServlet {
                 session.setAttribute("user", user);
                 session.setAttribute("userType", userType);
                 session.setAttribute("userTypes", userTypes);
-                
-                String basePath = "/NeoForce/Agent";
+                                
+                if(user.getSystemUserTypeId() > 1){//agent or customer so go get the permissions from db
+                    user.setPermissions(this.getUserTypePermissions(user));
+                }
+                    
                 String referrerURI = new URI(request.getHeader("referer")).toString();
                 String referrerPath = new URI(request.getHeader("referer")).getPath();
                 System.out.println("Context: " + URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath());
@@ -217,6 +227,29 @@ public class LoginController extends HttpServlet {
         System.out.println(" hello "+email);
        
         return systemUser;
+    }
+    
+    /**
+     * This method will return the permissions for an agent or customer in String form
+     * @param user 
+     * @return 
+     */
+    private String getUserTypePermissions(SystemUser user){
+        em = emf.createEntityManager();
+        Role role = (Role)em.createNamedQuery("Role.findByTitle").setParameter("title", "Agent").getSingleResult();
+        Gson gson = new GsonBuilder().create();
+
+        Type stringTypeToken = new TypeToken<ArrayList<String>>(){}.getType();
+        List<String> permissionsList = gson.fromJson(role.getPermissions(), stringTypeToken);
+        
+        String permissions ="";
+        for(int i=0; i < permissionsList.size(); i++)
+            permissions += permissionsList.get(i) + ",";
+        
+        permissions = permissions.substring(0, permissions.length() - 1);
+        
+        return permissions;
+        
     }
     
     public void processLogoutRequest(HttpServletRequest request, HttpServletResponse response)

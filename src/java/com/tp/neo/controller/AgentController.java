@@ -16,6 +16,7 @@ import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.GenericUser;
+import com.tp.neo.model.Notification;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.User;
@@ -66,6 +67,8 @@ public class AgentController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String AGENTS_ADMIN = "/views/agent/admin.jsp"; 
     private static String AGENTS_NEW = "/views/agent/add.jsp";
+    private static String AGENTS_REGISTRATION = "/views/agent/registration.jsp";
+    private static String AGENTS_REGISTRATION_SUCCESS = "/views/agent/success.jsp";
     private static String AGENTS_VIEW = "/views/agent/view.jsp";
     private static String AGENTS_WITHDRAWAL = "/views/agent/withdrawal.jsp";
     private static String AGENTS_WITHDRAW_APPROVAL = "/views/agent/withdrawApproval.jsp";
@@ -141,6 +144,12 @@ public class AgentController extends AppController {
         
         if (action.equalsIgnoreCase("new")){
                viewFile = AGENTS_NEW;
+        }
+        else if(action.equalsIgnoreCase("registration")){
+              viewFile = AGENTS_REGISTRATION;
+        }
+        else if(action.equalsIgnoreCase("success")){
+            viewFile = AGENTS_REGISTRATION_SUCCESS;
         }
         else if(action.equalsIgnoreCase("delete")){
             this.delete(Long.parseLong(request.getParameter("id")));
@@ -249,7 +258,7 @@ public class AgentController extends AppController {
             String updateStatusWait = request.getParameter("updateStatusWait")!=null ? request.getParameter("updateStatusWait") : "";
             String amount = request.getParameter("amount") != null ? request.getParameter("amount") : "";
             String withdrawal_id = request.getParameter("withdrawal_id") != null ? request.getParameter("withdrawal_id") : "";
-            
+            String agent_id = request.getParameter("agent_id") != null ? request.getParameter("agent_id") : "";
             try{
                      if(!withdrawal_id.equalsIgnoreCase("")){
 
@@ -261,7 +270,7 @@ public class AgentController extends AppController {
                               declineWithdrawal(withdrawal_id,request,response);
                           }
                     }
-                    else if(!(request.getParameter("agent_id").isEmpty()) ) { //edit mode'
+                      else if(!agent_id.equalsIgnoreCase("")) { //edit mode'
                         if(!(updateStatus.isEmpty())){
                         this.processAgentAccountStatus(request,response);
                         }
@@ -299,15 +308,22 @@ public class AgentController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        viewFile = AGENTS_NEW;
-
         String agentFileName = "";
         String agentKinFileName = "";
         
         boolean insertStatus = false;
         
+        String requestOrigin = request.getParameter("from") != null ? request.getParameter("from") : "";
+        
         request.setAttribute("success", false);
         Gson gson = new GsonBuilder().create();
+        
+        if(requestOrigin.equalsIgnoreCase("agent_registration")){
+            viewFile = AGENTS_REGISTRATION;
+        }
+        else {
+            viewFile = AGENTS_NEW;
+        }
         
         try{
 
@@ -351,7 +367,7 @@ public class AgentController extends AppController {
                 agentFileName = FileUploader.getSubmittedFileName(request.getPart("agentPhoto"));
                 agentKinFileName = FileUploader.getSubmittedFileName(request.getPart("agentKinPhoto"));
                 
-                if(agentFileName!=null){
+                if(agentFileName!=null && !agentFileName.equals("")){
                     Part filePart = request.getPart("agentPhoto");
                     String saveName = "agent_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
                     agent.setPhotoPath(saveName);
@@ -363,7 +379,7 @@ public class AgentController extends AppController {
                     throw new PropertyException("Please upload agent picture");
                 }
                 
-                if(agentKinFileName!=null){
+                if(agentKinFileName!=null && !agentKinFileName.equals("")){
                     Part filePart = request.getPart("agentKinPhoto");
                     String saveName = "agentkin_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
                     agent.setKinPhotoPath(saveName);
@@ -371,8 +387,8 @@ public class AgentController extends AppController {
                     new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "agentkins", saveName, true);
                 }
                 else{
-                    //agent.setKinPhotoPath("");
-                    throw new PropertyException("Please upload next of kin picture");
+                    agent.setKinPhotoPath("default");
+                    //throw new PropertyException("Please upload next of kin picture");
                 }
                 
                 new TrailableManager(agent).registerInsertTrailInfo(sessionUser.getSystemUserId());
@@ -446,8 +462,11 @@ public class AgentController extends AppController {
                 SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
             }
            
-            
-            if(insertStatus){
+            if(insertStatus && requestOrigin.equalsIgnoreCase("agent_registration")){
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Agent?action=success";
+                response.sendRedirect(page);
+            }
+            else if(insertStatus){
                 String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Agent?action=edit&agentId=" + agent.getAgentId() + "&addstat=1";
                 response.sendRedirect(page);
             }
@@ -844,6 +863,8 @@ public class AgentController extends AppController {
          List<Agent> agentDetails = jpqlQuery.getResultList();
          System.out.println(agentDetails);
          
+         String agent_id = request.getParameter("agent_id") != null ? request.getParameter("agent_id") : "";
+         
         if(request.getParameter("agentFirstname").isEmpty()){
             errorMessages.put("errors1", "Please enter First Name");
         } 
@@ -855,15 +876,18 @@ public class AgentController extends AppController {
             errorMessages.put("errors3", "Please enter Email");
         }
         
-        if((request.getParameter("agent_id").equals(""))) { //edit mode
+        if(agent_id.equalsIgnoreCase("")) { //edit mode
                 if(request.getParameter("agentPassword").isEmpty()){
-            errorMessages.put("errors4", "Please enter Password");
-        }
+                         errorMessages.put("errors4", "Please enter Password");
+                 }
+                else if(!request.getParameter("agentPassword").equals(request.getParameter("agentConfirmPassword"))){
+                    errorMessages.put("errors5", "Re-enter password does not match password");
+                }
                 
         if(!agentDetails.isEmpty()){
             errorMessages.put("errors6","Email exists in the database");
         }
-                }
+      }
        
        if(request.getParameter("agentStreet").isEmpty()){
         errorMessages.put("errors7", "Please enter Street");
@@ -1057,13 +1081,16 @@ public class AgentController extends AppController {
         
         Withdrawal withdrawal = em.find(Withdrawal.class,id);
         
+        Long notificationId = Long.parseLong(req.getParameter("nof_id"));
+        Notification notification = em.find(Notification.class, notificationId);
+        
         WithdrawalManager manager = new WithdrawalManager(sessionUser);
         manager.processWithdrawalApproval(withdrawal, req.getContextPath());
         
         emf.getCache().evictAll();
         em.close();
         emf.close();
-        
+             
         res.setContentType("text/html");
         res.getWriter().write("1");
     }
@@ -1077,6 +1104,9 @@ public class AgentController extends AppController {
         long id = Long.parseLong(withdrawal_id);
         
         Withdrawal withdrawal = em.find(Withdrawal.class,id);
+        
+        Long notificationId = Long.parseLong(req.getParameter("nof_id"));
+        Notification notification = em.find(Notification.class, notificationId);
         
         WithdrawalManager manager = new WithdrawalManager(sessionUser);
         //manager.processWithdrawalApproval(withdrawal, req.getContextPath());

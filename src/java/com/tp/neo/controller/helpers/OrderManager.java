@@ -197,13 +197,13 @@ public class OrderManager {
                 
                 //send approval alerts (email and SMS) to agent and customer
                 AlertManager alertManager = new AlertManager();
-                //alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
+                alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
                 //double entry (credit agent wallet): credit agent, debit unit
                 transactionManager.doDoubleEntry(thisItem.getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getCommissionAmount());
                 
                 //send wallet credit alert
-                //alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
+                alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
             }
             

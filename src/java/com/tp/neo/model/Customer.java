@@ -436,6 +436,19 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         this.lodgementCollection = lodgementCollection;
     }
     
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) 
+            return "create_customer";
+        else if(action.toUpperCase().equals("EDIT"))
+            return "edit_customer";
+        else if(action.toUpperCase().equals("DELETE")) 
+            return "delete_customer";
+        else if(action.toUpperCase().equals("LISTCUSTOMERS")) 
+            return "view_customer";
+        else 
+            return "view_customer";
+    }
+    
     public String getFullName(){
         String mName = middlename!=null?middlename:"";
         String fullname = lastname + " " + mName + " " + firstname;
@@ -443,4 +456,5 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         
         return fullname;
     }
+
 }
