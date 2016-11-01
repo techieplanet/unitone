@@ -36,15 +36,17 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "LodgementItem.findByCreatedDate", query = "SELECT l FROM LodgementItem l WHERE l.createdDate = :createdDate"),
     @NamedQuery(name = "LodgementItem.findByCreatedBy", query = "SELECT l FROM LodgementItem l WHERE l.createdBy = :createdBy"),
     @NamedQuery(name = "LodgementItem.findByModifiedDate", query = "SELECT l FROM LodgementItem l WHERE l.modifiedDate = :modifiedDate"),
-    @NamedQuery(name = "LodgementItem.findByModifiedBy", query = "SELECT l FROM LodgementItem l WHERE l.modifiedBy = :modifiedBy")})
+    @NamedQuery(name = "LodgementItem.findByModifiedBy", query = "SELECT l FROM LodgementItem l WHERE l.modifiedBy = :modifiedBy"),
+    @NamedQuery(name = "LodgementItem.findTotalApprovedSum", query = "SELECT SUM(l.amount) FROM LodgementItem l WHERE l.approvalStatus = :approvalStatus") })
+
 public class LodgementItem extends BaseModel {
 
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-    @Column(name = "created_by_user_type")
-    private Short createdByUserType;
+    //@Column(name = "created_by_user_type")
+    //private Short createdByUserType;
     @Column(name = "approval_status")
     private Short approvalStatus;
 
@@ -176,12 +178,12 @@ public class LodgementItem extends BaseModel {
 
     
 
-    public Short getCreatedByUserType() {
-        return createdByUserType;
-    }
-
-    public void setCreatedByUserType(Short createdByUserType) {
-        this.createdByUserType = createdByUserType;
-    }
+//    public Short getCreatedByUserType() {
+//        return createdByUserType;
+//    }
+//
+//    public void setCreatedByUserType(Short createdByUserType) {
+//        this.createdByUserType = createdByUserType;
+//    }
     
 }

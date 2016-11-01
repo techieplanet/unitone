@@ -23,6 +23,7 @@ import com.tp.neo.controller.helpers.SaleItemObject;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
@@ -512,8 +513,12 @@ public class OrderController extends AppController {
             customer = item.getOrder().getCustomer();
             productOrder = item.getOrder();
             
+            /***********************************************************************************************/
+            Notification notification = new Notification(); //this object is plain. Values should go into it
+            /***********************************************************************************************/
+            
             OrderManager orderManager = new OrderManager(sessionUser);
-            orderManager.processOrderApproval(productOrder, orderItemList, customer);
+            orderManager.processOrderApproval(productOrder, orderItemList, customer, notification);
             System.out.println("Successful");
             
         }

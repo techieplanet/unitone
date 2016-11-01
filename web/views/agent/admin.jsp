@@ -200,12 +200,9 @@
                 ]
         });
     
- <c:forEach items="${agents}" var="agent">
+            <c:forEach items="${agents}" var="agent">
                        var id = "row"+ <c:out value="${agent.agentId}" />;
                        $('#'+id+' :checkbox').rcSwitcher({
-
-					// reverse: true,
-					// inputs: true,
 					width: 65,
 					height: 24,
 					blobOffset: 2,
@@ -213,10 +210,8 @@
 					offText: 'NO',
 					theme: 'flat',
 				        autoFontSize: false,
-					
-
 				});
-  </c:forEach>
+            </c:forEach>
     
                                 
     
