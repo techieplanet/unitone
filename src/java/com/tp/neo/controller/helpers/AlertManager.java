@@ -32,6 +32,10 @@ public class AlertManager {
         return new NotificationsManager(route);
     }
     
+    public NotificationsManager getNotificationsManager(){
+        return new NotificationsManager();
+    }
+    
     public void sendAgentApprovalAlerts(Agent agent){
         new EmailHelper().sendAgentApprovalEmail(agent, 1);
         new SMSHelper().sendAgentApprovalSMS(agent, 1);

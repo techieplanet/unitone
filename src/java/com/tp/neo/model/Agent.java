@@ -65,7 +65,13 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByCreatedDate", query = "SELECT a FROM Agent a WHERE a.createdDate = :createdDate"),
     @NamedQuery(name = "Agent.findByCreatedBy", query = "SELECT a FROM Agent a WHERE a.createdBy = :createdBy"),
     @NamedQuery(name = "Agent.findByModifiedDate", query = "SELECT a FROM Agent a WHERE a.modifiedDate = :modifiedDate"),
-    @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy")})
+    @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy"),
+
+    
+    @NamedQuery(name = "Agent.findByTopSellingLocations", query = "SELECT COUNT(a.agentId) acount, a.state FROM Agent a JOIN a.customerCollection c ON a = c.agent AND a.approvalStatus = 1 GROUP BY a.state ORDER By acount")
+    
+})
+
 public class Agent extends BaseModel implements SystemUser  {
 
     @Column(name = "created_by")

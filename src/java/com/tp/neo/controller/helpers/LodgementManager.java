@@ -119,17 +119,17 @@ public class LodgementManager {
      * @param lodgement 
      * @param applicationContext 
      */
-    public void approveLodgement(Lodgement lodgement, String applicationContext) throws PropertyException, RollbackException{
+    public void approveLodgement(Lodgement lodgement, Notification notification, String applicationContext) throws PropertyException, RollbackException{
         List<LodgementItem> lodgementItems = (List)lodgement.getLodgementItemCollection();
         ProductOrder order = lodgementItems.get(0).getItem().getOrder();
         
         if(order.getApprovalStatus() == 0){ //unattended, create new order notification
             //this method will handle the process: credit the customer account, create order notification and send new order alerts to admins
             new OrderManager(sessionUser).processOrderLevelLodgementApproval(lodgement, order, lodgement.getCustomer(), applicationContext);
-            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer());
+            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification);
         }
         else{//mortgage lodgement
-            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer());
+            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification);
         }
     }
     
@@ -142,7 +142,7 @@ public class LodgementManager {
      * @throws PropertyException
      * @throws RollbackException 
      */
-    public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer) throws PropertyException, RollbackException{
+    public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification) throws PropertyException, RollbackException{
         
         em.getTransaction().begin();
         
@@ -150,6 +150,9 @@ public class LodgementManager {
         lodgement.setApprovalStatus((short)1);
         new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         em.flush();
+        
+        notification.setStatus((short)2);
+        em.merge(notification);
         
         //double entry: debit cash, credit customer account to the tune of the lodgment
         Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();

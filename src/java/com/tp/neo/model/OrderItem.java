@@ -46,7 +46,15 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "OrderItem.findByModifiedDate", query = "SELECT o FROM OrderItem o WHERE o.modifiedDate = :modifiedDate"),
     @NamedQuery(name="OrderItem.findByOrderAndUattendedItem", query = "SELECT o FROM OrderItem o WHERE o.order = :orderId AND o.approvalStatus = :approvalStatus ORDER BY o.id DESC"),
     @NamedQuery(name="OrderItem.findByOrder", query = "SELECT o FROM OrderItem o WHERE o.order = :order"),
-    @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy")})
+    @NamedQuery(name="OrderItem.findByUnit", query = "SELECT o FROM OrderItem o WHERE o.unit = :unit"),
+    @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy"),
+    
+    @NamedQuery(name = "OrderItem.findByUncompletedOrder", query = "SELECT o FROM OrderItem o JOIN FETCH o.order po WHERE po.approvalStatus < :approvalStatus"),
+    @NamedQuery(name = "OrderItem.findTotalApprovedSum", query = "SELECT SUM(o.quantity * p.cpu)  FROM OrderItem o JOIN o.unit p WHERE o.approvalStatus = :approvalStatus"),
+    @NamedQuery(name = "OrderItem.findByUncompletedOrderAndLodgementSum", query = "SELECT item, SUM(l.amount) FROM ProductOrder p JOIN p.orderItemCollection item JOIN item.lodgementItemCollection l " 
+                                                                                    + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps GROUP BY item.id ORDER  BY item.id") })
+
+
 public class OrderItem extends BaseModel {
 
     @Column(name = "created_by")

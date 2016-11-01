@@ -24,8 +24,17 @@ public class NotificationsManager {
     
     public String route = ""; 
     
+    public NotificationsManager(){
+        
+    }
+    
     public NotificationsManager(String route){
         this.route = route;
+    }
+    
+    public Notification getNotification(Long id){
+        Notification notification = (Notification)em.createNamedQuery("Notification.findById").setParameter("id", id).getSingleResult();
+        return notification;
     }
 
 

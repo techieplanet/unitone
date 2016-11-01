@@ -154,9 +154,11 @@ public class OrderManager {
     
     
     /********************* APPROVAL **********************/
-    public void processOrderApproval(ProductOrder order, List<OrderItem> orderItemsList, Customer customer) throws PropertyException, RollbackException{
+    public void processOrderApproval(ProductOrder order, List<OrderItem> orderItemsList, Customer customer, Notification notification) throws PropertyException, RollbackException{
         
         em.getTransaction().begin();
+        
+        AlertManager alertManager = new AlertManager();
         
         //get the unapproved order items for this order
         List<OrderItem> allItems = (List)order.getOrderItemCollection();
@@ -196,7 +198,6 @@ public class OrderManager {
                 transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getUnit().getAccount(), thisItem.getInitialDep());
                 
                 //send approval alerts (email and SMS) to agent and customer
-                AlertManager alertManager = new AlertManager();
                 alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
                 //double entry (credit agent wallet): credit agent, debit unit
@@ -227,8 +228,10 @@ public class OrderManager {
         
         if(approvedItems.size() + declinedItems.size()  == allItems.size()){ //each item has either approved or declined status
             setOrderStatus(order, (short)2); //complete the order
-            //List<LodgementItem> lodgementItems = (List)orderItemsList.get(0).getLodgementItemCollection();
-            //setLodgementStatus(lodgementItems.get(0).getLodgement(), (short)1); //approve lodgement
+            
+            //set the notification status here
+            notification.setStatus((short)2);
+            em.merge(notification);
         }
         else if(declinedItems.size() == allItems.size()){
             setOrderStatus(order, (short)3); //decline order
@@ -237,14 +240,20 @@ public class OrderManager {
         }
         else if(approvedItems.size() + declinedItems.size() < allItems.size()){
             setOrderStatus(order, (short)1); //processing status
-            //no nee to treat lodgement items
+            //no need to treat lodgement items
             
         }
         em.merge(order);
         em.getTransaction().commit();
     }
     
-    
+    /**
+     * This is the approval method for the first lodgement when the order is initially made
+     * @param lodgement the lodgement class
+     * @param order the order class
+     * @param customer the customer making the purchase
+     * @param applicationContext  the application context path
+     */
     public void processOrderLevelLodgementApproval(Lodgement lodgement, ProductOrder order, Customer customer, String applicationContext){
         em.getTransaction().begin();
         

@@ -76,6 +76,7 @@ and open the template in the editor.
 .blacktext{ color: #000 !important; }
 
 .box-title {display: block !important;}
+.header-stee-blue {background: lightsteelblue;}
 
 /*.innersidebarli{margin-bottom: 5px; }*/
 
@@ -182,6 +183,13 @@ span.lodgementTitleSpan{
     font-weight: bold;
 }
 
+
+
+
+/********************* ADMINLTE OVERRIDES *******************/
+.small-box h3{
+    font-size: 30px !important;
+}
 .navbar-nav > .notifications-menu > .dropdown-menu, .navbar-nav > .messages-menu > .dropdown-menu, .navbar-nav > .tasks-menu > .dropdown-menu {
     width: 380px !important;
 }

@@ -53,7 +53,19 @@ import javax.xml.bind.annotation.XmlTransient;
     //@NamedQuery(name = "ProjectUnit.findProject", query = "SELECT p.project FROM ProjectUnit p WHERE p.project = :project"),
     @NamedQuery(name = "ProjectUnit.findByProject", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project"),
     @NamedQuery(name = "ProjectUnit.findByProjectAndActive", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project AND p.deleted = :deleted"),
-    @NamedQuery(name = "ProjectUnit.findLastInserted", query = "SELECT p FROM ProjectUnit p ORDER BY p.createdDate DESC")})
+    @NamedQuery(name = "ProjectUnit.findLastInserted", query = "SELECT p FROM ProjectUnit p ORDER BY p.createdDate DESC"),
+    
+    
+    @NamedQuery(name = "ProjectUnit.findQuantitySold", query = "SELECT p, SUM(o.quantity) AS sold FROM ProjectUnit p JOIN p.orderItemCollection o ON o.approvalStatus = :approvalStatus AND p.id = :id")
+        
+//    @NamedQuery(name = "ProjectUnit.findTotalStockValue", query = "SELECT p.id, "   
+//                                                                //+ "SUM( "
+//                                                                  //  + "p.cpu * "
+//                                                                    //    + "(p.quantity - "
+//                                                                            + "(SELECT SUM(COALESCE(o.quantity)) FROM p.orderItemCollection o WHERE o.approvalStatus = :approvalStatus) as a "
+//                                                                      //      + ")) AS stockValue "
+//                                                                            + "FROM ProjectUnit p GROUP BY p.id")
+    }) //end NamedQuery
     
 public class ProjectUnit extends BaseModel {
 
