@@ -179,9 +179,9 @@ public class LodgementManager {
 
             //send wallet credit alert
             alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-            
+            em.merge(thisItem);
         }//end for       
-        
+        em.merge(lodgement);
         em.getTransaction().commit();
     }
     

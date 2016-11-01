@@ -50,8 +50,8 @@ public class AppController extends HttpServlet{
     public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, java.io.IOException {
      System.out.println("Inside Service Method");
       //hasActiveUserSession(req, res, APP_NAME);
+        req.setAttribute("notifications", getNotifications());
       
-      req.setAttribute("notifications", getNotifications());
       sessionUser = (SystemUser)req.getSession().getAttribute("user");
       
       super.service(req, res);
@@ -95,7 +95,7 @@ public class AppController extends HttpServlet{
        
     public boolean hasActionPermission(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{                
         String[] permissions = sessionUser.getPermissions().split(",");
-        //log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
+        log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
         
         for(String p : permissions){
             //log("p: " + p); log("action: " + action);

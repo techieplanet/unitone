@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Withdrawal.findById", query = "SELECT w FROM Withdrawal w WHERE w.id = :id"),
     @NamedQuery(name = "Withdrawal.findByDate", query = "SELECT w FROM Withdrawal w WHERE w.date = :date"),
     @NamedQuery(name = "Withdrawal.findByAmount", query = "SELECT w FROM Withdrawal w WHERE w.amount = :amount"),
-    @NamedQuery(name = "Withdrawal.findByApproved", query = "SELECT w FROM Withdrawal w WHERE w.approved = :approved"),
+    @NamedQuery(name = "Withdrawal.findByApproved", query = "SELECT w FROM Withdrawal w WHERE w.approved = :approved ORDER BY w.id DESC"),
     @NamedQuery(name = "Withdrawal.findByCreatedDate", query = "SELECT w FROM Withdrawal w WHERE w.createdDate = :createdDate"),
     @NamedQuery(name = "Withdrawal.findByCreatedBy", query = "SELECT w FROM Withdrawal w WHERE w.createdBy = :createdBy"),
     @NamedQuery(name = "Withdrawal.findByModifiedDate", query = "SELECT w FROM Withdrawal w WHERE w.modifiedDate = :modifiedDate"),

@@ -10,7 +10,7 @@
 
 
 <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper">
+      <div class="content-wrapper order-view">
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
@@ -135,62 +135,10 @@
         scrollTop: $(".scrollHere").offset().top
      }, 2000);
       
-    })
+    });
    
    
-    function acceptOrder(id,chkboxId,declineId){
-        
-        var isChecked = $("#"+chkboxId).prop('checked');
-        
-        
-        $("#"+id+" table").find(".order-item-approve").each(function(){
-            
-            var chkbox = $(this);
-            if($("#"+chkboxId).is(":checked")){
-                console.log("Checked true");
-                chkbox.prop("checked",true);
-                
-                //Uncheck the decline checkbox
-                $("#"+declineId).prop('checked',false);
-                
-                $(chkbox).parent().parent().find('.chkbox2').prop("checked",false);
-            }
-            else{
-                console.log("Checked false");
-                chkbox.prop("checked",false);
-                
-            }
-            
-        });
-        
-        isChecked = null;
-    }
     
-    function declineOrder(id,chkboxId,acceptId){
-        
-        var isChecked = $("#"+chkboxId).prop('checked');
-        
-        
-        $("#"+id+" table").find(".order-item-decline").each(function(){
-            
-            var chkbox = $(this);
-            if($("#"+chkboxId).is(":checked")){
-                console.log("Checked true");
-                chkbox.prop("checked",true);
-                
-                //Uncheck the approve checkbox
-                $("#"+acceptId).prop('checked',false);
-                $(chkbox).parent().parent().find('.chkbox1').prop("checked",false);
-            }
-            else{
-                console.log("Checked false");
-                chkbox.prop("checked",false);
-            }
-            
-        });
-        
-        isChecked = null;
-    }
     
 </script>
     

@@ -1,24 +1,111 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%-- 
+    Document   : registration
+    Created on : Oct 24, 2016, 10:24:47 AM
+    Author     : Prestige
+--%>
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
- <div class="row">
-            <!-- Customer Registration Form -->
-            <div class="col-md-12">
-              <!-- general form elements -->
-               
-                <!-- form start -->
-               <div class="box box-primary">
-                <div class="box-header with-border">
-                  <h3 class="box-title">Agent Registration Form 
-                        
-                             
-                      
-                       </h3>
-                </div><!-- /.box-header -->
-                <!-- form start -->
-                <div style="background:#ecf0f5 !important;">
-                <form role="form" name="agentRegistration" method="POST" action="Agent?action=${action}&agentId=${agent.agentId}" enctype="multipart/form-data" id="agentForm">
-                  <div class="box-body">
-                  
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>NeoForce | ${pageTitle}</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css" type="text/css" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+    
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet" href="plugins/iCheck/all.css">
+
+    
+    <!-- DataTables -->
+    <link rel="stylesheet" href="plugins/datatables/dataTables.bootstrap.css">
+    
+    <!-- bootstrap wysihtml5 - text editor -->
+    <link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    
+    <!-- Theme style -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminLTE.min.css" type="text/css" />
+     
+    
+    <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
+          page. However, you can choose any other skin. Make sure you
+          apply the skin class to the body tag so the changes take effect.
+    -->
+    <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/css/skin-blue.min.css" type="text/css" />-->
+    <link rel="stylesheet" href="css/skins/skin-blue.min.css" type="text/css" />
+
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/custom.css" type="text/css" />
+    <!-- jQuery 2.1.4 -->
+    <!--<script src="plugins/jQuery/jQuery-2.1.4.min.js"></script>-->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-2.1.4.min.js"></script>
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <!--
+  BODY TAG OPTIONS:
+  =================
+  Apply one or more of the following classes to get the
+  desired effect
+  |---------------------------------------------------------|
+  | SKINS         | skin-blue                               |
+  |               | skin-black                              |
+  |               | skin-purple                             |
+  |               | skin-yellow                             |
+  |               | skin-red                                |
+  |               | skin-green                              |
+  |---------------------------------------------------------|
+  |LAYOUT OPTIONS | fixed                                   |
+  |               | layout-boxed                            |
+  |               | layout-top-nav                          |
+  |               | sidebar-collapse                        |
+  |               | sidebar-mini                            |
+  |---------------------------------------------------------|
+  -->
+  <body style="background-color: #eee">
+   
+      <div class="container">
+          
+          <header style="background-color: #0073b7;color:#fff ">
+              <div class="row">
+                  <div class="col-md-3 text-center" style="margin:10px;">
+                      <i class="fa fa-image fa-4x"></i>
+                      <br/>
+                      <span>Company logo</span>
+                  </div>
+                  <div class="col-md-8" style="padding-left: 80px;padding-top: 10px">
+                      <h1>Agent Registration Form</h1>
+                  </div>
+              </div>
+          </header>
+          
+          <div class="jumbotron" style="background-color: #fff">
+              
+              <form role="form" name="agentRegistration" method="POST" action="RegisterAgent?from=agent_registration" enctype="multipart/form-data" id="agentForm">
+              
                 <c:if test="${fn:length(errors) > 0 }">
                 <div class="row">
                     <div class="col-md-12 ">
@@ -29,9 +116,9 @@
                         </p>
                     </div>
                 </div>
-            </c:if>
+                </c:if>
            
-            <c:if test="${success}">
+              <c:if test="${success}">
               <div class="row">
                     <div class="col-md-12 ">
                         <p class="bg-success padding15" style="vertical-align:center !important;" >
@@ -43,68 +130,67 @@
                           </span>
                         </p>
                     </div>
-                </div>
-          </c:if>
-                           <div class="box-footer " style="margin-right:10px !important;margin-top:-10px !important; background-color:transparent;height:50px !important;">
-                              
-                           <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate"/>
-                               
-                           <div class="col-md-6 pull-right">
-                            <c:if test="${agent.agentId !='' && agent.agentId!=null}">
-                                <span id="row${agent.agentId}" style="margin: 0 auto !important;">
-                                 <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
-                             
-                                </span>
-                               </c:if> 
-                                 </div>
-                  </div>
+              </div>
+             </c:if>
+                           
+                        
                     
-            
-              
-                               
-                                  
-                    <div class="box box-default">
-                    <div class="row" style="padding-top:10px;">
-                        <div class="col-md-4">
+                    <div class="row">
+                  
                       <fieldset>
                         <legend style="padding-left:10px !important;">Personal Information</legend>
-                          <div class="row">
-                              <div class="col-md-12">
+                        
+                         
+                              <div class="col-md-5">
                                   <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentFirstname">First Name</label>
                                       <input type="text"  name="agentFirstname" class="form-control" id="agentFirstname" 
                                              value=<c:if test="${fn:length(errors) > 0 }">"${param.agentFirstname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.firstname}"</c:if>  
                                       placeholder="First Name" >
                                     </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
+                              </div>
+                          
+                                      
+                           <div class="col-md-5">
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentMiddlename">Middle Name</label>
                                       <input type="text" class="form-control" id="agentMiddlename" name="agentMiddlename" placeholder="Middle Name" 
                                              value=<c:if test="${fn:length(errors) > 0 }">"${param.agentMiddlename}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.middlename}"</c:if> ">
                                     </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
+                           </div>
+                            
+                            
+                              <div class="col-md-5">
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentLastname">Last Name</label>
                                       <input type="text" class="form-control" name="agentLastname" id="agentLastname" placeholder="Last Name" 
                                              value=<c:if test="${fn:length(errors) > 0 }">"${param.agentLastname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.lastname}"</c:if> ">
                                     </div>
-                                </div>
-                            </div>
+                              </div>
+                              
+                              <div class="clearfix"></div>
+                              
+                              <div class="col-md-5">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="agentPhoto">Agent Photo</label><br />
+                                      <div class="btn-group btn-group-xs">
+                                          <div class="btn btn-primary">
+                                                <!--Upload Picture  <i class="fa fa-upload" aria-holder="true"></i>--> 
+                                                <input type="file" name="agentPhoto" accept="image/gif, image/jpeg, image/png" id="agentPhoto" />
+                                          </div>
+                                      </div>
+                                    </div>
+                              </div>
+                            
                         </fieldset>
-                        </div>
+                </div>
                         
-                        <div class="col-md-4">
+                    <div class="row" style="padding-top:10px">
                        
                             <fieldset>
                                 <legend style="padding-right:10px !important;">Login Information</legend>
-                          <div class="row">
-                              <div class="col-md-12">
+                          
+                              <div class="col-md-5">
                                   <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
                                       <label for="agentEmail">Email</label>
                                       <input type="email" class="form-control" id="agentEmail" name="agentEmail" placeholder="Email"  
@@ -113,95 +199,55 @@
                                       /> 
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
+                                      
+                               <div class="clearfix"></div>
+                            
+                                <div class="col-md-5">
                                     <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
                                       <label for="agentPassword">Password</label>
                                       <input type="password" class="form-control" id="agentPassword" name="agentPassword" placeholder="Password"  />
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
+                               
+                                <div class="clearfix"></div>
+                            
+                                <div class="col-md-5">
                                     <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
                                       <label for="agentConfirmPassword">Confirm Password</label>
                                       <input type="password" class="form-control" id="agentConfirmPassword" name="agentConfirmPassword" placeholder="Confirm Password"  />
                                     </div>
                                 </div>
-                            </div>
+                            
                             </fieldset>
-                        </div>
-                         <div class="col-md-4">
-                             <div class="row">
-                             <div class="row text-center" id="imgholder">
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group text-center">
-                                <c:if test="${agent.photoPath != null}">
-                                    <img src="${agentImageAccessDir}/${agent.photoPath}" 
-                                        class="img-responsive text-center" style="max-height:220px !important;"/>
-                                </c:if>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group">
-                              <div class="btn-group btn-group-xs">
-                                  <div class="btn btn-primary">
-                                        <!--Upload Picture  <i class="fa fa-upload" aria-holder="true"></i>--> 
-                                        <input type="file" name="agentPhoto" accept="image/gif, image/jpeg, image/png" id="agentPhoto" />
-                                  </div>
-                                  
-                                <input type="hidden" name="agentPhotoHidden" 
-                                        <c:if test="${agentPhotoHidden == null && agent.photoPath==null}"> value=""</c:if>
-                                        <c:if test="${agentPhotoHidden != null}"> value="${agentPhotoHidden}" </c:if> 
-                                        <c:if test="${agent.photoPath != null}"> value="${agent.photoPath}" </c:if> />
-                              </div>
-                                
-                            </div>
-                        </div>
                     </div>
+                                      
+                  
                     
-                  </div>
-                         </div>
-                    </div>
-                    </div>
-                   
-                    <div class="box box-default">
                     
                     <div class="row" style="padding-top:10px;">
-                    <div class="col-md-12" >
                         <fieldset>
                             <legend style="padding-left:10px !important;">Contact Information</legend>
-                    <div class="row">
+                    
                         
-                        <div class="col-md-12">
-                    <div class="row">
-                        <div class="col-md-4">
-                            
+                        <div class="col-md-5">
                             <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
                             <label for="agentStreet">Street</label>
-                                <input type="text" class="form-control" id="agentStreet" name="agentStreet" placeholder="Street"  
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.agentStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.street}"</c:if> "
-                                       />
+                                <input type="text" class="form-control" id="agentStreet" name="agentStreet" placeholder="Street" value=""/>
                             </div>
                         </div>
                         
                         <div class="col-md-4">
                             <div class="form-group" style="padding-left:10px !important;">
                             <label for="agentCity">City</label>
-                              
-                                <input type="text" class="form-control" id="agentCity" name="agentCity" placeholder="City"  
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.agentCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.city}"</c:if> "
-                                       />
-                                  
-                                
+                                <input type="text" class="form-control" id="agentCity" name="agentCity" placeholder="City" /> 
                             </div>
                         </div>
+                                       
                         <c:if test="${fn:length(errors) > 0 }"><c:set var="state" value="${param.agentState}" scope="session" /></c:if>
                         <c:if test="${fn:length(errors) <= 0 }"><c:set var="state" value="${agent.state}" scope="session" /></c:if>
                       
-                        <div class="col-md-4">
-                            <div class="form-group" style="margin-right:24px !important;padding-left:20px !important;"  />
+                        <div class="col-md-5">
+                            <div class="form-group" style="margin-right:24px !important;padding-left:20px !important;"  >
                               <label for="agentState">State</label>
                               <select class="form-control" id="agentState" name="agentState"  >
                                     <option value="">--choose--</option>
@@ -248,195 +294,177 @@
                         </div>
                         
                         
-                        
-                    </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="col-md-6">
+                        <div class="col-md-5">
                             <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
                             <label for="agentPhone">Phone Number</label>
-                               
-                                <input type="tel" class="form-control" id="agentPhone" name="agentPhone" placeholder="Phone Number"  minlength="8" maxlength="11"
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.agentPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.phone}"</c:if> "/>
+                                <input type="tel" class="form-control" id="agentPhone" name="agentPhone" placeholder="Phone Number"  minlength="8" maxlength="11" value=""/>
                                     
                             </div>
                         </div>
-                            
-                        </div>
-                    </div>
+                           
                         </fieldset>
-                    </div>
-                    </div>
-                    </div>
-                   <div class="box box-default">
-                    <div class="row" style="padding-top:10px;">
-                    <div class="col-md-12">
+                       </div>
+                   
+                  
+                    <div class="row" style="padding-top:10px">
                             <fieldset>
                         <legend style="padding-left:20px !important;">Account Information</legend>
                         
-                        <div class="col-md-12">
-                        
-                        <div class="row">
                           <div class="col-md-4">
                                 <div class="form-group" style="padding-left:10px !important;">
                                   <label for="agentBankName">Bank Name</label>
                                   <input type="text" class="form-control" id="agentBankName" name="agentBankName" placeholder="Enter Bank Name"  
-                                    value=<c:if test="${fn:length(errors) > 0 }">"${param.agentBankName}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.bankName}"</c:if> "     />
+                                    value="" />
                                 </div>
-                            </div>
-                            <div class="col-md-4">
+                          </div>
+                                
+                          <div class="col-md-4">
                                 <div class="form-group" style="padding-left:10px !important;">
                                 <label for="agentBankAccountName">Bank Account Name</label>
                                    
                                     <input type="text" class="form-control" id="agentBankAccountName" name="agentBankAccountName" placeholder="Enter Bank Account Name"  
-                                           value=<c:if test="${fn:length(errors) > 0 }">"${param.agentBankAccountName}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.bankAcctName}"</c:if> "/>
+                                           value="" />
                                        
                                 </div>
-                            </div>
+                          </div>
                             
-                             <div class="col-md-4" >
-                                <div class="row" >
+                        <div class="col-md-4" >
                         <div class="form-group" style="padding-left:10px !important;padding-right:25px !important;">
                           <label for="agentBankAccountNumber">Bank Account Number</label>
                            <input type="text" class="form-control"  id="agentBankAccountNumber"  name="agentBankAccountNumber" placeholder="Enter Bank Account Number" 
-                                  value=<c:if test="${fn:length(errors) > 0 }">"${param.agentBankAccountNumber}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.bankAcctNumber}"</c:if> "/><br/>
+                                  value=""/>
                         </div>
-                            </div>
                         </div>
                         
-                          
-                        </div>
-                        </div>
-                       
-                       
-                        
-                           
-                            </fieldset>
-                            </div>
+                        </fieldset>
                     </div>
-                         </div>
+                        
                     
-                    <div class="box box-default">
-                    <div class="row" style="padding-top:10px;">
-                    <div class="col-md-12">
-                                <fieldset>
+                    <div class="row" style="padding-top:10px">
+                            <fieldset>
                             <legend style="padding-left:20px !important;">Next of Kin</legend>
-                            <div class="col-md-12">
                             
-                            <div class="row">
                               <div class="col-md-6">
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentKinNames">Next of Kin - Name</label>
                                       <input type="text" class="form-control" id="agentKinNames" name="agentKinName" placeholder="Enter Kin Name"  
-                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentKinName}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.kinName}"</c:if> "/>
+                                             value=""/>
                                     </div>
                                 </div>
+                                    
                                 <div class="col-md-6">
                                     <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
                                     <label for="agentKinPhone">Next of Kin - Phone Number</label>
                                        
                                         <input type="tel" class="form-control" id="agentKinPhone" name="agentKinPhone" placeholder="Enter Kin Phone Number"  
-                                               value=<c:if test="${fn:length(errors) > 0 }">"${param.agentKinPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.kinPhone}"</c:if> "/>
+                                               value=""/>
                                             
                                     </div>
                                 </div>
+                            
+                            
+                             <div class="col-md-6 " >
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="agentKinAddress" style="">Next of Kin - Address</label>
+                                       <input type="text" class="form-control" id="agentKinAddress" name="agentKinAddress" placeholder="Enter Kin Address" style="  width:100%;" value=""/>
+                                    </div>
                             </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div  class="row">
-                             <div class="col-md-4" >
-                                    <div class="row" >
-                            <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
-                              <label for="agentKinPhoto" style="">Next of Kin Picture</label>
-                                    <c:if test="${agent.agentId != '' && agent.kinPhotoPath != null}"> 
-                                        <img src="${agentKinImageAccessDir}/${agent.kinPhotoPath}" 
-                                             class="img-responsive text-center" width="50.33333333%" style="max-height:220px !important;" />
-                                    </c:if> <br/>
+                            
+                            <div class="clearfix"></div>
+                                    
+                            <div class="col-md-6" >
+                                <div class="form-group" style="padding-left:10px !important;padding-right:20px !important">
+                                 <label for="agentKinPhoto" style="">Next of Kin Picture</label>
+                                    <br/>
                                     <div class="btn btn-primary">
                                         <input type="file" id="agentKinPhoto" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" 
                                          style="max-height:220px !important;"
                                            />
                                     </div>
-                                             
-                                    
-                                          
-                                             <input type="hidden" name="agentKinPhotoHidden" 
-                           <c:if test="${agentKinPhotoHidden == null && agent.kinPhotoPath ==null}"> value=""
-                    </c:if><c:if test="${agentKinPhotoHidden != null}"> value="${agentKinPhotoHidden}"
-                    </c:if> <c:if test="${agent.kinPhotoPath != null}"> value="${agent.kinPhotoPath}"
-                    </c:if> />
-                            </div>
                                 </div>
-                            </div>
-                                    <div class="col-md-2" style="padding-right:50% !important;"></div>
-                                <div class="col-md-6 " >
-                                    <div class="row" >
-                            <div class="form-group" style="padding-left:25px !important;">
-                              <label for="agentKinAddress" style="">Next of Kin - Address</label>
-                               <input type="text" class="form-control" id="agentKinAddress" name="agentKinAddress" placeholder="Enter Kin Address" style="  width:100%;"
-                                      
-                                      value=<c:if test="${fn:length(errors) > 0 }">"${param.agentKinAddress}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.kinAddress}"</c:if> "/><br/>
-                            </div>
-                                </div>
-                            </div>
-                                </div>
-                            </div>
-                                </fieldset>
-                    </div>
-                            <c:if test="${agent.agentId==null || agent.agentId==''}">
+                           </div>
+                            
+                               
+                            </fieldset>
+
+                       </div>
+                      
+                        <div class="row" style="padding-top:10px;padding-bottom: 10px">
                             <div class="col-md-12" style="text-align:center !important;">
                                 Do you agree to the terms of the <a href="#" onclick="$('#agreementStatusModal').modal();">agreement document?</a>
                             <br/>    <input type="radio" class="" name="agreement_document" id="agree" value="agree"  onclick="agreementStatusChecked(this)" <c:if test="${agent.agentId!=null && agent.agentId!=''}">checked</c:if>/> I agree  &nbsp;&nbsp;&nbsp;&nbsp;
                             <input type="radio" name="agreement_document" id="decline"  onclick="agreementStatusChecked(this)" value="decline"/>I disagree
                             <br/><br/><br/>
-                            </c:if>
-                            <!--
-</div>-->
-                         </div>
-                  </div><!-- /.box-body -->
-                        <input type="hidden" name="agent_id" id="agent_id" value="${agent.agentId}">
-                        <input type="hidden" name="id" id="id" value="${agent.agentId}">
-                  <div class="box-footer" style="margin-left:10px !important;margin-right:10px !important;margin-top:-20px !important; background-color:transparent;">
+                            </div>
+                        </div>
+                  
+                  
+                  <div class="col-md-12" style="margin-left:10px !important;margin-right:10px !important;margin-top:-20px !important; background-color:transparent;">
                       <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate" />
                   </div>
-                 
-                </div>
-              </div><!-- /.box -->
-               </form><!-- Form ends here -->
-              </div><!-- /.box -->
-            </div>
-           
-          </div>   <!-- /.row -->
-          
-          
-             <div class="modal fade" id="agreementStatusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-         <div class="vertical-alignment-helper">
-          <div class="modal-dialog vertical-align-center">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">NEOFORCE </h4>
-            </div>
-              
-            <div class="modal-body">
-              
-              <h5>The standard Lorem Ipsum passage, used since the 1500s</h5>
-              <p>
-"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-
-Section 1.10.32 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
-
-
-
-"On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains."
-              </p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default pull-left" data-dismiss="modal"> Cancel</button>
-              <button  type="button"  id="agreement" class="btn btn-success" onclick="modal_agree()"><i class="fa fa-check"></i> I agree</button>
-            </div>
+             </form>    
           </div>
-          </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-      </div><!-- /.modal -->
+                            
+          
+                            <footer class="main-footer" style="margin-left:0;">
+        <!-- To the right -->
+        <div class="pull-right hidden-xs">
+          Powered by <b>Techie Planet</b>
+        </div>
+        <!-- Default to the left -->
+        <!--<strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong> All rights reserved.-->
+        &nbsp;
+        </footer>                     
+         
+      </div>     
+               
+         
+          
       
+      
+      
+  
+   
+       
+      
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+ 
+    <!-- iCheck 1.0.1 -->
+    <script src="plugins/iCheck/icheck.min.js"></script>
+    
+
+    <!-- DataTables -->
+    <script src="plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="plugins/datatables/dataTables.bootstrap.min.js"></script>
+    
+    
+    <!-- AdminLTE App -->
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/app.min.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/functions.js"></script>
+
+
+    <script src="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+    
+    <script>
+      $(function () {
+            //iCheck for checkbox and radio inputs
+            $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
+              checkboxClass: 'icheckbox_minimal-blue',
+              radioClass: 'iradio_minimal-blue'
+            });
+            //Red color scheme for iCheck
+            $('input[type="checkbox"].minimal-red, input[type="radio"].minimal-red').iCheck({
+              checkboxClass: 'icheckbox_minimal-red',
+              radioClass: 'iradio_minimal-red'
+            });
+            //Flat red color scheme for iCheck
+            $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+              checkboxClass: 'icheckbox_flat-green',
+              radioClass: 'iradio_flat-green'
+            });
+        });
+      </script>
+      
+  </body>    
+</html>

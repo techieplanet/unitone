@@ -262,7 +262,7 @@ public class OrderManager {
         new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
         
         //create new order system notification
-        String route =  applicationContext + "Order?action=notification&id=" + order.getId();
+        String route =  applicationContext + "/Order?action=notification&id=" + order.getId();
         Notification notification = new AlertManager().getNotificationsManager(route).createNewOrderNotification(customer);
         em.persist(notification);
         

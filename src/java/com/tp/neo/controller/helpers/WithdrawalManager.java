@@ -46,7 +46,7 @@ public class WithdrawalManager {
                 recipientsList.remove(i);
         }
         String withdrawalPageLink = applicationContext + "Withdrawal?action=approval";
-        new AlertManager().sendNewWithdrawalRequestAlerts(w, recipientsList, withdrawalPageLink);
+        //new AlertManager().sendNewWithdrawalRequestAlerts(w, recipientsList, withdrawalPageLink);
         em.getTransaction().commit();
         
     }
@@ -61,13 +61,13 @@ public class WithdrawalManager {
         //Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
         //new TransactionManager(sessionUser).doDoubleEntry(w.getAgent().getAccount(), cashAccount, w.getAmount());
         
-        
+        em.merge(w);
         em.getTransaction().commit();
     }
     
     /**
      * This is a batch process that will pick each withdrawal that is in approved state
-     * and add it to a batch excel file then set the approval status to piad (3)
+     * and add it to a batch excel file then set the approval status to paid (3)
      * @param w 
      */
     public void disburseWithdrawals(){

@@ -75,11 +75,11 @@ function prepareOrderListTable(jsonString){
             var tr = "<tr id='"+rowId+"' >";
             tr += "<td>" + project + "</td>";
             tr += "<td>" + unitName + "</td>";
-            tr += "<td>" + initialDeposit.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
+            tr += "<td>" + accounting.formatMoney(initialDeposit,"N",2,",",".") + "</td>";
             tr += "<td>" + unitQty + "</td>";
-            tr += "<td>" + monthlyPay.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
-            tr += "<td>" + amountPaid.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
-            tr += "<td>" + amountPayable.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
+            tr += "<td>" + accounting.formatMoney(monthlyPay,"N",2,",",".") + "</td>";
+            tr += "<td>" + accounting.formatMoney(amountPaid,"N",2,",",".") + "</td>";
+            tr += "<td>" + accounting.formatMoney(amountPayable,"N",2,",",".") + "</td>";
             tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' value='' /></td>";
             tr += "<td><button class='btn btn-success' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add</button></td>";
             rows += tr;
@@ -196,7 +196,7 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
     
     var amountFieldSelector = "#" + rowId + " .lodgement-amount";
     var amount = $(amountFieldSelector).val();
-    var amountFormatted = amount.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ");
+    var amountFormatted = accounting.formatMoney(amount,"N",2,",",".");
     
     var item = {"orderItemId":orderItemId,"amount":amount};
     if(!cartData.lodgements)
@@ -252,7 +252,7 @@ function calculateLodgementCartTotal(){
     
     console.log("Total = " + total);
     
-    var totalFormatted = total.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ");
+    var totalFormatted = accounting.formatMoney(total,"N",2,",",".");
     $("#lodgementCartTable tfoot td#cart-total").html("<b>Total = " + totalFormatted + "</b>");
 }
 
@@ -333,6 +333,61 @@ function refreshCartDetails(){
     $("#checkOutBtn").prop("disabled",true);
     cartData.lodgements = [];
 }
+
+
+function acceptOrder(id,chkboxId,declineId){
+        
+        var isChecked = $("#"+chkboxId).prop('checked');
+        
+        
+        $("#"+id+" table").find(".order-item-approve").each(function(){
+            
+            var chkbox = $(this);
+            if($("#"+chkboxId).is(":checked")){
+                console.log("Checked true");
+                chkbox.prop("checked",true);
+                
+                //Uncheck the decline checkbox
+                $("#"+declineId).prop('checked',false);
+                
+                $(chkbox).parent().parent().find('.chkbox2').prop("checked",false);
+            }
+            else{
+                console.log("Checked false");
+                chkbox.prop("checked",false);
+                
+            }
+            
+        });
+        
+        isChecked = null;
+    }
+    
+function declineOrder(id,chkboxId,acceptId){
+
+    var isChecked = $("#"+chkboxId).prop('checked');
+
+
+    $("#"+id+" table").find(".order-item-decline").each(function(){
+
+        var chkbox = $(this);
+        if($("#"+chkboxId).is(":checked")){
+            console.log("Checked true");
+            chkbox.prop("checked",true);
+
+            //Uncheck the approve checkbox
+            $("#"+acceptId).prop('checked',false);
+            $(chkbox).parent().parent().find('.chkbox1').prop("checked",false);
+        }
+        else{
+            console.log("Checked false");
+            chkbox.prop("checked",false);
+        }
+
+    });
+        
+        isChecked = null;
+    }
 
 function stopLoading(elem){
     
