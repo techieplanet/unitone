@@ -59,65 +59,92 @@
                                           <c:if test="${lodgement.getPaymentMode() == 1}">
                                               <div class="row">
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Payment Mode : </span>
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>BANK DEPOSIT</span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Depositors Name : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getDepositorName()}</span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Amount : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
-                                                      <span>${lodgement.getAmount()}</span>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Teller No : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getTransactionId()}</span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Date : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getLodgmentDate()}</span>
                                                   </div>
 
                                               </div>
                                           </c:if> 
+                                          
+                                          <c:if test="${lodgement.getPaymentMode() == 2}">
+                                              <div class="row">
 
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Payment Mode : </span>
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span>Card</span>
+                                                  </div>
+
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Date : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span>${lodgement.getLodgmentDate()}</span>
+                                                  </div>
+
+                                              </div>
+                                          </c:if> 
+                                          
                                           <c:if test="${lodgement.getPaymentMode() == 3}">
                                               <div class="row">
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Payment Mode : </span>
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>CASH</span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Amount : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
-                                                      <span>${lodgement.getAmount()}</span>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Date : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getLodgmentDate()}</span>
                                                   </div>
 
@@ -127,39 +154,39 @@
                                           <c:if test="${lodgement.getPaymentMode() == 4}">
                                               <div class="row">
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Payment Mode : </span>
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>BANK TRANSFER</span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Customer Account Name : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getOriginAccountName()}</span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Customer Account Number : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getOriginAccountNumber()}</span>
                                                   </div>
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Amount : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
-                                                      <span>${lodgement.getAmount()}</span>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
                                                   </div>
 
 
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Date : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getLodgmentDate()}</span>
                                                   </div>
 
@@ -175,31 +202,31 @@
                                       <div class="col-md-6">
                                           <div class="row">
                                               
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Customer Name : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getCustomer().getFullName()}</span>
                                                   </div>
                                                   
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Customer Phone : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getCustomer().getPhone()}</span>
                                                   </div>
                                                   
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Agent Name : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getCustomer().getAgent().getFullName()}</span>
                                                   </div>
                                                   
-                                                  <div class="col-md-3">
+                                                  <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Agent Phone : </span> 
                                                   </div>
-                                                  <div class="col-md-9">
+                                                  <div class="col-md-8">
                                                       <span>${lodgement.getCustomer().getAgent().getPhone()}</span>
                                                   </div>
                                                   

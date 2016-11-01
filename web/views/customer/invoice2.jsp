@@ -91,18 +91,19 @@
       <div class="container">
           
           <section class="invoice" style="min-height: 600px">
+          <table class="table">
           <!-- title row -->
-          <div class="row">
-            <div class="col-xs-12">
-              <h2 class="page-header">
+          <tr>
+            <td colspan="3">
                 <i class="fa fa-globe"></i> NEOFORCE, SFA.
-                <small class="pull-right">${transactionDate}</small>
-              </h2>
-            </div><!-- /.col -->
-          </div>
+            </td>
+            <td>
+                <small>28/10/2016</small>
+            </td><!-- /.col -->
+          </tr>
           <!-- info row -->
-          <div class="row invoice-info">
-            <div class="col-sm-4 invoice-col">
+          <tr>
+              <td>
               From
               <address>
                 <strong>Techieplanet, Ltd.</strong><br>
@@ -111,31 +112,34 @@
                 Phone: (+234) 816-4334-657<br>
                 Email: info@techieplanetltd.com
               </address>
-            </div><!-- /.col -->
-            <div class="col-sm-4 invoice-col">
+              </td>
+            <td>
               To
               <address>
-                <strong>${customerInvoice.getFullName()}</strong><br>
-                ${customerInvoice.getStreet()}<br>
-                ${customerInvoice.getState()}<br>
-                Phone: ${customerInvoice.getPhone()}<br>
-                Email: ${customerInvoice.getEmail()}
+                <strong>Kehinde Odutan</strong><br>
+                12 view park Ikotun egbe<br>
+                Lagos<br>
+                Phone: 08164334657<br>
+                Email: kennyodutan@gmail.com
               </address>
-            </div><!-- /.col -->
-            <div class="col-sm-4 invoice-col">
+            </td><!-- /.col -->
+            <td>
               <b>Invoice #</b><br>
               <br>
               <b>Order ID:</b> ${productOrderInvoice.getId()}<br>
-            </div><!-- /.col -->
-          </div><!-- /.row -->
-
+           </td><!-- /.row -->
+          </tr>
+          </table>
+            
+            
+            
           <!-- Table row -->
           <div class="row">
             <div class="col-xs-12 table-responsive">
-              <table class="table table-bordered">
+              <table class="table table-striped">
                 <thead>
                   <tr>
-                      <th>S/N</th>
+                    <th>S/N</th>
                     <th>Qty</th>
                     <th>Product</th>
                     <th>Description</th>
@@ -144,49 +148,36 @@
                 </thead>
                 <tbody>
                   
-                    <c:forEach items="${orderItemInvoice}" var="item" varStatus="pointer">
                         <tr>
-                            <td>${pointer.count}</td>
-                            <td>${item.getQuantity()}</td>
-                            <td>${item.getUnit().getProject().getName()} - ${item.getUnit().getTitle()}</td>
-                            <td>${item.getUnit().getProject().getDescription()}</td>
-                            <td>${item.getInitialDep()}</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>Kali Homes - 3 bedroom flat apartment</td>
+                            <td>Situated in a very friendly and peaceful neighborhood </td>
+                            <td>1500000.00</td>
                         </tr>
-                    </c:forEach>
-                    
                 </tbody>
-                <tfoot>
+                <tfoot style="border:solid 1px #eee">
                     <tr>
-                        <td colspan="4" style="text-align: right">Total : </td>
-                        <td>${totalInvoice}</td>
+                        <td colspan="4" style="text-align: right">Total</td>
+                        <td>1500000.00</td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">VAT : </td>
-                        <td>${vatInvoice}</td>
+                        <td colspan="4" style="text-align: right">VAT</td>
+                        <td>0.00</td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">Gateway charge : </td>
-                        <td>${gatewayChargeInvoice}</td>
+                        <td colspan="4" style="text-align: right">Gateway charge</td>
+                        <td>0.00</td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">Grand Total : </td>
-                        <td>${grandTotalInvoice}</td>
+                        <td colspan="4" style="text-align: right">Grand Total</td>
+                        <td>1500000.00</td>
                     </tr>
                 </tfoot>
               </table>
-                    <c:remove var="customerInvoice" scope="session" />
-                    <c:remove var="orderItemInvoice" scope="session" />
-                    <c:remove var="productOrderInvoice" scope="session" />
-                    <c:remove var="transactionDate" scope="session" />
-                    <c:remove var="totalInvoice" scope="session" />
-                    <c:remove var="vatInvoice" scope="session" />
-                    <c:remove var="gatewayChargeInvoice" scope="session" />
-                    <c:remove var="grandTotalInvoice" scope="session" />
             </div><!-- /.col -->
             
-            <div class="col-md-12">
-                <a href="${pageContext.request.contextPath}" class="btn btn-primary">Login to Dashboard</a>
-            </div>
+            
           </div><!-- /.row -->
 
           

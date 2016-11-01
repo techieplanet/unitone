@@ -90,7 +90,7 @@
                                               <span class="text-bold">Requested amount</span>
                                           </div>
                                           <div class="col-md-8">
-                                              <span>${withdrawal.getAmount()}</span>
+                                              <span><fmt:formatNumber value="${withdrawal.getAmount()}" type="currency" currencySymbol="N" /></span>
                                           </div>  
                                       </div>
                                       

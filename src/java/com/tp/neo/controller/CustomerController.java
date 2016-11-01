@@ -328,11 +328,20 @@ public class CustomerController extends AppController  {
                         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
                         String dateString = sdf.format(date);
                         
+                        double vat = 0.00;
+                        double gateWayCharge = 0.00;
+                        Map map = getInvoicData(orderItem, vat, gateWayCharge);
+                        
                         viewFile = "/views/customer/gateway.jsp";
                         request.getSession().setAttribute("productOrderInvoice", productOrder);
                         request.getSession().setAttribute("orderItemInvoice", orderItem);
                         request.getSession().setAttribute("transactionDate", dateString);
                         request.getSession().setAttribute("customerInvoice", customer);
+                        request.getSession().setAttribute("totalInvoice", (Double)map.get("total"));
+                        request.getSession().setAttribute("grandTotalInvoice", (Double)map.get("grandTotal"));
+                        request.getSession().setAttribute("vatInvoice", vat);
+                        request.getSession().setAttribute("gatewayChargeInvoice", gateWayCharge);
+                        
                     }
                     else{
                         viewFile = "/views/customer/success.jsp";
@@ -770,6 +779,24 @@ public class CustomerController extends AppController  {
     {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
         return calendar;
+    }
+    
+    private Map getInvoicData(List<OrderItem> items, double vat, double gateWayCharge){
+        
+        double total = 0.00;
+        double grandTotal = 0.00;
+        
+        for(OrderItem item : items){
+            total += item.getInitialDep();
+        }
+        
+        grandTotal = total + vat + gateWayCharge;
+        
+        Map<String, Double> map = new HashMap();
+        map.put("total", total);
+        map.put("grandTotal", grandTotal);
+        
+        return map;
     }
     
       /*TP: Getting the customer Id for public use*/

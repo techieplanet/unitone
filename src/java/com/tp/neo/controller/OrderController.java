@@ -166,32 +166,19 @@ public class OrderController extends AppController {
         AgentController agent = new AgentController();
         
         
-        HttpSession session = request.getSession();
-        SystemUser user = null;
+        //HttpSession session = request.getSession();
+        SystemUser user = sessionUser;
+        System.out.println("System User : " + user);
         
-        if(session.getAttribute("user") != null && !session.getAttribute("user").equals(""))
-        {
-           user = (SystemUser)session.getAttribute("user");
-        }
-        
-        if(user != null)
-        {
-            int userType = user.getSystemUserTypeId();
-            request.setAttribute("userType", userType);
-            request.setAttribute("agents",agent.listAgents());
-        }
+        request.setAttribute("userType", user.getSystemUserTypeId());
+        request.setAttribute("agents",agent.listAgents());
+       
         
         
         //Project listprojects = project.listProjects();
         if (action.equalsIgnoreCase("new")){
                viewFile = ORDER_NEW;
                request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
-        }
-        else if(action.equalsIgnoreCase("testAction")){
-            
-            request.setAttribute("products", testAction());
-            request.getRequestDispatcher("views/test.jsp").forward(request, response);
-            return;
         }
         else if(action.equalsIgnoreCase("approval")) {
             viewFile = ORDER_APPROVAL; 
@@ -210,7 +197,6 @@ public class OrderController extends AppController {
         request.setAttribute("projects", project.listProjects());
         request.setAttribute("customers",customer.listCustomers());
         request.setAttribute("customerId",customerId);
-         this.testAction();
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
@@ -297,6 +283,8 @@ public class OrderController extends AppController {
                         
                     }
              }
+            
+            request.setAttribute("success", "Saved successfully");
             
         } catch (PropertyException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
@@ -444,23 +432,41 @@ public class OrderController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Query jplQuery = em.createNamedQuery("ProductOrder.findByNotApprovalStatus");
-        Short s = 3; // Get Orders that are not declined approved
-        jplQuery.setParameter("approvalStatus", s);
+//        Query jplQuery = em.createNamedQuery("ProductOrder.findByNotApprovalStatus");
+//        Short s = 3; // Get Orders that are not declined approved
+//        jplQuery.setParameter("approvalStatus", s);
+//        
+//        System.out.println("Query : " + jplQuery.toString());
+//        List<ProductOrder> orderResultSet = jplQuery.getResultList();
+
+        String q = "SELECT p FROM ProductOrder p "
+
+                    + "JOIN p.orderItemCollection q "
+
+                    + "JOIN q.lodgementItemCollection r "
+
+                    + "WHERE r.approvalStatus = :aps "
+
+                    + "GROUP BY p.id "
+
+                    + "ORDER  BY p.id";
+
+        TypedQuery<ProductOrder> orders =  em.createQuery(q, ProductOrder.class).setParameter("aps", 1);
+
+        List<ProductOrder> ordersList = orders.getResultList();
         
-        System.out.println("Query : " + jplQuery.toString());
-        List<ProductOrder> orderResultSet = jplQuery.getResultList();
+         System.out.println("Product Count : " + ordersList.size());
         
         List<OrderObjectWrapper> orderWrapperList = new ArrayList();
         
-        for(ProductOrder order : orderResultSet)
+        for(ProductOrder order : ordersList)
         {
             List<OrderItem> orderItems = getSalesByOrder(order);
             if(orderItems.size() < 1){
                 continue;
             }
-            OrderObjectWrapper orders = new OrderObjectWrapper(order, orderItems);
-            orderWrapperList.add(orders);
+            OrderObjectWrapper ordersWrapper = new OrderObjectWrapper(order, orderItems);
+            orderWrapperList.add(ordersWrapper);
         }
         
         
@@ -483,9 +489,6 @@ public class OrderController extends AppController {
         List<OrderItem> resultSet = jplQuery.getResultList();
         
        
-        
-       
-        
         return resultSet;
     }
     

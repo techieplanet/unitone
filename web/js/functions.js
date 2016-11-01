@@ -295,7 +295,7 @@ function calculateSum(){
 // iterate through each td based on class and add the values
 $(".payOut").each(function() {
 
-    var value = $(this).text();
+    var value = $(this).val();
     // add only if the value is number
     if(!isNaN(value) && value.length != 0) {
         sum += parseFloat(value);
@@ -306,7 +306,8 @@ $(".payOut").each(function() {
     }else{
        $("#checkOutToPay").attr("disabled",false);
     }
-    $("#cartSum").text(sum);
+    $("#CartActualSum").val(sum);
+    $("#cartSum").text(accounting.formatMoney(sum,"N",2,",","."));
     
 }
 
@@ -320,17 +321,17 @@ function addToCart(event){
   var productUnitId = $("#selectUnit").val();
   var productQuantity = $("#selectQuantity").val(); //Product Quantity (Quantity)
   var productAmount = $("#productAmount").val(); //Cost Per Unit * Qty
-  var amountUnit = $("#amountUnit").text(); // Cost Per Unit {Inside Span}
-  var amountTotalUnit = $("#amountTotalUnit").text(); //Cost Per Unit  * Qty {Inside Span}
-  var initialAmountPerUnit = $("#initialAmountPerUnit").text(); // least deposit Per Unit
-  var minInitialAmountSpan = $("#minInitialAmountSpan").text(); // Least deposit per Unit * Qty
+  var amountUnit = accounting.unformat($("#amountUnit").text()); // Cost Per Unit {Inside Span}
+  var amountTotalUnit = accounting.unformat($("#amountTotalUnit").text()); //Cost Per Unit  * Qty {Inside Span}
+  var initialAmountPerUnit = accounting.unformat($("#initialAmountPerUnit").text()); // least deposit Per Unit
+  var minInitialAmountSpan = accounting.unformat($("#minInitialAmountSpan").text()); // Least deposit per Unit * Qty
   var productMinimumInitialAmount = $("#productMinimumInitialAmount").val(); // First deposited amount(Initial_Deposit)
   var amountLeft = $("#amountLeft").val(); // Amount to be completed/Serviced
   var payDurationPerUnit = $("#payDurationPerUnit").text(); // Pay Duration Per Unit
   var payDurationPerQuantity = $("#payDurationPerQuantity").text(); // Pay Duration Per Unit * Qty
   var productMaximumDuration = $("#productMaximumDuration").val(); //Product Max Pay Duration
-  var monthlyPayPerUnit = $("#monthlyPayPerUnit").text();
-  var monthlyPayPerQuantity = $("#monthlyPayPerQuantity").text();
+  var monthlyPayPerUnit = accounting.unformat($("#monthlyPayPerUnit").text());
+  var monthlyPayPerQuantity = accounting.unformat($("#monthlyPayPerQuantity").text());
   var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
   
   //alert(productName+" "+productId+" "+productUnitName+" "+productUnitId+" "+productQuantity);
@@ -380,17 +381,18 @@ function addToCart(event){
   var buttonsData = '<a class="btn btn-success btn-xs" href="#" role="button" onclick="return editDataFromCart('+newId+')" title="Edit product details"><i class="fa fa-pencil"></i></a>\n\
 <a class="btn btn-danger btn-xs" href="#" title="Remove product from cart"  onclick="return showDeleteCartModal('+newId+')" role="button"><i class="fa fa-remove"></i></a>';
 
+  var payOutField = "<input type='hidden' class='payOut' value='" + productMinimumInitialAmount + "' />";
   //var newId = id + 1;
   var dataTr = "<tr id='"+newId+"' align='left'>";
       dataTr += "<td>"+productName+"</td>";
       dataTr += "<td>"+productUnitName+"</td>";
       dataTr += "<td>"+productQuantity+"</td>";
-      dataTr += "<td>"+productAmount+"</td>";
-      dataTr += "<td>"+productMinimumInitialAmount+"</td>";
-      dataTr += "<td>"+amountLeft+"</td>";
-      dataTr += "<td>"+productMaximumDuration+"</td>";
-      dataTr += "<td>"+productMinimumMonthlyPayment+"</td>";
-      dataTr += "<td class='payOut'>"+productMinimumInitialAmount+"</td>";
+      dataTr += "<td>"+ accounting.formatMoney(productAmount,"N",2,",",".")+"</td>";
+      dataTr += "<td>"+ accounting.formatMoney(productMinimumInitialAmount,"N",2,",",".") +"</td>";
+      dataTr += "<td>"+ accounting.formatMoney(amountLeft,"N",2,",",".")+"</td>";
+      dataTr += "<td>"+ productMaximumDuration +"</td>";
+      dataTr += "<td>"+ accounting.formatMoney(productMinimumMonthlyPayment,"N",2,",",".") +"</td>";
+      dataTr += "<td>"+ accounting.formatMoney(productMinimumInitialAmount,"N",2,",",".") + payOutField + "</td>";
       
       var rowId ="tr"+newId;
       
@@ -508,18 +510,18 @@ function editDataFromCart(id){
     $("#pUnitId").val(productUnitId);
     $("#productQuantity").val(productQuantity);
     $("#productAmount").val(productAmount);
-    $("#amountUnit").text(amountUnit);
-    $("#amountTotalUnit").text(amountTotalUnit);
-    $("#initialAmountPerUnit").text(initialAmountPerUnit);
-    $("#minInitialAmountSpan").text(minInitialAmountSpan);
+    $("#amountUnit").text(accounting.formatMoney(amountUnit,"N",2,",","."));
+    $("#amountTotalUnit").text(accounting.formatMoney(amountTotalUnit,"N",2,",","."));
+    $("#initialAmountPerUnit").text(accounting.formatMoney(initialAmountPerUnit,"N",2,",","."));
+    $("#minInitialAmountSpan").text(accounting.formatMoney(minInitialAmountSpan,"N",2,",","."));
     $("#productMinimumInitialAmount").val(productMinimumInitialAmount);
     $("#amountLeft").val(amountLeft);
     $("#payDurationPerUnit").text(payDurationPerUnit);
     $("#payDurationPerQuantity").text(payDurationPerQuantity);
     $("#productMaximumDuration").val(productMaximumDuration);
-    $("#monthlyPayPerUnit").text(monthlyPayPerUnit);
-    $("#monthlyPayPerQuantity").text(monthlyPayPerQuantity);
-    $("#productMinimumMonthlyPayment").val(productMinimumMonthlyPayment);
+    $("#monthlyPayPerUnit").text(accounting.formatMoney(monthlyPayPerUnit,"N",2,",","."));
+    $("#monthlyPayPerQuantity").text(accounting.formatMoney(monthlyPayPerQuantity,"N",2,",","."));
+    $("#productMinimumMonthlyPayment").val(productMinimumMonthlyPayment.toFixed(2));
     $("#addToCart").val("Update Cart");
     document.getElementById("selectUnit").value = productUnitId;
     $("#pUnitId").val(productUnitId);
@@ -622,8 +624,8 @@ function checkOutOfCart(){
     
         
          calculateSum();
-    var sum  = $("#cartSum").text();
-    $("#paySum").text(sum);
+    var sum  = $("#CartActualSum").val();
+    $("#paySum").text(accounting.formatMoney(sum,"N",2,",","."));
     if(sum==0 || sum==null){
         return false;
     }
@@ -659,7 +661,11 @@ function checkOutOfCart(){
     $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
     $("#process-step-3").removeClass('btn-default').removeAttr('disabled').addClass('btn-primary');
     
-   
+    $("#paymentCheckout .amount-box").each(function(){
+        $(this).val(sum.toString());
+        $(this).prop("readonly",true);
+    });
+    
     return false;
 }
 
@@ -1048,7 +1054,7 @@ function calculateDurationFromMonthlyPay(){
         $("#errorDuration").remove();
         $("#productMaximumDuration").val(monthLeft);
         if(finalAmount>0){
-        $("#finalAmount").text("Final Month Amount: N "+finalAmount);
+        $("#finalAmount").text("Final Month Amount: "+ accounting.formatMoney(finalAmount,"N",2,",","."));
         }
     }
    
@@ -1089,11 +1095,11 @@ function calculateProductAmount(){
     var durationPerUnit = resp.mpd;
 
     var finalAmount = amount - totalDiscountAmount;
-    $("#amountUnit").text(defaultDiscount);
-    $("#amountTotalUnit").text(finalAmount)
+    $("#amountUnit").text(accounting.formatMoney(defaultDiscount,"N",2,",","."));
+    $("#amountTotalUnit").text(accounting.formatMoney(finalAmount,"N",2,",","."))
     $("#productAmount").val(finalAmount);
-    $("#initialAmountPerUnit").text(resp.lid *1);
-    $("#minInitialAmountSpan").text(resp.lid * quantity);
+    $("#initialAmountPerUnit").text(accounting.formatMoney(resp.lid *1,"N",2,",","."));
+    $("#minInitialAmountSpan").text(accounting.formatMoney(resp.lid * quantity,"N",2,",","."));
     var durationPerUnit = durationPerUnit * 1;
     var alertMessage = "month";
     if(durationPerUnit>1){

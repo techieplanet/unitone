@@ -31,7 +31,14 @@ public class AgentRegistrationController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         
+        String action = req.getParameter("action") != null ? req.getParameter("action") : "";
         String viewFile = "/views/agent/registration.jsp";
+        
+        if(action.equalsIgnoreCase("success")){
+            viewFile = "/views/agent/success.jsp";
+        }
+        
+        
         req.getRequestDispatcher(viewFile).forward(req, resp);
     }
     

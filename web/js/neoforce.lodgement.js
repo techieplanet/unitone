@@ -75,11 +75,11 @@ function prepareOrderListTable(jsonString){
             var tr = "<tr id='"+rowId+"' >";
             tr += "<td>" + project + "</td>";
             tr += "<td>" + unitName + "</td>";
-            tr += "<td>" + initialDeposit.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
+            tr += "<td>" + accounting.formatMoney(initialDeposit,"N",2,",",".") + "</td>";
             tr += "<td>" + unitQty + "</td>";
-            tr += "<td>" + monthlyPay.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
-            tr += "<td>" + amountPaid.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
-            tr += "<td>" + amountPayable.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ") + "</td>";
+            tr += "<td>" + accounting.formatMoney(monthlyPay,"N",2,",",".") + "</td>";
+            tr += "<td>" + accounting.formatMoney(amountPaid,"N",2,",",".") + "</td>";
+            tr += "<td>" + accounting.formatMoney(amountPayable,"N",2,",",".") + "</td>";
             tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' value='' /></td>";
             tr += "<td><button class='btn btn-success' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add</button></td>";
             rows += tr;
@@ -196,7 +196,7 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
     
     var amountFieldSelector = "#" + rowId + " .lodgement-amount";
     var amount = $(amountFieldSelector).val();
-    var amountFormatted = amount.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ");
+    var amountFormatted = accounting.formatMoney(amount,"N",2,",",".");
     
     var item = {"orderItemId":orderItemId,"amount":amount};
     if(!cartData.lodgements)
@@ -252,7 +252,7 @@ function calculateLodgementCartTotal(){
     
     console.log("Total = " + total);
     
-    var totalFormatted = total.toString().replace(/(\d)(?=(\d{3})+$)/g,"$1, ");
+    var totalFormatted = accounting.formatMoney(total,"N",2,",",".");
     $("#lodgementCartTable tfoot td#cart-total").html("<b>Total = " + totalFormatted + "</b>");
 }
 

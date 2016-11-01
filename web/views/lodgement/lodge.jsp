@@ -45,7 +45,7 @@
             <c:forEach items="${customers}" var="customer">
                 <tr id='row<c:out value="${customer.customerId}" />'>
                     <td><img alt="No Image" class="img-responsive img-thumbnail" width="55" height="50" src="<c:out value='/uploads/NeoForce/images/customer/${customer.photoPath}'></c:out>" /></td>
-                    <td class="agentId"><c:out value="${customer.agent.agentId}" /></td>
+                    <td class="agentId"><c:out value="${customer.customerId}" /></td>
                     <td class="customerFname"><c:out value="${customer.firstname}" /></td>
                     <td class="customerMname"><c:out value="${customer.middlename}" /></td>
                     <td class="customerLname"><c:out value="${customer.lastname}" /></td>

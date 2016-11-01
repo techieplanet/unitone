@@ -14,6 +14,7 @@ import com.tp.neo.controller.helpers.AlertManager;
 import com.tp.neo.controller.helpers.WithdrawalManager;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
+import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.Notification;
@@ -391,7 +392,7 @@ public class AgentController extends AppController {
                     //throw new PropertyException("Please upload next of kin picture");
                 }
                 
-                new TrailableManager(agent).registerInsertTrailInfo(sessionUser.getSystemUserId());
+                
                 
                //persist only on save mode
                 em.persist(agent);   
@@ -407,6 +408,11 @@ public class AgentController extends AppController {
                 em.flush();
                 
                 em.getTransaction().commit();
+                
+                if(sessionUser == null)
+                    sessionUser = (SystemUser)agent;
+                
+                new TrailableManager(agent).registerInsertTrailInfo(sessionUser.getSystemUserId());
                 
                 insertStatus = true;
                 
@@ -463,7 +469,7 @@ public class AgentController extends AppController {
             }
            
             if(insertStatus && requestOrigin.equalsIgnoreCase("agent_registration")){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Agent?action=success";
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/RegisterAgent?action=success";
                 response.sendRedirect(page);
             }
             else if(insertStatus){

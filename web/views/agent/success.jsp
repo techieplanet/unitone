@@ -93,6 +93,9 @@
                       Congratulation!!! your account has been successfully created, You will receive an email and sms shortly
                   
                   </p>
+                  <p>
+                      <a href="${pageContext.request.contextPath}" class="btn btn-primary">Login to Dashboard</a>
+                  </p>
               </div>
           </div>
           
