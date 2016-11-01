@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<!--
-This is a starter template page. Use this page to start your new project from
-scratch. This page gets rid of all links and provides the needed markup only.
--->
+<%-- 
+    Document   : success
+    Created on : Oct 24, 2016, 3:33:16 PM
+    Author     : Prestige
+--%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -80,5 +80,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
   |               | sidebar-mini                            |
   |---------------------------------------------------------|
   -->
-  <body class="hold-transition skin-blue sidebar-mini">
-    <div class="wrapper">
+  <body style="background-color: #eee">
+   
+      <div class="container">
+          
+          <div class="jumbotron" style="background-color: #fff; margin-top: 100px; padding-bottom: 100px">
+              
+              <div class="row">
+                  <h3>Message</h3>
+                  <hr />
+                  <p>Dear ${customer.getFullName()},</p>
+                  <p>
+                      Your request is being processed, and an invoice will be sent to you after confirmation.
+                  
+                  </p>
+                  
+                  <a href="${pageContext.request.contextPath}" class="btn btn-primary">Login to Dashboard</a>
+                  
+              </div>
+          </div>
+          
+      </div>

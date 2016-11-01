@@ -1,15 +1,115 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%-- 
+    Document   : registration
+    Created on : Oct 27, 2016, 11:25:19 AM
+    Author     : Prestige
+--%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<!--
-    Process Step
--->
-<c:if test="${action == 'new'}">
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>NeoForce | ${pageTitle}</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css" type="text/css" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+    
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet" href="plugins/iCheck/all.css">
+
+    
+    <!-- DataTables -->
+    <link rel="stylesheet" href="plugins/datatables/dataTables.bootstrap.css">
+    
+    <!-- bootstrap wysihtml5 - text editor -->
+    <link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    
+    <!-- Theme style -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminLTE.min.css" type="text/css" />
+     
+    
+    <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
+          page. However, you can choose any other skin. Make sure you
+          apply the skin class to the body tag so the changes take effect.
+    -->
+    <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/css/skin-blue.min.css" type="text/css" />-->
+    <link rel="stylesheet" href="css/skins/skin-blue.min.css" type="text/css" />
+
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/custom.css" type="text/css" />
+    <!-- jQuery 2.1.4 -->
+    <!--<script src="plugins/jQuery/jQuery-2.1.4.min.js"></script>-->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-2.1.4.min.js"></script>
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <style>
+        #productCart th{
+            
+            font-weight: 500;
+        }
+    </style>
+  </head>
+  <!--
+  BODY TAG OPTIONS:
+  =================
+  Apply one or more of the following classes to get the
+  desired effect
+  |---------------------------------------------------------|
+  | SKINS         | skin-blue                               |
+  |               | skin-black                              |
+  |               | skin-purple                             |
+  |               | skin-yellow                             |
+  |               | skin-red                                |
+  |               | skin-green                              |
+  |---------------------------------------------------------|
+  |LAYOUT OPTIONS | fixed                                   |
+  |               | layout-boxed                            |
+  |               | layout-top-nav                          |
+  |               | sidebar-collapse                        |
+  |               | sidebar-mini                            |
+  |---------------------------------------------------------|
+  -->
+  <body style="background-color: #eee">
+   
+      <div class="container">
+          
+          <header style="background-color: #0073b7;color:#fff ">
+              <div class="row">
+                  <div class="col-md-3 text-center" style="margin:10px;">
+                      <i class="fa fa-image fa-4x"></i>
+                      <br/>
+                      <span>Company logo</span>
+                  </div>
+                  <div class="col-md-8" style="padding-left: 80px;padding-top: 10px">
+                      <h1>Customer Registration Form</h1>
+                  </div>
+              </div>
+          </header>
+          
+          <div class="jumbotron" style="background-color: #fff">
+
 <div class="stepwizard">
     <div class="stepwizard-row">
         <div class="stepwizard-step">
             <button type="button" id="process-step-1" class="btn btn-primary btn-circle" onclick="return showCustomerReg()">1</button>
-            <p>Register Customer</p>
+            <p>Register</p>
         </div>
         <div class="stepwizard-step">
             <button type="button" id="process-step-2" class="btn btn-default btn-circle" disabled="disabled" onclick="return showOrderProduct()">2</button>
@@ -17,134 +117,15 @@
         </div>
     </div>
 </div>
-</c:if>
 
- <c:if test='${userTypeId != null && userTypeId == "1" }'>
- <div class="row margin-bottom" id="agentListContainer">
-     
-     <section class="content-header">
-         
-         
-         <div class="box">
-                <div class="box-header">
-                  <h3 class="box-title block">
-                      Select an agent
-                  </h3>
-                </div><!-- /.box-header -->
-                
-                 <div class="box-body">
-                  <table id="agentList" class="table table-bordered table-striped table-hover">
-                    <thead>
-                      <tr>
-                        <th>Photo</th>
-                        <th>ID</th>
-                        <th>First Name</th>
-                        <th>Middle Name</th>
-                        <th>Last Name</th>
-                        <th>Phone No</th>
-                        <th>Email</th>
-                        <th>State</th>
-                        <th>Action</th>
-                        
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${agents}" var="agent">
-                            <tr id='row<c:out value="${agent.agentId}" />'>
-                                <td><img alt="No Image" class="img-responsive img-thumbnail" src="<c:out value='${agent.photoPath}'></c:out>" /></td>
-                                <td class="agentId"><c:out value="${agent.agentId}" /></td>
-                                <td class="agentFname"><c:out value="${agent.firstname}" /></td>
-                                <td class="agentMname"><c:out value="${agent.middlename}" /></td>
-                                <td class="agentLname"><c:out value="${agent.lastname}" /></td>
-                                <td class="agentPhone"><c:out value="${agent.phone}" /></td>
-                                <td class="agentEmail"><c:out value="${agent.email}" /></td>
-                                <td class="agentState"><c:out value="${agent.state}" /></td>
-                              
-                                <td>
-                                    <input type="hidden" class="agentImg" value='<c:out value="${agent.photoPath}"></c:out>' />
-                                    <a class="btn btn-primary" href="#" onclick="selectAgent('${agent.agentId}')" role="button">Choose</a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                  </tbody>
-                    <tfoot>
-                    
-                    </tfoot>
-                  </table>
-                  <div><span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span></div>
-                </div><!-- /.box-body -->
-              </div><!-- /.box -->
-         
-     </section>
-     
- </div>
-                                
- <div class="row" id="agentSpinnerContainer" style='display:none'>
-     <div class="spinner" >
-         <img class='img-responsive' src="${pageContext.request.contextPath}/images/uploadProgress.gif" style="margin: 10px auto" />
-     </div>
- </div>
-     
- <div class="row" id="agentDetailContainer"  style='display:none'>
-     
-     <div class="col-md-6 pull-right">
-         
-         <div class="box box-solid">
-             
-             <div class="box-header with-border">
-                 <h3 class="box-title">Agent Details</h3>
-             </div>
-             
-             <div class="box-body ">
-                 
-                 <div class="row">
-                     
-                     <div class="col-md-3">
-                         <img src="" alt="No image" />
-                     </div>
-                     
-                     <div class="col-md-9">
-                         <span class="agent_name"></span><br/>
-                         <span class="agent_moible"></span><br/>
-                         <span class="agent_state"></span>
-                     </div>
-                     
-                 </div>
-                 
-             </div>
-             
-             <div class="box-footer">
-                 <a href="#" onclick="showAgentList()"><i class='fa fa-chevron-left'></i> Show agent List</a>
-             </div>
-             
-         </div>
-         
-     </div>
-     
- </div>
-                                
-</c:if>  
-<form role="form" name="customerRegistration" method="POST" action="Customer?action=new" enctype="multipart/form-data">
+<form role="form" name="customerRegistration" method="POST" action="RegisterCustomer" enctype="multipart/form-data">
   
     <input type="hidden" name="customer_id" value="" />
-    <input type="hidden" name="agent_id" id="agent_id" value="" />
+    <input type="hidden" name="agent_id" id="agent_id" value="21" />
  
  <div class="row" id="step1">
-           <div class="col-md-12">
-              <!-- general form elements -->
-               
+      <div class="col-md-12">
                 <!-- form start -->
-               <div class="box box-primary">
-                <div class="box-header with-border">
-                  <h3 class="box-title">Customer Registration Form 
-                      
-                      
-                       </h3>
-                </div><!-- /.box-header -->
-                <!-- form start -->
-                <div style="background:#ecf0f5 !important;">
-                
-                  <div class="box-body">
                <c:if test="${fn:length(errors) > 0 }">
                 <div class="row">
                     <div class="col-md-12 ">
@@ -170,14 +151,8 @@
                     </div>
                 </div>
           </c:if>   
-                              <c:if test="${action != 'new'}">
-                                  <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Order?action=new&customer=${customer.customerId}">Buy Product</a>
-                                  &nbsp;&nbsp;&nbsp;
-                                  <a class="btn btn-primary" href="Customer?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Customer</a>
-                              </c:if>
-               
+                 
                     
-                    <div class="box box-default">
                     <div class="row" style="padding-top:10px;">
                         <div class="col-md-4">
                       <fieldset>
@@ -284,9 +259,9 @@
                   </div>
                          </div>
                     </div>
-                    </div>
+                    
                    
-                    <div class="box box-default">
+                    
                     
                     <div class="row" style="padding-top:10px;">
                     <div class="col-md-12" >
@@ -370,7 +345,7 @@
                         
                         
                     </div>
-                        </div>
+                  </div>
                         <div class="col-md-12">
                             <div class="col-md-6">
                             <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
@@ -384,13 +359,13 @@
                             
                         </div>
                     </div>
-                        </fieldset>
+                  </fieldset>
+                </div>
                     </div>
-                    </div>
-                    </div>
+                    
                    
                     
-                    <div class="box box-default">
+                    
                     <div class="row" style="padding-top:10px;">
                     <div class="col-md-12">
                                 <fieldset>
@@ -455,49 +430,24 @@
                                 </fieldset>
                     </div>
                          </div>
-                  </div><!-- /.box-body -->
-                         
-                 </div><!-- /.col-md-4 -->
-                </div><!-- /.row -->
-                </div> 
+                 
                          
       </div><!-- /.box -->
       
-      <c:if test="${action == 'edit'}">
-          <div class="col-md-12">
-              <button class="btn btn-success btn-lg" type="submit">Update</button>
-          </div>
-      </c:if>
-      <c:if test="${action == 'new'}">
+      
       <div class="col-md-12">
           <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Process to Order <i class="fa fa-long-arrow-right"></i></a>
       </div>
-      </c:if>
  </div><!-- /.box -->
-      
-<c:if test="${customer.customerId=='' || customer.customerId== null}">
                     
                     
-             <div class="row" id="step2" style="display:none">
-    
-               <div class="col-md-12">
-              <!-- general form elements -->
-               <div class="box box-primary">
+ <div class="row" id="step2" style="display:none">
+
+   <div class="col-md-12">
                
-                <div class="box-header with-border">
-                  <h3 class="box-title">Product Order Form 
-                      
-                      
-                  </h3>
-                </div><!-- /.box-header -->
-                <!-- form start -->
-                <div style="background:#ecf0f5 !important;">
-                <!--<form role="form" name="customerRegistration" method="POST" action="Order" enctype="multipart/form-data">-->
-                  <div class="box-body">
-          
-                  <div class="row">
+  
+         <div class="row">
                   <div class="col-md-12">
-                  <div class="box box-default">
                     <div class="row" style="padding-top:10px;">
                     <div class="col-md-12">
                         <input type="hidden" name="dataHidden" id="dataHidden" />
@@ -507,7 +457,7 @@
                             	<div class="row">
                                    
                                               
-                                   <div class="col-md-3">
+                                   <div class="col-md-4">
                                     	<div class="form-group">
                                             <label for="selectProdcut">Select Product</label>
                                             <select class="form-control select2" id="selectProduct" style="width: 100%;" onchange="getProjectUnits('${pageContext.request.contextPath}', 'Project','')" >
@@ -521,7 +471,7 @@
 <!--                                              /.form-group select product -->
                                     </div>
                                
-                                   <div class="col-md-3">
+                                   <div class="col-md-4">
                                     	<div class="form-group">
                                           <input type="hidden" id="pUnitId" />
                                             <label for="selectUnit">Select Unit</label>
@@ -534,7 +484,7 @@
 <!--                                              /.form-group  select unit-->
                                     </div>
                                 
-                                	<div class="col-md-3">
+                                    <div class="col-md-4">
                                     	<div class="form-group">
                                             <label for="selectQuantity">Select Quantity</label>
                                             
@@ -546,9 +496,9 @@
 <!--                                            /.form-group select quantity -->
                                     </div>
                                 </div>
-                                    <div class="row">
+                               <div class="row">
                                 
-                                	<div class="col-md-2">
+                                    <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="productAmount">Amount</label>
                                             <span id="amountPerUnit" class="productSpan">
@@ -561,7 +511,7 @@
                                     </div>
                                               
                                
-                                	<div class="col-md-2">
+                                   <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="productMinimumInitialAmount">Initial Amount(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
@@ -573,7 +523,7 @@
 <!--                                            /.form-group initial monthly amount -->
                                     </div>
                                               
-                                              <div class="col-md-2">
+                                    <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="amountLeft">Amount Payable(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
@@ -583,8 +533,10 @@
                                         </div> 
 <!--                                                  /.form-group initial monthly amount -->
                                     </div>
-                               <input type="hidden" id="editMode" value="" />
-                                	<div class="col-md-2">
+                                   
+                                    <input type="hidden" id="editMode" value="" />
+                                    
+                                    <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="productMaximumDuration">Payment Duration</label>
                                             <span id="amountPerUnit" class="productSpan">
@@ -602,7 +554,7 @@
                                         </div> <!-- /.form-group Duration -->
                                     </div>
                                
-                                	<div class="col-md-2">
+                                    <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="productMinimumMonthlyPayment">Monthly Payment(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
@@ -635,10 +587,9 @@
                     	</fieldset>
                   	</div> <!--/.col-md-12 -->
                  	</div> <!--/.row -->
-                  </div> <!-- /.box box-default -->
                   </div> <!-- /.col-md-4 -->
                   
-   </div> <!-- /.row -->
+                 </div> 
                   
                   
                   
@@ -649,18 +600,18 @@
     Product Cart starts here
     *****************************************
   -->
-  <div class="row">
+ <div class="row">
   <div class="col-md-12">
-  <div class="box box-default">
       <input type="hidden" name="dataHidden" id="dataHidden" />
     <div class="row" style="padding-top:10px;">
     <div class="col-md-12" id="shoppingCart">
-
-      <fieldset>
-      <legend style="padding-left:20px !important;">Product Cart</legend>
-                                
-              <div class="col-md-11" >
+      <div class="panel panel-default panel-primary">
+          <div class="panel-heading">
+              <div class="panel-title"><i class="fa fa-cart-plus fa-2x"></i> Product Cart </div>
+          </div>
+          <div class="panel-body"> 
                 <div class="row" >
+                 <div class="col-md-12">
                  <table id="productCart" class="table table-bordered table-striped table-hover" style="text-align:right !important;">
                     <thead>
                       <tr>
@@ -682,7 +633,7 @@
                       <tr>
                         <th colspan="8" align="right" style="text-align:right !important;">Total</th>
                         
-                        <th style="text-align:right !important;" align="right"><input type="hidden" id="CartActualSum" value="0" /><span id="cartSum">0</span></th>
+                        <th style="text-align:right !important;" align="right"><span id="cartSum">0</span></th>
                         
                         <th></th>
                         
@@ -696,13 +647,13 @@
                    
                   </table>
                                     
-                                    
+                 </div>                   
                  <!-- 
                    ***************************
                    Checkout Button starts Here
                    ***************************
                  -->
-                 <div class="col-md-1 pull-right">
+                 <div class="col-md-2 col-md-offset-10">
                      <div class="form-group">
                         <a href="#" class="btn" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i>Checkout</a>
                     </div> 
@@ -714,35 +665,34 @@
                     Checkout Button ends Here
                   ****************************
                  -->
-                     </div>
-                   </div>  
-                 <div class="col-md-1"></div>
-               </fieldset>
-              </div> 
+                </div>
+          </div>
+      </div>
+    </div> 
                         
                          <div class="col-md-12" id="paymentCheckout">
                       
                     	<fieldset>
                         <legend style="padding-left:20px !important;">Check Out</legend>
                                 
-                            <div class="col-md-11" >
+                            <div class="col-md-12" >
                             	
                                 <!-- Start of Payment Method Container -->
                                 <div class="row" > 
                                     <div class="col-md-12">
-                                        <span style="color:green;font-weight:bold;">You'd be paying <span id='paySum'></span></span>
+                                        <span style="color:green;font-weight:bold;">You'd be paying N<span id='paySum'></span></span>
                                     	<div class="form-group">
                                             <label for="paymentMethod">Payment method:</label><br/>
                                             <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
-                                            <c:if test="${userTypeId != null && userTypeId == 3 }">
+                                            
                                             <input type="radio" name="paymentMethod" value="2" id="paywithcard" onclick="showNecessaryMenu(2)"/>&nbsp; <label for="paywithcard" style="display:inline !important;cursor:pointer !important;">Credit/Debit Card <img src="${pageContext.request.contextPath}/images/img/paywithcard.png" /></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            </c:if>
+                                           
                                             <input type="radio" name="paymentMethod" value="3" id="paywithcash" onclick="showNecessaryMenu(3)"/>&nbsp;<label for="paywithcash" style="display:inline !important;"> Cash</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             <input type="radio" name="paymentMethod" value="4" id="bankTransfer" onclick="showNecessaryMenu(4)"/>&nbsp; <label for="bankTransfer" style="display:inline !important;cursor:pointer !important;">Bank Transfer </label>
                                         </div>
                                     </div>
                                     
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="companyAccount">Company Account</label>
                                             <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
@@ -809,10 +759,16 @@
                                 <!-- End of Pay with Cash Div Container -->
                                 
                                 
-                                <c:if test="${userTypeId != null && userTypeId == 3 }">
+                               
                                  <!-- Pay with Card Div Container -->
                                 <div class='row' id='pwCard'>
+                                    
+                                        
                                 	<div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="tellerNumber">Amount</label>
+                                                <input type="text" class="amount-box form-control" name="cardAmount" />
+                                            </div>
                                             <div class="form-group">
                                                 <label for="tellerNumber">Click to proceed to payment</label>
                                                 <!--<a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
@@ -821,7 +777,6 @@
                                         </div>
                                 </div>
                                 <!-- End of Pay with Card Div Container -->
-                                </c:if>
                                 
                                  <!-- Pay with Card Div Container -->
                                 <div class='row' id='pwBankTransfer'>
@@ -866,9 +821,7 @@
                          </div>
          </div>
                                  
-                            <div class="col-md-1"></div>
-                  	</div> <!--/.col-md-12 -->
-                 	</div> <!--/.row -->
+   </div> <!--/.row -->
  </div> <!--/.box box-default -->
            
           <!-- 
@@ -876,13 +829,10 @@
             Product Cart Ends here
             *****************************************
           -->
-          
-      </div> <!---/.col-md-4 Box-Body class div ends here -->
 
-      </div><!-- /.row -->
     
       <input type="hidden" name="cartDataJson" id="cartDataJson" />
-    </div>
+      
 
   </div><!-- /.box -->
   
@@ -890,9 +840,8 @@
       <a class="btn btn-primary" href="#" onclick="return showCustomerReg()" role="button"><i class="fa fa-long-arrow-left"></i> Customer registration</a>
   </div>
   
- </div><!-- /.box -->
+</div><!-- /.box -->
                     
-</c:if>
       
       <!--
       <div class="row">
@@ -903,4 +852,106 @@
           
       </div>
       -->
-</form>
+</form>     
+            
+          </div>  
+      </div>
+
+   
+         <footer class="main-footer" style="margin-left:0;">
+        <!-- To the right -->
+        <div class="pull-right hidden-xs">
+          Powered by <b>Techie Planet</b>
+        </div>
+        <!-- Default to the left -->
+        <!--<strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong> All rights reserved.-->
+        &nbsp;
+        </footer>                     
+         
+      </div>     
+               
+         
+      <!--MODAL-->
+      <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">NEOFORCE</h4>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to delete?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+              <button id="ok" type="button" onclick="" class="btn btn-primary">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+       
+      
+      <!--MODAL-->
+      <div class="modal fade" id="deleteModalCart" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">NEOFORCE</h4>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to delete?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+              <button id="ok" type="button" onclick="" class="btn btn-primary">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+      
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+ 
+    <!-- iCheck 1.0.1 -->
+    <script src="plugins/iCheck/icheck.min.js"></script>
+    
+
+    <!-- DataTables -->
+    <script src="plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="plugins/datatables/dataTables.bootstrap.min.js"></script>
+    
+    
+    <!-- AdminLTE App -->
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/app.min.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/functions.js"></script>
+
+
+    <script src="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+    
+    <script>
+      $(function () {
+            //iCheck for checkbox and radio inputs
+            $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
+              checkboxClass: 'icheckbox_minimal-blue',
+              radioClass: 'iradio_minimal-blue'
+            });
+            //Red color scheme for iCheck
+            $('input[type="checkbox"].minimal-red, input[type="radio"].minimal-red').iCheck({
+              checkboxClass: 'icheckbox_minimal-red',
+              radioClass: 'iradio_minimal-red'
+            });
+            //Flat red color scheme for iCheck
+            $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+              checkboxClass: 'icheckbox_flat-green',
+              radioClass: 'iradio_flat-green'
+            });
+        });
+      </script>
+                                      
+   
+  </body>
+
+</html>
+  
+

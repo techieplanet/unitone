@@ -44,6 +44,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.helpers.LodgementManager;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.CompanyAccount;
+import com.tp.neo.model.Notification;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -55,7 +56,7 @@ import javax.persistence.RollbackException;
  *
  * @author John
  */
-@WebServlet(name = "LodgementController", urlPatterns = {"/Lodgement"})
+@WebServlet(name = "LodgementController", urlPatterns = {"/Lodgement","/lodgement"})
 public class LodgementController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String LODGEMENT_ADMIN = "/views/lodgement/admin.jsp"; 
@@ -122,6 +123,7 @@ public class LodgementController extends AppController {
         
         long userTypeId = user.getSystemUserTypeId();
         
+        boolean isRedirect = false;
          
          String viewFile = LODGEMENT_ADMIN;
          
@@ -146,8 +148,26 @@ public class LodgementController extends AppController {
          else if(action.equalsIgnoreCase("approval")){
              
              viewFile = LODGEMENT_APPROVAL;
+             request.setAttribute("notificationLodgementId", 0);
              getUnapprovedLodgement(request);
              
+         }
+         else if(action.equalsIgnoreCase("approve")){
+             
+             approveLodgement(request);
+             response.sendRedirect(request.getContextPath() + "/Lodgement?action=approval");
+             isRedirect = true;
+         }
+         else if(action.equalsIgnoreCase("decline")){
+             
+             declineLodgement(request);
+             response.sendRedirect(request.getContextPath() + "/Lodgement?action=approval");
+             isRedirect = true;
+         }
+         else if(action.equalsIgnoreCase("notification")){
+             viewFile = LODGEMENT_APPROVAL;
+             getUnapprovedLodgement(request);
+             request.setAttribute("notificationLodgementId", Long.parseLong(request.getParameter("id")));
          }
          else if(action.equals("success")){
              viewFile = LODGEMENT_SUCCESS;
@@ -157,8 +177,11 @@ public class LodgementController extends AppController {
             request.setAttribute("lodgements",listLodgements());;
          }
         
+         if(!isRedirect){
+             System.out.println("Action : " + action + "/");
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
+         }
             
     }
     
@@ -419,8 +442,58 @@ public class LodgementController extends AppController {
         jplQuery.setParameter("approvalStatus", (short)0);
         List<Lodgement> lodgementList = jplQuery.getResultList();
         
+        emf.getCache().evictAll();
+        em.close();
+        
         request.setAttribute("notificationLodgementId",0);
         request.setAttribute("lodgements", lodgementList);
+    }
+    
+    private void approveLodgement(HttpServletRequest request){
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+        try {
+            emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            em = emf.createEntityManager();
+            
+            Long id = Long.parseLong(request.getParameter("id"));
+            Lodgement lodgement = em.find(Lodgement.class,id);
+            
+            Long notificationId = Long.parseLong(request.getParameter("nof_id"));
+            Notification notification = em.find(Notification.class, notificationId);
+            
+            LodgementManager manager = new LodgementManager(sessionUser);
+            manager.approveLodgement(lodgement, request.getContextPath());
+            
+            
+        } catch (PropertyException ex) {
+            Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RollbackException ex) {
+            Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally{
+            if(em != null){
+              em.close();
+            }
+        }
+    }
+    
+    private void declineLodgement(HttpServletRequest request){
+       
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            Long id = Long.parseLong(request.getParameter("id"));
+            Lodgement lodgement = em.find(Lodgement.class,id);
+            
+            Long notificationId = Long.parseLong(request.getParameter("nof_id"));
+            Notification notification = em.find(Notification.class, notificationId);
+            
+            LodgementManager manager = new LodgementManager(sessionUser);
+            //manager.declineLodgementApproval(lodgement, request.getContextPath());
+            
+            em.close();
+            emf.close();
     }
     
     private void payMorgage(HttpServletRequest request) {
@@ -460,6 +533,7 @@ public class LodgementController extends AppController {
                 
             }
             
+            lodgement.setCustomer(customer);
             LodgementManager lodgementManager = new LodgementManager(user);
             lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath());
             
@@ -498,7 +572,6 @@ public class LodgementController extends AppController {
             itemList.add(itemMap);
         }
        
-        System.out.println("Lenght of items : " + itemList.size());
         map.put("total",lodgement.getAmount());
         map.put("items",itemList);
         
@@ -543,6 +616,7 @@ public class LodgementController extends AppController {
         lodgement.setCreatedBy(userId);
         lodgement.setCompanyAccountId(companyAccount);
         lodgement.setApprovalStatus((short)0);
+        lodgement.setCreatedByUserType(Short.parseShort(sessionUser.getSystemUserTypeId().toString()));
         
         if(paymentMethod == 1) {
             lodgement.setTransactionId(request.get("tellerNumber").toString());
@@ -563,6 +637,9 @@ public class LodgementController extends AppController {
             lodgement.setLodgmentDate(getDateTime().getTime());
             
         }
+        
+        em.close();
+        emf.close();
         
         return lodgement;
     }

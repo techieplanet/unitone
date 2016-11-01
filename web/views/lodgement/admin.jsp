@@ -70,7 +70,7 @@
                         
                         <c:forEach items="${lodgements}" var="lodgement">
                            
-                            <tr id="row<c:out value="${lodgement.getLodgementId()}" />"
+                            <tr id="row<c:out value="${lodgement.getId()}" />"
                                 <c:if test="${lodgement.verificationStatus == 0 || lodgement.verificationStatus == null}">class="danger"</c:if>
                                 <c:if test="${lodgement.verificationStatus == -1}">class="warning"</c:if>
                                 <c:if test="${lodgement.verificationStatus== 1}">class="success"</c:if>

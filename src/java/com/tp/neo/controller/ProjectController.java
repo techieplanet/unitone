@@ -63,7 +63,13 @@ public class ProjectController extends AppController {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
-
+        
+        if(action.equalsIgnoreCase("punits")){
+                  int id = Integer.parseInt(request.getParameter("project_id"));
+                  sendProjectUnitsData(request, response,id);
+                  return;
+         }
+        
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
                 if(action.equalsIgnoreCase("punits")){
@@ -419,7 +425,9 @@ public class ProjectController extends AppController {
         //find by ID
         Query jpqlQuery  = em.createNamedQuery("Project.findByDeleted").setParameter("deleted", 0);
         List<Project> projectList = jpqlQuery.getResultList();
-
+        
+        em.close();
+        emf.close();
         return projectList;
     }
      

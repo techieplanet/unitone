@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Notification.findById", query = "SELECT n FROM Notification n WHERE n.id = :id"),
     @NamedQuery(name = "Notification.findByTitle", query = "SELECT n FROM Notification n WHERE n.title = :title"),
     @NamedQuery(name = "Notification.findByRoute", query = "SELECT n FROM Notification n WHERE n.route = :route"),
-    @NamedQuery(name = "Notification.findByStatus", query = "SELECT n FROM Notification n WHERE n.status = :status"),
+    @NamedQuery(name = "Notification.findByStatus", query = "SELECT n FROM Notification n WHERE n.status = :status ORDER BY n.id DESC"),
     @NamedQuery(name = "Notification.findByClearOnClick", query = "SELECT n FROM Notification n WHERE n.clearOnClick = :clearOnClick"),
     @NamedQuery(name = "Notification.findByAccessedBy", query = "SELECT n FROM Notification n WHERE n.accessedBy = :accessedBy"),
     @NamedQuery(name = "Notification.findByCreatedDate", query = "SELECT n FROM Notification n WHERE n.createdDate = :createdDate"),
@@ -61,13 +61,13 @@ public class Notification implements Serializable {
     @Column(name = "clear_on_click")
     private Short clearOnClick;
     @Column(name = "accessed_by")
-    private BigInteger accessedBy;
+    private Long accessedBy;
     @Column(name = "accessed_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date accessedDate;
     @JoinColumn(name = "type_id", referencedColumnName = "id")
     @ManyToOne
-    private NotificationType typeId;
+    private NotificationType type;
 
     public Notification() {
     }
@@ -93,7 +93,7 @@ public class Notification implements Serializable {
     }
 
     public String getRoute() {
-        return route;
+        return route + "&nof_id=" + getId();
     }
 
     public void setRoute(String route) {
@@ -116,11 +116,11 @@ public class Notification implements Serializable {
         this.clearOnClick = clearOnClick;
     }
 
-    public BigInteger getAccessedBy() {
+    public Long getAccessedBy() {
         return accessedBy;
     }
 
-    public void setAccessedBy(BigInteger accessedBy) {
+    public void setAccessedBy(Long accessedBy) {
         this.accessedBy = accessedBy;
     }
 
@@ -132,12 +132,12 @@ public class Notification implements Serializable {
         this.accessedDate = accessedDate;
     }
 
-    public NotificationType getTypeId() {
-        return typeId;
+    public NotificationType getType() {
+        return type;
     }
 
-    public void setTypeId(NotificationType typeId) {
-        this.typeId = typeId;
+    public void setType(NotificationType typeId) {
+        this.type = typeId;
     }
 
     @Override

@@ -41,13 +41,19 @@
                      <c:forEach items="${notifications}" var="notificationObject">
                       <li><!-- start notification -->
                         <a href="${notificationObject.getRoute()}">
-                            <i class="fa fa-users text-aqua"></i> <c:out value="${notificationObject.getTitle()}"></c:out>
+                            <c:if test='${notificationObject.getType().getAlias() == "ALERT_NEW_ORDER"}'>
+                                <i class="fa fa-cart-plus text-aqua"></i> <c:out value="${notificationObject.getTitle()}"></c:out>
+                            </c:if>
+                            <c:if test='${notificationObject.getType().getAlias() == "ALERT_NEW_LODGE"}'>
+                                <i class="fa fa-money text-green"></i> <c:out value="${notificationObject.getTitle()}"></c:out>
+                            </c:if>
+                            
                         </a>
                       </li><!-- end notification -->
                      </c:forEach>
                     </ul>
                   </li>
-                  <li class="footer"><a href="#">View all</a></li>
+                
                 </ul>
               </li>
               

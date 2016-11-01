@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "NotificationType.findByAlias", query = "SELECT n FROM NotificationType n WHERE n.alias = :alias")})
 public class NotificationType implements Serializable {
 
-    @OneToMany(mappedBy = "typeId")
+    @OneToMany(mappedBy = "type")
     private Collection<Notification> notificationCollection;
 
     private static final long serialVersionUID = 1L;

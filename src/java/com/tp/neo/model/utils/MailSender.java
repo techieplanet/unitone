@@ -87,7 +87,7 @@ public class MailSender {
          message.setContent(htmlMessage, "text/html" );
 
          // Send message
-         Transport.send(message);
+         //Transport.send(message);
          System.out.println("Sent message successfully....");
       }catch (MessagingException mex) {
          mex.printStackTrace();

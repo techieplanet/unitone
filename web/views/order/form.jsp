@@ -353,7 +353,7 @@
                       <tr>
                         <th colspan="8" align="right" style="text-align:right !important;">Total</th>
                         
-                        <th style="text-align:right !important;" align="right"><span id="cartSum">0</span></th>
+                        <th style="text-align:right !important;" align="right"><input type="hidden" id="CartActualSum" value="0" /><span id="cartSum">0</span></th>
                         
                         <th></th>
                         
@@ -401,7 +401,7 @@
                                 <!-- Start of Payment Method Container -->
                                 <div class="row" > 
                                     <div class="col-md-12">
-                                        <span style="color:green;font-weight:bold;">You'd be paying N<span id='paySum'></span></span>
+                                        <span style="color:green;font-weight:bold;">You'd be paying <span id='paySum'></span></span>
                                     	<div class="form-group">
                                             <label for="paymentMethod">Payment method:</label><br/>
                                             <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;

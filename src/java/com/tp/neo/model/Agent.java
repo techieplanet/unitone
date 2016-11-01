@@ -492,6 +492,16 @@ public class Agent extends BaseModel implements SystemUser  {
         this.withdrawalCollection = withdrawalCollection;
     }
 
-  
-    
+
+
+    public String getFullName(){
+        
+        String mName = middlename!=null ? middlename : "";
+        String fullname = lastname + " " + mName + " " + firstname;
+        System.out.println("Agent FullName : " + fullname);
+        
+        return fullname;
+    }
+
+
 }
