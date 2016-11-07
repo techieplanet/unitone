@@ -835,14 +835,14 @@
                                     <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="accountNo">Depositor's Account No</label>
-                                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
+                                            <input type="text" class="form-control" id="transfer_accountNo" name="transfer_accountNo" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
                                     <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="accountNo">Depositor's Account Name</label>
-                                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
+                                            <input type="text" class="form-control" id="transfer_accountName" name="transfer_accountName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     

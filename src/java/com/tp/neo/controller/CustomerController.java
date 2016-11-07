@@ -69,6 +69,8 @@ public class CustomerController extends AppController  {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String CUSTOMER_ADMIN = "/views/customer/admin.jsp"; 
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";
+    private static String CUSTOMER_COMPLETED_PAYMENT = "/views/customer/completed_payment.jsp";
+    private static String CUSTOMER_CURRENT_PAYING = "/views/customer/current_paying.jsp";
     private final String ORDER_NOTIFICATION_ROUTE = "/Order?action=notification&id=";
     private Customer customer = new Customer();
     private final static Logger LOGGER = 
@@ -211,9 +213,23 @@ public class CustomerController extends AppController  {
                 
                 validate(customer,request);
                 
-                long agentId = Long.parseLong(request.getParameter("agent_id"));
                 
-                Agent agent = em.find(Agent.class, agentId);
+                
+                Agent agent = null;
+                
+                if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
+                    
+                    //Assign default companies Agent to the customer
+                    agent = em.find(Agent.class, (long)18);
+                }
+                else if(user.getSystemUserTypeId() == 2){
+                    agent = em.find(Agent.class, user.getSystemUserId());
+                }
+                else{
+                        long agentId = Long.parseLong(request.getParameter("agent_id"));
+                        agent = em.find(Agent.class, agentId);
+                }
+                
                 customer.setFirstname(request.getParameter("customerFirstname"));
                 customer.setLastname(request.getParameter("customerLastname"));               
                 customer.setEmail(request.getParameter("customerEmail"));
@@ -226,7 +242,12 @@ public class CustomerController extends AppController  {
                 customer.setKinName(request.getParameter("customerKinName"));
                 customer.setKinPhone(request.getParameter("customerKinPhone"));
                 customer.setKinAddress(request.getParameter("customerKinAddress"));
-                customer.setCreatedBy(agentId);
+                if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
+                    //Assign default created by user
+                    //customer.setCreatedBy(10);
+                }else{
+                customer.setCreatedBy(user.getSystemUserId());
+                }
                 customer.setCreatedDate(getDateTime().getTime());
                 
                 
@@ -529,7 +550,22 @@ public class CustomerController extends AppController  {
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = CUSTOMER_ADMIN;
+            
+            if(sessionUser.getSystemUserTypeId() == 2){
+                request.setAttribute("customers", listAgentCustomers());
+            }else{
             request.setAttribute("customers", listCustomers());
+            }
+        }
+        else if(action.equalsIgnoreCase("current")){
+            
+            viewFile =  CUSTOMER_CURRENT_PAYING;
+            request.setAttribute("customers",getCurrentPayingCustomers());
+        }
+        else if(action.equalsIgnoreCase("completed")){
+            
+            viewFile = CUSTOMER_COMPLETED_PAYMENT;
+            request.setAttribute("customers",getCompletedPaymentCustomers());
         }
         request.setAttribute("projects", project.listProjects());
 
@@ -550,6 +586,22 @@ public class CustomerController extends AppController  {
         //find by ID
         Query jpqlQuery  = em.createNamedQuery("Customer.findByDeleted");
         jpqlQuery.setParameter("deleted", 0);
+        List<Customer> customerList = jpqlQuery.getResultList();
+
+        return customerList;
+    }
+    
+    public List<Customer> listAgentCustomers(){
+        
+        Agent agent = (Agent)sessionUser;
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+
+        //find by ID
+        Query jpqlQuery  = em.createNamedQuery("Customer.findByAgent");
+        jpqlQuery.setParameter("deleted", 0);
+        jpqlQuery.setParameter("agent", agent);
         List<Customer> customerList = jpqlQuery.getResultList();
 
         return customerList;
@@ -775,6 +827,38 @@ public class CustomerController extends AppController  {
         
     }
     
+    public List<Customer> getCurrentPayingCustomers(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+        
+        Query JPQL = em.createNamedQuery("ProductOrder.findByCurrentPayingCustomer");
+        JPQL.setParameter("agent",agent);
+        List<Customer> customers = JPQL.getResultList();
+        
+        em.close();
+        emf.close();
+        
+        return customers;
+    }
+    
+    public List<Customer> getCompletedPaymentCustomers(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+         Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+        
+        Query JPQL = em.createNamedQuery("ProductOrder.findByCompletedPaymentCustomer");
+        JPQL.setParameter("agent",agent);
+        List<Customer> customers = JPQL.getResultList();
+        
+        em.close();
+        emf.close();
+        
+        return customers;
+    }
+    
     private Calendar getDateTime()
     {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
@@ -799,6 +883,7 @@ public class CustomerController extends AppController  {
         return map;
     }
     
+
       /*TP: Getting the customer Id for public use*/
     public Long getSystemUserId(){
     return customer.getCustomerId();

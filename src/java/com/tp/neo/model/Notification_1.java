@@ -14,43 +14,33 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author swedge-mac
+ * @author Prestige
  */
 @Entity
 @Table(name = "notification")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Notification.findAll", query = "SELECT n FROM Notification n"),
-    @NamedQuery(name = "Notification.findById", query = "SELECT n FROM Notification n WHERE n.id = :id"),
-    @NamedQuery(name = "Notification.findByRemoteId", query = "SELECT n FROM Notification n WHERE n.remoteId = :remoteId AND n.type.title = :typeTitle"),
-    @NamedQuery(name = "Notification.findByTitle", query = "SELECT n FROM Notification n WHERE n.title = :title"),
-    @NamedQuery(name = "Notification.findByRoute", query = "SELECT n FROM Notification n WHERE n.route = :route"),
-    @NamedQuery(name = "Notification.findByStatus", query = "SELECT n FROM Notification n WHERE n.status = :status ORDER BY n.id DESC"),
-    @NamedQuery(name = "Notification.findByClearOnClick", query = "SELECT n FROM Notification n WHERE n.clearOnClick = :clearOnClick"),
-    @NamedQuery(name = "Notification.findByAccessedBy", query = "SELECT n FROM Notification n WHERE n.accessedBy = :accessedBy"),
-    @NamedQuery(name = "Notification.findByCreatedDate", query = "SELECT n FROM Notification n WHERE n.createdDate = :createdDate"),
-    @NamedQuery(name = "Notification.findByAccessedDate", query = "SELECT n FROM Notification n WHERE n.accessedDate = :accessedDate")})
-public class Notification implements Serializable {
-
-    @Column(name = "accessed_by")
-    private Long accessedBy;
-    @Column(name = "remote_id")
-    private Long remoteId;
-
-    @Column(name = "created_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
+    @NamedQuery(name = "Notification_1.findAll", query = "SELECT n FROM Notification_1 n"),
+    @NamedQuery(name = "Notification_1.findById", query = "SELECT n FROM Notification_1 n WHERE n.id = :id"),
+    @NamedQuery(name = "Notification_1.findByTitle", query = "SELECT n FROM Notification_1 n WHERE n.title = :title"),
+    @NamedQuery(name = "Notification_1.findByRoute", query = "SELECT n FROM Notification_1 n WHERE n.route = :route"),
+    @NamedQuery(name = "Notification_1.findByStatus", query = "SELECT n FROM Notification_1 n WHERE n.status = :status"),
+    @NamedQuery(name = "Notification_1.findByClearOnClick", query = "SELECT n FROM Notification_1 n WHERE n.clearOnClick = :clearOnClick"),
+    @NamedQuery(name = "Notification_1.findByCreatedDate", query = "SELECT n FROM Notification_1 n WHERE n.createdDate = :createdDate"),
+    @NamedQuery(name = "Notification_1.findByAccessedBy", query = "SELECT n FROM Notification_1 n WHERE n.accessedBy = :accessedBy"),
+    @NamedQuery(name = "Notification_1.findByAccessedDate", query = "SELECT n FROM Notification_1 n WHERE n.accessedDate = :accessedDate"),
+    @NamedQuery(name = "Notification_1.findByRemoteId", query = "SELECT n FROM Notification_1 n WHERE n.remoteId = :remoteId")})
+public class Notification_1 implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -58,25 +48,31 @@ public class Notification implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Long id;
+    @Size(max = 2147483647)
     @Column(name = "title")
     private String title;
+    @Size(max = 2147483647)
     @Column(name = "route")
     private String route;
     @Column(name = "status")
     private Short status;
     @Column(name = "clear_on_click")
     private Short clearOnClick;
+    @Column(name = "created_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+    @Column(name = "accessed_by")
+    private BigInteger accessedBy;
     @Column(name = "accessed_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date accessedDate;
-    @JoinColumn(name = "type_id", referencedColumnName = "id")
-    @ManyToOne
-    private NotificationType type;
+    @Column(name = "remote_id")
+    private BigInteger remoteId;
 
-    public Notification() {
+    public Notification_1() {
     }
 
-    public Notification(Long id) {
+    public Notification_1(Long id) {
         this.id = id;
     }
 
@@ -97,7 +93,7 @@ public class Notification implements Serializable {
     }
 
     public String getRoute() {
-        return route + "&nof_id=" + getId();
+        return route;
     }
 
     public void setRoute(String route) {
@@ -120,11 +116,19 @@ public class Notification implements Serializable {
         this.clearOnClick = clearOnClick;
     }
 
-    public Long getAccessedBy() {
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public BigInteger getAccessedBy() {
         return accessedBy;
     }
 
-    public void setAccessedBy(Long accessedBy) {
+    public void setAccessedBy(BigInteger accessedBy) {
         this.accessedBy = accessedBy;
     }
 
@@ -136,12 +140,12 @@ public class Notification implements Serializable {
         this.accessedDate = accessedDate;
     }
 
-    public NotificationType getType() {
-        return type;
+    public BigInteger getRemoteId() {
+        return remoteId;
     }
 
-    public void setType(NotificationType typeId) {
-        this.type = typeId;
+    public void setRemoteId(BigInteger remoteId) {
+        this.remoteId = remoteId;
     }
 
     @Override
@@ -154,10 +158,10 @@ public class Notification implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Notification)) {
+        if (!(object instanceof Notification_1)) {
             return false;
         }
-        Notification other = (Notification) object;
+        Notification_1 other = (Notification_1) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -166,23 +170,7 @@ public class Notification implements Serializable {
 
     @Override
     public String toString() {
-        return "com.tp.neo.model.Notification[ id=" + id + " ]";
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Long getRemoteId() {
-        return remoteId;
-    }
-
-    public void setRemoteId(Long remoteId) {
-        this.remoteId = remoteId;
+        return "com.tp.neo.model.Notification_1[ id=" + id + " ]";
     }
     
 }

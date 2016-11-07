@@ -12,7 +12,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Customers
+            Customers with completed Payment 
             <!--<small>Optional description</small>-->
           </h1>
 <!--          <ol class="breadcrumb">
@@ -48,7 +48,6 @@
                         <th>Street</th>
                         <th>City</th>
                         <th>State</th>
-                        <th>Action</th>
                         
                       </tr>
                     </thead>
@@ -66,13 +65,7 @@
                                 <td><c:out value="${customer.city}" /></td>
                                 <td><c:out value="${customer.state}" /></td>
                               
-                                <td>
-                                    <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
-                                     
-                                     <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
-                                    
-                                   
-                                </td>
+                                
                             </tr>
                         </c:forEach>
                   </tbody>
@@ -88,7 +81,6 @@
                         <th>Street</th>
                         <th>City</th>
                         <th>State</th>
-                        <th>Action</th>
                       </tr>
                     </tfoot>
                   </table>

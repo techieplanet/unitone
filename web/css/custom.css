@@ -197,3 +197,23 @@ span.lodgementTitleSpan{
 .cart-td{
     min-width: 50px;
 }
+
+body .modal-admin {
+    
+    /* new custom width */
+    width: 750px;
+    /* must be half of the width, minus scrollbar on the left (30px) */
+    margin-left: -375px;
+    
+}
+
+body .modal-lg {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media screen and (min-width: 768px) {
+    body .modal-admin {
+        width: 70%; /* either % (e.g. 60%) or px (400px) */
+    }
+}

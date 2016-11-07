@@ -110,7 +110,7 @@
       
 <!-- Include the bottom -->
 <%@ include file="../includes/bottom.jsp" %>
-
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/neoforce.lodgement.js"></script>
 <script>
     
     $(document).ready(function(){

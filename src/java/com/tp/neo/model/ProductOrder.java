@@ -6,6 +6,7 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -34,7 +35,9 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "product_order")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "ProductOrder.findAll", query = "SELECT o FROM ProductOrder o"),
+    @NamedQuery(name = "ProductOrder.findAll", query = "SELECT o FROM ProductOrder o ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.totalAmount", query = "SELECT SUM(unit.amountPayable * item.quantity) FROM ProductOrder order JOIN OrderItem item ON item.order.id = order.id JOIN item.unit unit where order.id = :orderId"),
+    @NamedQuery(name = "ProductOrder.findByAgent", query = "SELECT o FROM ProductOrder o WHERE o.agent = :agent "),
     @NamedQuery(name = "ProductOrder.findById", query = "SELECT o FROM ProductOrder o WHERE o.id = :id"),
     @NamedQuery(name = "ProductOrder.findByCreatedBy", query = "SELECT o FROM ProductOrder o WHERE o.createdBy = :createdBy"),
     @NamedQuery(name = "ProductOrder.findByCreatedDate", query = "SELECT o FROM ProductOrder o WHERE o.createdDate = :createdDate"),
@@ -46,7 +49,13 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProductOrder.findByApprovedBy", query = "SELECT o FROM ProductOrder o WHERE o.approvedBy = :approvedBy"),
     @NamedQuery(name = "ProductOrder.findByApprovedDate", query = "SELECT o FROM ProductOrder o WHERE o.approvedDate = :approvedDate"),
     @NamedQuery(name = "ProductOrder.findByApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus"),
-    @NamedQuery(name = "ProductOrder.findByNotApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus != :approvalStatus ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus"),
+    @NamedQuery(name = "ProductOrder.findByCurrentPayingCustomer", query = "SELECT o.customer FROM ProductOrder o WHERE o.mortgageStatus = 0 AND o.agent = :agent ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByCompletedPaymentCustomer", query = "SELECT o.customer FROM ProductOrder o WHERE o.mortgageStatus = 1 AND o.agent = :agent ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByCurrentPaying", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus < 2 ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByAgentCurrentPaying", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus < 2 AND o.agent = :agent ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByCompleted", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 2 ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByAgentCompleted", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 2 AND o.agent = :agent ORDER BY o.id DESC"),
     @NamedQuery(name = "ProductOrder.findLastInsertedId", query = "SELECT o FROM ProductOrder o ORDER BY o.id DESC")})
 
 public class ProductOrder extends BaseModel {
@@ -57,6 +66,8 @@ public class ProductOrder extends BaseModel {
     private Long modifiedBy;
     @Column(name = "approved_by")
     private Long approvedBy;
+    @Column(name = "mortgage_status")
+    private Short mortgageStatus;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private Collection<OrderItem> orderItemCollection;
 
@@ -67,10 +78,10 @@ public class ProductOrder extends BaseModel {
     @Column(name = "id")
     private Long id;
     @Column(name = "created_date")
-    @Temporal(TemporalType.TIME)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
     @Column(name = "modified_date")
-    @Temporal(TemporalType.TIME)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
     @Column(name = "creator_user_type")
     private Integer creatorUserType;
@@ -220,6 +231,8 @@ public class ProductOrder extends BaseModel {
             return "view_order";
         else if(action.toUpperCase().equals("NEW_ORDER")) 
             return "create_order";
+        else if(action.toUpperCase().equals("CURRENT")) return "view_order";
+        else if(action.toUpperCase().equals("COMPLETED")) return "view_order";
         else
             return "view_order";
     }
@@ -240,6 +253,15 @@ public class ProductOrder extends BaseModel {
 
     public void setApprovedBy(Long approvedBy) {
         this.approvedBy = approvedBy;
+    }
+
+
+    public Short getMortgageStatus() {
+        return mortgageStatus;
+    }
+
+    public void setMortgageStatus(Short mortgageStatus) {
+        this.mortgageStatus = mortgageStatus;
     }
 
    

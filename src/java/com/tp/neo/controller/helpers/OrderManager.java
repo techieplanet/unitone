@@ -17,11 +17,14 @@ import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.xml.bind.PropertyException;
 
@@ -58,7 +61,8 @@ public class OrderManager {
         
         //log the notification in the database
         String route = "Lodgement?action=notification&id=" + lodgement.getId();
-        Notification notification = new AlertManager().getNotificationsManager(route).createNewLodgementNotification(customer);
+        Notification notification = new AlertManager().getNotificationsManager(route).setupLodgementNotification(customer,lodgement);
+        em.persist(notification);
         
         //send the alert to customer, agent and admin
         AlertManager alertManager = new AlertManager();
@@ -263,7 +267,7 @@ public class OrderManager {
         
         //create new order system notification
         String route =  applicationContext + "/Order?action=notification&id=" + order.getId();
-        Notification notification = new AlertManager().getNotificationsManager(route).createNewOrderNotification(customer);
+        Notification notification = new AlertManager().getNotificationsManager(route).createNewOrderNotification(customer,order);
         em.persist(notification);
         
         //send email alert to all Admins with approve_order permisison

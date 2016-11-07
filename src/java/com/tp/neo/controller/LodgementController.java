@@ -45,6 +45,7 @@ import com.tp.neo.controller.helpers.LodgementManager;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Notification;
+import com.tp.neo.model.NotificationType;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -135,10 +136,11 @@ public class LodgementController extends AppController {
              
              if(userTypeId == 1)
                  request.setAttribute("customers", listCustomers());
-             else if(userTypeId == 2)
+             else if(userTypeId == 2){
+                 
                  request.setAttribute("customers", listAgentCustomers(user.getSystemUserId()));
              
-            
+             }
             
          }
          else if(action.equals("getOrders")) {
@@ -293,8 +295,10 @@ public class LodgementController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
+         Agent agent = em.find(Agent.class, agentId);
+        
         Query jplQuery = em.createNamedQuery("CustomerAgent.findByAgentId");
-        jplQuery.setParameter("agentId", agentId);
+        jplQuery.setParameter("agentId", agent);
         
         List<CustomerAgent> customerAgentResultList = jplQuery.getResultList();
         
@@ -459,11 +463,15 @@ public class LodgementController extends AppController {
             Long id = Long.parseLong(request.getParameter("id"));
             Lodgement lodgement = em.find(Lodgement.class,id);
             
-            Long notificationId = Long.parseLong(request.getParameter("nof_id"));
-            Notification notification = em.find(Notification.class, notificationId);
+            
+            Query jpQl = em.createNamedQuery("Notification.findByRemoteId");
+            jpQl.setParameter("remoteId", lodgement.getId());
+            jpQl.setParameter("typeTitle","Lodgement");
+            
+            Notification notification = (Notification)jpQl.getSingleResult();
             
             LodgementManager manager = new LodgementManager(sessionUser);
-            manager.approveLodgement(lodgement, request.getContextPath());
+            manager.approveLodgement(lodgement, notification, request.getContextPath());
             
             
         } catch (PropertyException ex) {
@@ -506,9 +514,10 @@ public class LodgementController extends AppController {
             List<MorgageList> morgageList = processJson(morgageItemJson);
             
             SystemUser user = sessionUser;
-            String type = userType;
+            long type = userType;
             
             Customer customer = null;
+            ProductOrder order = null;
             
             Long userId = user.getSystemUserId();
             Lodgement lodgement = prepareLodgement(getRequestParameters(request), userId);
@@ -529,13 +538,14 @@ public class LodgementController extends AppController {
                 
                 if(customer == null){
                     customer = orderItem.getOrder().getCustomer();
+                    order = orderItem.getOrder();
                 }
                 
             }
             
             lodgement.setCustomer(customer);
             LodgementManager lodgementManager = new LodgementManager(user);
-            lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath());
+            lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath(), order);
             
             Map map = prepareMorgageInvoice(lodgement, lodgementItemList);
             
@@ -657,5 +667,6 @@ public class LodgementController extends AppController {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
+    
+    
 }

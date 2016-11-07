@@ -118,7 +118,7 @@
     </div>
 </div>
 
-<form role="form" name="customerRegistration" method="POST" action="RegisterCustomer" enctype="multipart/form-data">
+<form role="form" name="customerRegistration" method="POST" action="CustomerRegistration" enctype="multipart/form-data">
   
     <input type="hidden" name="customer_id" value="" />
     <input type="hidden" name="agent_id" id="agent_id" value="21" />
@@ -226,38 +226,32 @@
                             </div>
                             </fieldset>
                         </div>
-                         <div class="col-md-4">
-                             <div class="row">
-                             <div class="row text-center" id="imgholder">
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group text-center">
-                            
-                              <img <c:if test="${customer.photoPath != null && customer.photoPath != "default"}"> src="/uploads/NeoForce/images/customer/${customer.photoPath}" </c:if>
-                               <c:if test="${customer.photoPath == "default"  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"</c:if>
-                                class=" img-responsive text-center" style="max-height:220px !important;"/>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group">
-                              <div class="btn-group btn-group-xs">
-                                  <div class="btn btn-primary btn-file">
-                      Change <span title="Change Profile Picture" class="glyphicon glyphicon-edit"></span> 
-                      <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
-                      <input type="hidden" name="customerPhotoHidden" 
-                           <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value=""
-                    </c:if><c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"
-                    </c:if> <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"
-                    </c:if> />
-                    </div>
-                                  
-                              </div>
-                                
-                            </div>
-                        </div>
-                    </div>
+                         
                     
-                  </div>
                          </div>
+                          <div class="row">
+                              
+                              <div class="col-md-4">
+                                 <fieldset>
+                                    <div class="col-md-6" style="padding-top:0px">
+
+                                        <div class="form-group">
+                                          <div class="btn-group btn-group-xs">
+                                              <label for="customerPhoto">Customer Photo</label>
+                                              <div class="btn btn-primary">
+                                                <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
+                                                <input type="hidden" name="customerPhotoHidden" />
+                                              </div>
+                                          </div>
+
+                                        </div>
+
+                                    </div>
+                                 </fieldset>
+                             
+                            </div>
+
+                          </div>
                     </div>
                     
                    
@@ -368,7 +362,7 @@
                     
                     <div class="row" style="padding-top:10px;">
                     <div class="col-md-12">
-                                <fieldset>
+                        <fieldset>
                             <legend style="padding-left:20px !important;">Next of Kin</legend>
                             <div class="col-md-12">
                             
@@ -393,52 +387,50 @@
                                 </div>
                             </div>
                             </div>
-                            <div class="col-md-12">
-                                <div  class="row">
-                             <div class="col-md-4" >
-                                    <div class="row" >
-                            <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
-                              <label for="customerKinPhoto" style="">Next of Kin Picture</label>
-                              <c:if test="${customer.customerId != ""}"> 
-                               <img <c:if test="${customer.kinPhotoPath != null && customer.kinPhotoPath != "default"}"> src="/uploads/NeoForce/images/customerKin/${customer.kinPhotoPath}" </c:if>
-                               <c:if test="${customer.photoPath == "default"  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"
-                                </c:if>
-                                class="img-responsive text-center" width="50.33333333%"/>
-                                </c:if>
-                               <input type="file" class="form-control" id="customerKinPhoto" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" />
-                               <input type="hidden" name="customerKinPhotoHidden" 
-                           <c:if test="${customerKinPhotoHidden == null && customer.kinPhotoPath==null}"> value=""
-                    </c:if><c:if test="${customerKinPhotoHidden != null}"> value="${customerKinPhotoHidden}"
-                    </c:if> <c:if test="${customer.kinPhotoPath != null}"> value="${customer.kinPhotoPath}"
-                    </c:if> />
+                        <div class="row" >
+                            <div class="col-md-6">
+                                    
+                                        <div class="form-group" style="padding-left:25px !important;">
+                                          <label for="customerKinAddress" style="">Next of Kin Address</label>
+                                           <input type="text" class="form-control" id="customerKinAddress" name="customerKinAddress" placeholder="Enter Kin Address" style="  width:100%;"
+                                                  value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinAddress}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinAddress}"</c:if> "/>
+                                                  <br/>
+                                        </div>
+                                    
                             </div>
-                                </div>
+                         </div>    
+                                                  
+                            <div  class="row">
+                                    <div class="col-md-4" style="padding-top:0px;padding-left:25px !important;" >
+                                     
+                                            <div class="form-group" >
+                                                <div class="btn-group btn-group-xs">  
+                                                  <label for="customerKinPhoto" style="">Next of Kin Picture</label>
+                                                  <div class="btn btn-primary">
+                                                   <input type="file" id="customerKinPhoto" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" />
+                                                   <input type="hidden" name="customerKinPhotoHidden" />
+                                                  </div>
+                                                </div>
+                                            </div>
+
+                                    </div>
                             </div>
-                                    <div class="col-md-2" style="padding-right:50% !important;"></div>
-                                <div class="col-md-6 " >
-                                    <div class="row" >
-                            <div class="form-group" style="padding-left:25px !important;">
-                              <label for="customerKinAddress" style="">Next of Kin Address</label>
-                               <input type="text" class="form-control" id="customerKinAddress" name="customerKinAddress" placeholder="Enter Kin Address" style="  width:100%;"
-                                      value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinAddress}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinAddress}"</c:if> "/>
-                                      <br/>
-                            </div>
-                                </div>
-                            </div>
-                                </div>
-                            </div>
-                                </fieldset>
+                                                  
+                        
+                        </fieldset>
                     </div>
-                         </div>
+                    </div>
+                                                  
+                    <div class="col-md-12">
+                        <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Process to Order <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+        </div>
                  
                          
-      </div><!-- /.box -->
       
       
-      <div class="col-md-12">
-          <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Process to Order <i class="fa fa-long-arrow-right"></i></a>
-      </div>
- </div><!-- /.box -->
+      
+      
                     
                     
  <div class="row" id="step2" style="display:none">
@@ -646,7 +638,8 @@
                    </tbody>
                    
                   </table>
-                                    
+                     
+                  <input type="hidden" id="CartActualSum" value="" />              
                  </div>                   
                  <!-- 
                    ***************************
@@ -670,155 +663,156 @@
       </div>
     </div> 
                         
-                         <div class="col-md-12" id="paymentCheckout">
-                      
-                    	<fieldset>
-                        <legend style="padding-left:20px !important;">Check Out</legend>
+         <div class="col-md-12" id="paymentCheckout">
+
+                <fieldset>
+        <legend style="padding-left:20px !important;">Check Out</legend>
+
+            <div class="col-md-12" >
+
+                <!-- Start of Payment Method Container -->
+                <div class="row" > 
+                    <div class="col-md-12">
+                        <span style="color:green;font-weight:bold;">You'd be paying <span id='paySum'></span></span>
+                        <div class="form-group">
+                            <label for="paymentMethod">Payment method:</label><br/>
+                            <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
+
+                            <input type="radio" name="paymentMethod" value="2" id="paywithcard" onclick="showNecessaryMenu(2)"/>&nbsp; <label for="paywithcard" style="display:inline !important;cursor:pointer !important;">Credit/Debit Card <img src="${pageContext.request.contextPath}/images/img/paywithcard.png" /></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                            <input type="radio" name="paymentMethod" value="3" id="paywithcash" onclick="showNecessaryMenu(3)"/>&nbsp;<label for="paywithcash" style="display:inline !important;"> Cash</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="radio" name="paymentMethod" value="4" id="bankTransfer" onclick="showNecessaryMenu(4)"/>&nbsp; <label for="bankTransfer" style="display:inline !important;cursor:pointer !important;">Bank Transfer </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="companyAccount">Company Account</label>
+                            <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
+                                <option value="">--Select Account--</option>
+                                <c:forEach items="${companyAccount}" var="CA">
+                                    <option value="${CA.getId()}">${CA.getAccountName()}</option>
+                                </c:forEach>
+                            </select>
+                        </div> 
+                    </div>
+                </div>
+                <!-- End of Payment Method Container -->        
+
+                 <!-- Pay via Bank Deposit Div Container -->            
+                <div class='row' id='pwBankdeposit'>
+
+
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="depositorsName">Depositor's Name</label>
+                            <input type="text" class="form-control" id="depositorsName" name="depositorsName" style="width: 100%;">
+                        </div> 
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="tellerNumber">Teller Number</label>
+                            <input type="text" class="form-control" id="tellerNumber" name="tellerNumber" style="width: 100%;">
+                        </div> 
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="tellerAmount">Amount</label>
+                            <input type="text" class="form-control amount-box" id="tellerAmount" name="tellerAmount" style="width: 100%;">
+                        </div>      
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group" style="padding-top:25px !important;">
+                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge"/>
+                        </div>      
+                    </div>
+
+                </div>
+                <!-- End of Pay Via Bank Deposit Div Container -->
+
+
+                <!-- Pay with Cash Div Container -->
+                <div class='row' id='pwCash'>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="cashAmount">Amount</label>
+                            <input type="text" class="form-control amount-box" id="cashAmount" name="cashAmount" style="width: 100%;">
+                        </div>      
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group" style="padding-top:25px !important;">
+                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge" style="vertical-align:bottom !important;"/>
+                        </div>      
+                    </div>
+                </div>
+                <!-- End of Pay with Cash Div Container -->
+
+
+
+                 <!-- Pay with Card Div Container -->
+                <div class='row' id='pwCard'>
+
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="tellerNumber">Amount</label>
+                                <input type="text" class="amount-box form-control" name="cardAmount" />
+                            </div>
+                            <div class="form-group">
+                                <label for="tellerNumber">Click to proceed to payment</label>
+                                <!--<a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
+                                --> <button type="submit"  name="Pay" class="btn btn-success"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
+                            </div> 
+                        </div>
+                </div>
+                <!-- End of Pay with Card Div Container -->
+
+                 <!-- Pay with Card Div Container -->
+                <div class='row' id='pwBankTransfer'>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="bankName">Depositor's Bank Name</label>
+                            <input type="text" class="form-control" id="transfer_bankName" name="transfer_bankName" style="width: 100%;">
+                        </div> 
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="accountNo">Depositor's Account No</label>
+                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
+                        </div> 
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="accountNo">Depositor's Account Name</label>
+                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
+                        </div> 
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="tellerAmount">Amount</label>
+                            <input type="text" class="form-control amount-box" id="transfer_amount" name="transfer_amount" style="width: 100%;">
+                        </div>      
+                    </div>
+
+                    <div class="col-md-1">
+                        <div class="form-group" style="padding-top:25px !important;">
+                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge"/>
+                        </div>      
+                    </div>
+                </div>
+                <!-- End of Pay with Cash Div Container -->
+
+              </div>
+        </fieldset>
                                 
-                            <div class="col-md-12" >
-                            	
-                                <!-- Start of Payment Method Container -->
-                                <div class="row" > 
-                                    <div class="col-md-12">
-                                        <span style="color:green;font-weight:bold;">You'd be paying N<span id='paySum'></span></span>
-                                    	<div class="form-group">
-                                            <label for="paymentMethod">Payment method:</label><br/>
-                                            <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
-                                            
-                                            <input type="radio" name="paymentMethod" value="2" id="paywithcard" onclick="showNecessaryMenu(2)"/>&nbsp; <label for="paywithcard" style="display:inline !important;cursor:pointer !important;">Credit/Debit Card <img src="${pageContext.request.contextPath}/images/img/paywithcard.png" /></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                           
-                                            <input type="radio" name="paymentMethod" value="3" id="paywithcash" onclick="showNecessaryMenu(3)"/>&nbsp;<label for="paywithcash" style="display:inline !important;"> Cash</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                            <input type="radio" name="paymentMethod" value="4" id="bankTransfer" onclick="showNecessaryMenu(4)"/>&nbsp; <label for="bankTransfer" style="display:inline !important;cursor:pointer !important;">Bank Transfer </label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-3">
-                                    	<div class="form-group">
-                                            <label for="companyAccount">Company Account</label>
-                                            <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
-                                                <option value="">--Select Account--</option>
-                                                <c:forEach items="${companyAccount}" var="CA">
-                                                    <option value="${CA.getId()}">${CA.getAccountName()}</option>
-                                                </c:forEach>
-                                            </select>
-                                        </div> 
-                                    </div>
-                                </div>
-                                <!-- End of Payment Method Container -->        
-                                            
-                                 <!-- Pay via Bank Deposit Div Container -->            
-                                <div class='row' id='pwBankdeposit'>
-                                    
-                                    
-                                    
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="depositorsName">Depositor's Name</label>
-                                            <input type="text" class="form-control" id="depositorsName" name="depositorsName" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                                    
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="tellerNumber">Teller Number</label>
-                                            <input type="text" class="form-control" id="tellerNumber" name="tellerNumber" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                             
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="tellerAmount">Amount</label>
-                                            <input type="text" class="form-control amount-box" id="tellerAmount" name="tellerAmount" style="width: 100%;">
-                                        </div>      
-                                    </div>
-                                    
-                                    <div class="col-md-2">
-                                    	<div class="form-group" style="padding-top:25px !important;">
-                                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge"/>
-                                        </div>      
-                                    </div>
-                                    
-                                </div>
-                                <!-- End of Pay Via Bank Deposit Div Container -->
-                                
-                                
-                                <!-- Pay with Cash Div Container -->
-                                <div class='row' id='pwCash'>
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="cashAmount">Amount</label>
-                                            <input type="text" class="form-control amount-box" id="cashAmount" name="cashAmount" style="width: 100%;">
-                                        </div>      
-                                    </div>
-                                    <div class="col-md-2">
-                                    	<div class="form-group" style="padding-top:25px !important;">
-                                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge" style="vertical-align:bottom !important;"/>
-                                        </div>      
-                                    </div>
-                                </div>
-                                <!-- End of Pay with Cash Div Container -->
-                                
-                                
-                               
-                                 <!-- Pay with Card Div Container -->
-                                <div class='row' id='pwCard'>
-                                    
-                                        
-                                	<div class="col-md-2">
-                                            <div class="form-group">
-                                                <label for="tellerNumber">Amount</label>
-                                                <input type="text" class="amount-box form-control" name="cardAmount" />
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="tellerNumber">Click to proceed to payment</label>
-                                                <!--<a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
-                                                --> <button type="submit"  name="Pay" class="btn btn-success"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
-                                            </div> 
-                                        </div>
-                                </div>
-                                <!-- End of Pay with Card Div Container -->
-                                
-                                 <!-- Pay with Card Div Container -->
-                                <div class='row' id='pwBankTransfer'>
-                                    <div class="col-md-3">
-                                    	<div class="form-group">
-                                            <label for="bankName">Depositor's Bank Name</label>
-                                            <input type="text" class="form-control" id="transfer_bankName" name="transfer_bankName" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                                    
-                                    <div class="col-md-3">
-                                    	<div class="form-group">
-                                            <label for="accountNo">Depositor's Account No</label>
-                                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                                    
-                                    <div class="col-md-3">
-                                    	<div class="form-group">
-                                            <label for="accountNo">Depositor's Account Name</label>
-                                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
-                                        </div> 
-                                    </div>
-                                    
-                                    <div class="col-md-2">
-                                    	<div class="form-group">
-                                            <label for="tellerAmount">Amount</label>
-                                            <input type="text" class="form-control amount-box" id="transfer_amount" name="transfer_amount" style="width: 100%;">
-                                        </div>      
-                                    </div>
-                                    
-                                    <div class="col-md-1">
-                                    	<div class="form-group" style="padding-top:25px !important;">
-                                            <input type="submit"  name="Pay" class="btn btn-success" value="Lodge"/>
-                                        </div>      
-                                    </div>
-                                </div>
-                                <!-- End of Pay with Cash Div Container -->
-                                             
-                              </div>
-                        </fieldset>
-                         </div>
+         </div>
          </div>
                                  
    </div> <!--/.row -->
@@ -923,6 +917,7 @@
     
     <!-- AdminLTE App -->
     <!--<script src="dist/js/app.min.js"></script>-->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/accounting.min.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/app.min.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/functions.js"></script>
 

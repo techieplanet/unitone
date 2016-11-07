@@ -27,6 +27,7 @@
               <!-- Messages: style can be found in dropdown.less-->
 
               <!-- Notifications Menu -->
+              <c:if test="${loggedInUser.getSystemUserTypeId() == 1}">
               <li class="dropdown notifications-menu">
                 <!-- Menu toggle button -->
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -56,7 +57,7 @@
                 
                 </ul>
               </li>
-              
+              </c:if>
               
               <!-- User Account Menu -->
               <li class="dropdown user user-menu">

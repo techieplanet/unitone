@@ -8,7 +8,7 @@
                   <!-- Optionally, you can add icons to the links -->
                   
                   <li class="active"><a href="#"><i class="fa fa-tachometer"></i> <span>Dashboard</span></a></li>
-                  <li class=""><a href="${pageContext.request.contextPath}/Project"><i class="fa fa-home"></i> <span>Projects</span><small class="label pull-right bg-yellow">2</small></a></li>
+                  <li class=""><a href="${pageContext.request.contextPath}/Project"><i class="fa fa-home"></i> <span>Projects</span></a></li>
                   
                   
 
@@ -22,13 +22,13 @@
                                 <li><a href="${pageContext.request.contextPath}/Customer?action=new">New Customer</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=new">Make Lodgement</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=new">Make Lodgement</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=new">Currently Paying</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=current">Currently Paying</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=new">Completed Payment</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=completed">Completed Payment</a></li>
                             </c:if>
                           </ul>
                       </li>
@@ -40,10 +40,9 @@
                         <li class="treeview">
                           <a href="#"><i class="fa fa-users"></i><span>My Wallet</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
-                            <li><a href="${pageContext.request.contextPath}/Agent">Current Balance</a></li>
-                            <li><a href="${pageContext.request.contextPath}/Agent?action=new">Credit History</a></li>
-                            <li><a href="${pageContext.request.contextPath}/Agent?action=wallet">Withdrawal History</a></li>
-                            <li><a href="${pageContext.request.contextPath}/Agent?action=wallet">Withdrawal Funds</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Agent?action=credit_history">Credit History</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Agent?action=debit_history">Withdrawal History</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Agent?action=withdrawal">Withdraw Funds</a></li>
                           </ul>
                       </li>
                   </c:if>

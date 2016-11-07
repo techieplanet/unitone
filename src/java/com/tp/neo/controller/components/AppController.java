@@ -37,7 +37,7 @@ public class AppController extends HttpServlet{
     public static final String defaultEmail = "no-reply@tplocalhost.com";
     
     public Calendar calendar;
-    protected String userType;
+    protected long userType;
     protected SystemUser sessionUser;
     protected String callbackUrRL = "";
     
@@ -48,17 +48,21 @@ public class AppController extends HttpServlet{
     }
     
     public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, java.io.IOException {
-     System.out.println("Inside Service Method");
-      //hasActiveUserSession(req, res, APP_NAME);
+     
+        System.out.println("Inside Service Method");
+        //hasActiveUserSession(req, res);
+        
+        sessionUser = (SystemUser)req.getSession().getAttribute("user");
+        
         req.setAttribute("notifications", getNotifications());
-      
-      sessionUser = (SystemUser)req.getSession().getAttribute("user");
-      
-      super.service(req, res);
+        req.setAttribute("loggedInUser",sessionUser);
+        
+        
+        super.service(req, res);
     }
     
     public void init(ServletConfig config) throws ServletException {
-        super.init(config);       
+        super.init(config);
     }
     
     public boolean hasActiveUserSession(HttpServletRequest request, HttpServletResponse response)
@@ -70,7 +74,10 @@ public class AppController extends HttpServlet{
         log("callbackURL: " + callbackURL);
         session.setAttribute("loginCallback", callbackURL);
         
+        System.out.println("Session User : " +  session.getAttribute("user"));
+        
         if(session.getAttribute("user") == null){
+            System.out.println("User not logged in");
             session.setAttribute("loginCallback", callbackURL);
             String loginPage = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/";
             log("loginPage: " + loginPage);
@@ -94,6 +101,8 @@ public class AppController extends HttpServlet{
     }
        
     public boolean hasActionPermission(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{                
+        System.out.println("Session User in HasPermission  : " + sessionUser);
+        System.out.println("Session User Permissions : " + sessionUser.getPermissions() );
         String[] permissions = sessionUser.getPermissions().split(",");
         log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
         

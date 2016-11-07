@@ -521,7 +521,7 @@ function editDataFromCart(id){
     $("#productMaximumDuration").val(productMaximumDuration);
     $("#monthlyPayPerUnit").text(accounting.formatMoney(monthlyPayPerUnit,"N",2,",","."));
     $("#monthlyPayPerQuantity").text(accounting.formatMoney(monthlyPayPerQuantity,"N",2,",","."));
-    $("#productMinimumMonthlyPayment").val(productMinimumMonthlyPayment.toFixed(2));
+    $("#productMinimumMonthlyPayment").val(productMinimumMonthlyPayment);
     $("#addToCart").val("Update Cart");
     document.getElementById("selectUnit").value = productUnitId;
     $("#pUnitId").val(productUnitId);
@@ -622,11 +622,13 @@ function payLodge(){
 function checkOutOfCart(){
     //allData
     
+    console.log("Before sum calculate")
         
-         calculateSum();
+    calculateSum();
     var sum  = $("#CartActualSum").val();
     $("#paySum").text(accounting.formatMoney(sum,"N",2,",","."));
     if(sum==0 || sum==null){
+        console.log("Sum is null/0, Sum = " + sum)
         return false;
     }
     $('#productCart > tbody').focus();

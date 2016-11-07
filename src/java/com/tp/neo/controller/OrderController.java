@@ -23,6 +23,7 @@ import com.tp.neo.controller.helpers.SaleItemObject;
 import com.tp.neo.controller.helpers.SaleItemObjectsList;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.MailSender;
@@ -190,6 +191,19 @@ public class OrderController extends AppController {
             viewFile = ORDER_APPROVAL; 
             approveSingleOrder(request,response);
             
+        }
+        else if(action.equalsIgnoreCase("getOrder")){
+            
+            getOrder(request, response);
+            return;
+        }
+        else if(action.equalsIgnoreCase("current")){
+            
+            request.setAttribute("orders", listCurrentOrders());
+        }
+        else if(action.equalsIgnoreCase("completed")){
+            
+            request.setAttribute("orders", listCompletedOrders());
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("list_orders")){
             viewFile = ORDER_ADMIN;
@@ -420,7 +434,77 @@ public class OrderController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Query jplQuery = em.createNamedQuery("ProductOrder.findAll");
+        String queryString = "ProductOrder.findAll";
+        Query jplQuery;
+        
+        //Check if user is an Agent, fetch orders made by the user
+        
+        if(sessionUser.getSystemUserTypeId() == 2){
+            queryString = "ProductOrder.findByAgent";
+            jplQuery = em.createNamedQuery(queryString);
+            jplQuery.setParameter("agent", (Agent)sessionUser);
+        }
+        else{
+            //if user is an admin, detch all orders
+            jplQuery = em.createNamedQuery(queryString);
+        }
+        
+        
+        List<ProductOrder> orderList = jplQuery.getResultList();
+        
+        emf.getCache().evictAll();
+        
+        return orderList;
+    }
+    
+    public List<ProductOrder> listCurrentOrders() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        String queryString = "ProductOrder.findByCurrentPaying";
+        Query jplQuery;
+        
+        //Check if user is an Agent, fetch orders made by the user
+        
+        if(sessionUser.getSystemUserTypeId() == 2){
+            queryString = "ProductOrder.findByAgentCurrentPaying";
+            jplQuery = em.createNamedQuery(queryString);
+            jplQuery.setParameter("agent", (Agent)sessionUser);
+        }
+        else{
+            //if user is an admin, detch all orders
+            jplQuery = em.createNamedQuery(queryString);
+        }
+        
+        
+        List<ProductOrder> orderList = jplQuery.getResultList();
+        
+        
+        
+        return orderList;
+    }
+    
+    
+    public List<ProductOrder> listCompletedOrders() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        String queryString = "ProductOrder.findByCompleted";
+        Query jplQuery;
+        
+        //Check if user is an Agent, fetch orders made by the user
+        
+        if(sessionUser.getSystemUserTypeId() == 2){
+            queryString = "ProductOrder.findByAgentCompleted";
+            jplQuery = em.createNamedQuery(queryString);
+            jplQuery.setParameter("agent", (Agent)sessionUser);
+        }
+        else{
+            //if user is an admin, detch all orders
+            jplQuery = em.createNamedQuery(queryString);
+        }
+        
+        
         List<ProductOrder> orderList = jplQuery.getResultList();
         
         
@@ -601,36 +685,58 @@ public class OrderController extends AppController {
         }
    }
    
-   private List<ProductOrder> testAction(){
+   private void getOrder(HttpServletRequest request, HttpServletResponse response) throws IOException{
        
-       EntityManagerFactory emf =  Persistence.createEntityManagerFactory("NeoForcePU");
+       EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
        EntityManager em = emf.createEntityManager();
        
-       System.out.println("Entered Test Zone");
+       Gson gson = new GsonBuilder().create();
        
-       String q = "SELECT p FROM ProductOrder p "
-
-                    + "JOIN p.orderItemCollection q "
-
-                    + "JOIN q.lodgementItemCollection r "
-
-                    + "WHERE r.approvalStatus = :aps "
-
-                    + "GROUP BY p.id "
-
-                    + "ORDER  BY p.id";
-
-        TypedQuery<ProductOrder> orders =  em.createQuery(q, ProductOrder.class).setParameter("aps", 1);
-
-        List<ProductOrder> ordersList = orders.getResultList();
-
-        return ordersList;
-//        for(ProductOrder order : ordersList){
-//
-//            System.out.println("Order Id: " + order.getId());
-//            System.out.println("Product Order" + order);
-//        }
+       Long orderId = Long.parseLong(request.getParameter("order_id"));
+       
+       ProductOrder productOrder = em.find(ProductOrder.class, orderId);
+       List<OrderItem> orderItemList = (List)productOrder.getOrderItemCollection();
+       
+       List<Map> orderItemMap = new ArrayList();
+      
+       
+       for(OrderItem item : orderItemList){
+           Map<String,String> map = new HashMap(); 
+           
+           map.put("id", item.getId().toString());
+           map.put("quantity", item.getQuantity().toString());
+           map.put("initialDeposit", item.getInitialDep().toString());
+           map.put("cpu", item.getUnit().getCpu().toString());
+           map.put("title", item.getUnit().getTitle());
+           map.put("total_paid", (getTotalItemPaidAmount((List)item.getLodgementItemCollection())).toString());
+           map.put("project_name", item.getUnit().getProject().getName());
+           
+           orderItemMap.add(map);
+       }
+       
+       String payLoad = gson.toJson(orderItemMap);
+       
+       System.out.println("Order : " + payLoad);
+       
+       response.setContentType("text/plain");
+       response.setCharacterEncoding("UTF-8");
+       response.getWriter().write(payLoad);
+       response.getWriter().flush();
+       response.getWriter().close();
    }
+   
+   private Double getTotalItemPaidAmount(List<LodgementItem> lodgementItem){
+       
+       double totalAmount = 0.00;
+       
+       for(LodgementItem item : lodgementItem){
+           totalAmount += item.getAmount();
+       }
+       
+       return totalAmount;
+   }
+   
+   
     
 
 }
