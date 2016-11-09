@@ -702,14 +702,17 @@ public class OrderController extends AppController {
        
        for(OrderItem item : orderItemList){
            Map<String,String> map = new HashMap(); 
+           Double total_paid = getTotalItemPaidAmount((List)item.getLodgementItemCollection());
            
            map.put("id", item.getId().toString());
            map.put("quantity", item.getQuantity().toString());
            map.put("initialDeposit", item.getInitialDep().toString());
            map.put("cpu", item.getUnit().getCpu().toString());
            map.put("title", item.getUnit().getTitle());
-           map.put("total_paid", (getTotalItemPaidAmount((List)item.getLodgementItemCollection())).toString());
+           map.put("discount", getOrderItemDiscount(item.getUnit().getDiscount(), item.getUnit().getCpu(), item.getQuantity()));
+           map.put("total_paid", total_paid.toString());
            map.put("project_name", item.getUnit().getProject().getName());
+           map.put("balance",getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
            
            orderItemMap.add(map);
        }
@@ -736,7 +739,15 @@ public class OrderController extends AppController {
        return totalAmount;
    }
    
+   private String getOrderItemBalance(double amtPayable, int qty, double amountPaid){
+       
+       return ((Double)((amtPayable * qty) - amountPaid)).toString();
+   }
    
+   private String getOrderItemDiscount(double discountPercent, double cpu, int qty){
+       
+       return ((Double)((discountPercent / 100 ) * (cpu * qty))).toString();
+   }
     
 
 }

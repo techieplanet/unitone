@@ -521,6 +521,7 @@ public class CustomerController extends AppController  {
         if (action.equalsIgnoreCase("new")){
                viewFile = CUSTOMER_NEW;
                request.setAttribute("userTypeId", userType);
+               request.setAttribute("userType",sessionUser.getSystemUserId());
                request.setAttribute("agents", agent.listAgents());
                request.setAttribute("projects", project.listProjects());
                request.setAttribute("action","new");
@@ -547,6 +548,7 @@ public class CustomerController extends AppController  {
 //            
             request.setAttribute("customer", customerList.get(0));
             request.setAttribute("action","edit");
+            request.setAttribute("userType",sessionUser.getSystemUserId());
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = CUSTOMER_ADMIN;

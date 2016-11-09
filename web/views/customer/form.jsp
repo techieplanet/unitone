@@ -187,6 +187,7 @@
                                   <div class="form-group" style="padding-left:10px !important;">
                                       <label for="customerFirstname">First Name</label>
                                       <input type="text"  name="customerFirstname" class="form-control" id="customerFirstname" placeholder="First Name" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if>    
                                          value=<c:if test="${fn:length(errors) > 0 }">"${param.customerFirstname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.firstname}"</c:if> "/>
                                              
                                     </div>
@@ -197,6 +198,7 @@
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="customerMiddlename">Middle Name</label>
                                       <input type="text" class="form-control" id="customerMiddlename" name="customerMiddlename" placeholder="Middle Name"
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerMiddlename}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.middlename}"</c:if> "/>
                                              
                                     </div>
@@ -207,6 +209,7 @@
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="customerLastname">Last Name</label>
                                       <input type="text" class="form-control" name="customerLastname" id="customerLastname" placeholder="Last Name" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                          value=<c:if test="${fn:length(errors) > 0 }">"${param.customerLastname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.lastname}"</c:if> "/>
                                              
                                     </div>
@@ -224,6 +227,7 @@
                             <div class="form-group" style="padding-left:10px !important;padding-right:10px !important">
                               <label for="customerEmail">Email address</label>
                               <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="your@email.com" 
+                                     <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                      value=<c:if test="${fn:length(errors) > 0 }">"${param.customerEmail}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.email}"</c:if> "
                               <c:if test="${customer.customerId !='' && customer.customerId != null }">readonly="true"</c:if>
                               />
@@ -301,6 +305,7 @@
                             <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
                             <label for="customerStreet">Street</label>
                                 <input type="text" class="form-control" id="customerStreet" name="customerStreet" placeholder="Street"  
+                                       <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.street}"</c:if> "
                                        />
                             </div>
@@ -311,6 +316,7 @@
                             <label for="customerCity">City</label>
                               
                                 <input type="text" class="form-control" id="customerCity" name="customerCity" placeholder="City"  
+                                       <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.city}"</c:if> "
                                        />
                                   
@@ -323,7 +329,7 @@
                         <div class="col-md-4">
                             <div class="form-group" style="margin-right:24px !important;padding-left:20px !important;"  />
                               <label for="customerState">State</label>
-                              <select class="form-control" id="customerState" name="customerState"  >
+                              <select class="form-control" id="customerState" name="customerState" <c:if test='${action == "edit" && userType > 1}'>disabled="disabled"</c:if>  >
                                     <option value="">--choose--</option>
                                     
                                     <option value="ABUJA FCT" <c:if test="${state == "ABUJA FCT"}"> <jsp:text>selected</jsp:text> </c:if>>ABUJA FCT</option>
@@ -377,6 +383,7 @@
                             <label for="customerPhone">Phone Number</label>
                                
                                 <input type="tel" class="form-control" id="customerPhone" name="customerPhone" placeholder="Phone Number" 
+                                       <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.phone}"</c:if> "/>
                                     
                             </div>
@@ -402,6 +409,7 @@
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="customerKinNames">Next of Kin Name</label>
                                       <input type="text" class="form-control" id="customerKinNames" name="customerKinName" placeholder="Enter Kin Name"  
+                                          <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                           value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinName}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinName}"</c:if> "/>
                                             
                                     </div>
@@ -411,6 +419,7 @@
                                     <label for="customerKinPhone">Next of Kin Phone Number</label>
                                        
                                         <input type="tel" class="form-control" id="customerKinPhone" name="customerKinPhone" placeholder="Enter Kin Phone Number" 
+                                               <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                                value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinPhone}"</c:if> "/>
                                               
                                             
@@ -445,6 +454,7 @@
                             <div class="form-group" style="padding-left:25px !important;">
                               <label for="customerKinAddress" style="">Next of Kin Address</label>
                                <input type="text" class="form-control" id="customerKinAddress" name="customerKinAddress" placeholder="Enter Kin Address" style="  width:100%;"
+                                      <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinAddress}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinAddress}"</c:if> "/>
                                       <br/>
                             </div>
@@ -465,7 +475,9 @@
       
       <c:if test="${action == 'edit'}">
           <div class="col-md-12">
+              <c:if test="${userType == 1}">
               <button class="btn btn-success btn-lg" type="submit">Update</button>
+              </c:if>
           </div>
       </c:if>
       <c:if test="${action == 'new'}">
@@ -478,23 +490,19 @@
 <c:if test="${customer.customerId=='' || customer.customerId== null}">
                     
                     
-             <div class="row" id="step2" style="display:none">
+<div class="row" id="step2" style="display:none">
     
                <div class="col-md-12">
               <!-- general form elements -->
-               <div class="box box-primary">
+               <div class="box box-primary" id="productCartBox">
                
                 <div class="box-header with-border">
-                  <h3 class="box-title">Product Order Form 
-                      
-                      
-                  </h3>
+                  <h3 class="box-title">Product Order Form</h3>
                 </div><!-- /.box-header -->
                 <!-- form start -->
                 <div style="background:#ecf0f5 !important;">
                 <!--<form role="form" name="customerRegistration" method="POST" action="Order" enctype="multipart/form-data">-->
                   <div class="box-body">
-          
                   <div class="row">
                   <div class="col-md-12">
                   <div class="box box-default">
@@ -659,7 +667,7 @@
       <fieldset>
       <legend style="padding-left:20px !important;">Product Cart</legend>
                                 
-              <div class="col-md-11" >
+              <div class="col-md-12" >
                 <div class="row" >
                  <table id="productCart" class="table table-bordered table-striped table-hover" style="text-align:right !important;">
                     <thead>
@@ -678,6 +686,11 @@
                         
                       </tr>
                     </thead>
+                    <tbody>
+                       
+                            
+                        
+                   </tbody>
                     <tfoot style="text-align:right !important;color:green !important; font-weight:bold !important;">
                       <tr>
                         <th colspan="8" align="right" style="text-align:right !important;">Total</th>
@@ -688,11 +701,6 @@
                         
                       </tr>
                     </tfoot>
-                    <tbody>
-                       
-                            
-                        
-                   </tbody>
                    
                   </table>
                                     
@@ -702,12 +710,7 @@
                    Checkout Button starts Here
                    ***************************
                  -->
-                 <div class="col-md-1 pull-right">
-                     <div class="form-group">
-                        <a href="#" class="btn" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i>Checkout</a>
-                    </div> 
-
-                 </div>
+                 
                  
                  <!--
                   ****************************
@@ -716,6 +719,12 @@
                  -->
                      </div>
                    </div>  
+                   <div class="col-md-2 pull-right">
+                     <div class="form-group">
+                        <a href="#" class="btn" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i>Checkout</a>
+                    </div> 
+
+                 </div>
                  <div class="col-md-1"></div>
                </fieldset>
               </div> 

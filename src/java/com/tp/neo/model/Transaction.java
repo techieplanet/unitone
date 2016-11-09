@@ -51,7 +51,7 @@ public class Transaction implements Serializable {
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "transaction_date")
-    @Temporal(TemporalType.TIME)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date transactionDate;
     @JoinColumn(name = "credit_account", referencedColumnName = "id")
     @ManyToOne

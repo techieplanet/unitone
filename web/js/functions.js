@@ -620,29 +620,31 @@ function payLodge(){
 
 /*TP: CHeck of the cart*/
 function checkOutOfCart(){
-    //allData
     
     console.log("Before sum calculate")
         
     calculateSum();
+    
     var sum  = $("#CartActualSum").val();
     $("#paySum").text(accounting.formatMoney(sum,"N",2,",","."));
+    
     if(sum==0 || sum==null){
         console.log("Sum is null/0, Sum = " + sum)
         return false;
     }
+    
     $('#productCart > tbody').focus();
+    
     var cartDataArray = {};
-     var data = new Array();
-       var dataArray  = "";
-       var id = "";
-       var dataCenter = [];
-       var i = 0;
+    var data = new Array();
+    var dataArray  = "";
+    var id = "";
+    var dataCenter = [];
+    var i = 0;
+    
     $('#productCart > tbody  > tr').each(function() {
           id = $(this).attr("id");
-         dataArray = $("#tr"+id).val();
-         //dataCenter.push(dataArray);
-         
+         dataArray = $("#tr"+id).val(); 
     });
     
     cartDataArray.sales = cartArray;
@@ -650,14 +652,8 @@ function checkOutOfCart(){
     
     var cartDataArrays = JSON.stringify(cartDataArray);
     
-//    cartDataArrays = cartDataArrays.replace('"{','{');
-//    cartDataArrays = cartDataArrays.replace('}"','}');
-//    cartDataArrays = cartDataArrays.replace('"sales"','sales');
     $("#cartDataJson").val(cartDataArrays);
-    alert(cartDataArrays);
     $("#paymentCheckout:hidden").toggle();
-    //$("#shoppingCart:visible").toggle();
-    
     
     $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
     $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
@@ -869,42 +865,43 @@ setTimeout(function(){
 
 /*TP: Get the project units*/
 function getProjectUnits(appName, entityName){
-   // alert(punit);
-   //url = appName + '/' + entityName;
+        
     $("#addToCart").attr("disabled",false);
+    
     var id =  $('#selectProduct').val();
-     url = appName + '/' + entityName;
-    console.log("URL: " + url);
-resetForm();
+    url = appName + '/' + entityName;
+    resetForm();
+    
+    //Start Loader
+    appendLoadingState("#productCartBox");
+    
     $.ajax({
        type : 'GET',
        url : url,
        data : {project_id:id, action:'punits'},
        success: function(data){
            
-           alert(data);
            var resp = JSON.parse(data);
            $('#selectUnit').empty();
            $('#selectUnit').append($('<option>', {value: "",text: "-- choose --"}));
 
            $.each( resp, function( key, value ) {
-          // $('#selectUnit').empty();
-          //alert(value);
 
-           $('#selectUnit').append($('<option>', {
-            value: value.id,
-            text: value.title,
+                   $('#selectUnit').append($('<option>', {
+                    value: value.id,
+                    text: value.title,
 
 
-        }));
+                }));
 
         });
 
            console.log("Loading project Units Successful");
-
+            removeLoadingState();
        },
        error: function(){
            console.log("Loading Project Units NOT Successful");
+           removeLoadingState();
        }
     });
     
@@ -912,17 +909,22 @@ resetForm();
 
 /*TP: Get the project quantity*/
 function getProjectQuantity(appName, entityName){
+    
     $("#addToCart").attr("disabled",false);
+    
     var id =  $('#selectUnit').val();
+    
     if(id== null || id==""){
         id = $("#pUnitId").val();
     }
     
     
-     url = appName + '/' + entityName;
+    url = appName + '/' + entityName;
     console.log("URL: " + url);
-//    alert(id);
-//    alert(url);
+    
+    //Start Loader
+    appendLoadingState("#productCartBox");
+    
     $.ajax({
        type : 'GET',
        url : url,
@@ -939,25 +941,22 @@ function getProjectQuantity(appName, entityName){
         
           
           for(var i=1;i<=resp.quantity;i++){
-              // $('#selectUnit').empty();
+              
                $('#selectQuantity').append($('<option>', {
-    value: i,
-    text: i
-}));
+                    value: i,
+                    text: i
+                }));
           }
+          
           calculateProductAmount();
-          //monthlyPayCalculator();
-       
-               //alert(value.id+"--> "+value.title);
-
-
-           console.log("Loading project Quantities Successful");
-//           $('#deleteModal').modal('hide');
-//           $('#row'+id + ',#row'+id + ' td').addClass("deleting");
-//           $('#row'+id).fadeOut(1500);
+          
+          console.log("Loading project Quantities Successful");
+          removeLoadingState();
+           
        },
        error: function(){
            console.log("Loading Project Quantities NOT Successful");
+           removeLoadingState();
        }
     });
     
@@ -1357,6 +1356,24 @@ function validateCustomerRegForm()
 //    }
     
     return true;
+}
+
+function appendLoadingState(selector){
+    
+    var overlay = document.createElement("div");
+    var loader = document.createElement("i");
+    
+    overlay.setAttribute("class","overlay");
+    loader.setAttribute("class","fa fa-refresh fa-spin");
+    
+    overlay.appendChild(loader);
+    
+    $(selector).append(overlay);
+}
+
+function removeLoadingState(){
+    
+    $(".overlay").remove();
 }
 
    

@@ -64,7 +64,7 @@
                                     </c:if>
                                         
                                     <c:if test="${status == 1 || status == 0}">
-                                        <span class="label label-info">In process</span>
+                                        <span class="label label-info">In progress</span>
                                     </c:if>
                                    
                                     <c:if test="${status == 3}">
@@ -122,7 +122,7 @@
       
       <!--MODAL-->
       <div class="modal fade" id="orderItemsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-lg">
+          <div class="modal-lg">
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -139,8 +139,10 @@
                             <th>Unit Name</th>
                             <th>Qty</th>
                             <th>CPU</th>
+                            <th>Discount</th>
                             <th>Initial Deposit</th>
                             <th>Total Paid</th>
+                            <th>Balance</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -218,8 +220,10 @@
                 tr += "<td>" + items[key].title + "</td>";
                 tr += "<td>" + items[key].quantity + "</td>";
                 tr += "<td>" + accounting.formatMoney(items[key].cpu,"N",2,",",".") + "</td>";
+                tr += "<td>" + accounting.formatMoney(items[key].discount,"N",2,",",".") + "</td>";
                 tr += "<td>" + accounting.formatMoney(items[key].initialDeposit,"N",2,",",".") + "</td>";    
                 tr += "<td>" + accounting.formatMoney(items[key].total_paid,"N",2,",",".") + "</td>";
+                tr += "<td>" + accounting.formatMoney(items[key].balance,"N",2,",",".") + "</td>";
                 
                 tr += "</tr>";
                 
