@@ -12,7 +12,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Orders
+           ${title}
             <!--<small>Optional description</small>-->
           </h1>
 <!--          <ol class="breadcrumb">
@@ -38,7 +38,7 @@
                   <table id="entitylist" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
-                        <th>ID</th>
+                        <th>S/N</th>
                         <th>Customer Name</th>
                         <th>Agent Name</th>
                         <th>Customer Phone No</th>
@@ -48,10 +48,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                        <c:forEach items="${orders}" var="order">
+                        <c:forEach items="${orders}" var="order" varStatus="pointer">
                             <tr id="row<c:out value="${order.id}" />">
                                 
-                                <td><c:out value="${order.getId()}" /></td>
+                                <td><c:out value="${pointer.count}" /></td>
                                 <td><c:out value="${order.getCustomer().getLastname()} ${order.getCustomer().getFirstname()} " /></td>
                                 <td><c:out value="${order.getAgent().getLastname()} ${order.getAgent().getFirstname()} " /></td>
                                 <td><c:out value="${order.getCustomer().getPhone()}" /></td>
@@ -59,17 +59,27 @@
                                 <td>
                                     <c:set value="${order.getApprovalStatus()}" var="status"/>
                                     
-                                     <c:if test="${status == 2}">
-                                        <span class="label label-success">Completed</span>
+                                        
+                                    <c:if test="${status == 0}">
+                                        <span class="label label-warning">UnAttended</span>
+                                    </c:if>
+                                    
+                                    <c:if test="${status == 1}">
+                                        <span class="label label-info">In Progress</span>
+                                    </c:if>    
+                                   
+                                    <c:if test="${status == 2 && order.getMortgageStatus() == 0}">
+                                        <span class="label label-primary">Approved <i class="fa fa-check"></i></span>
                                     </c:if>
                                         
-                                    <c:if test="${status == 1 || status == 0}">
-                                        <span class="label label-info">In progress</span>
-                                    </c:if>
-                                   
                                     <c:if test="${status == 3}">
                                         <span class="label label-danger">Decline</span>
                                     </c:if>
+                                    
+                                    <c:if test="${status == 2 && order.getMortgageStatus() == 1}">
+                                            <span class="label label-success">Completed</span>
+                                    </c:if>
+                                        
                                 </td>
                                 <td>
                                     <a class="btn btn-primary" onclick="getOrder(event,${order.id})" href="#" role="button">View <i class="fa fa-eye"></i> </a>
@@ -79,7 +89,7 @@
                   </tbody>
                     <tfoot>
                       <tr>
-                        <th>ID</th>
+                        <th>S/N</th>
                         <th>Customer Name</th>
                         <th>Agent Name</th>
                         <th>Customer Phone No</th>
@@ -143,6 +153,7 @@
                             <th>Initial Deposit</th>
                             <th>Total Paid</th>
                             <th>Balance</th>
+                            <th>Completion Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -224,6 +235,7 @@
                 tr += "<td>" + accounting.formatMoney(items[key].initialDeposit,"N",2,",",".") + "</td>";    
                 tr += "<td>" + accounting.formatMoney(items[key].total_paid,"N",2,",",".") + "</td>";
                 tr += "<td>" + accounting.formatMoney(items[key].balance,"N",2,",",".") + "</td>";
+                tr += "<td>" + items[key].completionDate + "</td>";
                 
                 tr += "</tr>";
                 

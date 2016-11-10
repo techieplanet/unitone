@@ -49,7 +49,7 @@
                         <li class="treeview">
                           <a href="#"><i class="fa fa-users"></i><span>Agents</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
-                            <li><a href="${pageContext.request.contextPath}/Agent">All Agents</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Agent">Approved Agents</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'create_agent')}">
                                 <li><a href="${pageContext.request.contextPath}/Agent?action=new">New Agent</a></li>
                             </c:if>
@@ -68,31 +68,25 @@
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Order">All Orders</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=current">Current Orders</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=approved">Approved</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=completed">Completed Orders</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=declined">Declined</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Order?action=processing">Processing</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Order?action=current">Ongoing Payments</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Order?action=completed">Completed Payments</a></li>
                             </c:if>
                           </ul>
                         </li>
                   </c:if>
                         
-                        
-                  <!--ANNOUNCEMENTS-->
-                  <%--<c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">--%>
-                        <li class="treeview">
-                          <a href="#"><i class="fa fa-users"></i><span>Orders</span><i class="fa fa-angle-left pull-right"></i></a>
-                          <ul class="treeview-menu">
-                            <li><a href="${pageContext.request.contextPath}/Order">All Orders</a></li>
-                            <%--<c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">--%>
-                                <li><a href="${pageContext.request.contextPath}/Order?action=current">Current Orders</a></li>
-                            <%--</c:if>--%>
-                            <%--<c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">--%>
-                                <li><a href="${pageContext.request.contextPath}/Order?action=completed">Completed Orders</a></li>
-                            <%--</c:if>--%>
-                          </ul>
-                        </li>
-                  <%--</c:if>--%>
+                  
                 
                   
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_role')}">

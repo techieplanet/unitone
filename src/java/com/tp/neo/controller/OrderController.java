@@ -30,6 +30,7 @@ import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -54,6 +55,7 @@ import javax.persistence.TypedQuery;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpSession;
+import javax.swing.text.DateFormatter;
 import javax.xml.bind.PropertyException;
 /**
  *
@@ -186,10 +188,12 @@ public class OrderController extends AppController {
             viewFile = ORDER_APPROVAL; 
             request.setAttribute("pendingOrders", listPendingOrders());
             request.setAttribute("singleOrderId",0);
+            request.setAttribute("title","Order Approval");
         }
         else if(action.equals("notification")) {
             viewFile = ORDER_APPROVAL; 
             approveSingleOrder(request,response);
+            request.setAttribute("title","Order Notification");
             
         }
         else if(action.equalsIgnoreCase("getOrder")){
@@ -197,17 +201,35 @@ public class OrderController extends AppController {
             getOrder(request, response);
             return;
         }
+        else if(action.equalsIgnoreCase("approved")){
+            
+            request.setAttribute("orders", listApprovedOrders());
+            request.setAttribute("title","Approved Orders");
+        }
+        else if(action.equalsIgnoreCase("declined")){
+            
+            request.setAttribute("orders", listDeclinedOrders());
+            request.setAttribute("title","Declined Orders");
+        }
+        else if(action.equalsIgnoreCase("processing")){
+            
+            request.setAttribute("orders", listProcessingOrders());
+            request.setAttribute("title","Processing Orders");
+        }
         else if(action.equalsIgnoreCase("current")){
             
             request.setAttribute("orders", listCurrentOrders());
+            request.setAttribute("title","Current Paying Orders");
         }
         else if(action.equalsIgnoreCase("completed")){
             
             request.setAttribute("orders", listCompletedOrders());
+            request.setAttribute("title","Completed Payment Orders");
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("list_orders")){
             viewFile = ORDER_ADMIN;
             request.setAttribute("orders", listOrders());
+            request.setAttribute("title","Orders");
         }
         request.setAttribute("projects", project.listProjects());
         request.setAttribute("customers",customer.listCustomers());
@@ -276,8 +298,13 @@ public class OrderController extends AppController {
             Long customerId = Long.parseLong(request.getParameter("customer_id"));
             customer  = em.find(Customer.class, customerId);
             
+            if(sessionUser.getSystemUserTypeId() == 1){
             long agentId = Long.parseLong(request.getParameter("agent_id"));
             agent = em.find(Agent.class, agentId);
+            }
+            else{
+                agent = em.find(Agent.class, sessionUser.getSystemUserId());
+            }
             
             System.out.println("Customer id :" + customer.getCustomerId() + ", Agent id: " + agent.getAgentId());
             
@@ -456,6 +483,78 @@ public class OrderController extends AppController {
         
         return orderList;
     }
+    
+    private List<ProductOrder> listApprovedOrders(){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<ProductOrder> orders = null;
+        
+        Query query = em.createNamedQuery("ProductOrder.findByApprovalStatus");
+        
+        //check if user is an agent, so you can only show orders related to that agent
+        if(sessionUser.getSystemUserTypeId() == 2){
+            
+            Agent agent = em.find(Agent.class, sessionUser.getSystemUserId());
+            query = em.createNamedQuery("ProductOrder.findByApprovalStatusAgent");
+            query.setParameter("agent", agent);
+        }
+        
+        query.setParameter("approvalStatus", 2);
+        
+        orders = query.getResultList();
+        
+        return orders;
+    }
+    
+     private List<ProductOrder> listDeclinedOrders(){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<ProductOrder> orders = null;
+        
+        Query query = em.createNamedQuery("ProductOrder.findByApprovalStatus");
+        
+        //check if user is an agent, so you can only show orders related to that agent
+        if(sessionUser.getSystemUserTypeId() == 2){
+            
+            Agent agent = em.find(Agent.class, sessionUser.getSystemUserId());
+            query = em.createNamedQuery("ProductOrder.findByApprovalStatusAgent");
+            query.setParameter("agent", agent);
+        }
+        
+        query.setParameter("approvalStatus", 3);
+        
+        orders = query.getResultList();
+        
+        return orders;
+    }
+     
+     private List<ProductOrder> listProcessingOrders(){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<ProductOrder> orders = null;
+        
+        Query query = em.createNamedQuery("ProductOrder.findByProcessing");
+        
+        //check if user is an agent, so you can only show orders related to that agent
+        if(sessionUser.getSystemUserTypeId() == 2){
+            
+            Agent agent = em.find(Agent.class, sessionUser.getSystemUserId());
+            query = em.createNamedQuery("ProductOrder.findByProcessingAgent");
+            query.setParameter("agent", agent);
+        }
+        
+        
+        
+        orders = query.getResultList();
+        
+        return orders;
+    } 
     
     public List<ProductOrder> listCurrentOrders() {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -713,6 +812,7 @@ public class OrderController extends AppController {
            map.put("total_paid", total_paid.toString());
            map.put("project_name", item.getUnit().getProject().getName());
            map.put("balance",getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
+           map.put("completionDate",getCompletionDate(item, total_paid));
            
            orderItemMap.add(map);
        }
@@ -749,5 +849,31 @@ public class OrderController extends AppController {
        return ((Double)((discountPercent / 100 ) * (cpu * qty))).toString();
    }
     
-
+   private String getCompletionDate(OrderItem item, double total_paid){
+       
+       //Get monthly Pay
+       double mortgage = item.getUnit().getMonthlyPay();
+       double balance = Double.parseDouble(getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
+       
+       double months = Math.ceil(balance / mortgage);
+       Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+       
+       if(months <= 0){
+           
+           Date d = item.getOrder().getModifiedDate();
+          cal.setTime(d);
+       }
+       else{
+           
+         cal.add(Calendar.MONTH, (int)months);
+       }
+       
+       System.out.println("Month = " + (int)months);
+       
+       SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy");
+       
+       String date = sdf.format(cal.getTime());
+       
+       return date;
+   }
 }
