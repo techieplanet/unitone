@@ -31,4 +31,27 @@ public class DateFunctions {
         
         return months.intValue();
     }
+    
+    public static Date getDateAfterAddingDays(int numberOfDays){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add( Calendar.DAY_OF_YEAR, numberOfDays);
+        Date newDate = cal.getTime();
+        
+        //LocalDate tenDaysAgo = LocalDate.now().minusDays(10);
+        
+        return newDate;       
+        
+    }
+    
+    public static Date getDateAfterSubtractDays(int numberOfDays){
+        return DateFunctions.getDateAfterAddingDays(-1 * numberOfDays);
+    }
+    
+    public static Date getDateFromValues(int year, int month, int day){
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, month, day);
+        Date newDate = cal.getTime();
+        return newDate;       
+    }
 }

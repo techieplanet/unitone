@@ -453,6 +453,7 @@ public class LodgementController extends AppController {
         request.setAttribute("lodgements", lodgementList);
     }
     
+    
     private void approveLodgement(HttpServletRequest request){
         EntityManagerFactory emf = null;
         EntityManager em = null;

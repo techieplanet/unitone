@@ -52,7 +52,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "OrderItem.findByUncompletedOrder", query = "SELECT o FROM OrderItem o JOIN FETCH o.order po WHERE po.approvalStatus < :approvalStatus"),
     @NamedQuery(name = "OrderItem.findTotalApprovedSum", query = "SELECT SUM(o.quantity * p.cpu)  FROM OrderItem o JOIN o.unit p WHERE o.approvalStatus = :approvalStatus"),
     @NamedQuery(name = "OrderItem.findByUncompletedOrderAndLodgementSum", query = "SELECT item, SUM(l.amount) FROM ProductOrder p JOIN p.orderItemCollection item JOIN item.lodgementItemCollection l " 
-                                                                                    + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps GROUP BY item.id ORDER  BY item.id") })
+                                                                                    + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps GROUP BY item.id ORDER  BY item.id"),
+
+    
+
+    })
 
 
 public class OrderItem extends BaseModel {

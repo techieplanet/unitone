@@ -29,6 +29,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- iCheck for checkboxes and radio inputs -->
     <link rel="stylesheet" href="plugins/iCheck/all.css">
 
+    <!--JQUERY UI CSS-->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery-ui-1.12.1.css" type="text/css" />
     
     <!-- DataTables -->
     <link rel="stylesheet" href="plugins/datatables/dataTables.bootstrap.css">
@@ -51,6 +53,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- jQuery 2.1.4 -->
     <!--<script src="plugins/jQuery/jQuery-2.1.4.min.js"></script>-->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-2.1.4.min.js"></script>
+    
+    
+    <!--JQUERY UI JS-->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.12.1.js"></script>
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
