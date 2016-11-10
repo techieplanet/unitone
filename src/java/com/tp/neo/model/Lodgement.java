@@ -6,6 +6,7 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -266,5 +267,7 @@ public class Lodgement extends BaseModel {
     public void setCreatedByUserType(Short createdByUserType) {
         this.createdByUserType = createdByUserType;
     }
+
+ 
     
 }

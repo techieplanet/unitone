@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Prestige
  */
-@WebServlet(name="RegisterAgent", urlPatterns = {"/RegisterAgent"})
+@WebServlet(name="RegisterAgent", urlPatterns = {"/AgentRegistration"})
 @MultipartConfig
 public class AgentRegistrationController extends HttpServlet {
 

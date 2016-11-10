@@ -31,6 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "LodgementItem.findAll", query = "SELECT l FROM LodgementItem l"),
+    @NamedQuery(name = "LodgementItem.findTotalApprovedOrderSum", query = "SELECT COALESCE(sum(LI.amount),0) FROM LodgementItem LI JOIN LI.item oi where LI.approvalStatus = 1 AND oi.order.id = :orderId"),
     @NamedQuery(name = "LodgementItem.findById", query = "SELECT l FROM LodgementItem l WHERE l.id = :id"),
     @NamedQuery(name = "LodgementItem.findByAmount", query = "SELECT l FROM LodgementItem l WHERE l.amount = :amount"),
     @NamedQuery(name = "LodgementItem.findByCreatedDate", query = "SELECT l FROM LodgementItem l WHERE l.createdDate = :createdDate"),

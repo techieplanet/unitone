@@ -6,8 +6,10 @@
 package com.tp.neo.controller.helpers;
 
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.NotificationType;
+import com.tp.neo.model.ProductOrder;
 import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -38,7 +40,7 @@ public class NotificationsManager {
     }
 
 
-    protected Notification createNewOrderNotification(Customer customer){
+    protected Notification createNewOrderNotification(Customer customer,ProductOrder order){
         String title = String.format("New order for %s %s (%s)", customer.getFirstname(), customer.getLastname(), customer.getAccount().getAccountCode());        
         Notification notification = new Notification();
         notification.setTitle(title);
@@ -46,12 +48,13 @@ public class NotificationsManager {
         notification.setStatus((short)0);
         notification.setCreatedDate(new Date());
         notification.setClearOnClick((short)0);
+        notification.setRemoteId(order.getId());
         notification.setType((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_ORDER").getSingleResult());
         
         return notification;
     }
     
-    protected Notification createNewLodgementNotification(Customer customer){
+    protected Notification setupLodgementNotification(Customer customer,Lodgement lodgement){
         String title = String.format("New Lodgement for %s %s (%s)", customer.getFirstname(), customer.getLastname(), customer.getAccount().getAccountCode());
         
         Notification notification = new Notification();
@@ -61,6 +64,7 @@ public class NotificationsManager {
         notification.setStatus((short)0);
         notification.setCreatedDate(new Date());
         notification.setClearOnClick((short)0);
+        notification.setRemoteId(lodgement.getId());
         notification.setType((NotificationType)em.createNamedQuery("NotificationType.findByAlias").setParameter("alias", "ALERT_NEW_LODGE").getSingleResult());
         
         return notification;

@@ -10,10 +10,12 @@ import com.tp.neo.model.Account;
 import com.tp.neo.model.Transaction;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 /**
  *
@@ -49,6 +51,28 @@ public class TransactionManager {
         em.refresh(transaction);
         
         return transaction;
+    }
+    
+    public List<Transaction> getCreditHistory(Account account){
+        
+        Query jpQl = em.createNamedQuery("Transaction.findByCreditAccount");
+        jpQl.setParameter("creditAccount",account);
+        
+        List<Transaction> creditHistory = jpQl.getResultList();
+        
+        return creditHistory;
+        
+    }
+    
+    public List<Transaction> getDebitHistory(Account account){
+        
+        Query jpQl = em.createNamedQuery("Transaction.findByDebitAccount");
+        jpQl.setParameter("debitAccount",account);
+        
+        List<Transaction> creditHistory = jpQl.getResultList();
+        
+        return creditHistory;
+        
     }
     
     
