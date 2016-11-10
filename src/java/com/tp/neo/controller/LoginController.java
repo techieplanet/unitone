@@ -259,6 +259,8 @@ public class LoginController extends HttpServlet {
             
             HttpSession session = request.getSession();
             SystemUser user = (SystemUser)session.getAttribute("user");
+            
+            if(user != null){
             String userType = session.getAttribute("userType").toString();
                                 
             //do logging here
@@ -275,7 +277,7 @@ public class LoginController extends HttpServlet {
 
             em.persist(auditlog);
             em.getTransaction().commit();
-                
+            }    
             String scheme = request.isSecure() ? "https" : "http";
             String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
             String host = new URI(request.getHeader("host")).toString();

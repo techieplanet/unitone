@@ -19,6 +19,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.xml.bind.PropertyException;
 
@@ -44,7 +45,7 @@ public class LodgementManager {
      * @param orderItems List of items being purchased
      * @return 1 - if all the operations are successful, 0 otherwise
      */
-    public Lodgement processLodgement(Customer customer, Lodgement lodgement, List<LodgementItem> lodgementItems, String applicationContext)
+    public Lodgement processLodgement(Customer customer, Lodgement lodgement, List<LodgementItem> lodgementItems, String applicationContext, ProductOrder order)
     throws PropertyException, RollbackException{
         
         em.getTransaction().begin();
@@ -66,7 +67,7 @@ public class LodgementManager {
         
         //create system notification for the lodgement
         String route =  applicationContext + "/Lodgement?action=notification&id=" + lodgement.getId();
-        Notification notification = new AlertManager().getNotificationsManager(route).createNewLodgementNotification(customer);
+        Notification notification = new AlertManager().getNotificationsManager(route).setupLodgementNotification(customer,lodgement);
         em.persist(notification);
         
         
@@ -126,10 +127,10 @@ public class LodgementManager {
         if(order.getApprovalStatus() == 0){ //unattended, create new order notification
             //this method will handle the process: credit the customer account, create order notification and send new order alerts to admins
             new OrderManager(sessionUser).processOrderLevelLodgementApproval(lodgement, order, lodgement.getCustomer(), applicationContext);
-            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification);
+            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification,order);
         }
         else{//mortgage lodgement
-            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification);
+            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification, order);
         }
     }
     
@@ -142,7 +143,7 @@ public class LodgementManager {
      * @throws PropertyException
      * @throws RollbackException 
      */
-    public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification) throws PropertyException, RollbackException{
+    public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
         
         em.getTransaction().begin();
         
@@ -183,6 +184,8 @@ public class LodgementManager {
         }//end for       
         em.merge(lodgement);
         em.getTransaction().commit();
+        
+        updateMortgageStatus(order);
     }
     
     
@@ -231,6 +234,53 @@ public class LodgementManager {
         lodgementItem.setApprovalStatus(status);
         new TrailableManager(lodgementItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         em.flush();
+    }
+    
+    public double getTotalOrderLodgementAmount(ProductOrder order){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query JPQL = em.createNamedQuery("LodgementItem.findTotalApprovedOrderSum");
+        JPQL.setParameter("orderId", order.getId());
+        
+        double total = (Double) JPQL.getSingleResult();
+        
+        return total;
+    }
+    
+    public double getOrderActualCost(ProductOrder order){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query JPQL = em.createNamedQuery("ProductOrder.totalAmount");
+        JPQL.setParameter("orderId", order.getId());
+        
+        double total = (Double) JPQL.getSingleResult();
+        
+        return total;
+   }
+    
+    public void updateMortgageStatus(ProductOrder order){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        System.out.println("UpdateMortgageStatus Called");
+        
+        em.getTransaction().begin();
+        
+        double actualCost = getOrderActualCost(order);
+        double totalLodgementAmount = getTotalOrderLodgementAmount(order);
+        
+        if((actualCost - totalLodgementAmount) <= 0){
+            
+            order.setMortgageStatus((short)1);
+            em.merge(order);
+        }
+        
+        em.getTransaction().commit();
+        emf.getCache().evictAll();
+       
     }
        
 }

@@ -104,7 +104,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           
           <div class="jumbotron" style="background-color: #fff">
               
-              <form role="form" name="agentRegistration" method="POST" action="RegisterAgent?from=agent_registration" enctype="multipart/form-data" id="agentForm">
+              <form role="form" name="agentRegistration" method="POST" action="AgentRegistration?from=agent_registration" enctype="multipart/form-data" id="agentForm">
               
                 <c:if test="${fn:length(errors) > 0 }">
                 <div class="row">

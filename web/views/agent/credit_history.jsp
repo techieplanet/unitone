@@ -14,7 +14,7 @@
     <section class="content-header">
         
         <h1>
-            <a href="#">Agent Withdrawal Request</a>
+            <a href="#">Agent Credit History</a>
         </h1>
         
     </section>
@@ -25,29 +25,42 @@
             
             <div class="box-header with-border"> 
                 <div class="callout callout-success" style="margin-bottom: 0;">
-                    <h4 style="margin-bottom: 0;">Balance  : <span><fmt:formatNumber type="currency" currencySymbol="N" maxFractionDigits="2" value="${balance}" /> </span></h4>
+                    <h4 style="margin-bottom: 0;">Credit History</h4>
                 </div>
      
             </div>
             
             <div class="box-body">
-             <div class="row">
-                <div class="col-xs-12">
-                    <h4>Request Withdrawal</h4>
-                </div>
-
-                <div class="col-md-2">
-                    <span>Amount</span>
-                </div>
-
-                <div class="col-md-2">
-                    <input type="text" name="" id="withdraw_amount" />
-                </div>
-
-                <div class="col-md-12">
-                    <a href="#" onclick="return withdrawalRequest(event)" class="btn btn-success"><i class="fa fa-money"></i>  Request</a>
-                </div>
-            </div>
+               
+                <table class="table table-hover table-striped" id="credit_history_table">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>ID</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach items="${transactions}" var="transaction" varStatus="cursor">
+                            <tr>
+                                <td>${cursor.count}</td>
+                                <td>${transaction.getId()}</td>
+                                <td><fmt:formatNumber type="currency" currencySymbol="N" maxFractionDigits="2" value="${transaction.getAmount()}" /></td>
+                                <td><fmt:formatDate value="${transaction.getTransactionDate()}" type="both" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>S/N</th>
+                            <th>ID</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                
             </div>
         </div>
         
@@ -102,52 +115,12 @@
 
 <script>
 
-  function withdrawalRequest(event){
-      event.preventDefault();
- 
-      sendWithdrawRequest();
-  }
-  
-  function sendWithdrawRequest(){
-      
-      var url = $("#contextPath").val();
-      var amount = $("#withdraw_amount").val();
-      var agentId = $("#agent_id").val();
-      
-      amount = amount.trim();
-      
-      
-      
-      if(isNaN(amount)){
-          alert("Please enter a valid amount to withdraw");
-          return;
-      }
-      
-      if(amount.length < 4){
-          alert("Minimum withdrawal amount is 1000");
-          return;
-      }
-      
-      $("#withdrawLoading").modal({
-          backdrop : false
-      });
-      
-      $.ajax({
-          url : url + "/Agent?action=withdrawal",
-          method : "post",
-          data : {amount : amount, agent_id : agentId},
-          success : function(data){
-                    console.log("Response : " + 1);
-                    $("#withdrawLoading").modal("hide");
-                    $("#withdrawSuccessModal").modal({
-                        backdrop : false
-                     });
-          },
-          error : function(){
-              alert("Ooops, something went wrong... ");
-          }
-      });
-      
-  }
+    $(function(){
+        
+    
+     $("#credit_history_table").DataTable();
+        
+     })
+
 
 </script>

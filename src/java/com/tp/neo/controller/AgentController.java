@@ -11,13 +11,16 @@ import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.components.AuditLogger;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.AlertManager;
+import com.tp.neo.controller.helpers.TransactionManager;
 import com.tp.neo.controller.helpers.WithdrawalManager;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
+import com.tp.neo.model.AgentBalance;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.Notification;
+import com.tp.neo.model.Transaction;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.User;
@@ -74,6 +77,8 @@ public class AgentController extends AppController {
     private static String AGENTS_WITHDRAWAL = "/views/agent/withdrawal.jsp";
     private static String AGENTS_WITHDRAW_APPROVAL = "/views/agent/withdrawApproval.jsp";
     private static String AGENTS_WAIT = "/views/agent/waiting.jsp";
+    private static String AGENTS_CREDIT_HISTORY = "/views/agent/credit_history.jsp";
+    private static String AGENTS_DEBIT_HISTORY = "/views/agent/debit_history.jsp";
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
     private Agent agent = new Agent();
    
@@ -165,6 +170,17 @@ public class AgentController extends AppController {
                 
             viewFile = AGENTS_WITHDRAWAL;
             request.setAttribute("agent", getAgentDetails());
+            request.setAttribute("balance", getAgentBalance());
+        }
+        else if(action.equalsIgnoreCase("credit_history")){
+            
+            viewFile = AGENTS_CREDIT_HISTORY;
+            request.setAttribute("transactions",getCreditHistory());
+        }
+        else if(action.equalsIgnoreCase("debit_history")){
+            
+            viewFile = AGENTS_DEBIT_HISTORY;
+            request.setAttribute("transactions",getDebitHistory());
         }
         else if(action.equalsIgnoreCase("withdrawApproval")){
             
@@ -469,7 +485,7 @@ public class AgentController extends AppController {
             }
            
             if(insertStatus && requestOrigin.equalsIgnoreCase("agent_registration")){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/RegisterAgent?action=success";
+                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/AgentRegistration?action=success";
                 response.sendRedirect(page);
             }
             else if(insertStatus){
@@ -1029,6 +1045,43 @@ public class AgentController extends AppController {
         emf.close();
         
         return agent;
+    }
+    
+    private double getAgentBalance(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jpQL = em.createNamedQuery("AgentBalance.findByAgentId");
+        jpQL.setParameter("agentId",sessionUser.getSystemUserId());
+        
+        AgentBalance agentBalance = (AgentBalance)jpQL.getSingleResult();
+        
+        System.out.println("AgentBalance : " + agentBalance);
+        double totalCredit = agentBalance.getTotalcredit() != null ? agentBalance.getTotalcredit() : 0.00;
+        double totalDebit = agentBalance.getTotaldebit() != null ? agentBalance.getTotaldebit() : 0.00;
+        
+        double balance = totalCredit - totalDebit;
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        return balance;
+    }
+    
+    private List<Transaction> getCreditHistory(){
+        
+        TransactionManager manager = new TransactionManager(sessionUser);
+        Account account = ((Agent)sessionUser).getAccount();
+        
+        return manager.getCreditHistory(account);
+    }
+    
+    private List<Transaction> getDebitHistory(){
+        
+        TransactionManager manager = new TransactionManager(sessionUser);
+        Account account = ((Agent)sessionUser).getAccount();
+        
+        return manager.getDebitHistory(account);
     }
     
     private void processAgentWithdrawalRequest(HttpServletRequest req, HttpServletResponse response) throws IOException{

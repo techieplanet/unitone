@@ -34,7 +34,7 @@
                   </h3>
                 </div><!-- /.box-header -->
                 
-                 <div class="box-body">
+                 <div class="box-body table-responsive">
                   <table id="entitylist" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
@@ -43,6 +43,7 @@
                         <th>Agent Name</th>
                         <th>Customer Phone No</th>
                         <th>Customer Email</th>
+                        <th>Status</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -55,9 +56,23 @@
                                 <td><c:out value="${order.getAgent().getLastname()} ${order.getAgent().getFirstname()} " /></td>
                                 <td><c:out value="${order.getCustomer().getPhone()}" /></td>
                                 <td><c:out value="${order.getCustomer().getEmail()}" /></td>
-                              
                                 <td>
-                                    <a class="btn btn-primary" href="Order?action=view&orderId=${order.id}" role="button">View <i class="fa fa-eye"></i> </a>
+                                    <c:set value="${order.getApprovalStatus()}" var="status"/>
+                                    
+                                     <c:if test="${status == 2}">
+                                        <span class="label label-success">Completed</span>
+                                    </c:if>
+                                        
+                                    <c:if test="${status == 1 || status == 0}">
+                                        <span class="label label-info">In progress</span>
+                                    </c:if>
+                                   
+                                    <c:if test="${status == 3}">
+                                        <span class="label label-danger">Decline</span>
+                                    </c:if>
+                                </td>
+                                <td>
+                                    <a class="btn btn-primary" onclick="getOrder(event,${order.id})" href="#" role="button">View <i class="fa fa-eye"></i> </a>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -69,6 +84,7 @@
                         <th>Agent Name</th>
                         <th>Customer Phone No</th>
                         <th>Customer Email</th>
+                        <th>Status</th>
                         <th>Action</th>
                       </tr>
                     </tfoot>
@@ -102,7 +118,45 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
-
+      
+      
+      <!--MODAL-->
+      <div class="modal fade" id="orderItemsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Project Unit Sales</h4>
+            </div>
+            <div class="modal-body table-responsive">
+              
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>ID</th>
+                            <th>Project Name</th>
+                            <th>Unit Name</th>
+                            <th>Qty</th>
+                            <th>CPU</th>
+                            <th>Discount</th>
+                            <th>Initial Deposit</th>
+                            <th>Total Paid</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+            <div class="modal-footer">
+              <button  type="button"  class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
       
 <!-- Include the footer -->
 <%@ include file="../includes/footer.jsp" %>      
@@ -122,11 +176,63 @@
                 "autoWidth": false,
                 "columnDefs": [
                     { "sortable": false, "width":"50px", "targets": 4 }
-                ]
+                ],
+                "order": [[ 0, "desc" ]]
         });
     
       
           });
           
-          
+        function getOrder(event,orderId){
+            
+            event.preventDefault();
+            
+            $.ajax({
+                url : "${pageContext.request.contextPath}/Order",
+                method : "GET",
+                data : {order_id : orderId, action : "getOrder"},
+                success : function(data){
+                    console.log("Payload : " + data);
+                    showOrderItems(data)
+                },
+                error : function(xhr,xhr_code,xhr_status){
+                    console.log("Error Code : " + xhr_code + ", Status : " + xhr_status);
+                    console.log("Response : " + xhr.responseText);
+                }
+            });
+        }
+        
+        function showOrderItems(orderItems){
+            
+            var items = JSON.parse(orderItems);
+            var sn = 1;
+            
+            //clear the orderItem ModalTable
+            $("#orderItemsModal tbody").html("");
+            
+            for(var key in items){
+                
+                var tr = "<tr>";
+                
+                tr += "<td>" + sn + "</td>";
+                tr += "<td>" + items[key].id + "</td>";
+                tr += "<td>" + items[key].project_name + "</td>";
+                tr += "<td>" + items[key].title + "</td>";
+                tr += "<td>" + items[key].quantity + "</td>";
+                tr += "<td>" + accounting.formatMoney(items[key].cpu,"N",2,",",".") + "</td>";
+                tr += "<td>" + accounting.formatMoney(items[key].discount,"N",2,",",".") + "</td>";
+                tr += "<td>" + accounting.formatMoney(items[key].initialDeposit,"N",2,",",".") + "</td>";    
+                tr += "<td>" + accounting.formatMoney(items[key].total_paid,"N",2,",",".") + "</td>";
+                tr += "<td>" + accounting.formatMoney(items[key].balance,"N",2,",",".") + "</td>";
+                
+                tr += "</tr>";
+                
+                ++sn;
+                
+                $("#orderItemsModal tbody").append(tr);
+            }
+            
+            $("#orderItemsModal").modal();
+        }
+        
 </script>

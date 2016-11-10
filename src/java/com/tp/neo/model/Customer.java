@@ -38,6 +38,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Customer.findAll", query = "SELECT c FROM Customer c"),
+    @NamedQuery(name = "Customer.findByAgent", query = "SELECT c FROM Customer c WHERE c.agent = :agent AND c.deleted = :deleted"),
     @NamedQuery(name = "Customer.findByCustomerId", query = "SELECT c FROM Customer c WHERE c.customerId = :customerId"),
     @NamedQuery(name = "Customer.findByFirstname", query = "SELECT c FROM Customer c WHERE c.firstname = :firstname"),
     @NamedQuery(name = "Customer.findByMiddlename", query = "SELECT c FROM Customer c WHERE c.middlename = :middlename"),
@@ -440,7 +441,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         if(action.toUpperCase().equals("NEW")) 
             return "create_customer";
         else if(action.toUpperCase().equals("EDIT"))
-            return "edit_customer";
+            return "view_customer";
         else if(action.toUpperCase().equals("DELETE")) 
             return "delete_customer";
         else if(action.toUpperCase().equals("LISTCUSTOMERS")) 

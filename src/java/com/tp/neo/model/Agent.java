@@ -160,7 +160,7 @@ public class Agent extends BaseModel implements SystemUser  {
 
     //Extra
     transient final Integer USERTYPEID = 2;
-    transient String permissions = "";
+    transient String permissions = "view_customer,create_customer,view_order,view_project";
     
     public Agent() {
     }
@@ -401,7 +401,7 @@ public class Agent extends BaseModel implements SystemUser  {
     }
     
     public Integer getSystemUserTypeId(){
-        return USERTYPEID;
+        return 2;
     }
     
     @Override
@@ -435,7 +435,7 @@ public class Agent extends BaseModel implements SystemUser  {
 
     @Override
     public String getPermissions() {
-        return permissions;
+        return "view_customer,create_customer,view_order,view_project,credit_history,debit_history,withdrawal";
     }
 
     @Override
@@ -457,6 +457,9 @@ public class Agent extends BaseModel implements SystemUser  {
         if(action.toUpperCase().equals("NEW")) return "create_agent";
         else if(action.toUpperCase().equals("EDIT")) return "edit_agent";
         else if(action.toUpperCase().equals("DELETE")) return "delete_agent";
+        else if(action.toUpperCase().equals("CREDIT_HISTORY")) return "credit_history";
+        else if(action.toUpperCase().equals("DEBIT_HISTORY")) return "debit_history";
+        else if(action.toUpperCase().equals("WITHDRAWAL")) return "withdrawal";
         else return "view_agent";
     }
     

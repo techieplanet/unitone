@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Prestige
  */
-@WebServlet(name="CustomerRegistration", urlPatterns={"/RegisterCustomer"})
+@WebServlet(name="CustomerRegistration", urlPatterns={"/CustomerRegistration"})
 @MultipartConfig
 public class CustomerRegistrationController extends HttpServlet {
 

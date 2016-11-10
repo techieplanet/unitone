@@ -35,7 +35,7 @@ public class AgentBalance implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Column(name = "agent_id")
-    private BigInteger agentId;
+    private Long agentId;
     @Column(name = "account_code")
     private String accountCode;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
@@ -47,11 +47,11 @@ public class AgentBalance implements Serializable {
     public AgentBalance() {
     }
 
-    public BigInteger getAgentId() {
+    public Long getAgentId() {
         return agentId;
     }
 
-    public void setAgentId(BigInteger agentId) {
+    public void setAgentId(Long agentId) {
         this.agentId = agentId;
     }
 
@@ -79,4 +79,8 @@ public class AgentBalance implements Serializable {
         this.totalcredit = totalcredit;
     }
     
+    public String toString(){
+        String str = "Total Debit : " + getTotaldebit() + ", Total Credit : " + getTotaldebit() + ", Agent Id: " + getAgentId();
+        return str;
+    }
 }

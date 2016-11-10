@@ -272,7 +272,7 @@ public class User extends BaseModel implements SystemUser{
     }
     
     public Integer getSystemUserTypeId(){
-        return USERTYPEID;
+        return 1;
     }
     
     public String getPermissionName(String action){
