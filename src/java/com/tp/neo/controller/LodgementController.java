@@ -449,6 +449,7 @@ public class LodgementController extends AppController {
         request.setAttribute("lodgements", lodgementList);
     }
     
+    
     private void approveLodgement(HttpServletRequest request){
         EntityManagerFactory emf = null;
         EntityManager em = null;
@@ -463,7 +464,7 @@ public class LodgementController extends AppController {
             Notification notification = em.find(Notification.class, notificationId);
             
             LodgementManager manager = new LodgementManager(sessionUser);
-            manager.approveLodgement(lodgement, request.getContextPath());
+            manager.approveLodgement(lodgement, notification, request.getContextPath());
             
             
         } catch (PropertyException ex) {

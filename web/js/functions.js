@@ -873,7 +873,7 @@ function getProjectUnits(appName, entityName){
     var id =  $('#selectProduct').val();
      url = appName + '/' + entityName;
     console.log("URL: " + url);
-resetForm();
+    resetForm();
     $.ajax({
        type : 'GET',
        url : url,
@@ -1358,3 +1358,56 @@ function validateCustomerRegForm()
 }
 
    
+
+
+
+
+
+
+
+
+
+
+/*****************************************************
+ * Use this as a generic ajax call method
+ *****************************************************/
+function genericAjax(appName, route, method, formData, callback){
+
+    var url = appName + '/' + route;
+    console.log("URL: " + url);
+    
+    $.ajax({
+       type : method,
+       url : url,
+       data : formData,
+       success: function(data){
+           console.log("Successful Ajax");
+           callback(data);
+       },
+       error: function(){
+           console.log("Ajax Error");
+       }
+    });
+    
+}
+
+function thousandSeparator(number){
+    var integer = ''; var decimal = '';
+    if((number + "").indexOf(".") > -1){
+        var numberArray = (number + "").split('.');
+        integer = numberArray[0];
+        decimal = numberArray[1];
+    }else{
+        integer = number;
+    }
+    
+    var valueArray = (integer + "").split('').reverse();
+    var value = '';
+    for(var i=0; i<valueArray.length; i++)
+        value = (i>0 && i%3 == 0) ? valueArray[i] + "," + value : valueArray[i] + value;
+    
+    if(decimal.length > 0)
+        value = value + "." + decimal;
+    
+    return value;
+}

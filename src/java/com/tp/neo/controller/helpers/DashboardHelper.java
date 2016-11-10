@@ -5,7 +5,8 @@
  */
 package com.tp.neo.controller.helpers;
 
-import com.tp.neo.model.Agent;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.utils.DateFunctions;
@@ -30,6 +31,9 @@ public class DashboardHelper {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em;
     Query query;
+    
+    Gson gson = new GsonBuilder().create();
+
     
     public DashboardHelper(){
         emf.getCache().evictAll();
@@ -185,6 +189,76 @@ public class DashboardHelper {
         
         
         return projectMapsList;
+    }
+    
+    
+    public String getOrderSummary() throws Exception{
+        Date startDate = DateFunctions.getDateAfterSubtractDays(40);
+        Date endDate = new Date();
+        return this.getOrderSummary("day", "d-Mon-YYYY", startDate, endDate);
+    }
+    
+    public String getOrderSummary(String truncatedBy, String truncationResultFormat, Date startDate, Date endDate) throws Exception{
+        //Redeclare here as these variables will not be available in AJAX mode
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+    
+        String query = "SELECT COUNT(DISTINCT(o.order_id)) as orderscount, SUM(o.quantity * u.amount_payable) as ordersvalue, " +
+                                                                           "to_char(date_trunc('" + truncatedBy + "', o.modified_date),'" + truncationResultFormat + "') as grouper " +
+                                                                           "FROM order_item o JOIN project_unit u ON o.unit_id = u.id " +
+                                                                           "WHERE o.approval_status = 1 AND (date(o.modified_date) >= '" + startDate.toString() + "' AND date(o.modified_date) <= '" + endDate.toString() + "') " +
+                                                                           "GROUP BY grouper";
+
+        List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
+        
+        List<HashMap> summaryMapsList = new ArrayList<HashMap>();
+        
+        for(Object[] summary : summaryObjects){
+            HashMap summaryMap = new HashMap();
+            summaryMap.put("count", summary[0]);
+            summaryMap.put("value", summary[1]);
+            summaryMap.put("date", summary[2]);
+            summaryMapsList.add(summaryMap);
+        }
+        
+        return gson.toJson(summaryMapsList);
+                            
+    }
+    
+    
+    
+    public String getLodgementSummary() throws Exception{
+        Date startDate = DateFunctions.getDateAfterSubtractDays(40);
+        Date endDate = new Date();
+        return this.getLodgementSummary("day", "d-Mon-YYYY", startDate, endDate);
+    }
+    
+    
+    public String getLodgementSummary(String truncatedBy, String truncationResultFormat, Date startDate, Date endDate) throws Exception{
+        //Redeclare here as these variables will not be available in AJAX mode
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount) as lvalue, " +
+                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper " +
+                       "FROM lodgement_item l " +
+                       "WHERE l.approval_status = 1 AND (date(l.modified_date) >= '" + startDate.toString() + "' AND date(l.modified_date) <= '" + endDate.toString() + "') " +
+                       "GROUP BY grouper";
+        
+        List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
+        
+        List<HashMap> summaryMapsList = new ArrayList<HashMap>();
+        
+        for(Object[] summary : summaryObjects){
+            HashMap summaryMap = new HashMap();
+            summaryMap.put("count", summary[0]);
+            summaryMap.put("value", summary[1]);
+            summaryMap.put("date", summary[2]);
+            summaryMapsList.add(summaryMap);
+        }
+        
+        return gson.toJson(summaryMapsList);
+        
     }
     
     

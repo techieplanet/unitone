@@ -77,19 +77,100 @@
                 <div class="box-body">
                     <div class="nav-tabs-custom">
                           <ul class="nav nav-tabs">
-                            <li class="active"><a href="#performance-pie-pane" data-toggle="tab">Percentages</a></li>
+                            <li class="active"><a href="#ordersummary-pane" data-toggle="tab">Orders</a></li>
+                            <li class=""><a href="#paymentsummary-pane" data-toggle="tab">Payments</a></li>
+                            <li class=""><a href="#performance-pie-pane" data-toggle="tab">Percentages</a></li>
                             <li id="p-bar-li"><a href="#performance-bar-pane" data-toggle="tab">Numbers</a></li>
                           </ul>
                           <div class="tab-content">
-                            <div class="active tab-pane" id="performance-pie-pane">
-                                <div id="performance"></div>
-                            </div><!-- /.tab-pane -->
+                             <div class="active tab-pane" id="ordersummary-pane">
+                                 <div class="row">
+                                     <div class="col-md-1"></div> 
+                                     <div class="col-md-10 bg-aqua padding10">
+                                        <div class="row">
+                                            <div class="col-md-2 col-md-offset-1">
+                                                <label>Start Date: </label>
+                                                <input type="text" name="start_date" id="start_date" class="datepicker  text-black" readonly="readonly">
+                                            </div>
 
-                            <div class="tab-pane" id="performance-bar-pane">
-                                <div id="performance-bar" style="width:80%;"></div>
-                            </div><!-- /.tab-pane -->
+                                            <div class="col-md-2">
+                                                <label>End Date: </label>
+                                                <input type="text" name="end_date" id="end_date" class="datepicker  text-black" readonly="readonly">
+                                            </div>
 
+                                            <div class="col-md-2">
+                                                <label>Group By:</label><br/>
+                                                <select name="groupby" id="groupby" class=" text-black">
+                                                    <option value="1">Day</option>
+                                                    <option value="2">Month</option>
+                                                    <option value="3">Year</option>
+                                                </select>
+                                            </div>
 
+                                            <div class="col-md-1">
+                                                <br/>
+                                                <a class="btn btn-primary" href="#" onclick="return filterOrderSummary(); return false;">Filter</a>
+                                            </div>
+                                        </div>
+                                     </div>
+                                     <div class="col-md-1"></div> 
+                                 </div>
+                                 
+                                     <div class="row">
+                                         <div id="order-combo" class="col-md-12">
+                                         </div>
+                                     </div>
+                                 </div>
+                            
+                            
+                                <div class="tab-pane" id="paymentsummary-pane">
+                                    <div class="row">
+                                        <div class="col-md-1"></div> 
+                                        <div class="col-md-10 bg-aqua padding10">
+                                           <div class="row">
+                                               <div class="col-md-2 col-md-offset-1">
+                                                   <label>Start Date: </label>
+                                                   <input type="text" name="lstart_date" id="lstart_date" class="datepicker  text-black" readonly="readonly">
+                                               </div>
+
+                                               <div class="col-md-2">
+                                                   <label>End Date: </label>
+                                                   <input type="text" name="lend_date" id="lend_date" class="datepicker  text-black" readonly="readonly">
+                                               </div>
+
+                                               <div class="col-md-2">
+                                                   <label>Group By:</label><br/>
+                                                   <select name="lgroupby" id="lgroupby" class=" text-black">
+                                                       <option value="1">Day</option>
+                                                       <option value="2">Month</option>
+                                                       <option value="3">Year</option>
+                                                   </select>
+                                               </div>
+
+                                               <div class="col-md-1">
+                                                   <br/>
+                                                   <a class="btn btn-primary" href="#" onclick="return filterLodgementSummary(); return false;">Filter</a>
+                                               </div>
+                                           </div>
+                                        </div>
+                                        <div class="col-md-1"></div> 
+                                    </div>
+
+                                        <div class="row">
+                                            <div id="payment-combo" class="col-md-10">
+                                            </div>
+                                        </div>
+                               </div><!-- /.tab-pane -->
+
+                               <div class="tab-pane" id="performance-pie-pane">
+                                   <div class="row">
+                                       <div id="performance-pie" class="col-md-10"></div>
+                                   </div>
+                               </div><!-- /.tab-pane -->
+
+                               <div class="tab-pane" id="performance-bar-pane">
+                                   <div id="performance-bar" class="col-md-10"></div>
+                               </div><!-- /.tab-pane -->
 
                           </div><!-- /.tab-content -->
                         </div><!-- /.nav-tabs-custom -->
@@ -178,16 +259,265 @@
 <script>
     
     $(function (){
+        $( ".datepicker" ).datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd-mm-yy",
+            showAnim: "drop"
+          });
+        
       //set high charts global color scheme for all high charts instances on this page
         Highcharts.setOptions({
                 colors: ['#3366CC', '#DC3912', '#FF9900', '#00a65a', '#109618', '#990099', '#0099C6', '#DD4477', '#AAAA11', '#B77322']
             });
             
-            
+      
+      drawOrderSummaryChart(${orderSummary});
+      drawLodgementSummaryChart(${lodgementSummary});
       drawPerformancePieChart();
       drawPerformanceBarChart();
       
     });
+    
+    function filterOrderSummary(){
+        formData = {startDate: $('#start_date').val(), endDate: $('#end_date').val(), grouping: $('#groupby').val()};
+        console.log('formData: ' + JSON.stringify(formData));
+        genericAjax('${pageContext.request.contextPath}', 'Dashboard?action=ordersummary', 'GET', formData, drawOrderSummaryChart);
+        return false;
+    }
+    
+    
+    function drawOrderSummaryChart(orderSummaryJSON){
+        Highcharts.setOptions({
+                colors: ['#3366CC', '#DC3912', '#FF9900', '#00a65a', '#109618', '#990099', '#0099C6', '#DD4477', '#AAAA11', '#B77322']
+            });
+            
+        console.log("inside drawOrderSummaryChart");
+        var seriesArray = new Array();
+        var countsObject = {name: 'Orders Count', type: 'column', data: new Array()};
+        var valuesObject = {name: 'Orders Value', type: 'spline', yAxis: 1, color: '#00a65a', data: new Array()};
+        var categoriesArray = new Array();
+        
+        console.log("orderSummaryJSON: " + JSON.stringify(orderSummaryJSON))
+        
+        
+        //if( (typeof orderSummaryList) == 'object') {
+        if( (typeof orderSummaryJSON) != 'object') {
+            //This is used when we are calling this function as an AJAx callback function. The value returned is a JSON string. 
+            //Needs to be parsed into JS object
+            console.log("inside 1");
+            orderSummaryList = JSON.parse(orderSummaryJSON);    
+        }
+        else{
+            //This is used when we are calling this function directly on page load. The value returned is a JSON object. 
+            //No need to parse into JS object
+            console.log("inside 2");
+            orderSummaryList = orderSummaryJSON;
+        }
+            
+        console.log("orderSummaryList.length " + orderSummaryList[0]);
+        
+        for(var i=0; i < orderSummaryList.length; i++){
+                console.log("loop");
+                var summary = orderSummaryList[i];
+                countsObject.data.push(summary.count); 
+                valuesObject.data.push(summary.value);
+                categoriesArray.push(summary.date)
+        }
+            
+            seriesArray.push(countsObject);
+            seriesArray.push(valuesObject);
+            
+            
+            
+            
+            
+        $('#order-combo').highcharts({
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: 'Order Summary'
+            },
+            subtitle: {
+                text: ''
+            },
+            xAxis: [{
+                categories: categoriesArray,
+                crosshair: true
+            }],
+            yAxis: [{ // Primary yAxis
+                    
+                    labels: {
+                        //format: '{value}°C',
+                        style: {
+                            //color: Highcharts.getOptions().colors[1]
+                            fontWeight: 'bold'
+                        }
+                    },
+                    title: {
+                        text: 'Number of Orders',
+                        style: {
+                          //  color: Highcharts.getOptions().colors[1]
+                          //fontWeight: 'bold'
+                        }
+                    }
+                },{ // Secondary yAxis
+                        title: {
+                            text: 'Value of Orders (NGN)',
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                                //fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            formatter: function(){
+                                return thousandSeparator(this.value);
+                            },
+                            style: {
+                                color: Highcharts.getOptions().colors[3],
+                                fontWeight: 'bold'
+                            }
+                        },
+                        opposite: true
+
+             }],
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                layout: 'horizontal',
+                align: 'center',
+                //x: 120,
+                //verticalAlign: 'top',
+                //y: 100,
+                //floating: true,
+                //backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            series: seriesArray
+        });
+    }
+    
+    
+    function filterLodgementSummary(){
+        console.log('filterLodgementSummary');
+        formData = {startDate: $('#lstart_date').val(), endDate: $('#lend_date').val(), grouping: $('#lgroupby').val()};
+        console.log('formData: ' + JSON.stringify(formData));
+        genericAjax('${pageContext.request.contextPath}', 'Dashboard?action=lodgementsummary', 'GET', formData, drawLodgementSummaryChart);
+        return false;
+    }
+    
+    function drawLodgementSummaryChart(lodgementSummaryJSON){
+        Highcharts.setOptions({
+                colors: ['#3366CC', '#DC3912', '#FF9900', '#00a65a', '#109618', '#990099', '#0099C6', '#DD4477', '#AAAA11', '#B77322']
+            });
+            
+        console.log("inside drawLodgementSummaryChart");
+        var seriesArray = new Array();
+        var countsObject = {name: 'Payments Count', type: 'column', data: new Array()};
+        var valuesObject = {name: 'Payments Value', type: 'spline', yAxis: 1, color: '#00a65a', data: new Array()};
+        var categoriesArray = new Array();
+        
+        console.log("lodgementSummaryJSON " + JSON.stringify(lodgementSummaryJSON))
+        
+        var lodgementSummaryList = '';
+        
+        if( (typeof lodgementSummaryJSON) != 'object') {
+            //This is used when we are calling this function as an AJAx callback function. The value returned is a JSON string. 
+            //Needs to be parsed into JS object
+            console.log("inside 1");
+            lodgementSummaryList = JSON.parse(lodgementSummaryJSON);    
+        }
+        else{
+            //This is used when we are calling this function directly on page load. The value returned is a JSON object. 
+            //No need to parse into JS object
+            console.log("inside 2");
+            lodgementSummaryList = lodgementSummaryJSON;
+        }
+            
+        console.log("lodgementSummaryList.length " + lodgementSummaryList[0]);
+        
+        for(var i=0; i < lodgementSummaryList.length; i++){
+                console.log("loop");
+                var summary = lodgementSummaryList[i];
+                countsObject.data.push(summary.count); 
+                valuesObject.data.push(summary.value);
+                categoriesArray.push(summary.date)
+        }
+            
+            seriesArray.push(countsObject);
+            seriesArray.push(valuesObject);
+            
+            
+            
+            
+            
+        $('#payment-combo').highcharts({
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: 'Payments Summary'
+            },
+            subtitle: {
+                text: ''
+            },
+            xAxis: [{
+                categories: categoriesArray,
+                crosshair: true
+            }],
+            yAxis: [{ // Primary yAxis
+                    
+                    labels: {
+                        //format: '{value}°C',
+                        style: {
+                            //color: Highcharts.getOptions().colors[1]
+                            fontWeight: 'bold'
+                        }
+                    },
+                    title: {
+                        text: 'Number of Payments',
+                        style: {
+                          //  color: Highcharts.getOptions().colors[1]
+                          //fontWeight: 'bold'
+                        }
+                    }
+                },{ // Secondary yAxis
+                        title: {
+                            text: 'Value of Payments (NGN)',
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                                //fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            formatter: function(){
+                                return thousandSeparator(this.value);
+                            },
+                            style: {
+                                color: Highcharts.getOptions().colors[3],
+                                fontWeight: 'bold'
+                            }
+                        },
+                        opposite: true
+
+             }],
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                layout: 'horizontal',
+                align: 'center',
+                //x: 120,
+                //verticalAlign: 'top',
+                //y: 100,
+                //floating: true,
+                //backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            },
+            series: seriesArray
+        });
+    }
+    
     
     
     
@@ -216,7 +546,7 @@
                 
         </c:forEach>
         
-        $('#performance').highcharts({
+        $('#performance-pie').highcharts({
             chart: {
                 type: 'pie',
                 events: {
