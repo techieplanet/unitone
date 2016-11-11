@@ -55,10 +55,19 @@
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Order">All Orders</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=current">Current Orders</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=approved">Approved</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=completed">Completed Orders</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=declined">Declined</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Order?action=processing">Processing</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Order?action=current">Ongoing Payments</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Order?action=completed">Completed Payments</a></li>
                             </c:if>
                           </ul>
                         </li>

@@ -106,6 +106,7 @@ public class OrderManager {
         order.setCustomer(customerId);
         order.setCreatorUserType(sessionUser.getSystemUserTypeId());
         order.setApprovalStatus((short)0);
+        order.setMortgageStatus((short)0);
         new TrailableManager(order).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
         em.persist(order);
