@@ -149,7 +149,7 @@ public class DashboardController extends AppController {
                 request.setAttribute("customerCount", customerCount);  
                 request.setAttribute("completedOrders", em.createNamedQuery("ProductOrder.findByApprovalStatus").setParameter("approvalStatus", 2).getResultList().size());  
                 request.setAttribute("processingOrders", em.createNamedQuery("ProductOrder.findByApprovalStatus").setParameter("approvalStatus", 1).getResultList().size());  
-                request.setAttribute("customersPerAgent", String.format("%.2f", (float)customerCount/agentCount));  
+                request.setAttribute("customersPerAgent", String.format("%.2f", agentCount == 0 ? 0 : (float)customerCount/agentCount));  
 
                 //request.setAttribute("topFiveAgentLocations", helper.getTopFiveAgentLocations());  //not needed anymore
                 //System.out.println("top: " + em.createNamedQuery("Agent.findByTopSellingLocations").getResultList().size());
@@ -158,7 +158,8 @@ public class DashboardController extends AppController {
                 dispatcher.forward(request, response);
             }
         } catch (Exception e){
-            SystemLogger.logSystemIssue(APP_NAME, request.getQueryString(), e.getMessage());
+            String inputValuesString = request.getQueryString() != null ? request.getQueryString() : "";
+            SystemLogger.logSystemIssue(APP_NAME, inputValuesString, e.getMessage());
             e.getMessage();
             e.printStackTrace();
         }

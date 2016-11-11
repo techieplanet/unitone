@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "LodgementItem.findByCreatedBy", query = "SELECT l FROM LodgementItem l WHERE l.createdBy = :createdBy"),
     @NamedQuery(name = "LodgementItem.findByModifiedDate", query = "SELECT l FROM LodgementItem l WHERE l.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "LodgementItem.findByModifiedBy", query = "SELECT l FROM LodgementItem l WHERE l.modifiedBy = :modifiedBy"),
-    @NamedQuery(name = "LodgementItem.findTotalApprovedSum", query = "SELECT SUM(l.amount) FROM LodgementItem l WHERE l.approvalStatus = :approvalStatus") })
+    @NamedQuery(name = "LodgementItem.findTotalApprovedSum", query = "SELECT COALESCE(SUM(l.amount),0) FROM LodgementItem l WHERE l.approvalStatus = :approvalStatus") })
 
 public class LodgementItem extends BaseModel {
 

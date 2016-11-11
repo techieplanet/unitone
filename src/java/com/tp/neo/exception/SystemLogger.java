@@ -23,12 +23,11 @@ public class SystemLogger {
         try{
             em.getTransaction().begin();
             
-            Date date = new Date();
             ExceptionLog exLog = new ExceptionLog();
             exLog.setEntity(entityName);
             exLog.setInputvalues(inputValues);
             exLog.setErrorMessage(errorMsg);
-            exLog.setDate(date);
+            exLog.setDate(new Date());
             
             em.persist(exLog);
             em.flush();
