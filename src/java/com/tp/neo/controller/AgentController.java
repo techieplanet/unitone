@@ -645,7 +645,7 @@ public class AgentController extends AppController {
                 new AlertManager().sendAgentApprovalAlerts(agent);
                 
                 
-                
+                emf.getCache().evict(Agent.class);
             } catch (RollbackException e){
                 e.printStackTrace();
             } catch(Exception e){
@@ -985,7 +985,11 @@ public class AgentController extends AppController {
         jpqlQuery.setParameter("active",0);
         jpqlQuery.setParameter("approvalStatus",-1);
         List<Agent> agentList = jpqlQuery.getResultList();
-
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        
         return agentList;
     }
 
@@ -1039,6 +1043,7 @@ public class AgentController extends AppController {
         
         long agentId = sessionUser.getSystemUserId();
         Agent agent = em.find(Agent.class, agentId);
+        
         
         
         em.close();

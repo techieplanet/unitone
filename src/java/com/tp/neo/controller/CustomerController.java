@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
-import com.tp.neo.controller.helpers.NotificationsManager;
 import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.utils.AuthManager;
@@ -33,7 +32,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,10 +49,8 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import javax.xml.bind.PropertyException;
 
@@ -220,7 +216,10 @@ public class CustomerController extends AppController  {
                 if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
                     
                     //Assign default companies Agent to the customer
-                    agent = em.find(Agent.class, (long)18);
+                    Query query = em.createNamedQuery("Agent.findByFullname");
+                    query.setParameter("firstname", "company");
+                    query.setParameter("lastname", "company");
+                    agent = (Agent)query.getSingleResult();
                 }
                 else if(user.getSystemUserTypeId() == 2){
                     agent = em.find(Agent.class, user.getSystemUserId());
@@ -388,7 +387,14 @@ public class CustomerController extends AppController  {
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
                 request.setAttribute("customer", customer);
-                request.setAttribute("errors", errorMessages);    
+                request.setAttribute("errors", errorMessages); 
+                request.setAttribute("projects", new ProjectController().listProjects());
+                request.setAttribute("userTypeId", userType);
+                request.setAttribute("userType",sessionUser.getSystemUserId());
+                request.setAttribute("agents", new AgentController().listAgents());
+                request.setAttribute("action","new");
+                request.setAttribute("companyAccount",CompanyAccountHelper.getCompanyAccounts());
+                
                 SystemLogger.logSystemIssue("Customer", gson.toJson(customer), err.getMessage());
             }
             catch(RollbackException rollExcept) {

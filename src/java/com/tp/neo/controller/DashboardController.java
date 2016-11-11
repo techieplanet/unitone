@@ -158,7 +158,8 @@ public class DashboardController extends AppController {
                 dispatcher.forward(request, response);
             }
         } catch (Exception e){
-            SystemLogger.logSystemIssue(APP_NAME, request.getQueryString(), e.getMessage());
+            String inputValues = request.getQueryString() != null ? request.getQueryString() : "";
+            SystemLogger.logSystemIssue(APP_NAME, inputValues, e.getMessage());
             e.getMessage();
             e.printStackTrace();
         }
