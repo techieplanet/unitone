@@ -68,9 +68,10 @@
                               
                                 <td>
                                     <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
-                                     
+                                   
+                                    <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}">
                                      <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
-                                    
+                                    </c:if>
                                    
                                 </td>
                             </tr>

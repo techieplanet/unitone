@@ -573,8 +573,7 @@ public class CustomerController extends AppController  {
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
-//        }
-//        }
+
     }
     
     

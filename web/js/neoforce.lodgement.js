@@ -81,7 +81,7 @@ function prepareOrderListTable(jsonString){
             tr += "<td>" + accounting.formatMoney(amountPaid,"N",2,",",".") + "</td>";
             tr += "<td>" + accounting.formatMoney(amountPayable,"N",2,",",".") + "</td>";
             tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' value='' /></td>";
-            tr += "<td><button class='btn btn-success' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add</button></td>";
+            tr += "<td><button class='btn btn-success' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add to Cart</button></td>";
             rows += tr;
         }
         

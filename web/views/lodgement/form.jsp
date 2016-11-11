@@ -136,7 +136,7 @@
                                               
                                               <div class="col-md-2">
                                     	<div class="form-group">
-                                            <label for="amountLeft">Amount Payable(N)</label>
+                                            <label for="amountLeft">Balance Payable(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
                                                
                                             </span>
@@ -184,9 +184,9 @@
                                                             </div>
                                                             <div class="col-md-2 pull-right">
                                                    <div id="addToCartLabel"  style="margin: 0 auto !important;" >
-                                    	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
-                                        </div> 
+                                                        <div class="form-group">
+                                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                                        </div> 
                                                    </div>
                                                    </div>
                                                    </div>

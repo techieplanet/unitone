@@ -48,14 +48,16 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProductOrder.findByModifierUserType", query = "SELECT o FROM ProductOrder o WHERE o.modifierUserType = :modifierUserType"),
     @NamedQuery(name = "ProductOrder.findByApprovedBy", query = "SELECT o FROM ProductOrder o WHERE o.approvedBy = :approvedBy"),
     @NamedQuery(name = "ProductOrder.findByApprovedDate", query = "SELECT o FROM ProductOrder o WHERE o.approvedDate = :approvedDate"),
-    @NamedQuery(name = "ProductOrder.findByApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus"),
-    @NamedQuery(name = "ProductOrder.findByApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus"),
+    @NamedQuery(name = "ProductOrder.findByApprovalStatus", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByApprovalStatusAgent", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus AND o.agent = :agent ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByProcessing", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 1 AND o.mortgageStatus = 0 ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByProcessingAgent", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 1 AND o.mortgageStatus = 0 AND o.agent = :agent ORDER BY o.id DESC"),
     @NamedQuery(name = "ProductOrder.findByCurrentPayingCustomer", query = "SELECT o.customer FROM ProductOrder o WHERE o.mortgageStatus = 0 AND o.agent = :agent ORDER BY o.id DESC"),
     @NamedQuery(name = "ProductOrder.findByCompletedPaymentCustomer", query = "SELECT o.customer FROM ProductOrder o WHERE o.mortgageStatus = 1 AND o.agent = :agent ORDER BY o.id DESC"),
-    @NamedQuery(name = "ProductOrder.findByCurrentPaying", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus < 2 ORDER BY o.id DESC"),
-    @NamedQuery(name = "ProductOrder.findByAgentCurrentPaying", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus < 2 AND o.agent = :agent ORDER BY o.id DESC"),
-    @NamedQuery(name = "ProductOrder.findByCompleted", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 2 ORDER BY o.id DESC"),
-    @NamedQuery(name = "ProductOrder.findByAgentCompleted", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 2 AND o.agent = :agent ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByCurrentPaying", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus <= 2  AND o.mortgageStatus = 0 ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByAgentCurrentPaying", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus <= 2 AND o.mortgageStatus = 0 AND o.agent = :agent ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByCompleted", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus <= 2 AND o.mortgageStatus = 1 ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByAgentCompleted", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus <= 2 AND o.mortgageStatus = 1 AND o.agent = :agent ORDER BY o.id DESC"),
     @NamedQuery(name = "ProductOrder.findLastInsertedId", query = "SELECT o FROM ProductOrder o ORDER BY o.id DESC")})
 
 public class ProductOrder extends BaseModel {

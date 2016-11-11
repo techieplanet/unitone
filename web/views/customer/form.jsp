@@ -583,7 +583,7 @@
                                               
                                               <div class="col-md-2">
                                     	<div class="form-group">
-                                            <label for="amountLeft">Amount Payable(N)</label>
+                                            <label for="amountLeft">Balance Payable(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
                                                
                                             </span>
