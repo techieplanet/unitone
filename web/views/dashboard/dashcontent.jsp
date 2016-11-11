@@ -208,7 +208,7 @@
               <div class="info-box">
                 <span class="info-box-icon bg-green"><i class="fa fa-cart-arrow-down"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text"><strong>Processing / Completed Orders</strong></span>
+                    <span class="info-box-text"><strong>Processing / Completed <br/>Orders</strong></span>
                   <span class="info-box-number">${processingOrders} / ${completedOrders}</span>
                 </div><!-- /.info-box-content -->
               </div><!-- /.info-box -->
@@ -217,7 +217,7 @@
               <div class="info-box">
                 <span class="info-box-icon bg-yellow"><i class="fa fa-user-times"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text"><strong>Average Customer per Agent</strong></span>
+                    <span class="info-box-text"><strong>Average Customer <br/>per Agent</strong></span>
                   <span class="info-box-number">${customersPerAgent}</span>
                 </div><!-- /.info-box-content -->
               </div><!-- /.info-box -->
