@@ -31,6 +31,7 @@ import javax.xml.bind.PropertyException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.RollbackException;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -42,6 +43,8 @@ public class ProjectController extends AppController {
 
     private static String PROJECTS_ADMIN = "/views/project/admin.jsp"; 
     private static String PROJECTS_NEW = "/views/project/add.jsp";
+    private static String ECOMMERCE = "/views/project/ecommerce.jsp";
+    private static String ECOMMERCE_UNITS = "/views/project/ecommerce_units.jsp";
     
     private HashMap<String, String> errorMessages = new HashMap<String, String>();
     
@@ -166,6 +169,16 @@ public class ProjectController extends AppController {
             request.setAttribute("id", id);
             if(addstat == 1) request.setAttribute("success", true);
         }
+        else if(sessionUser.getSystemUserTypeId() == 3 && action.equalsIgnoreCase("listprojects")){
+            
+            viewFile = ECOMMERCE;
+            request.setAttribute("projects", listProjects());
+        }
+        else if(sessionUser.getSystemUserTypeId() == 3 && action.equalsIgnoreCase("listunits")){
+            
+            viewFile = ECOMMERCE_UNITS;
+            request.setAttribute("projectUnits", getUnits(request));
+        }
         else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
             viewFile = PROJECTS_ADMIN;
             request.setAttribute("projects", listProjects());
@@ -199,10 +212,16 @@ public class ProjectController extends AppController {
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
-                if(request.getParameter("id").equals(""))
+                if(action.equalsIgnoreCase("addToCart")){
+                    addToCart(request,response);
+                    return;
+                }
+                else if(request.getParameter("id").equals("")){
                     processInsertRequest(request, response);
-                else
+                }
+                else{
                     processUpdateRequest(request, response);
+                }
             }
         }
 
@@ -429,6 +448,59 @@ public class ProjectController extends AppController {
         em.close();
         emf.close();
         return projectList;
+    }
+     
+    public List<ProjectUnit> getUnits(HttpServletRequest request){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Project project = em.find(Project.class, Long.parseLong(request.getParameter("project_id")));
+                
+        Query query = em.createNamedQuery("ProjectUnit.findByProjectAndQty");
+        query.setParameter("project", project);
+        
+        List<ProjectUnit> units  = query.getResultList();
+        
+        em.close();
+        emf.close();
+        
+        return units;
+    } 
+    
+    private void addToCart(HttpServletRequest request,HttpServletResponse response) throws IOException{
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        String[] unitIds = request.getParameterValues("unit_id");
+        
+        List<ProjectUnit> units = (List<ProjectUnit>)request.getSession().getAttribute("unit_cart");
+        
+        if(units == null){
+            units = new ArrayList();
+        }
+        
+        long project_id = 0;
+        
+        for(String id : unitIds){
+            
+            ProjectUnit unit = em.find(ProjectUnit.class, Long.parseLong(id));
+            units.add(unit);
+            project_id = unit.getProject().getId();
+            System.out.println("Unit Id : " + id);
+        }
+        
+        HttpSession session = request.getSession();
+        session.setAttribute("unit_cart", units);
+        
+        em.close();
+        emf.close();
+        
+        
+        
+        response.sendRedirect("Project?action=listunits&project_id="+project_id);
+            
     }
      
     /**

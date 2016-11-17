@@ -52,6 +52,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProjectUnit.findByModifiedBy", query = "SELECT p FROM ProjectUnit p WHERE p.modifiedBy = :modifiedBy"),
     //@NamedQuery(name = "ProjectUnit.findProject", query = "SELECT p.project FROM ProjectUnit p WHERE p.project = :project"),
     @NamedQuery(name = "ProjectUnit.findByProject", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project"),
+    @NamedQuery(name = "ProjectUnit.findByProjectAndQty", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project AND p.quantity > 0"),
     @NamedQuery(name = "ProjectUnit.findByProjectAndActive", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project AND p.deleted = :deleted"),
     @NamedQuery(name = "ProjectUnit.findLastInserted", query = "SELECT p FROM ProjectUnit p ORDER BY p.createdDate DESC"),
     

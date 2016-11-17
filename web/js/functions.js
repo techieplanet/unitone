@@ -41,12 +41,14 @@ function selectAgent(id)
    var email = $(row).find(".agentEmail").text();
    var state = $(row).find(".agentState").text();
    var photo = $(row).find(".agentImg").val();
+   var img = $(row).find(".agentImg").val();
    
    
    var fullname = lName + " " + fname + " " + mName;
    $("#agentDetailContainer .agent_name").text(fullname.trim());
    $("#agentDetailContainer .agent_moible").text(phoneNo);
    $("#agentDetailContainer .agent_state").text(state);
+   $("#agentDetailContainer .agent_img").attr("src",img);
    
    $("#agentListContainer").toggle();
    $("#agentSpinnerContainer").toggle();
@@ -97,9 +99,9 @@ function showSelectedAgent()
         return false;
     }
     
-    function showOrderProduct()
+    function showOrderProduct(proceed)
     {
-        var proceed = validateCustomerRegForm();
+        
         
         if(proceed == false)
         {
@@ -313,6 +315,9 @@ $(".payOut").each(function() {
 
 /*TP: add item to the cart*/
 function addToCart(event){
+  
+   event.preventDefault();  
+    
    $("#shoppingCart:hidden").toggle();
    $("#paymentCheckout:visible").toggle();
   var productName = $("#selectProduct :selected").text();
@@ -1279,6 +1284,8 @@ function submitPostForm(url, formData){
 
 function validateCustomerRegForm()
 {
+    appendLoadingState("#step1_box");
+    
     var errors = [];
     
     if($("#customerFirstname").val().trim() == '')
@@ -1339,23 +1346,52 @@ function validateCustomerRegForm()
     
     $("#customerErrorModal .modal-body").html("");
     
-
-//    if(errors.length > 0)
-//    {
-//        var errorText = '';
-//        
-//        for(var key in errors){
-//            var errorText = '' + errors[key] + '<br />';
-//            $("#customerErrorModal .modal-body").append(errorText);
-//        }
-//        $("#customerErrorModal").modal();
-//        return false;
-//    }
-//    else{
-//        return true
-//    }
+    var url = $("#pageContext").val();
     
-    return true;
+    
+    $.ajax({
+        url : url + "/Customer?action=email_validation",
+        method : 'GET',
+        data : {email : $("#customerEmail").val(), type : 'xmlhttp'},
+        success : function(data){
+            
+             removeLoadingState();
+            
+            console.log(data);
+            
+            var res = JSON.parse(data);
+            if(res.code === "-1" || res.code === -1){
+                errors.push("Email already exist");
+            }
+            
+            if(errors.length > 0)
+            {
+                var errorText = '';
+
+                for(var key in errors){
+                    var errorText = '' + errors[key] + '<br />';
+                    $("#customerErrorModal .modal-body").append(errorText);
+                }
+                $("#customerErrorModal").modal();
+                
+                showOrderProduct(false);
+            }
+            else{
+                showOrderProduct(true);
+            }
+            
+        },
+        error : function(xhr,status_code,status_text){
+            
+            console.log(status_code + " : " + status_text);
+            
+            removeLoadingState();
+        }
+    });
+
+    
+    
+    
 }
 
 function appendLoadingState(selector){

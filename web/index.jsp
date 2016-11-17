@@ -39,14 +39,14 @@ and open the template in the editor.
                                 <label>Login as</label>
                                 <select name="usertype" id="usertype" class="form-control select2" style="">
                                   <option value="0">--Select--</option>
-                                  <option value="ADMIN">Admin Member</option>
-                                  <option value="AGENT">Agent</option>
-                                  <option value="CUSTOMER">Customer</option>
+                                  <option value="ADMIN" ${loginDetails.get("userType").equals("ADMIN") ? 'selected' : ''}>Admin Member</option>
+                                  <option value="AGENT" ${loginDetails.get("userType").equals("AGENT") ? 'selected' : ''}>Agent</option>
+                                  <option value="CUSTOMER" ${loginDetails.get("userType").equals("CUSTOMER") ? 'selected' : ''}>Customer</option>
                                 </select>
                             </div>
                             <div class="form-group">
                               <label for="email">Email Address</label>
-                              <input type="email" class="form-control" name="email" id="email" placeholder="Email">
+                              <input type="email" class="form-control" name="email" id="email" placeholder="Email" value="${loginDetails.get("email")}">
                             </div>
                             <div class="form-group">
                               <label for="password">Password</label>

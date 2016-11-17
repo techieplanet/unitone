@@ -23,9 +23,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.servlet.ServletException;
@@ -150,8 +154,11 @@ public class LoginController extends HttpServlet {
                 session.setAttribute("userType", userType);
                 session.setAttribute("userTypes", userTypes);
                                 
-                if(user.getSystemUserTypeId() > 1){//agent or customer so go get the permissions from db
-                    user.setPermissions(this.getUserTypePermissions(user));
+                if(user.getSystemUserTypeId() == 2){//agent or customer so go get the permissions from db
+                    user.setPermissions(this.getUserTypePermissions(user,"Agent"));
+                }
+                else if(user.getSystemUserTypeId() == 3){//agent or customer so go get the permissions from db
+                    user.setPermissions(this.getUserTypePermissions(user,"Customer"));
                 }
                     
                 String referrerURI = new URI(request.getHeader("referer")).toString();
@@ -187,10 +194,17 @@ public class LoginController extends HttpServlet {
                 
             }else{
                 System.out.println("Failed!");
+                redirectToLogin(request, response);
             }
                 
             
-        } catch(Exception e){
+        }
+        catch(NoResultException nre){
+         
+            redirectToLogin(request, response);
+            return;
+        }
+        catch(Exception e){
             e.printStackTrace();
             System.out.println(e.getMessage());
         } finally{
@@ -198,7 +212,7 @@ public class LoginController extends HttpServlet {
         }
     }
 
-    private SystemUser getUserTypeObject(String userType, String email){        
+    private SystemUser getUserTypeObject(String userType, String email) throws NoResultException{        
         String queryArg = "";
         SystemUser systemUser = new User();
         Agent agentUser = new Agent();
@@ -234,9 +248,9 @@ public class LoginController extends HttpServlet {
      * @param user 
      * @return 
      */
-    private String getUserTypePermissions(SystemUser user){
+    private String getUserTypePermissions(SystemUser user, String title){
         em = emf.createEntityManager();
-        Role role = (Role)em.createNamedQuery("Role.findByTitle").setParameter("title", "Agent").getSingleResult();
+        Role role = (Role)em.createNamedQuery("Role.findByTitle").setParameter("title", title).getSingleResult();
         Gson gson = new GsonBuilder().create();
 
         Type stringTypeToken = new TypeToken<ArrayList<String>>(){}.getType();
@@ -296,6 +310,26 @@ public class LoginController extends HttpServlet {
         finally {
             em.close();
         }
+    }
+    
+    private void redirectToLogin(HttpServletRequest request, HttpServletResponse response) {
+        
+        try {
+            Map<String,String> map = new HashMap();
+            
+            map.put("userType", request.getParameter("usertype"));
+            map.put("email", request.getParameter("email"));
+            
+            
+            request.setAttribute("loginDetails", map); 
+            
+            request.getRequestDispatcher("/index.jsp").forward(request, response);
+        } catch (ServletException ex) {
+            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
     
     /**

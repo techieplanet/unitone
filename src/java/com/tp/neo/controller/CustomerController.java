@@ -117,6 +117,12 @@ public class CustomerController extends AppController  {
         
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
+        if(action.equalsIgnoreCase("email_validation")){
+            
+            validateEmail(request,response);
+            return;
+        }
+        
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Customer().getPermissionName(action), request, response)){
                 processGetRequest(request, response);
@@ -550,11 +556,12 @@ public class CustomerController extends AppController  {
             int id = Integer.parseInt(request.getParameter("customerId"));
             Query jpqlQuery  = em.createNamedQuery("Customer.findByCustomerId");
             jpqlQuery.setParameter("customerId", id);
+            jpqlQuery.setParameter("deleted", (short)0);
             List<Customer> customerList = jpqlQuery.getResultList();
 //            
             request.setAttribute("customer", customerList.get(0));
             request.setAttribute("action","edit");
-            request.setAttribute("userType",sessionUser.getSystemUserId());
+            request.setAttribute("userType",sessionUser.getSystemUserTypeId());
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = CUSTOMER_ADMIN;
@@ -890,6 +897,35 @@ public class CustomerController extends AppController  {
         return map;
     }
     
+    private void validateEmail(HttpServletRequest request,HttpServletResponse response){
+        
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            Query query = em.createNamedQuery("Customer.findByEmail");
+            query.setParameter("email",request.getParameter("email"));
+            
+            List<Customer> customer = query.getResultList();
+            
+            System.out.println("Customer count : " + customer.size());
+            
+            Integer code = customer.size() == 0 ? 1 : -1;
+            
+            Gson gson = new GsonBuilder().create();
+            
+            Map<String,String> map = new HashMap();
+            map.put("code", code.toString());
+            
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(gson.toJson(map));
+            response.getWriter().flush();
+            response.getWriter().close();
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
       /*TP: Getting the customer Id for public use*/
     public Long getSystemUserId(){
@@ -905,5 +941,6 @@ public class CustomerController extends AppController  {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
+    
+   
 }

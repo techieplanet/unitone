@@ -56,6 +56,12 @@
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_wallet')}">
                                 <li><a href="${pageContext.request.contextPath}/Agent?action=wallet">Agents Wallets</a></li>
                             </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_wallet')}">
+                                <li><a href="${pageContext.request.contextPath}/Agent?action=withdrawApproval">Pending Withdrawal Request</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_wallet')}">
+                                <li><a href="${pageContext.request.contextPath}/Agent?action=approvedWithdrawal">Approved Withdrawal Request</a></li>
+                            </c:if>
                           </ul>
                       </li>
                   </c:if>

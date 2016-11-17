@@ -80,6 +80,7 @@ public class AgentController extends AppController {
     private static String AGENTS_CREDIT_HISTORY = "/views/agent/credit_history.jsp";
     private static String AGENTS_DEBIT_HISTORY = "/views/agent/debit_history.jsp";
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
+    private final String APPROVED_WITHDRAWAL_REQUEST = "/views/agent/approved_withdrawal_request.jsp";
     private Agent agent = new Agent();
    
     private final static Logger LOGGER = Logger.getLogger(Agent.class.getCanonicalName());
@@ -187,6 +188,11 @@ public class AgentController extends AppController {
             viewFile = AGENTS_WITHDRAW_APPROVAL;
             request.setAttribute("notificationwithdrawalId", 0);
             request.setAttribute("withdrawals", getPendingWithdrawalRequest());
+        }
+        else if(action.equalsIgnoreCase("approvedWithdrawal")){
+            
+            viewFile = APPROVED_WITHDRAWAL_REQUEST;
+            request.setAttribute("withdrawals", getApprovedWithdrawalRequest());
         }
         else if (action.equalsIgnoreCase("view")){
                 viewFile = AGENTS_VIEW;
@@ -774,107 +780,6 @@ public class AgentController extends AppController {
             dispatcher.forward(request, response);
     }
     
-    
-   
-             
-    /*TP: Upload of the Agent's picture is done here*/
-    private String uploadAgentPicture(Agent agent,HttpServletRequest request,String agentFileName)throws PropertyException,ServletException,IOException{
-          String root = getServletContext().getRealPath("/");
-          String path = root+"/images/uploads/agents/";
-          long unixTime = System.currentTimeMillis() / 1000L;
-          if(( request.getPart("agentPhoto") != null ) || (!request.getParameter("agentPhotoHidden").isEmpty() && request.getParameter("agentPhotoHidden") != null )){
-                   if (request.getPart("agentPhoto")!=null){
-                /*TP: Agent personal file upload*/
-                        Part agentPartPhoto = request.getPart("agentPhoto"); 
-                        String myName = getFileName(agentPartPhoto);
-                         
-                         if(myName.isEmpty() && !request.getParameter("agentPhotoHidden").isEmpty() ){
-                            
-                              agentFileName = request.getParameter("agentPhotoHidden");
-                              agent.setPhotoPath(request.getParameter("agentPhotoHidden"));
-                         }else {
-                            
-                                int fnameLength = myName.length();
-                                int startingPoint = fnameLength - 4;
-                                myName = myName.substring(startingPoint,fnameLength);
-                                agentFileName = "agent_"+unixTime+myName;
-                                this.photoImageUpload(agentFileName,path,agentPartPhoto);
-                       }
-                   }
-                   else if(!request.getParameter("agentPhotoHidden").isEmpty()){
-                       agentFileName = request.getParameter("agentPhotoHidden");
-                       agent.setPhotoPath(request.getParameter("agentPhotoHidden"));
-                   }
-               
-         }
-     return agentFileName;
-     
-     }
-    
-    /*TP: Upload of the Agent's next of kin picture is done here*/
-    private String uploadAgentKinPicture(Agent agent,HttpServletRequest request, String agentKinFileName)throws PropertyException, ServletException, IOException{
-         String root = getServletContext().getRealPath("/");
-         String path = root+"/images/uploads/agents/";
-          long unixTime = System.currentTimeMillis() / 1000L;
-     if((request.getPart("agentKinPhoto")!= null) || (!request.getParameter("agentKinPhotoHidden").isEmpty() && request.getParameter("agentKinPhotoHidden") != null)){
-              
-                       
-                if( request.getPart("agentKinPhoto") !=null ){
-                       /*TP: Agent Kin personal file upload*/
-                               Part agentKinPartPhoto = request.getPart("agentKinPhoto");
-                               String myNameKin = "";
-                               myNameKin = getFileName(agentKinPartPhoto);
-                               System.out.println("This is the my name of the next of kin we are testing for "+request.getParameter("agentKinPhotoHidden"));
-                             if( myNameKin.isEmpty()&& (!request.getParameter("agentKinPhotoHidden").isEmpty())){
-                               agentKinFileName = request.getParameter("agentKinPhotoHidden");
-                               agent.setPhotoPath(request.getParameter("agentKinPhotoHidden"));
-                              }else {
-                               int fnameLengthK = myNameKin.length();
-                               int startingPointK = fnameLengthK - 4;
-                               myNameKin = myNameKin.substring(startingPointK,fnameLengthK);
-                               agentKinFileName = "agentKin_"+unixTime+myNameKin;
-                               photoImageUpload(agentKinFileName,path,agentKinPartPhoto);
-                }
-                          }
-                    else if(!request.getParameter("agentKinPhotoHidden").isEmpty()){
-
-                               agentKinFileName = request.getParameter("agentKinPhotoHidden");
-                               agent.setPhotoPath(request.getParameter("agentKinPhotoHidden"));
-                              }
-                    }
-     return agentKinFileName;
-     
-     }
-    
-    /*TP: This is a generic method for image upload*/
-    private void photoImageUpload(String agentFileName,String path, Part agentPartPhoto){
-    OutputStream fout = null;
-    InputStream filecontent = null;
-   
-      String type = agentPartPhoto.getHeader("content-type");
-   if(type.equals("image/jpeg") || type.equals("image/png") || type.equals("image/jpg") || type.equals("image/gif") || type.equals("image/bmp") )
-    {
-          try {
-            fout = new FileOutputStream(new File(path  + agentFileName));
-          
-            filecontent = agentPartPhoto.getInputStream();
-            
-            int read = 0;
-            final byte[] bytes = new byte[32*1024];
-// 
-            while ((read =filecontent.read(bytes)) != -1) {
-                fout.write(bytes, 0, read);
-            }
-            fout.flush();
-            fout.close();
-            } catch (Exception e) { 
-          errorMessages.put("error7","Invalid File Format");
-        }  
-    } else { 
-        errorMessages.put("error7","Invalid File Format");
-        } 
-    }
-    
     /*TP: Validation is done here*/
     private void validate(Agent agent, HttpServletRequest request) throws PropertyException, ServletException, IOException {
          errorMessages.clear();
@@ -1136,6 +1041,22 @@ public class AgentController extends AppController {
         return pendingWithdrawal;
     }
     
+    private List<Withdrawal> getApprovedWithdrawalRequest(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Withdrawal.findByApproved");
+        jplQuery.setParameter("approved", (short)1);
+        
+        List<Withdrawal> approvedWithdrawal = jplQuery.getResultList();
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        
+        return approvedWithdrawal;
+    }
+    
     private void approveWithdrawal(String withdrawal_id,HttpServletRequest req, HttpServletResponse res) throws IOException{
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -1145,8 +1066,8 @@ public class AgentController extends AppController {
         
         Withdrawal withdrawal = em.find(Withdrawal.class,id);
         
-        Long notificationId = Long.parseLong(req.getParameter("nof_id"));
-        Notification notification = em.find(Notification.class, notificationId);
+//        Long notificationId = Long.parseLong(req.getParameter("nof_id"));
+//        Notification notification = em.find(Notification.class, notificationId);
         
         WithdrawalManager manager = new WithdrawalManager(sessionUser);
         manager.processWithdrawalApproval(withdrawal, req.getContextPath());

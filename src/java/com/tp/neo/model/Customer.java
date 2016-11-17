@@ -26,6 +26,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -38,8 +39,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Customer.findAll", query = "SELECT c FROM Customer c"),
-    @NamedQuery(name = "Customer.findByAgent", query = "SELECT c FROM Customer c WHERE c.agent = :agent AND c.deleted = :deleted"),
-    @NamedQuery(name = "Customer.findByCustomerId", query = "SELECT c FROM Customer c WHERE c.customerId = :customerId"),
+    @NamedQuery(name = "Customer.findByAgent", query = "SELECT c FROM Customer c WHERE c.agent = :agent AND c.deleted = :deleted ORDER BY c.firstname"),
+    @NamedQuery(name = "Customer.findByCustomerId", query = "SELECT c FROM Customer c WHERE c.customerId = :customerId AND c.deleted = :deleted ORDER BY c.firstname"),
     @NamedQuery(name = "Customer.findByFirstname", query = "SELECT c FROM Customer c WHERE c.firstname = :firstname"),
     @NamedQuery(name = "Customer.findByMiddlename", query = "SELECT c FROM Customer c WHERE c.middlename = :middlename"),
     @NamedQuery(name = "Customer.findByLastname", query = "SELECT c FROM Customer c WHERE c.lastname = :lastname"),
@@ -54,7 +55,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customer.findByKinPhone", query = "SELECT c FROM Customer c WHERE c.kinPhone = :kinPhone"),
     @NamedQuery(name = "Customer.findByKinAddress", query = "SELECT c FROM Customer c WHERE c.kinAddress = :kinAddress"),
     @NamedQuery(name = "Customer.findByKinPhotoPath", query = "SELECT c FROM Customer c WHERE c.kinPhotoPath = :kinPhotoPath"),
-    @NamedQuery(name = "Customer.findByDeleted", query = "SELECT c FROM Customer c WHERE c.deleted = :deleted"),
+    @NamedQuery(name = "Customer.findByDeleted", query = "SELECT c FROM Customer c WHERE c.deleted = :deleted ORDER BY c.firstname"),
     @NamedQuery(name = "Customer.findByActive", query = "SELECT c FROM Customer c WHERE c.active = :active"),
     @NamedQuery(name = "Customer.findByVerificationStatus", query = "SELECT c FROM Customer c WHERE c.verificationStatus = :verificationStatus"),
     @NamedQuery(name = "Customer.findByCreatedDate", query = "SELECT c FROM Customer c WHERE c.createdDate = :createdDate"),
@@ -137,8 +138,11 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer")
     private CustomerBalance customerBalance;
 
-    //Extra
-    transient final Integer USERTYPEID = 3;
+    @Transient
+    private final Integer USERTYPEID = 3;
+    
+    @Transient
+    private String permissions = "";
     
     public Customer() {
     }
@@ -384,12 +388,12 @@ public class Customer implements Serializable, ITrailable, SystemUser {
 
     @Override
     public String getPermissions() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return permissions;
     }
 
     @Override
     public void setPermissions(String permissions) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.permissions = permissions;
     }
 
   
