@@ -50,6 +50,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <link rel="stylesheet" href="css/skins/skin-blue.min.css" type="text/css" />
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/custom.css" type="text/css" />
+    
+    <!-- ICheck fronteed skin css-->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/line.css" type="text/css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/green.css" type="text/css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/blue.css" type="text/css" />
+    
     <!-- jQuery 2.1.4 -->
     <!--<script src="plugins/jQuery/jQuery-2.1.4.min.js"></script>-->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-2.1.4.min.js"></script>
@@ -58,7 +64,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!--JQUERY UI JS-->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.12.1.js"></script>
 
-
+    
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>

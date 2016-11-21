@@ -339,12 +339,7 @@ function addToCart(event){
   var monthlyPayPerQuantity = accounting.unformat($("#monthlyPayPerQuantity").text());
   var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
   
-  //alert(productName+" "+productId+" "+productUnitName+" "+productUnitId+" "+productQuantity);
-  
-//  var dataArray = [];
-//  dataArray.push(productName,productId,productUnitName,productUnitId,productQuantity,productAmount,amountUnit,amountTotalUnit,
-//  initialAmountPerUnit,minInitialAmountSpan,productMinimumInitialAmount,amountLeft,payDurationPerUnit,payDurationPerQuantity,productMaximumDuration,monthlyPayPerUnit,monthlyPayPerQuantity,productMinimumMonthlyPayment);
-//  
+   
   
   var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuanity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
@@ -971,12 +966,9 @@ function getProjectQuantity(appName, entityName){
 function monthlyPayCalculator(){
     $("#addToCart").attr("disabled",false);
     var productAmount = $("#productAmount").val();
-    //alert(productAmount);
     var quantity = $("#selectQuantity").val();
     var productMinimumInitialAmount = $("#productMinimumInitialAmount").val();
-    //alert(productMinimumInitialAmount);
     var productMaximumDuration = $("#productMaximumDuration").val();
-    //alert(productMaximumDuration);
     var payLeft = productAmount - productMinimumInitialAmount;
     $("#amountLeft").val(payLeft);
     var monthlyPay = payLeft / productMaximumDuration;
@@ -1069,23 +1061,17 @@ function calculateDurationFromMonthlyPay(){
 /*TP: calculate the product amount from the quantity*/
 function calculateProductAmount(){
     var data = $("#dataHidden").val();
-    //alert(data);
     var resp = JSON.parse(data);
     
     var cpu = resp.cpu;
-    //alert(cpu);
     var quantity = $("#selectQuantity").val();
     var duration = resp.mpd;
-    //$( quantity ).prependTo( "#qty" );
-    //alert("The quantity is "+quantity);
     $('span[id="qty"]').text( quantity);
     var discount = resp.discount;
     var totalDiscount = 0;
     if(discount>0){
         totalDiscount = discount * quantity;
     }
-    //var totalDiscount = discount * quantity;
-    //alert(quantity);
     var amount = quantity * cpu;
     var mpd = resp.mpd;
     var defaultDiscount = 0;

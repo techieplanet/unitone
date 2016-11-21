@@ -70,7 +70,17 @@
                                     <h4>${unit.getTitle()}</h4>
                                     <span><fmt:formatNumber value="${unit.getCpu()}" type="currency" currencySymbol="N" /></span><br />
                                     <span>Qty : ${unit.getQuantity()}</span> 
-                                    <p class="text-center"><input type="checkbox" class="unit_check" name="unit_id" value="${unit.getId()}" /></p>
+                                    <p class="text-center">
+                                        <input type="checkbox"  class="unit_check" name="unit_id" value="${unit.getId()}" autocomplete="off"
+                                               
+                                               <c:forEach items="${unit_cart}" var="cartUnit">
+                                                   <c:if test="${cartUnit.getId() == unit.getId()}">
+                                                       disabled checked
+                                                   </c:if>
+                                               </c:forEach>
+                                        >
+                                            <label>Select</label>
+                                    </p>
                                   </div>
                                 </div>
                               </div>
@@ -89,8 +99,8 @@
                          
                     <div class="panel panel-default">
                       <div class="panel-body">
-                          <button type="submit" class="btn btn-primary"><i class="fa fa-cart-plus"></i> Add to cart</button>
-                          <a href="${pageContext.request.contextPath}/Project?action=listprojects" class="btn btn-success pull-right"><i class="fa fa-undo"></i> Continue</a>
+                          <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-cart-plus"></i> Add to cart</button>
+                          <a href="${pageContext.request.contextPath}/Project?action=listprojects" class="btn btn-success pull-left"><i class="fa fa-undo"></i> Continue</a>
                       </div>
                     </div>    
                     
@@ -142,9 +152,18 @@
         },
         
         initCheckBox : function(){
-            $(".unit_check").iCheck({
-                checkboxClass: 'icheckbox_minimal-blue'
+            $('.unit_check').each(function(){
+              var self = $(this);
+              label = self.next();
+              label_text = label.text();
+
+            label.remove();
+            self.iCheck({
+              checkboxClass: 'icheckbox_line-blue',
+              radioClass: 'iradio_line-blue',
+              insert: '<div class="icheck_line-icon"></div>' + label_text
             });
+          });
         }
 
     }

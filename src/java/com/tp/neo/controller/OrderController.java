@@ -69,6 +69,7 @@ public class OrderController extends AppController {
     private static String ORDER_NEW = "/views/order/add.jsp";
     private final  String ORDER_APPROVAL = "/views/order/approval.jsp";
     private final String ORDER_NOTIFICATION_ROUTE = "/Order?action=notification&id=";
+    private final String CART_CHECKOUT = "/views/order/ecommerce_order.jsp";
     
     private final static Logger LOGGER = 
             Logger.getLogger(Customer.class.getCanonicalName());
@@ -162,8 +163,8 @@ public class OrderController extends AppController {
         EntityManager em = emf.createEntityManager();
         String viewFile = ORDER_ADMIN; 
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
-        String customerId = request.getParameter("customer") != null ? request.getParameter("customer") : "";
-        customerId = customerId.trim();
+        Long customerId = request.getParameter("customer") != null ? Long.parseLong(request.getParameter("customer")) : null;
+        
         
         ProjectController project = new ProjectController();
         AgentController agent = new AgentController();
@@ -173,7 +174,7 @@ public class OrderController extends AppController {
         SystemUser user = sessionUser;
         System.out.println("System User : " + user);
         
-        request.setAttribute("userType", user.getSystemUserTypeId());
+        request.setAttribute("userType", sessionUser.getSystemUserTypeId());
         request.setAttribute("agents",agent.listAgents());
        
         
@@ -182,6 +183,12 @@ public class OrderController extends AppController {
         if (action.equalsIgnoreCase("new")){
                viewFile = ORDER_NEW;
                request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
+        }
+        else if (action.equalsIgnoreCase("checkOut")){
+               
+               viewFile = CART_CHECKOUT;
+               request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
+               
         }
         else if(action.equalsIgnoreCase("approval")) {
             viewFile = ORDER_APPROVAL; 
@@ -256,7 +263,7 @@ public class OrderController extends AppController {
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         
-        String action = request.getParameter("action");
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
         if(action.equals("approveOrder")){
             
@@ -284,7 +291,7 @@ public class OrderController extends AppController {
         
         for(SaleItemObject s : sales) {
             System.out.println("Product Name : " + s.productName);
-            System.out.println("Product Qty : " + s.productQuanity);
+            System.out.println("Product Qty : " + s.productQuantity);
             System.out.println("Product Amount Per Unit " + s.amountUnit);
             System.out.println("Product Cost" + s.amountTotalUnit);
         }
@@ -300,7 +307,16 @@ public class OrderController extends AppController {
             Agent agent = null;
             Customer customer = null;
             
-            Long customerId = Long.parseLong(request.getParameter("customer_id"));
+            Long customerId = null;
+            
+            if(request.getParameter("customer_id") != null){
+                
+                customerId = Long.parseLong(request.getParameter("customer_id"));
+                
+            }else{
+                customerId = sessionUser.getSystemUserId();
+            }
+            
             customer  = em.find(Customer.class, customerId);
             
             if(sessionUser.getSystemUserTypeId() == 1){
@@ -321,8 +337,7 @@ public class OrderController extends AppController {
             SaleItemObjectsList saleItemObject = getCartData(request);
             
             //Get Session User
-            HttpSession session = request.getSession();
-            SystemUser user  = (SystemUser) session.getAttribute("user");
+            SystemUser user  = sessionUser;
             
             List<OrderItem> orderItems = prepareOrderItem(saleItemObject, agent);
             Lodgement lodgement = prepareLodgement(getRequestParameters(request), agent);
@@ -373,6 +388,9 @@ public class OrderController extends AppController {
                         request.setAttribute("customer",customer);
             }
             
+            em.close();
+            emf.close();
+            
             request.getRequestDispatcher(viewFile).forward(request, response);
             
         } catch (PropertyException ex) {
@@ -380,7 +398,9 @@ public class OrderController extends AppController {
         } catch (RollbackException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+        finally{
+            
+        }
 
     }
     
@@ -416,12 +436,12 @@ public class OrderController extends AppController {
             long unitId = saleItem.productUnitId;
             ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
             
-            orderItem.setQuantity(saleItem.productQuanity);
+            orderItem.setQuantity(saleItem.productQuantity);
             orderItem.setInitialDep((double)(saleItem.productMinimumInitialAmount));
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
             orderItem.setCreatedDate(getDateTime().getTime());
-            orderItem.setCreatedBy(agent.getAgentId());
+            orderItem.setCreatedBy(sessionUser.getSystemUserId());
             orderItem.setApprovalStatus(approval);
             orderItem.setUnit(projectUnit);
             
@@ -443,8 +463,10 @@ public class OrderController extends AppController {
         CompanyAccount companyAccount = em.find(CompanyAccount.class, Integer.parseInt(request.get("companyAccount").toString()));
         
         lodgement.setPaymentMode(paymentMethod);
+        lodgement.setLodgmentDate(this.getDateTime().getTime());
         lodgement.setCreatedDate(this.getDateTime().getTime());
-        lodgement.setCreatedBy(agent.getAgentId());
+        lodgement.setCreatedBy(sessionUser.getSystemUserId());
+        lodgement.setCreatedByUserType(Short.parseShort((sessionUser.getSystemUserTypeId()).toString()));
         lodgement.setCompanyAccountId(companyAccount);
         lodgement.setApprovalStatus((short)0);
         
@@ -984,5 +1006,7 @@ public class OrderController extends AppController {
         return map;
     }
    
+    
+    
    
 }

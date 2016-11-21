@@ -95,7 +95,7 @@
                   
                   </p>
                   
-                  <a href="${pageContext.request.contextPath}" class="btn btn-primary">Login to Dashboard</a>
+                  <a href="${pageContext.request.contextPath}/Dashboard" class="btn btn-primary">Continue to Dashboard</a>
                   
               </div>
           </div>

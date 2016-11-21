@@ -167,8 +167,10 @@
                                             <label for="selectProdcut">Select Customer</label>
                                             
                                             <select class="form-control select2" id="selectCustomer" name="customer_id" style="width: 100%;" onchange="" <c:if test="${customer.customerId != null && customer.customerId!=''}">disabled</c:if>>
+                                              
+                                              <c:if test="${userType != 3}">  
                                                 <option value="" selected="selected">-- choose --</option>
-                                                
+                                              </c:if>  
                                               <c:forEach items="${customers}" var="customer" >  
                                               
                                               <option  value="${customer.customerId}"  <c:if test="${customerId == customer.customerId}"> <jsp:text>selected</jsp:text> </c:if> >${customer.firstname} ${customer.lastname}</option>

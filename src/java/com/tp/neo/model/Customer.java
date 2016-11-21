@@ -350,12 +350,14 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         return hash;
     }
 
+    @Override
     public Long getSystemUserId(){
        return getCustomerId();
     }
     
+    @Override
     public Integer getSystemUserTypeId(){
-        return USERTYPEID;
+        return 3;
     }
      
     @Override

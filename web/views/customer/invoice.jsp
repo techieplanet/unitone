@@ -150,7 +150,7 @@
                             <td>${item.getQuantity()}</td>
                             <td>${item.getUnit().getProject().getName()} - ${item.getUnit().getTitle()}</td>
                             <td>${item.getUnit().getProject().getDescription()}</td>
-                            <td>${item.getInitialDep()}</td>
+                            <td><fmt:formatNumber value="${item.getInitialDep()}" type="currency" currencySymbol="N" /></td>
                         </tr>
                     </c:forEach>
                     
@@ -158,19 +158,19 @@
                 <tfoot>
                     <tr>
                         <td colspan="4" style="text-align: right">Total : </td>
-                        <td>${totalInvoice}</td>
+                        <td><fmt:formatNumber value="${totalInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
                         <td colspan="4" style="text-align: right">VAT : </td>
-                        <td>${vatInvoice}</td>
+                        <td><fmt:formatNumber value="${vatInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
                         <td colspan="4" style="text-align: right">Gateway charge : </td>
-                        <td>${gatewayChargeInvoice}</td>
+                        <td><fmt:formatNumber value="${gatewayChargeInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
                         <td colspan="4" style="text-align: right">Grand Total : </td>
-                        <td>${grandTotalInvoice}</td>
+                        <td><fmt:formatNumber value="${grandTotalInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                 </tfoot>
               </table>
@@ -185,7 +185,7 @@
             </div><!-- /.col -->
             
             <div class="col-md-12">
-                <a href="${pageContext.request.contextPath}" class="btn btn-primary">Login to Dashboard</a>
+                <a href="${pageContext.request.contextPath}/Dashboard" class="btn btn-primary">Continue to Dashboard</a>
             </div>
           </div><!-- /.row -->
 

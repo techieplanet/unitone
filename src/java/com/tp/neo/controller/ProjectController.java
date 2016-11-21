@@ -68,7 +68,7 @@ public class ProjectController extends AppController {
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
         if(action.equalsIgnoreCase("punits")){
-                  int id = Integer.parseInt(request.getParameter("project_id"));
+                  long id = Long.parseLong(request.getParameter("project_id"));
                   sendProjectUnitsData(request, response,id);
                   return;
          }
@@ -86,7 +86,7 @@ public class ProjectController extends AppController {
     }
     
     
-    protected void sendProjectUnitsData(HttpServletRequest request, HttpServletResponse response,int id) throws ServletException, IOException{
+    protected void sendProjectUnitsData(HttpServletRequest request, HttpServletResponse response,long id) throws ServletException, IOException{
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         Project project = em.find(Project.class, id);
@@ -179,6 +179,11 @@ public class ProjectController extends AppController {
             viewFile = ECOMMERCE_UNITS;
             request.setAttribute("projectUnits", getUnits(request));
         }
+        else if(sessionUser.getSystemUserTypeId() == 3 && action.equalsIgnoreCase("removeFromCart")){
+            
+            removeFromCart(request, response);
+            return;
+        }
         else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
             viewFile = PROJECTS_ADMIN;
             request.setAttribute("projects", listProjects());
@@ -214,7 +219,11 @@ public class ProjectController extends AppController {
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
                 if(action.equalsIgnoreCase("addToCart")){
                     addToCart(request,response);
-                    return;
+                    
+                }
+                else if(action.equalsIgnoreCase("removeFromCart")){
+                    removeFromCart(request, response);
+                    
                 }
                 else if(request.getParameter("id").equals("")){
                     processInsertRequest(request, response);
@@ -502,6 +511,42 @@ public class ProjectController extends AppController {
         response.sendRedirect("Project?action=listunits&project_id="+project_id);
             
     }
+    
+    private void removeFromCart(HttpServletRequest request,HttpServletResponse response) throws IOException{
+        
+        
+        long project_id = 0;
+     
+        long unitId =Long.parseLong(request.getParameter("unit_id"));
+         
+        HttpSession session = request.getSession();
+        List<ProjectUnit> units = (List<ProjectUnit>)session.getAttribute("unit_cart");
+        
+        if(units != null){
+            int counter = 0;
+            int deleteIndex = -1;
+            
+            for(ProjectUnit unit : units){
+                
+                if(unitId == unit.getId()){
+                    deleteIndex = counter;
+                    project_id = unit.getProject().getId();
+                }
+                
+                counter += 1;
+            }
+            
+            if(deleteIndex != -1)
+                units.remove(deleteIndex);
+        }
+        
+        session.setAttribute("unit_cart", units);
+       
+        response.sendRedirect("Project?action=listunits&project_id="+project_id);
+            
+    }
+    
+    
      
     /**
      * Returns a short description of the servlet.
