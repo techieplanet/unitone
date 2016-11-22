@@ -188,7 +188,7 @@
                 "columnDefs": [
                     { "sortable": false, "width":"50px", "targets": 4 }
                 ],
-                "order": [[ 0, "desc" ]]
+                "order": [[ 0, "asc" ]]
         });
     
       

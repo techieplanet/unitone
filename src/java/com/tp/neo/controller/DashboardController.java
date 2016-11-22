@@ -154,6 +154,9 @@ public class DashboardController extends AppController {
                 //request.setAttribute("topFiveAgentLocations", helper.getTopFiveAgentLocations());  //not needed anymore
                 //System.out.println("top: " + em.createNamedQuery("Agent.findByTopSellingLocations").getResultList().size());
                 
+                //Keep track of the sideBar
+                request.setAttribute("sideNav", "Dashboard");
+                
                 RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
                 dispatcher.forward(request, response);
             }

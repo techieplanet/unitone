@@ -23,23 +23,15 @@
   <!-- general form elements -->
 
     <!-- form start -->
-   <div class="box box-primary">
-       <form role="form" name="new_order" method="POST" action="${pageContext.request.contextPath}/Order" >
+    <form role="form" name="new_order" method="POST" action="${pageContext.request.contextPath}/Order" onsubmit="return ecommerce.submitForm()" >
 
     <input type="hidden" name="agent_id" id="agent_id" value="" />
 
-    <div class="box-header with-border">
-      <h3 class="box-title">Product Order Form 
-
-
-      </h3>
-    </div><!-- /.box-header -->
+   
     <!-- form start -->
     <div style="background:#ecf0f5 !important;">
     <!--<form role="form" name="customerRegistration" method="POST" action="Order" enctype="multipart/form-data">-->
-      <div class="box-body"> 
-               
- 
+      
       <div class="row">
       <div class="col-md-12">
 
@@ -103,7 +95,8 @@
                   </table>
               </div>
               <div class="panel-footer">
-                  <a class="btn btn-success"  onclick="ecommerce.proceedToPayment(event)">Proceed to Payment</a>
+                  <a class="btn btn-success"  onclick="ecommerce.proceedToPayment(event)">Proceed to Payment</a> &nbsp;&nbsp;
+                  <a href="${pageContext.request.contextPath}/Project?action=listprojects"  class="btn btn-primary">Continue shopping</a>
               </div>
          </div>
           
@@ -117,14 +110,14 @@
         <div class="col-md-12" >
                       
                     	<fieldset>
-                        <legend style="padding-left:20px !important;">Check Out</legend>
+                        <legend style="padding-left:20px !important;">Payment</legend>
                                 
                             <div class="col-md-11" >
                             	
                                 <!-- Start of Payment Method Container -->
                                 <div class="row" > 
                                     <div class="col-md-12">
-                                        <span style="color:green;font-weight:bold;">You'd be paying <span id='paySum'></span></span>
+                                        <span style="color:green;font-weight:bold;font-size: 21px">You'd be paying <span id='paySum'></span></span>
                                     	<div class="form-group">
                                             <label for="paymentMethod">Payment method:</label><br/>
                                             <input type="radio" name="paymentMethod" value="1" id="bankdep" onclick="showNecessaryMenu(1)"/>&nbsp;<label for="bankdep" style="display:inline !important;">Bank Deposit</label>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -136,7 +129,7 @@
                                         </div>
                                     </div>
                                             
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="companyAccount">Company Account</label>
                                             <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
@@ -209,10 +202,10 @@
                                 <div class='row' id='pwCard'>
                                 	<div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="tellerNumber">Click to proceed to payment</label>
+                                                <label for="tellerNumber"></label>
                                                 <!--<a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
                                                 --> <button type="submit"  name="Pay" class="btn btn-success"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
-                                                <input type="hidden" class="form-control amount-box" id="transfer_bankName" name="cardAmount" >
+                                                <input type="hidden" class="form-control amount-box"  name="cardAmount" >
                                             </div> 
                                         </div>
                                 </div>
@@ -231,14 +224,14 @@
                                     <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="accountNo">Depositor's Account No</label>
-                                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
+                                            <input type="text" class="form-control" id="transfer_accountNo" name="transfer_accountNo" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
                                     <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="accountNo">Depositor's Account Name</label>
-                                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
+                                            <input type="text" class="form-control" id="transfer_accountName" name="transfer_accountName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
@@ -266,16 +259,8 @@
                     	
                 </div> <!--/.col-md-12 -->
             </div> <!--/.row -->
-        </div> <!--/.box box-default -->
-           
-          <!-- 
-            *****************************************
-            Product Cart Ends here
-            *****************************************
-          -->
-          
-      </div> <!---/.col-md-4 Box-Body class div ends here -->
-
+        </div>
+                          
       </div><!-- /.row -->
               
       <input type="hidden" name="customer_id" id="id" value="${customerId}">
@@ -283,7 +268,6 @@
       <input type="hidden" name="cartDataJson" id="cartDataJson" />
       
       </form>
-    </div>
 
   </div><!-- /.box -->
   
@@ -293,10 +277,10 @@
                 <table class="table">
           <!-- title row -->
                   <tr>
-                    <td colspan="3">
+                    <td>
                         <i class="fa fa-globe"></i> NEOFORCE, SFA.
                     </td>
-                    <td>
+                    <td style="text-align:right">
                         <small class="invoice_date"></small>
                     </td><!-- /.col -->
                   </tr>
@@ -370,7 +354,8 @@
 
                   <div class="row">
                       
-                      <a href="#" onclick="ecommerce.pay(event)" class="btn btn-success">Proceed to Pay</a>
+                      <a href="#" onclick="ecommerce.pay(event)" class="btn btn-success">Proceed to Pay</a>&nbsp;&nbsp;
+                      <a href="${pageContext.request.contextPath}/Project?action=listprojects"  class="btn btn-primary">Continue shopping</a>
                   </div>
         </section>
               
@@ -601,6 +586,57 @@
            $("#paymentCheckout:hidden").toggle();
            
            return false;
+       },
+       
+       submitForm : function(){
+           
+           var submitOk = true;
+           
+           var payment_mode = $('input:radio[name=paymentMethod]:checked').val();
+           
+           var companyAccount = $("#companyAccount").val();
+           
+           if(companyAccount == ""){
+               
+               alert("Please select company account");
+               submitOk = false;
+           } 
+           else if(payment_mode == 1){
+               
+               var depositorsName = $("#depositorsName").val();
+               var tellerNumber = $("#tellerNumber").val();
+                       
+               if( $.trim(depositorsName) == ""){
+                   alert("Please Enter depositors name");
+                   submitOk = false;
+               }
+               else if($.trim(tellerNumber) == ""){
+                   alert("Please enter teller number");
+                   submitOk = false;
+               }
+           }
+           else if(payment_mode == 4){
+               
+               var transfer_bankName = $("#transfer_bankName").val();
+               var transfer_accountNo = $("#transfer_accountNo").val();
+               var transfer_accountName = $("#transfer_accountName").val();
+               
+               if($.trim(transfer_bankName) == ""){
+                   alert("Please enter Bank Name");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountNo) == ""){
+                   alert("Please enter account number");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountName) == ""){
+                   alert("Please enter account Name");
+                   submitOk = false;
+               }
+               
+           }
+           
+           return submitOk;
        }
        
     }

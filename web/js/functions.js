@@ -341,7 +341,7 @@ function addToCart(event){
   
    
   
-  var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuanity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
+  var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuantity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
   productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment}
   
@@ -479,7 +479,7 @@ function editDataFromCart(id){
   var productId = dataArray.productId;
   var productUnitName = dataArray.productUnitName;
   var productUnitId = dataArray.productUnitId;
-  var productQuantity = dataArray.productQuanity;
+  var productQuantity = dataArray.productQuantity;
   var productAmount = dataArray.productAmount;
   var amountUnit = dataArray.amountUnit;
   var amountTotalUnit = dataArray.amountTotalUnit;
@@ -557,7 +557,7 @@ function updateUnit(id){
     //alert(datajson);
     var dataArray = JSON.parse(datajson);
     var productUnitId = dataArray.productUnitId;
-    var productQuantity = dataArray.productQuanity;
+    var productQuantity = dataArray.productQuantity;
     var productMinimumInitialAmount = dataArray.productMinimumInitialAmount;
     var productAmount = dataArray.productAmount;
     var productMaximumDuration = dataArray.productMaximumDuration;
@@ -1452,3 +1452,54 @@ function thousandSeparator(number){
     
     return value;
 }
+
+    function submitForm(){
+           
+           var submitOk = true;
+           
+           var payment_mode = $('input:radio[name=paymentMethod]:checked').val();
+           
+           var companyAccount = $("#companyAccount").val();
+           
+           if(companyAccount == ""){
+               
+               alert("Please select company account");
+               submitOk = false;
+           } 
+           else if(payment_mode == 1){
+               
+               var depositorsName = $("#depositorsName").val();
+               var tellerNumber = $("#tellerNumber").val();
+                       
+               if( $.trim(depositorsName) == ""){
+                   alert("Please Enter depositors name");
+                   submitOk = false;
+               }
+               else if($.trim(tellerNumber) == ""){
+                   alert("Please enter teller number");
+                   submitOk = false;
+               }
+           }
+           else if(payment_mode == 4){
+               
+               var transfer_bankName = $("#transfer_bankName").val();
+               var transfer_accountNo = $("#transfer_accountNo").val();
+               var transfer_accountName = $("#transfer_accountName").val();
+               
+               if($.trim(transfer_bankName) == ""){
+                   alert("Please enter Bank Name");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountNo) == ""){
+                   alert("Please enter account number");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountName) == ""){
+                   alert("Please enter account Name");
+                   submitOk = false;
+               }
+               
+           }
+           
+           return submitOk;
+       }

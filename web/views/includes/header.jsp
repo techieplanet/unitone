@@ -60,6 +60,7 @@
                           
                           <a class="list-group-item">
                           <div class="col-md-8">
+                              <span>${cart.getProject().getName()}</span><br />
                               <span>${cart.getTitle()}</span><br />
                               <span><fmt:formatNumber value="${cart.getCpu()}" type="currency" currencySymbol="N" /></span><br />
                           </div>

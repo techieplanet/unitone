@@ -38,8 +38,8 @@
                   <table id="customerList" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
+                        <th>SN</th>
                         <th>Image</th>
-                        <th>ID</th>
                         <th>First Name</th>
                         <th>Middle Name</th>
                         <th>Last Name</th>
@@ -53,10 +53,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                        <c:forEach items="${customers}" var="customer">
-                            <tr id="row<c:out value="${customer.customerId}" />">
+                        <c:forEach items="${customers}" var="customer" varStatus="pointer">
+                            <tr id="row<c:out value="${pointer.count}" />">
+                                <td><c:out value="${pointer.count}" /></td>
                                 <td><img src="/uploads/NeoForce/images/customer/${customer.photoPath}" width='55' height='50'/></td>
-                                <td><c:out value="${customer.customerId}" /></td>
                                 <td><c:out value="${customer.firstname}" /></td>
                                 <td><c:out value="${customer.middlename}" /></td>
                                 <td><c:out value="${customer.lastname}" /></td>
@@ -79,8 +79,8 @@
                   </tbody>
                     <tfoot>
                       <tr>
+                        <th>SN</th>
                         <th>Image</th>
-                        <th>ID</th>
                         <th>First Name</th>
                         <th>Middle Name</th>
                         <th>Last Name</th>
@@ -139,7 +139,7 @@
         
         $(function () {
             $("#customerList").DataTable({
-                order :[[1,"desc"]]
+                order :[[0,"asc"]]
             });
           });
           

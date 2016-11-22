@@ -112,7 +112,7 @@
                
                 <!-- form start -->
                <div class="box box-primary">
-                   <form role="form" name="customerRegistration" method="POST" action="${pageContext.request.contextPath}/Order?action=new_order" enctype="multipart/form-data">
+                   <form role="form" name="customerRegistration" method="POST" action="${pageContext.request.contextPath}/Order?action=new_order" enctype="multipart/form-data" onsubmit="return submitForm()">
                 
                 <input type="hidden" name="agent_id" id="agent_id" value="" />
                    

@@ -22,9 +22,6 @@
                                 <li><a href="${pageContext.request.contextPath}/Customer?action=new">New Customer</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=new">Make Lodgement</a></li>
-                            </c:if>
-                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
                                 <li><a href="${pageContext.request.contextPath}/Customer?action=current">Currently Paying</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
@@ -73,7 +70,27 @@
                         </li>
                   </c:if>
                         
-                        
+                   <!--Lodgement-->
+                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                        <li class="treeview <c:out value='${sideNav eq "Lodgement" ? "active":""}' />" >
+                          <a href="#"><i class="fa fa-users"></i><span>Lodgement</span><i class="fa fa-angle-left pull-right"></i></a>
+                          <ul class="treeview-menu">
+                            <li><a href="${pageContext.request.contextPath}/Lodgement">All</a></li>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=list_pending">Pending Lodgment</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=new">Make Lodgment</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=list_approved">Approved Lodgment</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=list_unapproved">Declined Lodgment</a></li>
+                            </c:if>
+                          </ul>
+                        </li>
+                  </c:if>     
                 
                   <!--ANNOUNCEMENT-->
                   <li class="treeview">

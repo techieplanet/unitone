@@ -124,7 +124,7 @@
  </div>
                                 
 </c:if>  
-<form role="form" name="customerRegistration" method="POST" action="Customer?action=new" enctype="multipart/form-data">
+<form role="form" name="customerRegistration" method="POST" action="Customer?action=new" enctype="multipart/form-data" onsubmit="return submitForm()">
   
     <input type="hidden" name="customer_id" value="" />
     <input type="hidden" name="agent_id" id="agent_id" value="" />
@@ -632,7 +632,7 @@
                                 <div class="col-md-2 pull-right">
                                    <div id="addToCartLabel"  style="margin: 0 auto !important;" >
                                     	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
                                         </div> 
                                    </div>
                                </div>

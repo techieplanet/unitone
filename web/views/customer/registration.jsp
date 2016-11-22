@@ -118,7 +118,7 @@
     </div>
 </div>
 
-<form role="form" name="customerRegistration" method="POST" action="CustomerRegistration" enctype="multipart/form-data">
+<form role="form" name="customerRegistration" method="POST" action="CustomerRegistration" enctype="multipart/form-data" onsubmit="return submitForm()">
   
     <input type="hidden" name="customer_id" value="" />
     <input type="hidden" name="agent_id" id="agent_id" value="21" />
@@ -942,6 +942,58 @@
               radioClass: 'iradio_flat-green'
             });
         });
+        
+        function submitForm(){
+           
+           var submitOk = true;
+           
+           var payment_mode = $('input:radio[name=paymentMethod]:checked').val();
+           
+           var companyAccount = $("#companyAccount").val();
+           
+           if(companyAccount == ""){
+               
+               alert("Please select company account");
+               submitOk = false;
+           } 
+           else if(payment_mode == 1){
+               
+               var depositorsName = $("#depositorsName").val();
+               var tellerNumber = $("#tellerNumber").val();
+                       
+               if( $.trim(depositorsName) == ""){
+                   alert("Please Enter depositors name");
+                   submitOk = false;
+               }
+               else if($.trim(tellerNumber) == ""){
+                   alert("Please enter teller number");
+                   submitOk = false;
+               }
+           }
+           else if(payment_mode == 4){
+               
+               var transfer_bankName = $("#transfer_bankName").val();
+               var transfer_accountNo = $("#transfer_accountNo").val();
+               var transfer_accountName = $("#transfer_accountName").val();
+               
+               if($.trim(transfer_bankName) == ""){
+                   alert("Please enter Bank Name");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountNo) == ""){
+                   alert("Please enter account number");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountName) == ""){
+                   alert("Please enter account Name");
+                   submitOk = false;
+               }
+               
+           }
+           
+           return submitOk;
+       }
+       
       </script>
                                       
    

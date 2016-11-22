@@ -24,6 +24,32 @@
     
     <section class="content">
         
+            
+            <c:if test="${fn:length(errors) > 0 }">
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <p class="bg-danger padding10" style="width:100%; margin:0 auto !important">
+                          <c:forEach items="${errors}" var="error">
+                              <c:out value="${error.value}" /><br/>
+                          </c:forEach>
+                        </p>
+                    </div>
+                </div>
+            </c:if>
+        
+          <c:if test="${success}">
+              <div class="row">
+                    <div class="col-md-12 ">
+                        <p class="bg-success padding10" style="width:95%">
+                          <i class="fa fa-check"></i>Lodgement Approval was Successful
+                        </p>
+                    </div>
+                </div>
+                <c:remove scope="session" var="success"  />
+          </c:if> 
+        
+        
+        
          <div class="panel-group" id="accordion2" role="tablist" aria-multiselectable="true">
               
               <c:forEach items="${lodgements}" var="lodgement" varStatus="lodgementCount">

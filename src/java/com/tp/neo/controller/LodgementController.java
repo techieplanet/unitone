@@ -228,6 +228,8 @@ public class LodgementController extends AppController {
             request.setAttribute("table_title", "All Lodgments");
          }
         
+            //Keep track of the sideBar
+            request.setAttribute("sideNav", "Lodgement");   
      
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
@@ -528,6 +530,7 @@ public class LodgementController extends AppController {
             LodgementManager manager = new LodgementManager(sessionUser);
             manager.approveLodgement(lodgement, notification, request.getContextPath());
             
+            request.getSession().setAttribute("success", true);
             
         } catch (PropertyException ex) {
             Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);

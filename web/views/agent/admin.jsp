@@ -50,8 +50,8 @@
                   <table id="entitylist" class="table table-bordered table-striped"  style="font-size: 14px;">
                     <thead>
                       <tr>
+                        <th>SN</th>
                         <th>Image</th>
-                        <th>ID</th>
                         <th>First Name</th>
                         <th>Middle Name</th>
                         <th>Last Name</th>
@@ -64,11 +64,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                        <c:forEach items="${agents}" var="agent">
+                        <c:forEach items="${agents}" var="agent" varStatus="pointer">
                             <tr id="row<c:out value="${agent.agentId}" />">
-                                <!--<td><img src="${pageContext.request.contextPath}/build/images/uploads/agents/${agent.photoPath}" width='55' height='50'/></td>-->
+                                <td><c:out value="${pointer.count}" /></td>
                                 <td><img src="${agentImageAccessDir}/${agent.photoPath}" width='55' height='50'/></td>
-                                <td><c:out value="${agent.agentId}" /></td>
                                 <td><c:out value="${agent.firstname}" /></td>
                                 <td><c:out value="${agent.middlename}" /></td>
                                 <td><c:out value="${agent.lastname}" /></td>
@@ -97,8 +96,8 @@
                   </tbody>
                     <tfoot>
                       <tr>
+                        <th>SN</th>
                         <th>Image</th>
-                        <th>ID</th>
                         <th>First Name</th>
                         <th>Middle Name</th>
                         <th>Last Name</th>
@@ -194,6 +193,7 @@
                 "autoWidth": false,
                 "columnDefs": [
                     { "width":"100px", "targets": 3 },
+                    {"sort":"asc","targets":0},
                     <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
                         { "sortable": false, "width":"80px", "targets": 8 }
                     </c:if>

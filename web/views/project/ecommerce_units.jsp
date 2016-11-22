@@ -42,8 +42,9 @@
                              <c:set var="project" value="${projectUnits.get(0).getProject()}" />
                              <div class="well-lg">
                                  <div class="col-md-2"><b>Name</b></div><div class="col-md-10"><p>${project.getName()}</p></div>
-                                 <div class="col-md-2"><b>Description</b></div><div class="col-md-10"><p>${project.getDescription()}</p></div>
                                  <div class="col-md-2"><b>Location</b></div><div class="col-md-10"><p>${project.getLocation()}</p></div>
+                                 <div class="col-md-2"><b>Description</b></div><div class="col-md-10"><p>${project.getDescription()}</p></div>
+                                 
                              </div>
                            
                          </div>
@@ -69,7 +70,7 @@
                                   <div class="caption">
                                     <h4>${unit.getTitle()}</h4>
                                     <span><fmt:formatNumber value="${unit.getCpu()}" type="currency" currencySymbol="N" /></span><br />
-                                    <span>Qty : ${unit.getQuantity()}</span> 
+                                    <span>In Stock : ${unit.getQuantity()}</span> 
                                     <p class="text-center">
                                         <input type="checkbox"  class="unit_check" name="unit_id" value="${unit.getId()}" autocomplete="off"
                                                
@@ -99,8 +100,8 @@
                          
                     <div class="panel panel-default">
                       <div class="panel-body">
-                          <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-cart-plus"></i> Add to cart</button>
-                          <a href="${pageContext.request.contextPath}/Project?action=listprojects" class="btn btn-success pull-left"><i class="fa fa-undo"></i> Continue</a>
+                          <button type="submit" class="btn btn-success pull-right"><i class="fa fa-cart-plus"></i> Add to cart</button>
+                          <a href="${pageContext.request.contextPath}/Project?action=listprojects" class="btn btn-primary pull-left">Continue shopping</a>
                       </div>
                     </div>    
                     

@@ -583,7 +583,10 @@ public class CustomerController extends AppController  {
             request.setAttribute("customers",getCompletedPaymentCustomers());
         }
         request.setAttribute("projects", project.listProjects());
-
+        
+        //Keep track of the sideBar
+        request.setAttribute("sideNav", "Customer");
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
 

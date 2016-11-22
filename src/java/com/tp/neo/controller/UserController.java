@@ -179,6 +179,9 @@ public class UserController extends AppController {
             request.setAttribute("users", listUsers());
         }
         
+        //Keep track of the sideBar
+        request.setAttribute("sideNav", "User");
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             

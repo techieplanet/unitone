@@ -246,6 +246,9 @@ public class OrderController extends AppController {
             request.setAttribute("customerId",customerId);
         }
         
+        //Keep track of the sideBar
+        request.setAttribute("sideNav", "Order");
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
@@ -306,6 +309,7 @@ public class OrderController extends AppController {
             
             Agent agent = null;
             Customer customer = null;
+            
             
             Long customerId = null;
             

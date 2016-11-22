@@ -242,7 +242,10 @@ public class AgentController extends AppController {
         else if(action.equalsIgnoreCase("approval")){
             this.processApprovalRequest(Long.parseLong(agent_id), Integer.parseInt(status), request);
         }
-
+        
+        //Keep track of the sideBar
+        request.setAttribute("sideNav", "Agent");
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
