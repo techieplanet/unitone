@@ -1,0 +1,247 @@
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<!-- Include the lid -->
+<%@ include file="../includes/lid.jsp" %>      
+
+<!-- Include the header -->
+<%@ include file="../includes/header.jsp" %>
+
+<%@ include file="../includes/sidebar.jsp" %>   
+
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+          
+        <c:if test="${success}">
+              <div class="row">
+                    <div class="col-md-12 ">
+                        <p class="bg-success padding15" style="vertical-align:center !important;" >
+                          <i class="fa fa-check"></i>Saved Successfully
+                        </p>
+                    </div>
+                </div>
+          </c:if>  
+        
+          
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Customer Profile
+          </h1>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          
+          
+            <div class="panel">
+                
+                <div class="panel-body">
+                    
+                    <div class="row">
+                        
+                        <div class="col-md-2">
+                            
+                            <h4>Customer Picture</h4>
+                            <img src="/uploads/NeoForce/images/customer/${customer.photoPath}" class="img img-responsive img-thumbnail" />
+                            
+                            <h4>Next of Kin Picture</h4>
+                            <img src="/uploads/NeoForce/images/customerKin/${customer.getKinPhotoPath()}" alt="No Preview Image" class="img img-responsive img-thumbnail" />
+                            
+                        </div>
+                        
+                        <div class="col-md-10">
+                            
+                            <table class="table table-profile">
+                                
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>
+                                            <div class="col-md-9">
+                                                <h4>${customer.getFullName()}</h4>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <a href="#" class="pull-right" onclick="customeProfile.showPasswordModal(event)" style="text-decoration: none; border-bottom: 1px dotted blue;">Change password</a>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="highlight">
+                                        <td class="field">Email</td>
+                                        <td><i class="fa fa-envelope-o"></i> ${customer.getEmail()} </td>
+                                        
+                                    </tr>
+                                    <tr class="divider">
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Mobile</td>
+                                        <td><i class="fa fa-mobile-phone"></i> ${customer.getPhone()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Street</td>
+                                        <td>${customer.getStreet()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">City</td>
+                                        <td>${customer.getCity()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">State</td>
+                                        <td>${customer.getState()}</td>
+                                    </tr>
+                                    <tr class="highlight">
+                                        <td class="field" colspan="2" style="text-align: left">
+                                            <h4>Next of Kin Information</h4>
+                                        </td>
+                                    </tr>
+                                    <tr class="divider">
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Name</td>
+                                        <td>${customer.getKinName()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Mobile</td>
+                                        <td><i class="fa fa-mobile-phone"></i> ${customer.getKinPhone()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">State</td>
+                                        <td>${customer.getKinAddress()}</td>
+                                    </tr>
+                                    <tr class="highlight">
+                                        <td class="field" colspan="2" style="text-align: left">
+                                            <h4>Customer's Agent Information</h4>
+                                        </td>
+                                    </tr>
+                                    <tr class="divider">
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Name</td>
+                                        <td>${customer.getAgent().getFullName()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Email</td>
+                                        <td><i class="fa fa-envelope-o"></i> ${customer.getAgent().getEmail()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Mobile</td>
+                                        <td><i class="fa fa-mobile-phone"></i> ${customer.getAgent().getPhone()}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+      
+      <!--MODAL-->
+      <div class="modal fade" id="password_change_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Password Change</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Old password</label>
+                    <input type="password" class="form-control" name="old_password" id="old_password" />
+                </div>
+                <div class="form-group">
+                    <label>New password</label>
+                    <input type="password" class="form-control" name="new_password" id="new_password" />
+                </div>
+                <div class="form-group">
+                    <label>Re-enter New password</label>
+                    <input type="password" class="form-control" name="new_password2" id="new_password2" />
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+              <button id="ok" type="button" onclick="customeProfile.changePassword('${customer.getCustomerId()}')"  class="btn btn-primary">Submit</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+
+      
+<!-- Include the footer -->
+<%@ include file="../includes/footer.jsp" %>      
+
+
+<!-- Include the control sidebar -->
+<%--<%@ include file="../includes/control-sidebar.jsp" %>--%>      
+      
+<!-- Include the bottom -->
+<%@ include file="../includes/bottom.jsp" %>
+
+
+<script>
+      
+     var customeProfile = {
+         
+         changePassword : function(id){
+             
+             var old_password = $("#old_password").val();
+             var pwd1 = $("#new_password").val();
+             var pwd2 = $("#new_password2").val();
+             
+             var errors = [];
+             
+             if($.trim(old_password).length < 1){
+                 errors.push("Old password is required")
+             }
+             if($.trim(pwd1).length < 1){
+                 errors.push("New Password is required")
+             }
+             else if($.trim(pwd1) != $.trim(pwd2)){
+                 errors.push("Password and Re-enter password must match");
+             }
+             
+             if(errors.length > 0){
+                 
+             }else{
+                 console.log(old_password)
+                 $.ajax({
+                     url : "${pageContext.request.contextPath}/Customer?action=password_change",
+                     method : "POST",
+                     data : {old_password : old_password, pwd1 : pwd1, pwd2 : pwd2, id : id},
+                     success : function(data){
+                         
+                         var json = JSON.parse(data);
+                         
+                         if(json.success){
+                             alert(json.success);
+                         }
+                         else{
+                             alert(json.error);
+                         }
+                     },
+                     error : function(xhr,error_code,error_text){
+                         console.log(xhr.responseText);
+                     }
+                 })
+             }
+             
+         },
+         
+         showPasswordModal : function(evt){
+             evt.preventDefault();
+             
+             $("#password_change_modal").modal({
+                 backdrop : "static"
+             });
+         }
+     }
+          
+ </script>         

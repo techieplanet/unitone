@@ -75,6 +75,7 @@
                                     <c:if test="${lodgement.paymentMode==1}">Bank Deposit</c:if>
                                     <c:if test="${lodgement.paymentMode==2}">Credit/Debit Card</c:if>
                                     <c:if test="${lodgement.paymentMode==3}">Cash / Cheque</c:if>
+                                    <c:if test="${lodgement.paymentMode==4}">Bank Transfer</c:if>
                                    </td>
                                 <td><c:out value="${lodgement.originAccountNumber}" /></td>
                                 <td><c:out value="${lodgement.getTransactionId()}" /></td>

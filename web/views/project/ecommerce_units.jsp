@@ -34,7 +34,7 @@
                   <div class="row" style="margin-top:10px">
                         <c:if test="${projectUnits.size() > 0}">   
                          <div class="col-md-2">
-                             <img src="${pageContext.request.contextPath}/images/img/boxed-bg.png"  alt="No Preview Image" class="img img-thumbnail" />
+                             <img src="${pageContext.request.contextPath}/images/img/project.jpg"  alt="No Preview Image" class="img img-thumbnail" />
                          </div>
                          
                          <div class="col-md-8">
@@ -66,8 +66,8 @@
                          
                               <div class="col-md-3">
                                 <div class="thumbnail">
-                                  <img src="${pageContext.request.contextPath}/images/img/boxed-bg.png" class="img img-thumbnail" style="height: 200px"  alt="No Preview">
-                                  <div class="caption">
+                                  <img src="${pageContext.request.contextPath}/images/img/unit.jpg" class="img" style="height: 200px"  alt="No Preview">
+                                  <div class="caption text-center">
                                     <h4>${unit.getTitle()}</h4>
                                     <span><fmt:formatNumber value="${unit.getCpu()}" type="currency" currencySymbol="N" /></span><br />
                                     <span>In Stock : ${unit.getQuantity()}</span> 
@@ -101,7 +101,7 @@
                     <div class="panel panel-default">
                       <div class="panel-body">
                           <button type="submit" class="btn btn-success pull-right"><i class="fa fa-cart-plus"></i> Add to cart</button>
-                          <a href="${pageContext.request.contextPath}/Project?action=listprojects" class="btn btn-primary pull-left">Continue shopping</a>
+                          <a href="${pageContext.request.contextPath}/Project?action=listprojects" class="btn btn-primary pull-left">Back</a>
                       </div>
                     </div>    
                     

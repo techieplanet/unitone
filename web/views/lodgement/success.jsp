@@ -28,11 +28,11 @@
                     <h3 class='box-title'>Confirmation</h3>
                 </div>
                 <div class='box-body'>
-                    <p>Congratulation!!! Your Lodgement for the sum of ${sessionScope.invoice.get("total")} was successful</p>
+                    <p>Congratulation!!! Your Lodgement for the sum of <fmt:formatNumber value='${sessionScope.invoice.get("total")}' type="currency" currencySymbol="N" /> was successful</p>
                     <h4>List of Items</h4>
                     <ul>
                         <c:forEach items="${sessionScope.invoice.get('items')}" var="item">
-                            <li>${item.get("title")} - ${item.get("amount")}</li>
+                            <li>${item.get("title")} - <fmt:formatNumber value='${item.get("amount")}' type="currency" currencySymbol="N" /></li>
                         </c:forEach>
                     </ul>
                     <c:remove var="invoice" scope="session" />

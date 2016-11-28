@@ -190,10 +190,10 @@
                         </fieldset>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-4" style="padding-top:50px">
                        
-                            <fieldset>
-                                <legend style="padding-right:10px !important;">System Information</legend>
+                          <fieldset>
+                                
                           <div class="row">
                              <div class="col-md-12">
                             <div class="form-group" style="padding-left:10px !important;padding-right:10px !important">
@@ -228,10 +228,9 @@
                         </div>
                          
                     
-                         </div>
-                          <div class="row">
-                              
-                              <div class="col-md-4">
+                    </div>
+                    <div class="row">
+                      <div class="col-md-4">
                                  <fieldset>
                                     <div class="col-md-6" style="padding-top:0px">
 
@@ -251,7 +250,7 @@
                              
                             </div>
 
-                          </div>
+                    </div>
                     </div>
                     
                    
@@ -261,31 +260,31 @@
                     <div class="col-md-12" >
                         <fieldset>
                             <legend style="padding-left:10px !important;">Contact Information</legend>
-                   <div class="row">
+                        <div class="row">
                         
                         <div class="col-md-12">
-                    <div class="row">
-                        <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-md-4">
                             
-                            <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
-                            <label for="customerStreet">Street</label>
-                                <input type="text" class="form-control" id="customerStreet" name="customerStreet" placeholder="Street"  
+                                <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                                    <label for="customerStreet">Street</label>
+                                    <input type="text" class="form-control" id="customerStreet" name="customerStreet" placeholder="Street"  
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.street}"</c:if> "
                                        />
+                                </div>
                             </div>
-                        </div>
                         
-                        <div class="col-md-4">
-                            <div class="form-group" style="padding-left:10px !important;">
-                            <label for="customerCity">City</label>
-                              
-                                <input type="text" class="form-control" id="customerCity" name="customerCity" placeholder="City"  
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.city}"</c:if> "
-                                       />
-                                  
-                                
+                            <div class="col-md-4">
+                                <div class="form-group" style="padding-left:10px !important;">
+                                <label for="customerCity">City</label>
+
+                                    <input type="text" class="form-control" id="customerCity" name="customerCity" placeholder="City"  
+                                           value=<c:if test="${fn:length(errors) > 0 }">"${param.customerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.city}"</c:if> "
+                                           />
+
+
+                                </div>
                             </div>
-                        </div>
                         <c:if test="${fn:length(errors) > 0 }"><c:set var="state" value="${param.customerState}" scope="session" /></c:if>
                         <c:if test="${fn:length(errors) <= 0 }"><c:set var="state" value="${customer.state}" scope="session" /></c:if>
                       
@@ -336,10 +335,9 @@
                             </div>
                         </div>
                         
-                        
-                        
-                    </div>
-                  </div>
+                        </div>
+                        </div>
+                              
                         <div class="col-md-12">
                             <div class="col-md-6">
                             <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
@@ -349,7 +347,7 @@
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.phone}"</c:if> "/>
                                     
                             </div>
-                        </div>
+                            </div>
                             
                         </div>
                     </div>
@@ -422,17 +420,11 @@
                     </div>
                                                   
                     <div class="col-md-12">
-                        <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Process to Order <i class="fa fa-long-arrow-right"></i></a>
+                        <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Proceed to Order <i class="fa fa-long-arrow-right"></i></a>
                     </div>
         </div>
                  
-                         
-      
-      
-      
-      
-                    
-                    
+          
  <div class="row" id="step2" style="display:none">
 
    <div class="col-md-12">
@@ -568,7 +560,7 @@
                                 <div class="col-md-2 pull-right">
                                    <div id="addToCartLabel"  style="margin: 0 auto !important;" >
                                     	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
                                         </div> 
                                    </div>
                                </div>
@@ -783,14 +775,14 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="accountNo">Depositor's Account No</label>
-                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
+                            <input type="text" class="form-control" id="transfer_accountNo" name="transfer_accountNo" style="width: 100%;">
                         </div> 
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="accountNo">Depositor's Account Name</label>
-                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
+                            <input type="text" class="form-control" id="transfer_accountName" name="transfer_accountName" style="width: 100%;">
                         </div> 
                     </div>
 

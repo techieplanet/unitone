@@ -67,6 +67,7 @@ public class CustomerController extends AppController  {
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";
     private static String CUSTOMER_COMPLETED_PAYMENT = "/views/customer/completed_payment.jsp";
     private static String CUSTOMER_CURRENT_PAYING = "/views/customer/current_paying.jsp";
+    private static String CUSTOMER_PROFILE = "/views/customer/profile.jsp";
     private final String ORDER_NOTIFICATION_ROUTE = "/Order?action=notification&id=";
     private Customer customer = new Customer();
     private final static Logger LOGGER = 
@@ -117,11 +118,14 @@ public class CustomerController extends AppController  {
         
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
+        //Ajax Get Request
         if(action.equalsIgnoreCase("email_validation")){
             
             validateEmail(request,response);
             return;
         }
+        
+        
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Customer().getPermissionName(action), request, response)){
@@ -156,6 +160,13 @@ public class CustomerController extends AppController  {
          
         if(!requestFrom.equals("")){
             processInsertRequest(request, response);
+        }
+        
+        //Ajax Post Request for Password Change
+        if(action.equalsIgnoreCase("password_change")){
+            
+            changeCustomerPassword(request,response);
+            return;
         }
         
         if(super.hasActiveUserSession(request, response)){
@@ -345,7 +356,7 @@ public class CustomerController extends AppController  {
                 }
 
                 
-                viewFile = CUSTOMER_NEW;
+                viewFile = CUSTOMER_PROFILE;
                 
                 if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
                     if(lodgement.getPaymentMode() == 2){
@@ -380,6 +391,12 @@ public class CustomerController extends AppController  {
                 request.setAttribute("customers", listCustomers());
                 request.setAttribute("success",true);
                 request.setAttribute("customer", customer);
+                request.setAttribute("action","");
+                if(sessionUser == null){
+                    request.setAttribute("userType", 3);
+                }else{
+                    request.setAttribute("userType", sessionUser.getSystemUserTypeId());
+                }
                 
             }
             catch (PropertyException err){
@@ -550,7 +567,7 @@ public class CustomerController extends AppController  {
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
         else if(action.equalsIgnoreCase("edit")){
-            viewFile = CUSTOMER_NEW;
+            viewFile = "/views/customer/profile.jsp";
 //            
 //            //find by ID
             int id = Integer.parseInt(request.getParameter("customerId"));
@@ -929,8 +946,70 @@ public class CustomerController extends AppController  {
             Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    private void changeCustomerPassword(HttpServletRequest request, HttpServletResponse response) {
+        
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            
+            
+            Map<String, String> resMap = new HashMap();
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            
+            String oldPassword = request.getParameter("old_password");
+            String pwd1 = request.getParameter("pwd1");
+            String pwd2 = request.getParameter("pwd2");
+            
+            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            em.getTransaction().begin();
+            
+            Customer customer = em.find(Customer.class, id);
+            
+            
+            
+            if(AuthManager.check(oldPassword, customer.getPassword())){
+                
+                if(pwd1.equals(pwd2) && !pwd1.equals("")){
+                    customer.setPassword(AuthManager.getSaltedHash(pwd1));
+                    resMap.put("success", "Password changed successfully");
+                }else{
+                    resMap.put("error", "Password and Re-enter password do not match");
+                }
+                 
+            }else{
+                resMap.put("error", "Invalid old password");
+            }
+            
+            if(customer != null){
+                em.merge(customer);
+                
+            }
+            
+            em.getTransaction().commit();
+            em.close();
+            emf.close();
+            
+            Gson gson = new GsonBuilder().create();
+            
+            String json = gson.toJson(resMap);
+            
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(json);
+            response.getWriter().flush();
+            response.getWriter().close();
+            
+            
+        } catch (Exception ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
 
-      /*TP: Getting the customer Id for public use*/
+    /*TP: Getting the customer Id for public use*/
     public Long getSystemUserId(){
     return customer.getCustomerId();
     }
@@ -944,6 +1023,8 @@ public class CustomerController extends AppController  {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    
     
    
 }

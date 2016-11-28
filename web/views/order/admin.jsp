@@ -61,7 +61,7 @@
                                     
                                         
                                     <c:if test="${status == 0}">
-                                        <span class="label label-warning">UnAttended</span>
+                                        <span class="label label-warning">Unattended</span>
                                     </c:if>
                                     
                                     <c:if test="${status == 1}">

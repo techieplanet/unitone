@@ -47,6 +47,13 @@ public class AppController extends HttpServlet{
         calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
     }
     
+    
+    public void guestService(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException{
+        
+        super.service(req, res);
+        
+    }
+    
     public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, java.io.IOException {
      
         System.out.println("Inside Service Method");

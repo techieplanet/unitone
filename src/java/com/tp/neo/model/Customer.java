@@ -51,6 +51,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customer.findByState", query = "SELECT c FROM Customer c WHERE c.state = :state"),
     @NamedQuery(name = "Customer.findByPhotoPath", query = "SELECT c FROM Customer c WHERE c.photoPath = :photoPath"),
     @NamedQuery(name = "Customer.findByPassword", query = "SELECT c FROM Customer c WHERE c.password = :password"),
+    @NamedQuery(name = "Customer.findByIdAndPassword", query = "SELECT c FROM Customer c WHERE c.password = :password AND c.customerId = :id"),
     @NamedQuery(name = "Customer.findByKinName", query = "SELECT c FROM Customer c WHERE c.kinName = :kinName"),
     @NamedQuery(name = "Customer.findByKinPhone", query = "SELECT c FROM Customer c WHERE c.kinPhone = :kinPhone"),
     @NamedQuery(name = "Customer.findByKinAddress", query = "SELECT c FROM Customer c WHERE c.kinAddress = :kinAddress"),

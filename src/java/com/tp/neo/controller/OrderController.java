@@ -121,6 +121,15 @@ public class OrderController extends AppController {
             throws ServletException, IOException {
         
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        String loggedIn =request.getParameter("loggedin") != null ? request.getParameter("loggedin") : "";
+                
+        if (action.equalsIgnoreCase("checkOut") && loggedIn.equalsIgnoreCase("no")){
+               
+               String viewFile = "/views/index/checkout.jsp";
+               request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
+               request.getRequestDispatcher(viewFile).forward(request, response);
+               return;
+        }
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new ProductOrder().getPermissionName(action), request, response)){
@@ -445,7 +454,9 @@ public class OrderController extends AppController {
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
             orderItem.setCreatedDate(getDateTime().getTime());
-            orderItem.setCreatedBy(sessionUser.getSystemUserId());
+            if(sessionUser != null){
+                orderItem.setCreatedBy(sessionUser.getSystemUserId()); 
+            }
             orderItem.setApprovalStatus(approval);
             orderItem.setUnit(projectUnit);
             
@@ -469,8 +480,10 @@ public class OrderController extends AppController {
         lodgement.setPaymentMode(paymentMethod);
         lodgement.setLodgmentDate(this.getDateTime().getTime());
         lodgement.setCreatedDate(this.getDateTime().getTime());
-        lodgement.setCreatedBy(sessionUser.getSystemUserId());
-        lodgement.setCreatedByUserType(Short.parseShort((sessionUser.getSystemUserTypeId()).toString()));
+        if(sessionUser != null) {
+            lodgement.setCreatedBy(sessionUser.getSystemUserId());
+            lodgement.setCreatedByUserType(Short.parseShort((sessionUser.getSystemUserTypeId()).toString()));
+        }
         lodgement.setCompanyAccountId(companyAccount);
         lodgement.setApprovalStatus((short)0);
         

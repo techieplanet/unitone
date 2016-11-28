@@ -170,7 +170,7 @@
                     </div>
                 </div>
           </c:if>   
-                              <c:if test="${action != 'new' && userType != 3}" >
+                              <c:if test='${action != "new" && userType != 3}' >
                                   <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Order?action=new&customer=${customer.customerId}">Buy Product</a>
                                   &nbsp;&nbsp;&nbsp;
                                   <a class="btn btn-primary" href="Customer?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Customer</a>

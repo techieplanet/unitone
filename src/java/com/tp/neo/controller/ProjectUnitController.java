@@ -108,12 +108,12 @@ public class ProjectUnitController extends AppController {
 //               viewFile = PROJECTS_NEW;
 //        }
         if(action.equalsIgnoreCase("delete")){
-            delete(Integer.parseInt(request.getParameter("id")));
+            delete(Long.parseLong(request.getParameter("id")));
         }
 
 
         else if(action.equalsIgnoreCase("edit")){            
-            int id = (Integer.parseInt(request.getParameter("id")));
+            long id = (Long.parseLong(request.getParameter("id")));
             Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
             ProjectUnit projectUnit = (ProjectUnit)query.getSingleResult();
             em.close(); emf.close();
@@ -189,7 +189,7 @@ public class ProjectUnitController extends AppController {
                 
                 validate(request);
                 
-                Project project = em.find(Project.class, Integer.parseInt(request.getParameter("projectid")));
+                Project project = em.find(Project.class, Long.parseLong(request.getParameter("projectid")));
                 
                 projectUnit.setTitle(request.getParameter("title"));
                 projectUnit.setCpu(Double.parseDouble(request.getParameter("cpu")));
@@ -298,7 +298,7 @@ public class ProjectUnitController extends AppController {
                 
                 validate(request);
                
-                int id = (Integer.parseInt(request.getParameter("id")));
+                long id = (Long.parseLong(request.getParameter("id")));
                 Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
                 projectUnit = (ProjectUnit)query.getSingleResult();
                 
@@ -368,7 +368,7 @@ public class ProjectUnitController extends AppController {
     }
     
     
-    public void delete(int id){
+    public void delete(long id){
         log("starting to delete: " + id);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();

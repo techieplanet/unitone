@@ -323,7 +323,7 @@ public class LoginController extends HttpServlet {
             
             request.setAttribute("loginDetails", map); 
             
-            request.getRequestDispatcher("/index.jsp").forward(request, response);
+            request.getRequestDispatcher("home").forward(request, response);
         } catch (ServletException ex) {
             Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

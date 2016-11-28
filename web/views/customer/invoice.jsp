@@ -116,41 +116,39 @@
               <table class="table table-bordered">
                 <thead>
                   <tr>
-                      <th>S/N</th>
-                    <th>Qty</th>
-                    <th>Product</th>
+                    <th style="text-align:center">S/N</th>
                     <th>Description</th>
-                    <th>Subtotal</th>
+                    <th style="text-align:center">Qty</th>
+                    <th style="text-align:center">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
                   
                     <c:forEach items="${orderItemInvoice}" var="item" varStatus="pointer">
                         <tr>
-                            <td>${pointer.count}</td>
-                            <td>${item.getQuantity()}</td>
+                            <td style="text-align:center">${pointer.count}</td>
                             <td>${item.getUnit().getProject().getName()} - ${item.getUnit().getTitle()}</td>
-                            <td>${item.getUnit().getProject().getDescription()}</td>
-                            <td><fmt:formatNumber value="${item.getInitialDep()}" type="currency" currencySymbol="N" /></td>
+                            <td style="text-align:center">${item.getQuantity()}</td>
+                            <td style="text-align:right"><fmt:formatNumber value="${item.getInitialDep()}" type="currency" currencySymbol="N" /></td>
                         </tr>
                     </c:forEach>
                     
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="4" style="text-align: right">Total : </td>
+                        <td colspan="3" style="text-align: right">Total : </td>
                         <td><fmt:formatNumber value="${totalInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">VAT : </td>
+                        <td colspan="3" style="text-align: right">VAT : </td>
                         <td><fmt:formatNumber value="${vatInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">Gateway charge : </td>
+                        <td colspan="3" style="text-align: right">Gateway charge : </td>
                         <td><fmt:formatNumber value="${gatewayChargeInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">Grand Total : </td>
+                        <td colspan="3" style="text-align: right">Grand Total : </td>
                         <td><fmt:formatNumber value="${grandTotalInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                 </tfoot>

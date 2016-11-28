@@ -41,8 +41,8 @@
                          
                               <div class="col-md-4">
                                 <div class="thumbnail">
-                                    <img src="${pageContext.request.contextPath}/images/img/boxed-bg.png" class="img img-thumbnail" style="min-height: 200px" width="300px" height="200px" alt="No Preview">
-                                  <div class="caption">
+                                    <img src="${pageContext.request.contextPath}/images/img/project.jpg" class="img img-responsive" style="min-height: 200px" width="300px" height="200px" alt="No Preview">
+                                  <div class="caption text-center">
                                     <h3>${project.getName()}</h3>
                                     <p>
                                         ${fn:substring(project.getDescription(),0,47)}

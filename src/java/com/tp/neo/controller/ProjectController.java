@@ -11,6 +11,7 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.ProjectUnit;
 
 import com.tp.neo.model.utils.TrailableManager;
@@ -50,8 +51,18 @@ public class ProjectController extends AppController {
     
     private String action = "";
     private String viewFile = "";
-    
+    private String loggedIn = "";
   
+    public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, java.io.IOException {
+     
+        loggedIn = req.getParameter("loggedin") != null ? req.getParameter("loggedin") : "";
+        
+        if(loggedIn.equalsIgnoreCase("no")){
+            super.guestService(req, res);
+        }else{
+            super.service(req, res);
+        }
+    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -73,10 +84,15 @@ public class ProjectController extends AppController {
                   return;
          }
         
+        if(loggedIn.equalsIgnoreCase("no")){
+            processGetRequest(request, response);
+            return;
+        }
+        
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
                 if(action.equalsIgnoreCase("punits")){
-                  int id = Integer.parseInt(request.getParameter("project_id"));
+                  long id = Long.parseLong(request.getParameter("project_id"));
                   sendProjectUnitsData(request, response,id);
                 }else {
                     processGetRequest(request, response);
@@ -138,14 +154,14 @@ public class ProjectController extends AppController {
                request.setAttribute("id", "");
         }
         else if(action.equalsIgnoreCase("delete")){
-            this.delete(Integer.parseInt(request.getParameter("id")));
+            this.delete(Long.parseLong(request.getParameter("id")));
         }
 
         else if(action.equalsIgnoreCase("edit") && !(stringId.equals(""))){
             viewFile = PROJECTS_NEW;
             
             //find by ID
-            int id = Integer.parseInt(stringId);
+            long id = Long.parseLong(stringId);
             
             Project project = em.find(Project.class, id);
             
@@ -168,6 +184,10 @@ public class ProjectController extends AppController {
             request.setAttribute("action", "edit");
             request.setAttribute("id", id);
             if(addstat == 1) request.setAttribute("success", true);
+        }
+        else if(action.equalsIgnoreCase("listunits") && loggedIn.equalsIgnoreCase("no")){
+            viewFile = "/views/index/units.jsp";
+            request.setAttribute("projectUnits", getUnits(request));
         }
         else if(sessionUser.getSystemUserTypeId() == 3 && action.equalsIgnoreCase("listprojects")){
             
@@ -217,6 +237,20 @@ public class ProjectController extends AppController {
             throws ServletException, IOException {
 
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        if(loggedIn.equalsIgnoreCase("no")){
+            
+                if(action.equalsIgnoreCase("addToCart")){
+                    addToCart(request,response);
+                }
+                else if(action.equalsIgnoreCase("removeFromCart")){
+                    removeFromCart(request, response);
+                    
+                }
+                
+                return;
+        }
+        
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
                 if(action.equalsIgnoreCase("addToCart")){
@@ -341,7 +375,7 @@ public class ProjectController extends AppController {
         try{                                
                 em.getTransaction().begin();
                 
-                project = em.find(Project.class, Integer.parseInt(request.getParameter("id")));
+                project = em.find(Project.class, Long.parseLong(request.getParameter("id")));
                 project.setName(request.getParameter("pname"));
                 project.setDescription(request.getParameter("desc"));               
                 project.setLocation(request.getParameter("location"));
@@ -404,10 +438,7 @@ public class ProjectController extends AppController {
             dispatcher.forward(request, response);
     }
     
-    
-    
-    
-    public void delete(int id){
+    public void delete(long id){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
@@ -509,8 +540,11 @@ public class ProjectController extends AppController {
         emf.close();
         
         
-        
-        response.sendRedirect("Project?action=listunits&project_id="+project_id);
+        if(loggedIn.equalsIgnoreCase("no")){
+            response.sendRedirect("Project?action=listunits&project_id="+project_id+"&loggedin=no");
+        }else{
+            response.sendRedirect("Project?action=listunits&project_id="+project_id);
+        }
             
     }
     
@@ -544,8 +578,11 @@ public class ProjectController extends AppController {
         
         session.setAttribute("unit_cart", units);
        
+        if(loggedIn.equalsIgnoreCase("no")){
+            response.sendRedirect("Project?action=listunits&project_id="+project_id+"&loggedin=no");
+        }else{
         response.sendRedirect("Project?action=listunits&project_id="+project_id);
-            
+        }
     }
     
     
