@@ -24,7 +24,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Customer Profile
+            Agent Profile
           </h1>
         </section>
 
@@ -40,11 +40,11 @@
                         
                         <div class="col-md-2">
                             
-                            <h4>Customer Picture</h4>
-                            <img src="/uploads/NeoForce/images/customer/${customer.photoPath}" class="img img-responsive img-thumbnail" />
+                            <h4>Agent Picture</h4>
+                            <img src="${agentImageAccessDir}/${agent.photoPath}" class="img img-responsive img-thumbnail" />
                             
                             <h4>Next of Kin Picture</h4>
-                            <img src="/uploads/NeoForce/images/customerKin/${customer.getKinPhotoPath()}" alt="No Preview Image" class="img img-responsive img-thumbnail" />
+                            <img src="${agentKinImageAccessDir}/${agent.getKinPhotoPath()}" alt="No Preview Image" class="img img-responsive img-thumbnail" />
                             
                         </div>
                         
@@ -57,10 +57,10 @@
                                         <th></th>
                                         <th>
                                             <div class="col-md-9">
-                                                <h4>${customer.getFullName()}</h4>
+                                                <h4>${agent.getFullName()}</h4>
                                             </div>
                                             <div class="col-md-3">
-                                                <a href="#" class="pull-right" onclick="customerProfile.showPasswordModal(event)" style="text-decoration: none; border-bottom: 1px dotted blue;">Change password</a>
+                                                <a href="#" class="pull-right" onclick="agentProfile.showPasswordModal(event)" style="text-decoration: none; border-bottom: 1px dotted blue;">Change password</a>
                                             </div>
                                         </th>
                                     </tr>
@@ -68,7 +68,7 @@
                                 <tbody>
                                     <tr class="highlight">
                                         <td class="field">Email</td>
-                                        <td><i class="fa fa-envelope-o"></i> ${customer.getEmail()} </td>
+                                        <td><i class="fa fa-envelope-o"></i> ${agent.getEmail()} </td>
                                         
                                     </tr>
                                     <tr class="divider">
@@ -76,19 +76,19 @@
                                     </tr>
                                     <tr>
                                         <td class="field">Mobile</td>
-                                        <td><i class="fa fa-mobile-phone"></i> ${customer.getPhone()}</td>
+                                        <td><i class="fa fa-mobile-phone"></i> ${agent.getPhone()}</td>
                                     </tr>
                                     <tr>
                                         <td class="field">Street</td>
-                                        <td>${customer.getStreet()}</td>
+                                        <td>${agent.getStreet()}</td>
                                     </tr>
                                     <tr>
                                         <td class="field">City</td>
-                                        <td>${customer.getCity()}</td>
+                                        <td>${agent.getCity()}</td>
                                     </tr>
                                     <tr>
                                         <td class="field">State</td>
-                                        <td>${customer.getState()}</td>
+                                        <td>${agent.getState()}</td>
                                     </tr>
                                     <tr class="highlight">
                                         <td class="field" colspan="2" style="text-align: left">
@@ -100,36 +100,17 @@
                                     </tr>
                                     <tr>
                                         <td class="field">Name</td>
-                                        <td>${customer.getKinName()}</td>
+                                        <td>${agent.getKinName()}</td>
                                     </tr>
                                     <tr>
                                         <td class="field">Mobile</td>
-                                        <td><i class="fa fa-mobile-phone"></i> ${customer.getKinPhone()}</td>
+                                        <td><i class="fa fa-mobile-phone"></i> ${agent.getKinPhone()}</td>
                                     </tr>
                                     <tr>
                                         <td class="field">State</td>
-                                        <td>${customer.getKinAddress()}</td>
+                                        <td>${agent.getKinAddress()}</td>
                                     </tr>
-                                    <tr class="highlight">
-                                        <td class="field" colspan="2" style="text-align: left">
-                                            <h4>Customer's Agent Information</h4>
-                                        </td>
-                                    </tr>
-                                    <tr class="divider">
-                                        <td colspan="2"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">Name</td>
-                                        <td>${customer.getAgent().getFullName()}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">Email</td>
-                                        <td><i class="fa fa-envelope-o"></i> ${customer.getAgent().getEmail()}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">Mobile</td>
-                                        <td><i class="fa fa-mobile-phone"></i> ${customer.getAgent().getPhone()}</td>
-                                    </tr>
+                                    
                                 </tbody>
                             </table>
                             
@@ -176,7 +157,7 @@
             <div class="modal-footer">
               <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
               
-              <button id="ok" type="button" onclick="customerProfile.changePassword('${customer.getCustomerId()}')"  class="btn btn-primary">Submit</button>
+              <button id="ok" type="button" onclick="agentProfile.changePassword('${agent.getAgentId()}')"  class="btn btn-primary">Submit</button>
             </div>
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -196,7 +177,7 @@
 
 <script>
       
-     var customerProfile = {
+     var agentProfile = {
          
          changePassword : function(id){
              
@@ -240,7 +221,7 @@
              }else{
                  
                  $.ajax({
-                     url : "${pageContext.request.contextPath}/Customer?action=password_change",
+                     url : "${pageContext.request.contextPath}/Agent?action=password_change",
                      method : "POST",
                      data : {old_password : old_password, pwd1 : pwd1, pwd2 : pwd2, id : id},
                      success : function(data){

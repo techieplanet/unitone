@@ -18,6 +18,7 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.AgentBalance;
+import com.tp.neo.model.Customer;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Transaction;
@@ -31,11 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,6 +75,7 @@ public class AgentController extends AppController {
     private static String AGENTS_ADMIN = "/views/agent/admin.jsp"; 
     private static String AGENTS_NEW = "/views/agent/add.jsp";
     private static String AGENTS_REGISTRATION = "/views/agent/registration.jsp";
+    private static String AGENT_PROFILE = "/views/agent/profile.jsp";
     private static String AGENTS_REGISTRATION_SUCCESS = "/views/agent/success.jsp";
     private static String AGENTS_VIEW = "/views/agent/view.jsp";
     private static String AGENTS_WITHDRAWAL = "/views/agent/withdrawal.jsp";
@@ -233,6 +237,21 @@ public class AgentController extends AppController {
             
             log("imageAccessDirPath: " + imageAccessDirPath);
         }
+        else if(action.equalsIgnoreCase("profile")){
+            
+            viewFile = AGENT_PROFILE;
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            Agent agent = em.find(Agent.class, id);
+            
+            String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+            
+            request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
+            request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agentkins");
+            request.setAttribute("sideNav", "profile");
+            request.setAttribute("agent", agent);
+            
+        }
         else if (action.isEmpty() || action.equalsIgnoreCase("listagents")){
             viewFile = AGENTS_ADMIN;
             request.setAttribute("agents", listAgents());
@@ -243,8 +262,10 @@ public class AgentController extends AppController {
             this.processApprovalRequest(Long.parseLong(agent_id), Integer.parseInt(status), request);
         }
         
-        //Keep track of the sideBar
-        request.setAttribute("sideNav", "Agent");
+        if(request.getAttribute("sideNav") == null){
+            //Keep track of the sideBar
+            request.setAttribute("sideNav", "Agent");
+        }
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -264,6 +285,14 @@ public class AgentController extends AppController {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        
+            //Ajax Post Request for Password Change
+            if(action.equalsIgnoreCase("password_change")){
+
+                changeAgentPassword(request,response);
+                return;
+            }
         
          if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
@@ -981,6 +1010,27 @@ public class AgentController extends AppController {
         return balance;
     }
     
+    private double getAgentBalance(long agentId){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jpQL = em.createNamedQuery("AgentBalance.findByAgentId");
+        jpQL.setParameter("agentId",agentId);
+        
+        AgentBalance agentBalance = (AgentBalance)jpQL.getSingleResult();
+        
+        System.out.println("AgentBalance : " + agentBalance);
+        double totalCredit = agentBalance.getTotalcredit() != null ? agentBalance.getTotalcredit() : 0.00;
+        double totalDebit = agentBalance.getTotaldebit() != null ? agentBalance.getTotaldebit() : 0.00;
+        
+        double balance = totalCredit - totalDebit;
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        return balance;
+    }
+    
     private List<Transaction> getCreditHistory(){
         
         TransactionManager manager = new TransactionManager(sessionUser);
@@ -1028,7 +1078,7 @@ public class AgentController extends AppController {
         
     }
     
-    private List<Withdrawal> getPendingWithdrawalRequest(){
+    private List<Map> getPendingWithdrawalRequest(){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
@@ -1037,11 +1087,26 @@ public class AgentController extends AppController {
         
         List<Withdrawal> pendingWithdrawal = jplQuery.getResultList();
         
+        List<Map> pendingWithdrawalMap = new ArrayList();
+        
+        for(Withdrawal w : pendingWithdrawal){
+            
+            Map<String, String> map = new HashMap();
+            
+            map.put("id", w.getId().toString());
+            map.put("agentFullName", w.getAgent().getFullName());
+            map.put("agentId", w.getAgent().getAgentId().toString());
+            map.put("amount", String.format("%.2f", w.getAmount()));
+            map.put("balance", String.format("%.2f", getAgentBalance(w.getAgent().getAgentId())));
+            
+            pendingWithdrawalMap.add(map);
+        }
+        
         emf.getCache().evictAll();
         em.close();
         emf.close();
         
-        return pendingWithdrawal;
+        return pendingWithdrawalMap;
     }
     
     private List<Withdrawal> getApprovedWithdrawalRequest(){
@@ -1101,6 +1166,68 @@ public class AgentController extends AppController {
         
         res.setContentType("text/html");
         res.getWriter().write("1");
+    }
+    
+    private void changeAgentPassword(HttpServletRequest request, HttpServletResponse response) {
+        
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            
+            
+            Map<String, String> resMap = new HashMap();
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            
+            String oldPassword = request.getParameter("old_password");
+            String pwd1 = request.getParameter("pwd1");
+            String pwd2 = request.getParameter("pwd2");
+            
+            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            em.getTransaction().begin();
+            
+            Agent agent = em.find(Agent.class, id);
+            
+            
+            
+            if(AuthManager.check(oldPassword, agent.getPassword())){
+                
+                if(pwd1.equals(pwd2) && !pwd1.equals("")){
+                    agent.setPassword(AuthManager.getSaltedHash(pwd1));
+                    resMap.put("success", "Password changed successfully");
+                }else{
+                    resMap.put("error", "Password and Re-enter password do not match");
+                }
+                 
+            }else{
+                resMap.put("error", "Invalid old password");
+            }
+            
+            if(agent != null){
+                em.merge(agent);
+                
+            }
+            
+            em.getTransaction().commit();
+            em.close();
+            emf.close();
+            
+            Gson gson = new GsonBuilder().create();
+            
+            String json = gson.toJson(resMap);
+            
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(json);
+            response.getWriter().flush();
+            response.getWriter().close();
+            
+            
+        } catch (Exception ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
     
     /*Getting the agent Id for public use*/

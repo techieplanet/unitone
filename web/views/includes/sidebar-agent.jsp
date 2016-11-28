@@ -103,7 +103,7 @@
                   
                  
                     
-                    <li class=""><a href="${pageContext.request.contextPath}/User"><i class="fa fa-users"></i> <span>My Profile</span></a></li>
+                    <li class="<c:out  value='${sideNav eq "profile" ? "active":""}' />"><a href="${pageContext.request.contextPath}/Agent?action=profile&id=${sessionScope.user.getSystemUserId()}"><i class="fa fa-users"></i> <span>My Profile</span></a></li>
                     
                 </ul><!-- /.sidebar-menu -->
   

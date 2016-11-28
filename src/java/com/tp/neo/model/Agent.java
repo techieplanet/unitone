@@ -436,7 +436,7 @@ public class Agent extends BaseModel implements SystemUser  {
 
     @Override
     public String getPermissions() {
-        return "view_customer,create_customer,view_order,view_project,credit_history,debit_history,withdrawal,create_order";
+        return "view_agent,view_customer,create_customer,view_order,view_project,credit_history,debit_history,withdrawal,create_order";
     }
 
     @Override

@@ -186,28 +186,31 @@
                                                   <div class="col-md-8">
                                                       <span>BANK TRANSFER</span>
                                                   </div>
-
+                                                  <div class="clearfix"></div>
+                                                  
                                                   <div class="col-md-4">
-                                                      <span class="lodgementTitleSpan">Customer Account Name : </span> 
+                                                      <span class="lodgementTitleSpan">Account Name : </span> 
                                                   </div>
                                                   <div class="col-md-8">
                                                       <span>${lodgement.getOriginAccountName()}</span>
                                                   </div>
-
+                                                  <div class="clearfix"></div>
+                                                  
                                                   <div class="col-md-4">
-                                                      <span class="lodgementTitleSpan">Customer Account Number : </span> 
+                                                      <span class="lodgementTitleSpan">Account Number : </span> 
                                                   </div>
                                                   <div class="col-md-8">
                                                       <span>${lodgement.getOriginAccountNumber()}</span>
                                                   </div>
-
+                                                  <div class="clearfix"></div>
+                                                  
                                                   <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Amount : </span> 
                                                   </div>
                                                   <div class="col-md-8">
                                                       <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
                                                   </div>
-
+                                                  <div class="clearfix"></div>
 
                                                   <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Date : </span> 
@@ -215,7 +218,7 @@
                                                   <div class="col-md-8">
                                                       <span>${lodgement.getLodgmentDate()}</span>
                                                   </div>
-
+                                                  <div class="clearfix"></div>
 
                                               </div>
                                           </c:if> 
