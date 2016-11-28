@@ -87,6 +87,7 @@ public class DashboardHelper {
     public double getTotalCommissionsPayable(){
         query = em.createNamedQuery("AgentBalance.findAllBalanceSum");
         double balanceSum = (Double)query.getSingleResult();
+        System.out.println("Commissions Payable: " + balanceSum);
         return balanceSum;
     }
     
