@@ -43,6 +43,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByFirstname", query = "SELECT a FROM Agent a WHERE a.firstname = :firstname"),
     @NamedQuery(name = "Agent.findByMiddlename", query = "SELECT a FROM Agent a WHERE a.middlename = :middlename"),
     @NamedQuery(name = "Agent.findByLastname", query = "SELECT a FROM Agent a WHERE a.lastname = :lastname"),
+    @NamedQuery(name = "Agent.findByFullname", query = "SELECT a FROM Agent a WHERE a.lastname = :lastname AND a.firstname = :firstname"),
     @NamedQuery(name = "Agent.findByPassword", query = "SELECT a FROM Agent a WHERE a.password = :password"),
     @NamedQuery(name = "Agent.findByPhone", query = "SELECT a FROM Agent a WHERE a.phone = :phone"),
     @NamedQuery(name = "Agent.findByEmail", query = "SELECT a FROM Agent a WHERE a.email = :email"),
@@ -435,7 +436,7 @@ public class Agent extends BaseModel implements SystemUser  {
 
     @Override
     public String getPermissions() {
-        return "view_customer,create_customer,view_order,view_project,credit_history,debit_history,withdrawal,create_order";
+        return "view_agent,view_customer,create_customer,view_order,view_project,credit_history,debit_history,withdrawal,create_order";
     }
 
     @Override

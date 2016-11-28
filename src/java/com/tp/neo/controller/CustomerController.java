@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
-import com.tp.neo.controller.helpers.NotificationsManager;
 import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.utils.AuthManager;
@@ -33,7 +32,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,10 +49,8 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import javax.xml.bind.PropertyException;
 
@@ -71,6 +67,7 @@ public class CustomerController extends AppController  {
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";
     private static String CUSTOMER_COMPLETED_PAYMENT = "/views/customer/completed_payment.jsp";
     private static String CUSTOMER_CURRENT_PAYING = "/views/customer/current_paying.jsp";
+    private static String CUSTOMER_PROFILE = "/views/customer/profile.jsp";
     private final String ORDER_NOTIFICATION_ROUTE = "/Order?action=notification&id=";
     private Customer customer = new Customer();
     private final static Logger LOGGER = 
@@ -121,6 +118,15 @@ public class CustomerController extends AppController  {
         
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
+        //Ajax Get Request
+        if(action.equalsIgnoreCase("email_validation")){
+            
+            validateEmail(request,response);
+            return;
+        }
+        
+        
+        
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Customer().getPermissionName(action), request, response)){
                 processGetRequest(request, response);
@@ -154,6 +160,13 @@ public class CustomerController extends AppController  {
          
         if(!requestFrom.equals("")){
             processInsertRequest(request, response);
+        }
+        
+        //Ajax Post Request for Password Change
+        if(action.equalsIgnoreCase("password_change")){
+            
+            changeCustomerPassword(request,response);
+            return;
         }
         
         if(super.hasActiveUserSession(request, response)){
@@ -220,7 +233,10 @@ public class CustomerController extends AppController  {
                 if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
                     
                     //Assign default companies Agent to the customer
-                    agent = em.find(Agent.class, (long)18);
+                    Query query = em.createNamedQuery("Agent.findByFullname");
+                    query.setParameter("firstname", "company");
+                    query.setParameter("lastname", "company");
+                    agent = (Agent)query.getSingleResult();
                 }
                 else if(user.getSystemUserTypeId() == 2){
                     agent = em.find(Agent.class, user.getSystemUserId());
@@ -340,7 +356,7 @@ public class CustomerController extends AppController  {
                 }
 
                 
-                viewFile = CUSTOMER_NEW;
+                viewFile = CUSTOMER_PROFILE;
                 
                 if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
                     if(lodgement.getPaymentMode() == 2){
@@ -375,6 +391,12 @@ public class CustomerController extends AppController  {
                 request.setAttribute("customers", listCustomers());
                 request.setAttribute("success",true);
                 request.setAttribute("customer", customer);
+                request.setAttribute("action","");
+                if(sessionUser == null){
+                    request.setAttribute("userType", 3);
+                }else{
+                    request.setAttribute("userType", sessionUser.getSystemUserTypeId());
+                }
                 
             }
             catch (PropertyException err){
@@ -388,7 +410,14 @@ public class CustomerController extends AppController  {
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
                 request.setAttribute("customerPhotoHidden",customerFileName);
                 request.setAttribute("customer", customer);
-                request.setAttribute("errors", errorMessages);    
+                request.setAttribute("errors", errorMessages); 
+                request.setAttribute("projects", new ProjectController().listProjects());
+                request.setAttribute("userTypeId", userType);
+                request.setAttribute("userType",sessionUser.getSystemUserId());
+                request.setAttribute("agents", new AgentController().listAgents());
+                request.setAttribute("action","new");
+                request.setAttribute("companyAccount",CompanyAccountHelper.getCompanyAccounts());
+                
                 SystemLogger.logSystemIssue("Customer", gson.toJson(customer), err.getMessage());
             }
             catch(RollbackException rollExcept) {
@@ -538,17 +567,18 @@ public class CustomerController extends AppController  {
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
         else if(action.equalsIgnoreCase("edit")){
-            viewFile = CUSTOMER_NEW;
+            viewFile = "/views/customer/profile.jsp";
 //            
 //            //find by ID
             int id = Integer.parseInt(request.getParameter("customerId"));
             Query jpqlQuery  = em.createNamedQuery("Customer.findByCustomerId");
             jpqlQuery.setParameter("customerId", id);
+            jpqlQuery.setParameter("deleted", (short)0);
             List<Customer> customerList = jpqlQuery.getResultList();
 //            
             request.setAttribute("customer", customerList.get(0));
             request.setAttribute("action","edit");
-            request.setAttribute("userType",sessionUser.getSystemUserId());
+            request.setAttribute("userType",sessionUser.getSystemUserTypeId());
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = CUSTOMER_ADMIN;
@@ -570,7 +600,10 @@ public class CustomerController extends AppController  {
             request.setAttribute("customers",getCompletedPaymentCustomers());
         }
         request.setAttribute("projects", project.listProjects());
-
+        
+        //Keep track of the sideBar
+        request.setAttribute("sideNav", "Customer");
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
 
@@ -884,8 +917,99 @@ public class CustomerController extends AppController  {
         return map;
     }
     
+    private void validateEmail(HttpServletRequest request,HttpServletResponse response){
+        
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            Query query = em.createNamedQuery("Customer.findByEmail");
+            query.setParameter("email",request.getParameter("email"));
+            
+            List<Customer> customer = query.getResultList();
+            
+            System.out.println("Customer count : " + customer.size());
+            
+            Integer code = customer.size() == 0 ? 1 : -1;
+            
+            Gson gson = new GsonBuilder().create();
+            
+            Map<String,String> map = new HashMap();
+            map.put("code", code.toString());
+            
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(gson.toJson(map));
+            response.getWriter().flush();
+            response.getWriter().close();
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void changeCustomerPassword(HttpServletRequest request, HttpServletResponse response) {
+        
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            
+            
+            Map<String, String> resMap = new HashMap();
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            
+            String oldPassword = request.getParameter("old_password");
+            String pwd1 = request.getParameter("pwd1");
+            String pwd2 = request.getParameter("pwd2");
+            
+            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            em.getTransaction().begin();
+            
+            Customer customer = em.find(Customer.class, id);
+            
+            
+            
+            if(AuthManager.check(oldPassword, customer.getPassword())){
+                
+                if(pwd1.equals(pwd2) && !pwd1.equals("")){
+                    customer.setPassword(AuthManager.getSaltedHash(pwd1));
+                    resMap.put("success", "Password changed successfully");
+                }else{
+                    resMap.put("error", "Password and Re-enter password do not match");
+                }
+                 
+            }else{
+                resMap.put("error", "Invalid old password");
+            }
+            
+            if(customer != null){
+                em.merge(customer);
+                
+            }
+            
+            em.getTransaction().commit();
+            em.close();
+            emf.close();
+            
+            Gson gson = new GsonBuilder().create();
+            
+            String json = gson.toJson(resMap);
+            
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(json);
+            response.getWriter().flush();
+            response.getWriter().close();
+            
+            
+        } catch (Exception ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
 
-      /*TP: Getting the customer Id for public use*/
+    /*TP: Getting the customer Id for public use*/
     public Long getSystemUserId(){
     return customer.getCustomerId();
     }
@@ -900,4 +1024,7 @@ public class CustomerController extends AppController  {
         return "Short description";
     }// </editor-fold>
 
+    
+    
+   
 }

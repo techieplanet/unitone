@@ -18,6 +18,7 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.AgentBalance;
+import com.tp.neo.model.Customer;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Transaction;
@@ -31,11 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,6 +75,7 @@ public class AgentController extends AppController {
     private static String AGENTS_ADMIN = "/views/agent/admin.jsp"; 
     private static String AGENTS_NEW = "/views/agent/add.jsp";
     private static String AGENTS_REGISTRATION = "/views/agent/registration.jsp";
+    private static String AGENT_PROFILE = "/views/agent/profile.jsp";
     private static String AGENTS_REGISTRATION_SUCCESS = "/views/agent/success.jsp";
     private static String AGENTS_VIEW = "/views/agent/view.jsp";
     private static String AGENTS_WITHDRAWAL = "/views/agent/withdrawal.jsp";
@@ -80,6 +84,7 @@ public class AgentController extends AppController {
     private static String AGENTS_CREDIT_HISTORY = "/views/agent/credit_history.jsp";
     private static String AGENTS_DEBIT_HISTORY = "/views/agent/debit_history.jsp";
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
+    private final String APPROVED_WITHDRAWAL_REQUEST = "/views/agent/approved_withdrawal_request.jsp";
     private Agent agent = new Agent();
    
     private final static Logger LOGGER = Logger.getLogger(Agent.class.getCanonicalName());
@@ -188,6 +193,11 @@ public class AgentController extends AppController {
             request.setAttribute("notificationwithdrawalId", 0);
             request.setAttribute("withdrawals", getPendingWithdrawalRequest());
         }
+        else if(action.equalsIgnoreCase("approvedWithdrawal")){
+            
+            viewFile = APPROVED_WITHDRAWAL_REQUEST;
+            request.setAttribute("withdrawals", getApprovedWithdrawalRequest());
+        }
         else if (action.equalsIgnoreCase("view")){
                 viewFile = AGENTS_VIEW;
                 
@@ -227,6 +237,21 @@ public class AgentController extends AppController {
             
             log("imageAccessDirPath: " + imageAccessDirPath);
         }
+        else if(action.equalsIgnoreCase("profile")){
+            
+            viewFile = AGENT_PROFILE;
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            Agent agent = em.find(Agent.class, id);
+            
+            String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+            
+            request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
+            request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agentkins");
+            request.setAttribute("sideNav", "profile");
+            request.setAttribute("agent", agent);
+            
+        }
         else if (action.isEmpty() || action.equalsIgnoreCase("listagents")){
             viewFile = AGENTS_ADMIN;
             request.setAttribute("agents", listAgents());
@@ -236,7 +261,12 @@ public class AgentController extends AppController {
         else if(action.equalsIgnoreCase("approval")){
             this.processApprovalRequest(Long.parseLong(agent_id), Integer.parseInt(status), request);
         }
-
+        
+        if(request.getAttribute("sideNav") == null){
+            //Keep track of the sideBar
+            request.setAttribute("sideNav", "Agent");
+        }
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
@@ -255,6 +285,14 @@ public class AgentController extends AppController {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        
+            //Ajax Post Request for Password Change
+            if(action.equalsIgnoreCase("password_change")){
+
+                changeAgentPassword(request,response);
+                return;
+            }
         
          if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
@@ -645,7 +683,7 @@ public class AgentController extends AppController {
                 new AlertManager().sendAgentApprovalAlerts(agent);
                 
                 
-                
+                emf.getCache().evict(Agent.class);
             } catch (RollbackException e){
                 e.printStackTrace();
             } catch(Exception e){
@@ -774,107 +812,6 @@ public class AgentController extends AppController {
             dispatcher.forward(request, response);
     }
     
-    
-   
-             
-    /*TP: Upload of the Agent's picture is done here*/
-    private String uploadAgentPicture(Agent agent,HttpServletRequest request,String agentFileName)throws PropertyException,ServletException,IOException{
-          String root = getServletContext().getRealPath("/");
-          String path = root+"/images/uploads/agents/";
-          long unixTime = System.currentTimeMillis() / 1000L;
-          if(( request.getPart("agentPhoto") != null ) || (!request.getParameter("agentPhotoHidden").isEmpty() && request.getParameter("agentPhotoHidden") != null )){
-                   if (request.getPart("agentPhoto")!=null){
-                /*TP: Agent personal file upload*/
-                        Part agentPartPhoto = request.getPart("agentPhoto"); 
-                        String myName = getFileName(agentPartPhoto);
-                         
-                         if(myName.isEmpty() && !request.getParameter("agentPhotoHidden").isEmpty() ){
-                            
-                              agentFileName = request.getParameter("agentPhotoHidden");
-                              agent.setPhotoPath(request.getParameter("agentPhotoHidden"));
-                         }else {
-                            
-                                int fnameLength = myName.length();
-                                int startingPoint = fnameLength - 4;
-                                myName = myName.substring(startingPoint,fnameLength);
-                                agentFileName = "agent_"+unixTime+myName;
-                                this.photoImageUpload(agentFileName,path,agentPartPhoto);
-                       }
-                   }
-                   else if(!request.getParameter("agentPhotoHidden").isEmpty()){
-                       agentFileName = request.getParameter("agentPhotoHidden");
-                       agent.setPhotoPath(request.getParameter("agentPhotoHidden"));
-                   }
-               
-         }
-     return agentFileName;
-     
-     }
-    
-    /*TP: Upload of the Agent's next of kin picture is done here*/
-    private String uploadAgentKinPicture(Agent agent,HttpServletRequest request, String agentKinFileName)throws PropertyException, ServletException, IOException{
-         String root = getServletContext().getRealPath("/");
-         String path = root+"/images/uploads/agents/";
-          long unixTime = System.currentTimeMillis() / 1000L;
-     if((request.getPart("agentKinPhoto")!= null) || (!request.getParameter("agentKinPhotoHidden").isEmpty() && request.getParameter("agentKinPhotoHidden") != null)){
-              
-                       
-                if( request.getPart("agentKinPhoto") !=null ){
-                       /*TP: Agent Kin personal file upload*/
-                               Part agentKinPartPhoto = request.getPart("agentKinPhoto");
-                               String myNameKin = "";
-                               myNameKin = getFileName(agentKinPartPhoto);
-                               System.out.println("This is the my name of the next of kin we are testing for "+request.getParameter("agentKinPhotoHidden"));
-                             if( myNameKin.isEmpty()&& (!request.getParameter("agentKinPhotoHidden").isEmpty())){
-                               agentKinFileName = request.getParameter("agentKinPhotoHidden");
-                               agent.setPhotoPath(request.getParameter("agentKinPhotoHidden"));
-                              }else {
-                               int fnameLengthK = myNameKin.length();
-                               int startingPointK = fnameLengthK - 4;
-                               myNameKin = myNameKin.substring(startingPointK,fnameLengthK);
-                               agentKinFileName = "agentKin_"+unixTime+myNameKin;
-                               photoImageUpload(agentKinFileName,path,agentKinPartPhoto);
-                }
-                          }
-                    else if(!request.getParameter("agentKinPhotoHidden").isEmpty()){
-
-                               agentKinFileName = request.getParameter("agentKinPhotoHidden");
-                               agent.setPhotoPath(request.getParameter("agentKinPhotoHidden"));
-                              }
-                    }
-     return agentKinFileName;
-     
-     }
-    
-    /*TP: This is a generic method for image upload*/
-    private void photoImageUpload(String agentFileName,String path, Part agentPartPhoto){
-    OutputStream fout = null;
-    InputStream filecontent = null;
-   
-      String type = agentPartPhoto.getHeader("content-type");
-   if(type.equals("image/jpeg") || type.equals("image/png") || type.equals("image/jpg") || type.equals("image/gif") || type.equals("image/bmp") )
-    {
-          try {
-            fout = new FileOutputStream(new File(path  + agentFileName));
-          
-            filecontent = agentPartPhoto.getInputStream();
-            
-            int read = 0;
-            final byte[] bytes = new byte[32*1024];
-// 
-            while ((read =filecontent.read(bytes)) != -1) {
-                fout.write(bytes, 0, read);
-            }
-            fout.flush();
-            fout.close();
-            } catch (Exception e) { 
-          errorMessages.put("error7","Invalid File Format");
-        }  
-    } else { 
-        errorMessages.put("error7","Invalid File Format");
-        } 
-    }
-    
     /*TP: Validation is done here*/
     private void validate(Agent agent, HttpServletRequest request) throws PropertyException, ServletException, IOException {
          errorMessages.clear();
@@ -985,7 +922,11 @@ public class AgentController extends AppController {
         jpqlQuery.setParameter("active",0);
         jpqlQuery.setParameter("approvalStatus",-1);
         List<Agent> agentList = jpqlQuery.getResultList();
-
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        
         return agentList;
     }
 
@@ -1041,6 +982,7 @@ public class AgentController extends AppController {
         Agent agent = em.find(Agent.class, agentId);
         
         
+        
         em.close();
         emf.close();
         
@@ -1053,6 +995,27 @@ public class AgentController extends AppController {
         
         Query jpQL = em.createNamedQuery("AgentBalance.findByAgentId");
         jpQL.setParameter("agentId",sessionUser.getSystemUserId());
+        
+        AgentBalance agentBalance = (AgentBalance)jpQL.getSingleResult();
+        
+        System.out.println("AgentBalance : " + agentBalance);
+        double totalCredit = agentBalance.getTotalcredit() != null ? agentBalance.getTotalcredit() : 0.00;
+        double totalDebit = agentBalance.getTotaldebit() != null ? agentBalance.getTotaldebit() : 0.00;
+        
+        double balance = totalCredit - totalDebit;
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        return balance;
+    }
+    
+    private double getAgentBalance(long agentId){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jpQL = em.createNamedQuery("AgentBalance.findByAgentId");
+        jpQL.setParameter("agentId",agentId);
         
         AgentBalance agentBalance = (AgentBalance)jpQL.getSingleResult();
         
@@ -1115,7 +1078,7 @@ public class AgentController extends AppController {
         
     }
     
-    private List<Withdrawal> getPendingWithdrawalRequest(){
+    private List<Map> getPendingWithdrawalRequest(){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
@@ -1124,11 +1087,42 @@ public class AgentController extends AppController {
         
         List<Withdrawal> pendingWithdrawal = jplQuery.getResultList();
         
+        List<Map> pendingWithdrawalMap = new ArrayList();
+        
+        for(Withdrawal w : pendingWithdrawal){
+            
+            Map<String, String> map = new HashMap();
+            
+            map.put("id", w.getId().toString());
+            map.put("agentFullName", w.getAgent().getFullName());
+            map.put("agentId", w.getAgent().getAgentId().toString());
+            map.put("amount", String.format("%.2f", w.getAmount()));
+            map.put("balance", String.format("%.2f", getAgentBalance(w.getAgent().getAgentId())));
+            
+            pendingWithdrawalMap.add(map);
+        }
+        
         emf.getCache().evictAll();
         em.close();
         emf.close();
         
-        return pendingWithdrawal;
+        return pendingWithdrawalMap;
+    }
+    
+    private List<Withdrawal> getApprovedWithdrawalRequest(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Withdrawal.findByApproved");
+        jplQuery.setParameter("approved", (short)1);
+        
+        List<Withdrawal> approvedWithdrawal = jplQuery.getResultList();
+        
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        
+        return approvedWithdrawal;
     }
     
     private void approveWithdrawal(String withdrawal_id,HttpServletRequest req, HttpServletResponse res) throws IOException{
@@ -1140,8 +1134,8 @@ public class AgentController extends AppController {
         
         Withdrawal withdrawal = em.find(Withdrawal.class,id);
         
-        Long notificationId = Long.parseLong(req.getParameter("nof_id"));
-        Notification notification = em.find(Notification.class, notificationId);
+//        Long notificationId = Long.parseLong(req.getParameter("nof_id"));
+//        Notification notification = em.find(Notification.class, notificationId);
         
         WithdrawalManager manager = new WithdrawalManager(sessionUser);
         manager.processWithdrawalApproval(withdrawal, req.getContextPath());
@@ -1172,6 +1166,68 @@ public class AgentController extends AppController {
         
         res.setContentType("text/html");
         res.getWriter().write("1");
+    }
+    
+    private void changeAgentPassword(HttpServletRequest request, HttpServletResponse response) {
+        
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            
+            
+            Map<String, String> resMap = new HashMap();
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            
+            String oldPassword = request.getParameter("old_password");
+            String pwd1 = request.getParameter("pwd1");
+            String pwd2 = request.getParameter("pwd2");
+            
+            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            em.getTransaction().begin();
+            
+            Agent agent = em.find(Agent.class, id);
+            
+            
+            
+            if(AuthManager.check(oldPassword, agent.getPassword())){
+                
+                if(pwd1.equals(pwd2) && !pwd1.equals("")){
+                    agent.setPassword(AuthManager.getSaltedHash(pwd1));
+                    resMap.put("success", "Password changed successfully");
+                }else{
+                    resMap.put("error", "Password and Re-enter password do not match");
+                }
+                 
+            }else{
+                resMap.put("error", "Invalid old password");
+            }
+            
+            if(agent != null){
+                em.merge(agent);
+                
+            }
+            
+            em.getTransaction().commit();
+            em.close();
+            emf.close();
+            
+            Gson gson = new GsonBuilder().create();
+            
+            String json = gson.toJson(resMap);
+            
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(json);
+            response.getWriter().flush();
+            response.getWriter().close();
+            
+            
+        } catch (Exception ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
     
     /*Getting the agent Id for public use*/

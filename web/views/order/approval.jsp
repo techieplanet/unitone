@@ -69,7 +69,7 @@
                                             <td>${orderItemCount.count}</td>
                                             <td>${order.getProjectName(orderItemCount.index)}</td>
                                             <td>${order.getUnitTitle(orderItemCount.index)}</td>
-                                            <td style="text-align: right">${orderItem.getInitialDep()}</td>
+                                            <td style="text-align: right"><fmt:formatNumber value='${orderItem.getInitialDep()}' type='currency' currencySymbol='N' /></td>
                                             <td style="text-align: center">${orderItem.getQuantity()}</td>
                                             <td style="background-color: #008D4C; text-align: center;">
                                                 <input type="checkbox" name="order-item-approve" class="order-item-approve chkbox1" value="${orderItem.getId()}" />

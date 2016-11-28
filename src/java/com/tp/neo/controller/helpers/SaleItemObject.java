@@ -15,7 +15,7 @@ public class SaleItemObject {
     public int productId;
     public String productUnitName;
     public int productUnitId;
-    public int productQuanity;
+    public int productQuantity;
     public float productAmount;
     public float amountUnit;
     public float amountTotalUnit;
