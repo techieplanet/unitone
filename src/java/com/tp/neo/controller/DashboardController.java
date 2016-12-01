@@ -8,16 +8,17 @@ package com.tp.neo.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.controller.helpers.AgentDashboardHelper;
 import com.tp.neo.controller.helpers.DashboardHelper;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Agent;
+import com.tp.neo.model.Customer;
+import com.tp.neo.model.ProductOrder;
 import com.tp.utils.DateFunctions;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -68,7 +69,10 @@ public class DashboardController extends AppController {
          
          if(super.hasActiveUserSession(request, response)){
 //            if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
-                processGetRequest(request, response);
+                if(sessionUser.getSystemUserTypeId() == 1) //admin
+                    processAdminDashboard(request, response);
+                if(sessionUser.getSystemUserTypeId() == 2) //agent
+                    processAgentDashboard(request, response);
 //            }
 //            else{
 //                super.errorPageHandler("forbidden", request, response);
@@ -91,8 +95,9 @@ public class DashboardController extends AppController {
     }
 
     
-    protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
+    protected void processAdminDashboard(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        System.err.println("Inside admin dashboard");
         response.setContentType("text/html;charset=UTF-8");
         
         viewFile = "/views/dashboard/home.jsp";
@@ -116,7 +121,7 @@ public class DashboardController extends AppController {
                 response.getWriter().flush(); 
                 response.getWriter().close();
             }
-            if(action.equalsIgnoreCase("lodgementsummary")){
+            else if(action.equalsIgnoreCase("lodgementsummary")){
                 String startDate = request.getParameter("startDate");
                 String endDate = request.getParameter("endDate");
                 int groupId = Integer.parseInt(request.getParameter("grouping"));
@@ -134,14 +139,15 @@ public class DashboardController extends AppController {
                 long customerCount = em.createNamedQuery("Customer.findAll").getResultList().size();
                 long agentCount = em.createNamedQuery("Agent.findByApprovalStatus").setParameter("approvalStatus", 1).getResultList().size();
 
-
-                request.setAttribute("totalDue", String.format("%,.2f",helper.getTotalDuePayments()));  //total due payments 
-                request.setAttribute("totalOutstanding", String.format("%,.2f",helper.getTotalOutstandingPayments()));  //total outstanding
+                double totalDebt = helper.getTotalDuePayments();
+                request.setAttribute("totalDue", String.format("%,.2f",totalDebt));  //total due payments 
+                request.setAttribute("totalOutstanding", String.format("%,.2f", helper.getTotalOutstandingPayments()));  //total outstanding
                 request.setAttribute("commissionsPayable", String.format("%,.2f",helper.getTotalCommissionsPayable()));  //total outstanding
                 request.setAttribute("totalStockValue", String.format("%,.2f",helper.getTotalStockValue()));  //total value of remaining stock
 
                 //orders will go here
-                request.setAttribute("projectPerformance", helper.getProjectsPerformance());  //the amount sold for each project unit
+                request.setAttribute("projectPerformanceBySalesQuota", helper.getProjectsPerformanceBySalesQuota());  //the quota of this project or unit compared to other items in same category
+                request.setAttribute("projectPerformanceByStockSold", helper.getProjectsPerformanceByStockSold());  //the srock sold for each project and its units
                 request.setAttribute("orderSummary", helper.getOrderSummary());  //the default version to get orders in the last 7 days
                 request.setAttribute("lodgementSummary", helper.getLodgementSummary());  //the default version to get lodgements in the last 7 days
 
@@ -167,6 +173,106 @@ public class DashboardController extends AppController {
 
             
     }
+    
+    
+    
+    
+    protected void processAgentDashboard(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        System.err.println("Inside agent dashboard");
+        response.setContentType("text/html;charset=UTF-8");
+        
+        viewFile = "/views/dashboard/home.jsp";
+        
+        em = emf.createEntityManager();
+        
+        //get total due
+        AgentDashboardHelper helper = new AgentDashboardHelper();
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        Long agentId = sessionUser.getSystemUserId();
+        
+        try{
+            if(action.equalsIgnoreCase("ordersummary")){
+                String startDate = request.getParameter("startDate");
+                String endDate = request.getParameter("endDate");
+                int groupId = Integer.parseInt(request.getParameter("grouping"));
+
+                String jsonResponse = this.fetchOrderSummary(startDate, endDate, groupId);
+
+                response.getWriter().write(jsonResponse);
+                response.getWriter().flush(); 
+                response.getWriter().close();
+            }
+            else if(action.equalsIgnoreCase("lodgementsummary")){
+                String startDate = request.getParameter("startDate");
+                String endDate = request.getParameter("endDate");
+                int groupId = Integer.parseInt(request.getParameter("grouping"));
+
+                String jsonResponse = this.fetchLodgementSummary(startDate, endDate, groupId);
+                System.out.println("jsonResponse: " + jsonResponse );
+
+                response.getWriter().write(jsonResponse);
+                response.getWriter().flush(); 
+                response.getWriter().close();
+            }
+            else{
+                //DecimalFormat formatter = new DecimalFormat("0,000.00"); //this will do same as String.format("%,.2f",XXXXXX)
+                
+                //long customerCount = em.createNamedQuery("Customer.findAll").getResultList().size();
+                //long agentCount = em.createNamedQuery("Agent.findByApprovalStatus").setParameter("approvalStatus", 1).getResultList().size();
+                
+                //debtors
+                HashMap<String, Number> debtorsMap = helper.getTotalAgentDebts(agentId);
+                request.setAttribute("totalDebt", String.format("%,.2f", debtorsMap.get("totalDebt").doubleValue()));  //total due payments 
+                request.setAttribute("debtorsCount", debtorsMap.get("customerCount").intValue());  // debtors count
+                
+                //outstanding
+                HashMap<String, Number> totalOutstandingPayments = helper.getTotalOutstandingPayments(agentId);
+                request.setAttribute("totalOutstanding", String.format("%,.2f", totalOutstandingPayments.get("totalOustandingPayments").doubleValue()));  //total outstanding
+                request.setAttribute("outstandersCount", totalOutstandingPayments.get("customerCount").intValue());  //total 
+                
+                //commissions
+                request.setAttribute("commissionsPayable", String.format("%,.2f",helper.getTotalCommissionsPayable(agentId)));  //total outstanding
+                
+                //unapproved lodgements
+                HashMap<String, Number> totalUnapproved = helper.getTotalUnapprovedLodgments(agentId);
+                request.setAttribute("totalUapprovedLodgements", String.format("%,.2f",totalUnapproved.get("totalUnapproved")));  //total value of unapproved lodgements
+                request.setAttribute("unapprovedCount", totalUnapproved.get("customerCount"));  //total value of unapproved lodgements
+
+                //orders will go here
+                request.setAttribute("projectPerformance", helper.getProjectsPerformance(agentId));  //the amount sold for each project unit
+                request.setAttribute("projectPerformanceBySalesQuota", helper.getProjectsPerformanceBySalesQuota(agentId));  //the amount sold for each project unit
+                request.setAttribute("orderSummary", helper.getOrderSummary(agentId));  //the default version to get orders in the last 7 days
+                request.setAttribute("lodgementSummary", helper.getLodgementSummary(agentId));  //the default version to get lodgements in the last 7 days
+                
+               
+               
+                //request.setAttribute("agentCount", agentCount);  
+                List<Customer> myCustomers = helper.getMyCustomers(agentId);
+                request.setAttribute("customerCount", myCustomers.size());  
+                
+                List<ProductOrder> myOrders = helper.getMyOrders(agentId);
+                request.setAttribute("orderCount", myOrders.size());
+                
+                request.setAttribute("ordersValue", String.format("%,.2f",helper.getMyOrdersValue(agentId)));  
+                //request.setAttribute("processingOrders", em.createNamedQuery("ProductOrder.findByApprovalStatus").setParameter("approvalStatus", 1).getResultList().size());  
+                //request.setAttribute("customersPerAgent", String.format("%.2f", agentCount == 0 ? 0 : (float)customerCount/agentCount));  
+                
+                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+                dispatcher.forward(request, response);
+            }
+        } catch (Exception e){
+            String inputValuesString = request.getQueryString() != null ? request.getQueryString() : "";
+            SystemLogger.logSystemIssue(APP_NAME, inputValuesString, e.getMessage());
+            e.getMessage();
+            e.printStackTrace();
+        }
+
+            
+    }
+    
+    
     
     
     private String fetchOrderSummary(String start, String end, int groupId){

@@ -12,17 +12,33 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-              <a href="Agent"> Admin Dashboard</a>
+              <a href="">
+                  <c:choose>
+                      <c:when test="${sessionScope.userType == 'ADMIN'}">
+                        Admin Dashboard
+                      </c:when>
+                        
+                      <c:when test="${sessionScope.userType == 'AGENT'}">
+                        Agent Dashboard
+                      </c:when>
+                  </c:choose>
+                  </a>
           </h1>
         </section>
 
         <!-- Main content -->
         <section class="content">
         
-            <%@ include file="dashcontent.jsp" %>    
-          
+            <c:choose>
+                  <c:when test="${sessionScope.userType == 'ADMIN'}">
+                        <%@ include file="dashcontent.jsp" %>
+                  </c:when>
+
+                  <c:when test="${sessionScope.userType == 'AGENT'}">
+                        <%@ include file="agentdashcontent.jsp" %>
+                  </c:when>
+            </c:choose>
             
-          
         </section><!-- /.content -->
       </div><!-- /.content-wrapper -->
 

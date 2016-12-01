@@ -7,7 +7,11 @@ package com.tp.neo.controller.helpers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.tp.neo.model.Agent;
+import com.tp.neo.model.AgentBalance;
+import com.tp.neo.model.Customer;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.utils.DateFunctions;
@@ -30,7 +34,7 @@ import java.util.Set;
  *
  * @author swedge-mac
  */
-public class DashboardHelper {
+public class AgentDashboardHelper {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em;
     Query query;
@@ -38,47 +42,23 @@ public class DashboardHelper {
     Gson gson = new GsonBuilder().create();
 
     
-    public DashboardHelper(){
+    public AgentDashboardHelper(){
         emf.getCache().evictAll();
     }
     
-    public double getTotalDuePayments(){
-        double totalDue = 0;
-        
-        
-        em = emf.createEntityManager();
-        query = em.createNamedQuery("OrderItem.findByApprovedLodgementItemsSum");
-        query.setParameter("aps", 1);
-        query.setParameter("item_aps", 1);
-        List<Object[]> itemAndAmountList = query.getResultList();
-        
-        for(Object[] itemAndAmount : itemAndAmountList){
-            System.out.println("Inside getduepayemnts");
-            OrderItem orderItem = (OrderItem)itemAndAmount[0];
-            double paidSum = (Double)itemAndAmount[1];
-            
-            Date orderItemApprovalDate = orderItem.getModifiedDate();
-            int monthsElapsed = DateFunctions.getNumberOfMonthsBetweenDates(orderItemApprovalDate, new Date());
-            double expectedMortgageTotal = orderItem.getUnit().getMonthlyPay() * monthsElapsed;
-            
-            if(expectedMortgageTotal > paidSum)
-                totalDue += expectedMortgageTotal - paidSum;
-        }
-    
-        return totalDue;
-    }
     
     
-    public HashMap<String, Number> getTotalAgentDebts(){
+    public HashMap<String, Number> getTotalAgentDebts(Long agentId){
         double totalDebt = 0;
-        int ordersCount = 0;
         Set<Long> ordersSet = new HashSet<Long>();
         
         em = emf.createEntityManager();
-        query = em.createNamedQuery("OrderItem.findByApprovedLodgementItemsSum");
+        query = em.createNamedQuery("Agent.findMyTotalLodgementsSumPerOrderItem");
         query.setParameter("aps", 1);
         query.setParameter("item_aps", 1);
+        query.setParameter("agentId", agentId);
         List<Object[]> itemAndAmountList = query.getResultList();
+        System.out.println("Total Agent Debts: " + gson.toJson(itemAndAmountList.get(0)[1]));
         
         for(Object[] itemAndAmount : itemAndAmountList){
             System.out.println("Inside getduepayemnts");
@@ -109,61 +89,56 @@ public class DashboardHelper {
      * This is the difference of total order items approved (expected) and total lodgements approved (received)
      * @return double
      */
-    
-    public double getTotalOutstandingPayments(){
-        query = em.createNamedQuery("OrderItem.findMyTotalOutstandingAmountPerOrderItem");
+    public HashMap<String, Number> getTotalOutstandingPayments(Long agentId){
+        query = em.createNamedQuery("Agent.findMyTotalOutstandingAmountPerOrderItem");
         query.setParameter("aps", 1);
+        query.setParameter("item_aps", 1);
+        query.setParameter("agentId", agentId);
         List<Object[]>  outstandingItems = query.getResultList();
         
         double totalPayments = 0;
+        Set<Long> ordersSet = new HashSet<Long>();
         
         for(Object[] outObjects : outstandingItems){
+            OrderItem orderItem = (OrderItem)outObjects[0];
             totalPayments += (double)outObjects[1];
+            ordersSet.add(orderItem.getOrder().getId());
         }
         
-        return totalPayments;
+        HashMap<String, Number> returnMap = new HashMap<String, Number>();
+        returnMap.put("totalOustandingPayments", totalPayments);
+        returnMap.put("customerCount", ordersSet.size());
+        
+        return returnMap;
     }
-    /*
-    public double getTotalOutstandingPayments(){
-        query = em.createNamedQuery("OrderItem.findTotalApprovedSum");
-        query.setParameter("approvalStatus", 1);
-        double approvedOrderItemSum = (Double)query.getSingleResult();
-        
-        query = em.createNamedQuery("LodgementItem.findTotalApprovedSum");
-        query.setParameter("approvalStatus", 1);
-        double approvedLodgementItemSum = (Double)query.getSingleResult();
-        
-        double totalOutstanding = approvedOrderItemSum - approvedLodgementItemSum;
-        
-        return totalOutstanding;
-    }
-    */
     
-    public double getTotalCommissionsPayable(){
-        query = em.createNamedQuery("AgentBalance.findAllBalanceSum");
-        double balanceSum = (Double)query.getSingleResult();
-        System.out.println("Commissions Payable: " + balanceSum);
-        return balanceSum;
+    public double getTotalCommissionsPayable(Long agentId){
+        AgentBalance agentBalance = (AgentBalance)em.createNamedQuery("AgentBalance.findByAgentId").setParameter("agentId", agentId).getSingleResult();
+        return agentBalance.getTotalcredit() - agentBalance.getTotaldebit();
     }
     
     
-    public double getTotalStockValue(){
-        double totalStockValue = 0;
-        List<ProjectUnit> units = em.createNamedQuery("ProjectUnit.findAll").getResultList();
-        for(ProjectUnit unit : units){
-            
-            int quantitySold = 0;
-            List<OrderItem> items = (List)unit.getOrderItemCollection();
-            for(OrderItem item : items){
-                if(item.getApprovalStatus() == 0) continue;
-                quantitySold += item.getQuantity();
-            }
-            
-            totalStockValue += unit.getCpu() * (unit.getQuantity() - quantitySold);
-            
+    public HashMap<String, Number> getTotalUnapprovedLodgments(Long agentId){
+        double sum = 0;
+        Set<Long> ordersSet = new HashSet<Long>();
+        
+        List<Object[]> objects = em.createNamedQuery("Agent.findMyTotalLodgementsSumPerOrderItem")
+                                    .setParameter("item_aps", 1)
+                                    .setParameter("aps", 0)
+                                    .setParameter("agentId", agentId)
+                                    .getResultList();
+        
+        for(Object[] thisObject : objects){
+            sum += (Double)thisObject[1];
+            OrderItem orderItem = (OrderItem)thisObject[0];
+            ordersSet.add(orderItem.getOrder().getId());
         }
 
-        return totalStockValue;
+        HashMap<String, Number> returnMap = new HashMap<String, Number>();
+        returnMap.put("totalUnapproved", sum);
+        returnMap.put("customerCount", ordersSet.size());
+        
+        return returnMap;
     }
     
     
@@ -172,18 +147,21 @@ public class DashboardHelper {
      * units are map objects in an ArrayList that are then put into corresponding projects map which in turn are put into a projects ArrayList
      * @return List<HashMap>
      */
-    public List<HashMap> getProjectsPerformanceByStockSold(){
+    public List<HashMap> getProjectsPerformance(Long agentId){
         List<Object[]> performance = em.createNativeQuery("SELECT p.id, p.name, pno.puid, pno.puname, pno.sold, pno.stock AS setupstock "
                                                             + "FROM project p LEFT JOIN "
-                                                            + "(SELECT pu.title AS puname, pu.id AS puid, project_id, COALESCE(SUM(o.quantity),0) AS sold, pu.quantity as stock FROM project_unit pu LEFT JOIN order_item o ON pu.id = o.unit_id AND approval_status = 1 GROUP BY pu.id)" 
-                                                            + "As pno ON p.id = pno.project_id "
+                                                                + "(SELECT pu.title AS puname, pu.id AS puid, project_id, COALESCE(SUM(o.quantity),0) AS sold, pu.quantity as stock "
+                                                                + "FROM project_unit pu LEFT JOIN order_item o ON pu.id = o.unit_id AND o.approval_status = 1 "
+                                                                + "LEFT JOIN product_order po ON o.order_id = po.id LEFT JOIN agent a ON po.agent_id = a.agent_id AND a.agent_id = " + agentId
+                                                                + "GROUP BY pu.id) As pno " 
+                                                            + "ON p.id = pno.project_id "
                                                             + "ORDER By p.id, puid"
                                                           ).getResultList();
         
         
-        for(Object[] perf : performance){
-            System.out.println("ID: " + perf[0] + ", Project: " + perf[1] + ", Unit ID: " + perf[2] + ", Unit: " +  perf[3] + ", Quantity: " + perf[4] + ", Stock: " + perf[5]);
-        }
+        //for(Object[] perf : performance){
+          //  System.out.println("ID: " + perf[0] + ", Project: " + perf[1] + ", Unit ID: " + perf[2] + ", Unit: " +  perf[3] + ", Quantity: " + perf[4] + ", Stock: " + perf[5]);
+        //}
         
         
         int i = 0;
@@ -248,19 +226,18 @@ public class DashboardHelper {
     }
     
     
-    
-    
-    /**
+     /**
      * This retrieves all the projects and their units. 
      * units are map objects in an ArrayList that are then put into corresponding projects map which in turn are put into a projects ArrayList
      * @return List<HashMap>
      */
-    public List<HashMap> getProjectsPerformanceBySalesQuota(){
-        List<Object[]> projectsPerformanceList = em.createNamedQuery("OrderItem.findSalesSumByProject")
+    public List<HashMap> getProjectsPerformanceBySalesQuota(long agentId){
+        List<Object[]> projectsPerformanceList = em.createNamedQuery("Agent.findMySalesSumByProject")
                                                                     .setParameter("item_aps", 1)
                                                                     .setParameter("aps", 1)
+                                                                    .setParameter("agentId", agentId)
                                                                     .getResultList();
-        //System.out.println("Length of projects: " + projectsPerformanceList.size());
+        System.out.println("Length of projects: " + projectsPerformanceList.size());
         
         //get the totals for all projects
         long totalProjectsSalesQuotaStock = 0;
@@ -277,10 +254,11 @@ public class DashboardHelper {
             int projectId = project.getId();
             
             //get the units for this project with its their sales stock and value sums
-            List<Object[]> unitsPerformanceList = em.createNamedQuery("OrderItem.findSalesSumByProjectUnit")
+            List<Object[]> unitsPerformanceList = em.createNamedQuery("Agent.findMySalesSumByProjectUnit")
                                                                             .setParameter("projectId", project.getId())
                                                                             .setParameter("item_aps", 1)
                                                                             .setParameter("aps", 1)
+                                                                            .setParameter("agentId", agentId)
                                                                             .getResultList();
             //System.out.println("Length of units: " + unitsPerformanceList.size() + ", project: " + project.getName());
             //get the totals for all units in this project
@@ -321,24 +299,24 @@ public class DashboardHelper {
         return projectMapsList;
     }
     
-    
-    public String getOrderSummary() throws Exception{
+    public String getOrderSummary(Long agentId) throws Exception{
         Date startDate = DateFunctions.getDateAfterSubtractDays(40);
         Date endDate = new Date();
-        return this.getOrderSummary("day", "DD-Mon-YYYY", startDate, endDate);
+        return this.getOrderSummary(agentId, "day", "DD-Mon-YYYY", startDate, endDate);
     }
     
-    public String getOrderSummary(String truncatedBy, String truncationResultFormat, Date startDate, Date endDate) throws Exception{
+    public String getOrderSummary(Long agentId, String truncatedBy, String truncationResultFormat, Date startDate, Date endDate) throws Exception{
         //Redeclare here as these variables will not be available in AJAX mode
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
     
-        String query = "SELECT COUNT(DISTINCT(o.order_id)) as orderscount, SUM(o.quantity * u.amount_payable) as ordersvalue, " +
-                                                                           "to_char(date_trunc('" + truncatedBy + "', o.modified_date),'" + truncationResultFormat + "') as grouper " +
-                                                                           "FROM order_item o JOIN project_unit u ON o.unit_id = u.id " +
-                                                                           "WHERE o.approval_status = 1 AND (date(o.modified_date) >= '" + startDate.toString() + "' AND date(o.modified_date) <= '" + endDate.toString() + "') " +
-                                                                           "GROUP BY grouper";
-
+        String query = "SELECT COUNT(DISTINCT(o.order_id)) as orderscount, SUM(o.quantity * u.amount_payable) as ordersvalue, " 
+                                                                           + "to_char(date_trunc('" + truncatedBy + "', o.modified_date),'" + truncationResultFormat + "') as grouper " 
+                                                                           + "FROM order_item o JOIN project_unit u ON o.unit_id = u.id "
+                                                                           + "JOIN product_order po ON o.order_id = po.id JOIN agent a ON po.agent_id = a.agent_id " 
+                                                                           + "WHERE a.agent_id = " + agentId + " AND o.approval_status = 1 AND (date(o.modified_date) >= '" + startDate.toString() + "' AND date(o.modified_date) <= '" + endDate.toString() + "') " 
+                                                                           + "GROUP BY grouper";
+        System.out.println("order query: " + query);
         List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
         
         List<HashMap> summaryMapsList = new ArrayList<HashMap>();
@@ -357,22 +335,22 @@ public class DashboardHelper {
     
     
     
-    public String getLodgementSummary() throws Exception{
+    public String getLodgementSummary(Long agentId) throws Exception{
         Date startDate = DateFunctions.getDateAfterSubtractDays(40);
         Date endDate = new Date();
-        return this.getLodgementSummary("day", "DD-Mon-YYYY", startDate, endDate);
+        return this.getLodgementSummary(agentId, "day", "DD-Mon-YYYY", startDate, endDate);
     }
     
     
-    public String getLodgementSummary(String truncatedBy, String truncationResultFormat, Date startDate, Date endDate) throws Exception{
+    public String getLodgementSummary(Long agentId, String truncatedBy, String truncationResultFormat, Date startDate, Date endDate) throws Exception{
         //Redeclare here as these variables will not be available in AJAX mode
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
         String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount) as lvalue, " +
                        "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper " +
-                       "FROM lodgement_item l " +
-                       "WHERE l.approval_status = 1 AND (date(l.modified_date) >= '" + startDate.toString() + "' AND date(l.modified_date) <= '" + endDate.toString() + "') " +
+                       "FROM lodgement_item l JOIN order_item o ON l.item_id = o.id JOIN product_order po ON po.id = o.order_id JOIN agent a ON po.agent_id = a.agent_id " +
+                       "WHERE a.agent_id= " + agentId + " AND l.approval_status = 1 AND (date(l.modified_date) >= '" + startDate.toString() + "' AND date(l.modified_date) <= '" + endDate.toString() + "') " +
                        "GROUP BY grouper";
         
         List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
@@ -408,6 +386,34 @@ public class DashboardHelper {
         
         return agentMapList;
     }
+    
+    
+    public List<Customer> getMyCustomers(Long agentId){
+        List<Customer> myCustomers = em.createNamedQuery("Customer.findByAgent")
+                                                        .setParameter("agent", em.find(Agent.class, agentId))
+                                                        .setParameter("deleted", 0)
+                                                        .getResultList();
+        return myCustomers;
+    }
+    
+    
+    public List<ProductOrder> getMyOrders(Long agentId){
+        List<ProductOrder> myOrders = em.createNamedQuery("ProductOrder.findByAgent")
+                                                        .setParameter("agent", em.find(Agent.class, agentId))
+                                                        .getResultList();
+        return myOrders;
+    }
+    
+    
+    public double getMyOrdersValue(Long agentId){
+        double myOrdersValue = (double)em.createNamedQuery("Agent.findMyTotalLodgements")
+                                                        .setParameter("item_aps", 1)
+                                                        .setParameter("aps", 1)
+                                                        .setParameter("agentId", agentId)
+                                                        .getSingleResult();
+        return myOrdersValue;
+    }
+    
     
     public static  void main(String[] args){
          

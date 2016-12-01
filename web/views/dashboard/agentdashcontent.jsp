@@ -10,14 +10,14 @@
               <!-- small box -->
               <div class="small-box bg-green">
                 <div class="inner">
-                    <h3><c:out value="${totalDue}" /></h3>
+                    <h3><c:out value="${totalDebt}" /></h3>
                     <p class="bold">TOTAL DUE PAYMENTS</p>
                 </div>
                 <div class="icon">
                   <i class="fa fa-cart-plus"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
+                <a href="" class="small-box-footer">${debtorsCount} customers <i class="fa fa-angle-double-right"></i></a>
               </div>
             </div><!-- ./col -->
             
@@ -32,7 +32,7 @@
                   <i class="fa fa-cart-plus"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
+                <a href="" class="small-box-footer">${outstandersCount} customers <i class="fa fa-angle-double-right"></i></a>
               </div>
             </div><!-- ./col -->
             
@@ -41,7 +41,7 @@
               <div class="small-box bg-yellow">
                 <div class="inner">
                     <h3><c:out value="${commissionsPayable}" /></h3>
-                  <p class="bold">TOTAL COMMISSIONS PAYABLE</p>
+                  <p class="bold">ACCOUNT BALANCE</p>
                 </div>
                 <div class="icon">
                   <i class="fa fa-location-arrow"></i>
@@ -55,20 +55,55 @@
               <!-- small box -->
               <div class="small-box bg-red">
                 <div class="inner">
-                    <h3><c:out value="${totalStockValue}" /></h3>
-                  <p class="bold">TOTAL STOCK VALUE</p>
+                    <h3><c:out value="${totalUapprovedLodgements}" /></h3>
+                  <p class="bold">UNAPPROVED LODGEMENTS</p>
                 </div>
                 <div class="icon">
                   <i class="ion ion-pie-graph"></i>
                 </div>
-                <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
+                <a href="" class="small-box-footer">${unapprovedCount} customers <i class="fa fa-angle-double-right"></i></a>
               </div>
             </div><!-- ./col -->
             
           </div><!-- /.row -->
           
           
+          <!--COSTS LINE-->
+        <div class="row">
+            <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="callout bg-blue">
+                    <strong>
+                        Customers
+                        <span class="pull-right">${customerCount}</span>
+                    </strong>
+                </div>
+            </div><!-- /.col -->
+            
+            <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="callout bg-green">
+                    <strong>
+                        Order Count
+                        <span class="pull-right">${orderCount}</span>
+                    </strong>
+                </div>
+            </div><!-- /.col -->
+
+            <!-- fix for small devices only -->
+            <div class="clearfix visible-sm-block"></div>
+
+            <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="callout bg-olive">
+                    <strong>
+                        Total Sales Value
+                        <span class="pull-right"><b>${ordersValue}</b></span>
+                    </strong>
+                </div>
+            </div><!-- /.col -->
+          
+        </div><!-- /.row -->
+    
+    
+    
           <!--Perfomance Tabs-->
           <div class="box box-primary">
                 <div class="box-header with-border header-stee-blue">
@@ -80,7 +115,7 @@
                             <li class="active"><a href="#ordersummary-pane" data-toggle="tab">Orders</a></li>
                             <li class=""><a href="#paymentsummary-pane" data-toggle="tab">Payments</a></li>
                             <li class=""><a href="#performance-pie-pane" data-toggle="tab">Percentages</a></li>
-                            <li id="p-bar-li"><a href="#performance-bar-pane" data-toggle="tab">Numbers</a></li>
+                            <!--<li id="p-bar-li"><a href="#performance-bar-pane" data-toggle="tab">Numbers</a></li>-->
                           </ul>
                           <div class="tab-content">
                              <div class="active tab-pane" id="ordersummary-pane">
@@ -168,7 +203,7 @@
                                    </div>
                                </div><!-- /.tab-pane -->
 
-                               <div class="tab-pane" id="performance-bar-pane">
+                               <!--<div class="tab-pane" id="performance-bar-pane">
                                    <div id="performance-bar" class="col-md-10"></div>
                                </div><!-- /.tab-pane -->
 
@@ -179,50 +214,7 @@
           
           
 
-    <!--COSTS LINE-->
-        <div class="row">
-            <div class="col-md-3 col-sm-6 col-xs-12">
-              <div class="info-box">
-                <span class="info-box-icon bg-aqua"><i class="fa fa-users"></i></span>
-                <div class="info-box-content">
-                  <span class="info-box-text"><strong>Number of Customers</strong></span>
-                  <span class="info-box-number">${customerCount}</span>
-                </div><!-- /.info-box-content -->
-              </div><!-- /.info-box -->
-            </div><!-- /.col -->
-            
-            <div class="col-md-3 col-sm-6 col-xs-12">
-              <div class="info-box">
-                <span class="info-box-icon bg-red"><i class="fa fa-user-plus"></i></span>
-                <div class="info-box-content">
-                  <span class="info-box-text"><strong>Number of Approved Agents</strong></span>
-                  <span class="info-box-number">${agentCount}</span>
-                </div><!-- /.info-box-content -->
-              </div><!-- /.info-box -->
-            </div><!-- /.col -->
-
-            <!-- fix for small devices only -->
-            <div class="clearfix visible-sm-block"></div>
-
-            <div class="col-md-3 col-sm-6 col-xs-12">
-              <div class="info-box">
-                <span class="info-box-icon bg-green"><i class="fa fa-cart-arrow-down"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text"><strong>Processing / Completed <br/>Orders</strong></span>
-                  <span class="info-box-number">${processingOrders} / ${completedOrders}</span>
-                </div><!-- /.info-box-content -->
-              </div><!-- /.info-box -->
-            </div><!-- /.col -->
-            <div class="col-md-3 col-sm-6 col-xs-12">
-              <div class="info-box">
-                <span class="info-box-icon bg-yellow"><i class="fa fa-user-times"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text"><strong>Average Customer <br/>per Agent</strong></span>
-                  <span class="info-box-number">${customersPerAgent}</span>
-                </div><!-- /.info-box-content -->
-              </div><!-- /.info-box -->
-            </div><!-- /.col -->
-    </div><!-- /.row -->
+    
     
 <!--    <div class="row">
         <div class="col-md-6">
@@ -275,7 +267,7 @@
       drawOrderSummaryChart(${orderSummary});
       drawLodgementSummaryChart(${lodgementSummary});
       drawPerformancePieChart();
-      drawPerformanceBarChart();
+      //drawPerformanceBarChart();
       
     });
     
@@ -518,10 +510,10 @@
         });
     }
     
-    
-    
-    
-    function drawPerformancePieChart(){
+
+
+
+      function drawPerformancePieChart(){
         var projectDataArray = new Array();
         var drillObjectsArray = new Array();
         
@@ -597,124 +589,137 @@
     }
     
     
-    function drawPerformanceBarChart(){
-        Highcharts.setOptions({
-                colors: ['#CC0000', '#00a65a', '#3366CC', '#FF9900', '#109618', '#990099', '#0099C6', '#DD4477', '#AAAA11', '#B77322']
-            });
-            
-        var projectDataArray = new Array();
-        var criteriaArray = new Array("Stock", "Sold"); //Mind the order
-        var seriesArray = new Array();
-        
-        
-        //stock: unsold
-        var seriesObject = {};
-        seriesObject.name = "In Stock";
-        <c:forEach items="${projectPerformanceByStockSold}" var="project">
-                projectObject = {};
-                projectObject.name = '${project.projectName}';
-                projectObject.y = (${project.setupStock} - ${project.sold});
-                projectObject.drilldown = true;
-                projectDataArray.push(projectObject);
-        </c:forEach>
-        seriesObject.data = projectDataArray;
-        seriesArray.push(seriesObject);
-            
-        //sold
-        projectDataArray = new Array();
-        seriesObject = {};
-        seriesObject.name = "Sold";
-        <c:forEach items="${projectPerformanceByStockSold}" var="project">
-                projectObject = {};
-                projectObject.name = '${project.projectName}';
-                projectObject.y = ${project.sold};
-                projectObject.drilldown = true;
-                projectDataArray.push(projectObject);
-        </c:forEach>
-        seriesObject.data = projectDataArray;
-        seriesArray.push(seriesObject);
-            
-            
-        $('#performance-bar').highcharts({
-            chart: {
-            type: 'column',
-            events: {
-                load:function(){
-                    $("text:contains(Highcharts.com)").css("display","none");
-                },
-                drilldown: function (e) {
-                    if (!e.seriesOptions) {
-                      var values = getChartAndDrillDownArray(this,e);   
-                      var chart = values[0];
-                      var series = values[1];
-                      var series2 = values[2];
-                      
-                      chart.addSingleSeriesAsDrilldown(e.point, series); 
-                      chart.addSingleSeriesAsDrilldown(e.point, series2);
-                      chart.applyDrilldown();
-                    }
-                },
-                load: function(event) {
-                    event.target.reflow();
-                  }
-            }
-        },
-        title: {
-            text: 'Projects and their units'
-        },
-        subtitle: {
-                text: 'Click the bars to view units under each project.'
-            },
-        xAxis: {
-            type: 'category'
-        },
-        legend: {
-            enabled: false
-        },
-        plotOptions: {
-            column: {stacking: 'normal'},
-                series: {
-                    borderWidth: 0,
-                    dataLabels: {
-                        enabled: true,
-                        style: { textShadow: false}
-                    }
-                }
-        },
-        legend: {
-            layout: 'horizontal',
-            align: 'bottom',
-            align: 'center',
-            margin: 18,
-            //floating: true,
-            borderWidth: 1,
-            borderRadius: 5,
-            //shadow: true
-        },
-        credit: false,
-        series: seriesArray,
-        drilldown: {
-            activeAxisLabelStyle: { 
-                "cursor": "pointer", 
-                "color": "#000000", 
-                "fontWeight": "normal", 
-                "fontSize": "12px",
-                "textDecoration": "none" 
-            },
-            activeDataLabelStyle: { 
-                    "cursor": "pointer", 
-                    "color": "#ffffff", 
-                    "fontWeight": "bold", 
-                    "fontSize": "12px",
-                    "overflow": "justify",
-                    "textDecoration": "none", 
-                },
-            series: []
-        }
-        
-        });
-
-    }
+//    function drawPerformanceBarChart(){
+//        Highcharts.setOptions({
+//                colors: ['#CC0000', '#00a65a', '#3366CC', '#FF9900', '#109618', '#990099', '#0099C6', '#DD4477', '#AAAA11', '#B77322']
+//            });
+//            
+//        var projectDataArray = new Array();
+//        var criteriaArray = new Array("Stock", "Sold"); //Mind the order
+//        var seriesArray = new Array();
+//        
+////        {
+////            name: 'Things',
+////            color: '#3150b4',
+////            data: [{
+////                name: 'Animals',
+////                y: 5,
+////                drilldown: true
+////            }, {
+////                name: 'Fruits',
+////                y: 5,
+////                drilldown: true
+////            }]
+////        }
+//        
+//        //stock: unsold
+//        var seriesObject = {};
+//        seriesObject.name = "In Stock";
+        <%--<c:forEach items="${projectPerformance}" var="project">--%>
+//                projectObject = {};
+//                projectObject.name = '${project.projectName}';
+//                projectObject.y = (${project.setupStock} - ${project.sold});
+//                projectObject.drilldown = true;
+//                projectDataArray.push(projectObject);
+        <%--</c:forEach>--%>
+//        seriesObject.data = projectDataArray;
+//        seriesArray.push(seriesObject);
+//            
+//        //sold
+//        projectDataArray = new Array();
+//        seriesObject = {};
+//        seriesObject.name = "Sold";
+        <%--<c:forEach items="${projectPerformance}" var="project">--%>
+//                projectObject = {};
+//                projectObject.name = '${project.projectName}';
+//                projectObject.y = ${project.sold};
+//                projectObject.drilldown = true;
+//                projectDataArray.push(projectObject);
+        <%--</c:forEach>--%>
+//        seriesObject.data = projectDataArray;
+//        seriesArray.push(seriesObject);
+//            
+//            
+//        $('#performance-bar').highcharts({
+//            chart: {
+//            type: 'column',
+//            events: {
+//                load:function(){
+//                    $("text:contains(Highcharts.com)").css("display","none");
+//                },
+//                drilldown: function (e) {
+//                    if (!e.seriesOptions) {
+//                      var values = getChartAndDrillDownArray(this,e);   
+//                      var chart = values[0];
+//                      var series = values[1];
+//                      var series2 = values[2];
+//                      
+//                      chart.addSingleSeriesAsDrilldown(e.point, series); 
+//                      chart.addSingleSeriesAsDrilldown(e.point, series2);
+//                      chart.applyDrilldown();
+//                    }
+//                },
+//                load: function(event) {
+//                    event.target.reflow();
+//                  }
+//            }
+//        },
+//        title: {
+//            text: 'Projects and their units'
+//        },
+//        subtitle: {
+//                text: 'Click the bars to view units under each project.'
+//            },
+//        xAxis: {
+//            type: 'category'
+//        },
+//        legend: {
+//            enabled: false
+//        },
+//        plotOptions: {
+//            column: {stacking: 'normal'},
+//                series: {
+//                    borderWidth: 0,
+//                    dataLabels: {
+//                        enabled: true,
+//                        style: { textShadow: false}
+//                    }
+//                }
+//        },
+//        legend: {
+//            layout: 'horizontal',
+//            align: 'bottom',
+//            align: 'center',
+//            margin: 18,
+//            //floating: true,
+//            borderWidth: 1,
+//            borderRadius: 5,
+//            //shadow: true
+//        },
+//        credit: false,
+//        series: seriesArray,
+//        drilldown: {
+//            activeAxisLabelStyle: { 
+//                "cursor": "pointer", 
+//                "color": "#000000", 
+//                "fontWeight": "normal", 
+//                "fontSize": "12px",
+//                "textDecoration": "none" 
+//            },
+//            activeDataLabelStyle: { 
+//                    "cursor": "pointer", 
+//                    "color": "#ffffff", 
+//                    "fontWeight": "bold", 
+//                    "fontSize": "12px",
+//                    "overflow": "justify",
+//                    "textDecoration": "none", 
+//                },
+//            series: []
+//        }
+//        
+//        });
+//
+//    }
     
     function getChartAndDrillDownArray(obj,e){
         var drillDownSeriiObject1 = {color: 'green'};
@@ -731,7 +736,7 @@
 //            },
 
         //stock: unsold
-        <c:forEach items="${projectPerformanceByStockSold}" var="project">
+        <c:forEach items="${projectPerformance}" var="project">
                 projectObject = {};
                 projectUnitsArray = new Array();
                 projectObject.name = '${project.projectName}';
@@ -746,7 +751,7 @@
         </c:forEach>
             console.log("drillDownSeriiObject1: " + JSON.stringify(drillDownSeriiObject1));
         //sold
-        <c:forEach items="${projectPerformanceByStockSold}" var="project">
+        <c:forEach items="${projectPerformance}" var="project">
                 projectObject = {};
                 projectUnitsArray = new Array();
                 projectObject.name = '${project.projectName}';

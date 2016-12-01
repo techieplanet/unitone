@@ -129,9 +129,14 @@ public class FileUploader {
         
         File file = new File(fileTypeUploadDirectory, fileSaveName);
 
+        System.out.println("fileSaveName: " + fileSaveName);
         try (InputStream input = fileContent) {
             Files.copy(input, file.toPath());
-        }        
+        } catch(Exception e){
+            e.getMessage();
+            e.printStackTrace();
+        }
+        
     }
      
      

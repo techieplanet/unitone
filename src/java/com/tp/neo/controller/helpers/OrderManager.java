@@ -319,8 +319,6 @@ public class OrderManager {
         Path path = Paths.get(invoiceFilePath);
         String content = new String(Files.readAllBytes(path));
         
-        
-        
         //System.out.println("Shout: " + content);
         //URL location = OrderManager.class.getProtectionDomain().getCodeSource().getLocation();
         //System.out.println("location: " + location.getFile());

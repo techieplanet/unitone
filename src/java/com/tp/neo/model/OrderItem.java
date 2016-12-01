@@ -50,12 +50,30 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy"),
     
     @NamedQuery(name = "OrderItem.findByUncompletedOrder", query = "SELECT o FROM OrderItem o JOIN FETCH o.order po WHERE po.approvalStatus < :approvalStatus"),
+    @NamedQuery(name = "OrderItem.findByUncompletedMortgage", query = "SELECT o FROM OrderItem o JOIN FETCH o.order po WHERE po.mortgageStatus < :mortgageStatus"),
     @NamedQuery(name = "OrderItem.findTotalApprovedSum", query = "SELECT COALESCE(SUM(o.quantity * p.cpu),0)  FROM OrderItem o JOIN o.unit p WHERE o.approvalStatus = :approvalStatus"),
     @NamedQuery(name = "OrderItem.findByUncompletedOrderAndLodgementSum", query = "SELECT item, COALESCE(SUM(l.amount),0) FROM ProductOrder p JOIN p.orderItemCollection item JOIN item.lodgementItemCollection l " 
                                                                                     + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps GROUP BY item.id ORDER  BY item.id"),
+    @NamedQuery(name = "OrderItem.findByApprovedLodgementItemsSum", query = "SELECT item, COALESCE(SUM(l.amount),0) FROM OrderItem item JOIN item.lodgementItemCollection l " 
+                                                                                    + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps GROUP BY item.id ORDER  BY item.id"),
 
+    @NamedQuery(name = "OrderItem.findMyTotalOutstandingAmountPerOrderItem", query = "SELECT item, COALESCE(SUM(item.quantity * u.cpu),0) - COALESCE(SUM(l.amount),0)" 
+                                                                                        + "FROM OrderItem item JOIN item.unit u JOIN item.lodgementItemCollection l "
+                                                                                        + "WHERE item.approvalStatus = :aps AND l.approvalStatus = :aps "
+                                                                                        + "GROUP BY item.id ORDER  BY item.id"),
     
-
+        @NamedQuery(name = "OrderItem.findSalesSumByProject", query = "SELECT p, COALESCE(SUM(item.quantity),0), COALESCE(SUM(l.amount),0)  " 
+                                                                    + "FROM Project p LEFT JOIN p.projectUnitCollection u LEFT JOIN u.orderItemCollection item ON item.approvalStatus = :item_aps "
+                                                                    + "LEFT JOIN item.lodgementItemCollection l On l.approvalStatus = :aps "
+                                                                    + "WHERE p.deleted =0 "
+                                                                    + "GROUP BY p.id ORDER  BY p.id"),
+        
+        @NamedQuery(name = "OrderItem.findSalesSumByProjectUnit", query = "SELECT u, COALESCE(SUM(item.quantity),0), COALESCE(SUM(l.amount),0)  " 
+                                                                    + "FROM ProjectUnit u LEFT JOIN u.orderItemCollection item ON item.approvalStatus = :item_aps "
+                                                                    + "LEFT JOIN item.lodgementItemCollection l ON l.approvalStatus = :aps "
+                                                                    + "WHERE u.project.id = :projectId AND u.project.deleted = 0 "
+                                                                    + "GROUP BY u.id ORDER  BY u.id"),
+        
     })
 
 

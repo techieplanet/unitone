@@ -37,9 +37,6 @@ public class WithdrawalManager {
         em.persist(w);
         em.flush();
         
-        //send alerts
-        //now send alerts on the lodgement to customer, agent and admin
-        //email alert will be sent to all Admins with approve_order permisison
         List<User> recipientsList = em.createNamedQuery("User.findAll").getResultList();
         for(int i=0; i < recipientsList.size(); i++){
             if( !(recipientsList.get(i).hasActionPermission("approve_withdrawal")) )
@@ -57,9 +54,6 @@ public class WithdrawalManager {
         w.setApproved((short)1);
         new TrailableManager(w).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         
-        //double entry: debit agent, credit cash
-        //Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
-        //new TransactionManager(sessionUser).doDoubleEntry(w.getAgent().getAccount(), cashAccount, w.getAmount());
         
         em.merge(w);
         em.getTransaction().commit();
@@ -73,7 +67,7 @@ public class WithdrawalManager {
     public void disburseWithdrawals(){
         em.getTransaction().begin();
         
-        List<Withdrawal> wList = em.createNamedQuery("Withdrawal.findByApproved").setParameter("approved", 3).getResultList();
+        List<Withdrawal> wList = em.createNamedQuery("Withdrawal.findByApproved").setParameter("approved", 1).getResultList();
         
         for(int i = 0; i < wList.size(); i++){
             Withdrawal w;
@@ -81,6 +75,10 @@ public class WithdrawalManager {
             //send to excel list
             w.setApproved((short)3);
             new TrailableManager(w).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+            
+            //double entry: debit agent, credit cash
+            Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
+            new TransactionManager(sessionUser).doDoubleEntry(w.getAgent().getAccount(), cashAccount, w.getAmount());
             em.flush();
         }
         
