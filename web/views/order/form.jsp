@@ -112,7 +112,7 @@
                
                 <!-- form start -->
                <div class="box box-primary">
-                   <form role="form" name="customerRegistration" method="POST" action="${pageContext.request.contextPath}/Order?action=new_order" enctype="multipart/form-data">
+                   <form role="form" name="customerRegistration" method="POST" action="${pageContext.request.contextPath}/Order?action=new_order" enctype="multipart/form-data" onsubmit="return submitForm()">
                 
                 <input type="hidden" name="agent_id" id="agent_id" value="" />
                    
@@ -167,8 +167,10 @@
                                             <label for="selectProdcut">Select Customer</label>
                                             
                                             <select class="form-control select2" id="selectCustomer" name="customer_id" style="width: 100%;" onchange="" <c:if test="${customer.customerId != null && customer.customerId!=''}">disabled</c:if>>
+                                              
+                                              <c:if test="${userType != 3}">  
                                                 <option value="" selected="selected">-- choose --</option>
-                                                
+                                              </c:if>  
                                               <c:forEach items="${customers}" var="customer" >  
                                               
                                               <option  value="${customer.customerId}"  <c:if test="${customerId == customer.customerId}"> <jsp:text>selected</jsp:text> </c:if> >${customer.firstname} ${customer.lastname}</option>
@@ -295,7 +297,7 @@
                                                             <div class="col-md-2 pull-right">
                                                    <div id="addToCartLabel"  style="margin: 0 auto !important;" >
                                     	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
                                         </div> 
                                                    </div>
                                                    </div>

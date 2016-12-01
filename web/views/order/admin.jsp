@@ -61,7 +61,7 @@
                                     
                                         
                                     <c:if test="${status == 0}">
-                                        <span class="label label-warning">UnAttended</span>
+                                        <span class="label label-warning">Unattended</span>
                                     </c:if>
                                     
                                     <c:if test="${status == 1}">
@@ -188,7 +188,7 @@
                 "columnDefs": [
                     { "sortable": false, "width":"50px", "targets": 4 }
                 ],
-                "order": [[ 0, "desc" ]]
+                "order": [[ 0, "asc" ]]
         });
     
       

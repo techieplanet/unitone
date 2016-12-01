@@ -41,12 +41,14 @@ function selectAgent(id)
    var email = $(row).find(".agentEmail").text();
    var state = $(row).find(".agentState").text();
    var photo = $(row).find(".agentImg").val();
+   var img = $(row).find(".agentImg").val();
    
    
    var fullname = lName + " " + fname + " " + mName;
    $("#agentDetailContainer .agent_name").text(fullname.trim());
    $("#agentDetailContainer .agent_moible").text(phoneNo);
    $("#agentDetailContainer .agent_state").text(state);
+   $("#agentDetailContainer .agent_img").attr("src",img);
    
    $("#agentListContainer").toggle();
    $("#agentSpinnerContainer").toggle();
@@ -97,9 +99,9 @@ function showSelectedAgent()
         return false;
     }
     
-    function showOrderProduct()
+    function showOrderProduct(proceed)
     {
-        var proceed = validateCustomerRegForm();
+        
         
         if(proceed == false)
         {
@@ -313,6 +315,9 @@ $(".payOut").each(function() {
 
 /*TP: add item to the cart*/
 function addToCart(event){
+  
+   event.preventDefault();  
+    
    $("#shoppingCart:hidden").toggle();
    $("#paymentCheckout:visible").toggle();
   var productName = $("#selectProduct :selected").text();
@@ -334,14 +339,9 @@ function addToCart(event){
   var monthlyPayPerQuantity = accounting.unformat($("#monthlyPayPerQuantity").text());
   var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
   
-  //alert(productName+" "+productId+" "+productUnitName+" "+productUnitId+" "+productQuantity);
+   
   
-//  var dataArray = [];
-//  dataArray.push(productName,productId,productUnitName,productUnitId,productQuantity,productAmount,amountUnit,amountTotalUnit,
-//  initialAmountPerUnit,minInitialAmountSpan,productMinimumInitialAmount,amountLeft,payDurationPerUnit,payDurationPerQuantity,productMaximumDuration,monthlyPayPerUnit,monthlyPayPerQuantity,productMinimumMonthlyPayment);
-//  
-  
-  var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuanity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
+  var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuantity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
   productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment}
   
@@ -479,7 +479,7 @@ function editDataFromCart(id){
   var productId = dataArray.productId;
   var productUnitName = dataArray.productUnitName;
   var productUnitId = dataArray.productUnitId;
-  var productQuantity = dataArray.productQuanity;
+  var productQuantity = dataArray.productQuantity;
   var productAmount = dataArray.productAmount;
   var amountUnit = dataArray.amountUnit;
   var amountTotalUnit = dataArray.amountTotalUnit;
@@ -557,7 +557,7 @@ function updateUnit(id){
     //alert(datajson);
     var dataArray = JSON.parse(datajson);
     var productUnitId = dataArray.productUnitId;
-    var productQuantity = dataArray.productQuanity;
+    var productQuantity = dataArray.productQuantity;
     var productMinimumInitialAmount = dataArray.productMinimumInitialAmount;
     var productAmount = dataArray.productAmount;
     var productMaximumDuration = dataArray.productMaximumDuration;
@@ -966,12 +966,9 @@ function getProjectQuantity(appName, entityName){
 function monthlyPayCalculator(){
     $("#addToCart").attr("disabled",false);
     var productAmount = $("#productAmount").val();
-    //alert(productAmount);
     var quantity = $("#selectQuantity").val();
     var productMinimumInitialAmount = $("#productMinimumInitialAmount").val();
-    //alert(productMinimumInitialAmount);
     var productMaximumDuration = $("#productMaximumDuration").val();
-    //alert(productMaximumDuration);
     var payLeft = productAmount - productMinimumInitialAmount;
     $("#amountLeft").val(payLeft);
     var monthlyPay = payLeft / productMaximumDuration;
@@ -1064,23 +1061,17 @@ function calculateDurationFromMonthlyPay(){
 /*TP: calculate the product amount from the quantity*/
 function calculateProductAmount(){
     var data = $("#dataHidden").val();
-    //alert(data);
     var resp = JSON.parse(data);
     
     var cpu = resp.cpu;
-    //alert(cpu);
     var quantity = $("#selectQuantity").val();
     var duration = resp.mpd;
-    //$( quantity ).prependTo( "#qty" );
-    //alert("The quantity is "+quantity);
     $('span[id="qty"]').text( quantity);
     var discount = resp.discount;
     var totalDiscount = 0;
     if(discount>0){
         totalDiscount = discount * quantity;
     }
-    //var totalDiscount = discount * quantity;
-    //alert(quantity);
     var amount = quantity * cpu;
     var mpd = resp.mpd;
     var defaultDiscount = 0;
@@ -1279,6 +1270,8 @@ function submitPostForm(url, formData){
 
 function validateCustomerRegForm()
 {
+    appendLoadingState("#step1_box");
+    
     var errors = [];
     
     if($("#customerFirstname").val().trim() == '')
@@ -1339,23 +1332,52 @@ function validateCustomerRegForm()
     
     $("#customerErrorModal .modal-body").html("");
     
-
-//    if(errors.length > 0)
-//    {
-//        var errorText = '';
-//        
-//        for(var key in errors){
-//            var errorText = '' + errors[key] + '<br />';
-//            $("#customerErrorModal .modal-body").append(errorText);
-//        }
-//        $("#customerErrorModal").modal();
-//        return false;
-//    }
-//    else{
-//        return true
-//    }
+    var url = $("#pageContext").val();
     
-    return true;
+    
+    $.ajax({
+        url : url + "/Customer?action=email_validation",
+        method : 'GET',
+        data : {email : $("#customerEmail").val(), type : 'xmlhttp'},
+        success : function(data){
+            
+             removeLoadingState();
+            
+            console.log(data);
+            
+            var res = JSON.parse(data);
+            if(res.code === "-1" || res.code === -1){
+                errors.push("Email already exist");
+            }
+            
+            if(errors.length > 0)
+            {
+                var errorText = '';
+
+                for(var key in errors){
+                    var errorText = '' + errors[key] + '<br />';
+                    $("#customerErrorModal .modal-body").append(errorText);
+                }
+                $("#customerErrorModal").modal();
+                
+                showOrderProduct(false);
+            }
+            else{
+                showOrderProduct(true);
+            }
+            
+        },
+        error : function(xhr,status_code,status_text){
+            
+            console.log(status_code + " : " + status_text);
+            
+            removeLoadingState();
+        }
+    });
+
+    
+    
+    
 }
 
 function appendLoadingState(selector){
@@ -1430,3 +1452,54 @@ function thousandSeparator(number){
     
     return value;
 }
+
+    function submitForm(){
+           
+           var submitOk = true;
+           
+           var payment_mode = $('input:radio[name=paymentMethod]:checked').val();
+           
+           var companyAccount = $("#companyAccount").val();
+           
+           if(companyAccount == ""){
+               
+               alert("Please select company account");
+               submitOk = false;
+           } 
+           else if(payment_mode == 1){
+               
+               var depositorsName = $("#depositorsName").val();
+               var tellerNumber = $("#tellerNumber").val();
+                       
+               if( $.trim(depositorsName) == ""){
+                   alert("Please Enter depositors name");
+                   submitOk = false;
+               }
+               else if($.trim(tellerNumber) == ""){
+                   alert("Please enter teller number");
+                   submitOk = false;
+               }
+           }
+           else if(payment_mode == 4){
+               
+               var transfer_bankName = $("#transfer_bankName").val();
+               var transfer_accountNo = $("#transfer_accountNo").val();
+               var transfer_accountName = $("#transfer_accountName").val();
+               
+               if($.trim(transfer_bankName) == ""){
+                   alert("Please enter Bank Name");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountNo) == ""){
+                   alert("Please enter account number");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountName) == ""){
+                   alert("Please enter account Name");
+                   submitOk = false;
+               }
+               
+           }
+           
+           return submitOk;
+       }

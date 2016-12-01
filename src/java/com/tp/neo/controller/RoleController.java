@@ -145,7 +145,10 @@ public class RoleController extends AppController {
             viewFile = ROLE_ADMIN;
             request.setAttribute("roles", listRoles());
         }
-
+        
+        //Keep track of the sideBar
+        request.setAttribute("sideNav", "Role");
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             

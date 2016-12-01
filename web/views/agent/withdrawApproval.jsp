@@ -38,7 +38,7 @@
                             <div class="panel-heading" style="height:40px; background-color: #357CA5 !important;" role="tab" id="heading${withdrawalCount.count}">
                               <h4 class="panel-title">
                                 <a role="button" style="display: block;color:#fff !important;" data-toggle="collapse" data-parent="#accordion2" href="#collapse${withdrawalCount.count}"  aria-controls="collapse${withdrawalCount.count}">
-                                    <span>ID : </span>${withdrawal.getId()} 
+                                    <span>ID : </span>${withdrawal.get("id")} 
                                     
                                 </a>
                                
@@ -52,7 +52,7 @@
                                          <c:if test="${notificationwithdrawalId == 0}"> 
                                              <c:out value='${withdrawalCount.count == 1?"in":""}' />
                                          </c:if>
-                                         <c:if test="${notificationwithdrawalId > 0 && withdrawal.getId() == notificationwithdrawalId}"> 
+                                         <c:if test='${notificationwithdrawalId > 0 && withdrawal.get("id") == notificationwithdrawalId}'> 
                                              <c:out value='in scrollHere' />
                                          </c:if>
                                          " 
@@ -67,14 +67,14 @@
                                               <span class="text-bold">Name</span>
                                           </div>
                                           <div class="col-md-8">
-                                              <span>${withdrawal.getAgent().getFullName()}</span>
+                                              <span>${withdrawal.get("agentFullName")}</span>
                                           </div>    
                                           
                                           <div class="col-md-4">
                                               <span class="text-bold">Agent ID</span>
                                           </div>
                                           <div class="col-md-8">
-                                              <span>${withdrawal.getAgent().getAgentId()}</span>
+                                              <span>${withdrawal.get("agentId")}</span>
                                           </div>    
                                       </div>
                                       
@@ -83,20 +83,20 @@
                                               <span class="text-bold">Balance</span>
                                           </div>
                                           <div class="col-md-8">
-                                              <span>&nbsp;</span>
+                                              <span><fmt:formatNumber value='${withdrawal.get("balance")}' type="currency" currencySymbol="N" /></span>
                                           </div>
                                           
                                           <div class="col-md-4">
                                               <span class="text-bold">Requested amount</span>
                                           </div>
                                           <div class="col-md-8">
-                                              <span><fmt:formatNumber value="${withdrawal.getAmount()}" type="currency" currencySymbol="N" /></span>
+                                              <span><fmt:formatNumber value="${withdrawal.get('amount')}" type="currency" currencySymbol="N" /></span>
                                           </div>  
                                       </div>
                                       
                                       <div class="col-md-12 margintop10">
-                                          <a href="#" onclick="approveRequest(${withdrawal.getId()},event,'panel${withdrawalCount.count}')" class="btn btn-success">Approve</a> &nbsp;&nbsp;&nbsp;&nbsp;
-                                          <a href="#" onclick="declineRequest(${withdrawal.getId()},event,'panel${withdrawalCount.count}')" class="btn btn-danger">Decline</a>
+                                          <a href="#" onclick="approveRequest(${withdrawal.get('id')},event,'panel${withdrawalCount.count}')" class="btn btn-success">Approve</a> &nbsp;&nbsp;&nbsp;&nbsp;
+                                          <a href="#" onclick="declineRequest(${withdrawal.get('id')},event,'panel${withdrawalCount.count}')" class="btn btn-danger">Decline</a>
                                       </div>
                                   </div>
                               </div> 

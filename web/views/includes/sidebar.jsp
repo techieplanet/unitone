@@ -38,6 +38,7 @@
           </c:if>
           
           <c:if test="${sessionScope.userType eq sessionScope.userTypes.CUSTOMER}">
+              <%@ include file="sidebar-customer.jsp" %>
           </c:if>
 
           

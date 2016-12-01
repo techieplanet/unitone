@@ -66,26 +66,7 @@
         }
     </style>
   </head>
-  <!--
-  BODY TAG OPTIONS:
-  =================
-  Apply one or more of the following classes to get the
-  desired effect
-  |---------------------------------------------------------|
-  | SKINS         | skin-blue                               |
-  |               | skin-black                              |
-  |               | skin-purple                             |
-  |               | skin-yellow                             |
-  |               | skin-red                                |
-  |               | skin-green                              |
-  |---------------------------------------------------------|
-  |LAYOUT OPTIONS | fixed                                   |
-  |               | layout-boxed                            |
-  |               | layout-top-nav                          |
-  |               | sidebar-collapse                        |
-  |               | sidebar-mini                            |
-  |---------------------------------------------------------|
-  -->
+ 
   <body style="background-color: #eee">
    
       <div class="container">
@@ -135,42 +116,40 @@
               <table class="table table-bordered">
                 <thead>
                   <tr>
-                      <th>S/N</th>
-                    <th>Qty</th>
-                    <th>Product</th>
+                    <th style="text-align:center">S/N</th>
                     <th>Description</th>
-                    <th>Subtotal</th>
+                    <th style="text-align:center">Qty</th>
+                    <th style="text-align:center">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
                   
                     <c:forEach items="${orderItemInvoice}" var="item" varStatus="pointer">
                         <tr>
-                            <td>${pointer.count}</td>
-                            <td>${item.getQuantity()}</td>
+                            <td style="text-align:center">${pointer.count}</td>
                             <td>${item.getUnit().getProject().getName()} - ${item.getUnit().getTitle()}</td>
-                            <td>${item.getUnit().getProject().getDescription()}</td>
-                            <td>${item.getInitialDep()}</td>
+                            <td style="text-align:center">${item.getQuantity()}</td>
+                            <td style="text-align:right"><fmt:formatNumber value="${item.getInitialDep()}" type="currency" currencySymbol="N" /></td>
                         </tr>
                     </c:forEach>
                     
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="4" style="text-align: right">Total : </td>
-                        <td>${totalInvoice}</td>
+                        <td colspan="3" style="text-align: right">Total : </td>
+                        <td><fmt:formatNumber value="${totalInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">VAT : </td>
-                        <td>${vatInvoice}</td>
+                        <td colspan="3" style="text-align: right">VAT : </td>
+                        <td><fmt:formatNumber value="${vatInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">Gateway charge : </td>
-                        <td>${gatewayChargeInvoice}</td>
+                        <td colspan="3" style="text-align: right">Gateway charge : </td>
+                        <td><fmt:formatNumber value="${gatewayChargeInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">Grand Total : </td>
-                        <td>${grandTotalInvoice}</td>
+                        <td colspan="3" style="text-align: right">Grand Total : </td>
+                        <td><fmt:formatNumber value="${grandTotalInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                 </tfoot>
               </table>
@@ -185,13 +164,10 @@
             </div><!-- /.col -->
             
             <div class="col-md-12">
-                <a href="${pageContext.request.contextPath}" class="btn btn-primary">Login to Dashboard</a>
+                <a href="${pageContext.request.contextPath}/Dashboard" class="btn btn-primary">Continue to Dashboard</a>
             </div>
           </div><!-- /.row -->
 
-          
-
-          
         </section>
           
       </div>
