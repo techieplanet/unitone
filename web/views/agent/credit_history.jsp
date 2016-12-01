@@ -36,7 +36,6 @@
                     <thead>
                         <tr>
                             <th>S/N</th>
-                            <th>ID</th>
                             <th>Amount</th>
                             <th>Date</th>
                         </tr>
@@ -45,7 +44,6 @@
                         <c:forEach items="${transactions}" var="transaction" varStatus="cursor">
                             <tr>
                                 <td>${cursor.count}</td>
-                                <td>${transaction.getId()}</td>
                                 <td><fmt:formatNumber type="currency" currencySymbol="N" maxFractionDigits="2" value="${transaction.getAmount()}" /></td>
                                 <td><fmt:formatDate value="${transaction.getTransactionDate()}" type="both" /></td>
                             </tr>
@@ -54,7 +52,6 @@
                     <tfoot>
                         <tr>
                             <th>S/N</th>
-                            <th>ID</th>
                             <th>Amount</th>
                             <th>Date</th>
                         </tr>

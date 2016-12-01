@@ -38,8 +38,8 @@
                   <table id="customerList" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
+                        <th>SN</th>
                         <th>Image</th>
-                        <th>ID</th>
                         <th>First Name</th>
                         <th>Middle Name</th>
                         <th>Last Name</th>
@@ -53,10 +53,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                        <c:forEach items="${customers}" var="customer">
-                            <tr id="row<c:out value="${customer.customerId}" />">
+                        <c:forEach items="${customers}" var="customer" varStatus="pointer">
+                            <tr id="row<c:out value="${pointer.count}" />">
+                                <td><c:out value="${pointer.count}" /></td>
                                 <td><img src="/uploads/NeoForce/images/customer/${customer.photoPath}" width='55' height='50'/></td>
-                                <td><c:out value="${customer.customerId}" /></td>
                                 <td><c:out value="${customer.firstname}" /></td>
                                 <td><c:out value="${customer.middlename}" /></td>
                                 <td><c:out value="${customer.lastname}" /></td>
@@ -67,20 +67,20 @@
                                 <td><c:out value="${customer.state}" /></td>
                               
                                 <td>
-                                    <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
-                                   
                                     <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}">
+                                     <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
                                      <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
                                     </c:if>
-                                   
+                                    
+                                     <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
                                 </td>
                             </tr>
                         </c:forEach>
                   </tbody>
                     <tfoot>
                       <tr>
+                        <th>SN</th>
                         <th>Image</th>
-                        <th>ID</th>
                         <th>First Name</th>
                         <th>Middle Name</th>
                         <th>Last Name</th>
@@ -122,6 +122,53 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
+      
+      
+      
+      <!--MODAL-->
+      <div class="modal fade" id="customerLodgementsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" style="width : 80% !important;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Customer Lodgment's</h4>
+            </div>
+            <div class="modal-body">
+                
+                <h3 id="customerName"></h3>
+                <div class="table-responsive">
+                    
+                    <table class="table table-striped table-hover" id="customer_lodgement_table">
+                        
+                        <thead>
+                            <tr>
+                                <td>SN</td>
+                                <td>Depositor Name</td>
+                                <td>Depositor Acct Name</td>
+                                <td>Depositor Acct No</td>
+                                <td>Payment Mode</td>
+                                <td>Date</td>
+                                <td>Amount</td>
+                            </tr>
+                        </thead>
+                        
+                        <tbody>
+                            
+                        </tbody>
+                        
+                    </table>
+                    
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+              <button id="ok" type="button" onclick="" class="btn btn-primary">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+      
 
       
 <!-- Include the footer -->
@@ -139,8 +186,65 @@
         
         $(function () {
             $("#customerList").DataTable({
-                order :[[1,"desc"]]
+                order :[[0,"asc"]]
             });
           });
+          
+          var customer = {
+              
+              getCustomerLodgements : function(id,evt){
+                  
+                 evt.preventDefault();
+                          
+                  $.ajax({
+                      url : '${pageContext.request.contextPath}/Customer?action=customer_lodgements',
+                      method : "GET",
+                      data : {id : id},
+                      success : function(data){
+                          
+                          console.log(data);
+                          
+                          customer.prepareLodgementTable(JSON.parse(data));
+                      }
+                  });
+                  
+              },
+              
+             prepareLodgementTable : function(data){
+             
+                var lodgements = data.lodgements;
+                var customerName = data.customerName;
+                
+                $("#customer_lodgement_table tbody").html("");
+                
+                var counter = 1;
+                
+                $("#customerName").text(customerName)
+                
+                for(var k in lodgements){
+                    
+                  var tr = "<tr>";
+                  
+                  tr += "<td>" + counter + "</td>";
+                  tr += "<td>" + lodgements[k].depositorName + "</td>";
+                  tr += "<td>" + lodgements[k].depositorAcctName + "</td>";
+                  tr += "<td>" + lodgements[k].depositorAcctNo + "</td>";
+                  tr += "<td>" + lodgements[k].paymentMode + "</td>";
+                  tr += "<td>" + lodgements[k].date + "</td>";
+                  tr += "<td>" + accounting.formatMoney(lodgements[k].amount,"N",2,",",".") + "</td>";
+                  
+                  tr += "</tr>";
+                  
+                  $("#customer_lodgement_table tbody").append(tr);
+                  
+                  counter++;
+                }
+                
+                $("#customerLodgementsModal").modal({
+                    backdrop : "static"
+                });
+             }
+              
+          };
           
  </script>         

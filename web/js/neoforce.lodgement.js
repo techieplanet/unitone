@@ -387,7 +387,53 @@ function declineOrder(id,chkboxId,acceptId){
     });
         
         isChecked = null;
+}
+
+function getLodgmentItem(lodgmentId,url,event){
+    
+    event.preventDefault();
+    
+    $.ajax({
+        url : url + "/Lodgement?action=lodgmentItems",
+        method : "GET",
+        data : {lodgement_id : lodgmentId},
+        success : function(data){
+            
+            console.log(JSON.stringify(data));
+            
+            var lodgmentItems = JSON.parse(data);
+            setupLodgementItemTable(lodgmentItems);
+            
+        },
+        error : function(xhr,status_code,status_text){
+            
+            console.log(status_code + " : " + status_text);
+        }
+    });
+}
+
+function setupLodgementItemTable(lodgmentItems){
+    
+    //Clear any rows in table body
+    $("#lodgmentItemModal tbody").html("");
+    
+    var count = 1;
+    for(var items in lodgmentItems){
+                
+         var tr = "<tr>";
+         
+         tr += "<td>" + count + "</td>";
+         tr += "<td>" + lodgmentItems[items].project + "</td>";
+         tr += "<td>" + lodgmentItems[items].unit + "</td>";
+         tr += "<td>" + accounting.formatMoney(lodgmentItems[items].amount,"N",2,",",".") + "</td>";
+         
+         $("#lodgmentItemModal tbody").append(tr);
+         
+         count++;       
     }
+    
+    $("#lodgmentItemModal").modal();
+}
 
 function stopLoading(elem){
     

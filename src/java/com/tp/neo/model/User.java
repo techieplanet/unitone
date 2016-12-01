@@ -265,7 +265,14 @@ public class User extends BaseModel implements SystemUser{
     }
     
 
-    
+    public String getUserFullName(){
+        
+        String lname = lastname;
+        String fname = firstname;
+        String mname = middlename.equals("") ? " " : " " + middlename + " ";
+        
+        return fname + mname + lname;
+    }
     
     public Long getSystemUserId(){
         return getUserId();

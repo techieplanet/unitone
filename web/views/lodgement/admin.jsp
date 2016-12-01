@@ -12,7 +12,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Lodgements
+            Lodgement
             <!--<small>Optional description</small>-->
           </h1>
 <!--          <ol class="breadcrumb">
@@ -27,7 +27,7 @@
           <div class="box">
                 <div class="box-header">
                   <h3 class="box-title block">
-                      Lodgment List
+                      ${table_title}
                        <c:if test="${success}">
               <div class="row">
                     <div class="col-md-12 ">
@@ -54,67 +54,51 @@
                   <table id="entitylist" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
-                        <th>Agent Id</th>
-                        <th>Customer Id</th>
-                        <th>Amount</th>
-                        <th>Payment Mode</th>
+                        <th>SN</th>  
+                        <th>Customer</th>
                         <th>Transaction Amount</th>
-                        <th>Bank Name</th>
+                        <th>Payment Mode</th>
+                        <th>Account number</th>
+                        <th>Teller/Transaction Id</th>
                         <th>Depositors Name</th>
-                        <th>Teller Number</th>
                         <th>Lodgement Date</th>
-                        <th>Verification Status</th>                      
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
                         
-                        <c:forEach items="${lodgements}" var="lodgement">
+                        <c:forEach items="${lodgements}" var="lodgement" varStatus="pointer">
                            
-                            <tr id="row<c:out value="${lodgement.getId()}" />"
-                                <c:if test="${lodgement.verificationStatus == 0 || lodgement.verificationStatus == null}">class="danger"</c:if>
-                                <c:if test="${lodgement.verificationStatus == -1}">class="warning"</c:if>
-                                <c:if test="${lodgement.verificationStatus== 1}">class="success"</c:if>
-                                >
-                                 <td><a href="Agent?action=edit&agentId=${lodgement.sale.orderId.agentId.agentId}&id=${lodgement.sale.orderId.agentId.agentId}"><c:out value="${lodgement.sale.orderId.agentId.agentId}" /></a></td>
-                                
-                                    <td><a href="Customer?action=edit&customerId=${lodgement.sale.orderId.customerId.customerId}"><c:out value="${lodgement.sale.orderId.customerId.customerId}" /></a></td>
-                                <td><c:out value="${lodgement.amount}" /></td>
+                            <tr id="row<c:out value="${lodgement.getId()}" />">
+                                <td>${pointer.count}</td> 
+                                <td><c:out value="${lodgement.getCustomer().getFullName()}" /></td>
+                                <td><fmt:formatNumber value="${lodgement.amount}" type="currency" currencySymbol="N" /></td>
                                 <td>
                                     <c:if test="${lodgement.paymentMode==1}">Bank Deposit</c:if>
                                     <c:if test="${lodgement.paymentMode==2}">Credit/Debit Card</c:if>
                                     <c:if test="${lodgement.paymentMode==3}">Cash / Cheque</c:if>
+                                    <c:if test="${lodgement.paymentMode==4}">Bank Transfer</c:if>
                                    </td>
-                                <td><c:out value="${lodgement.amount}" /></td>
-                                <td><c:out value="${lodgement.bankName}" /></td>
-                                <td><c:out value="${lodgement.depositorsName}" /></td>
-                                <td><c:out value="${lodgement.tellerNo}" /></td>
-                                <td><c:out value="${lodgement.createdDate}" /></td>
-                                <td>
-                                    <c:if test="${lodgement.verificationStatus == 1}">
-                                        <a class="btn btn-danger btn-xs" href="#"  role="button" title="deactivate">Decline <i class="fa fa-remove"></i></a>
-                                        <a class="btn btn-success btn-xs" href="#"  role="button" title="activate">Approve <i class="fa fa-check"></i></a> &nbsp;
-                                    </c:if>
-                                    <c:if test="${lodgement.verificationStatus == 0 || lodgement.verificationStatus==-1 || lodgement.verificationStatus == null}">
-                                            <a class="btn btn-success btn-xs" href="#"  role="button" title="activate">Approve <i class="fa fa-check"></i></a> &nbsp;
-                                            <a class="btn btn-danger btn-xs" href="#"  role="button" title="deactivate">Decline <i class="fa fa-remove"></i></a>
-                                    </c:if>
-                                </td>
+                                <td><c:out value="${lodgement.originAccountNumber}" /></td>
+                                <td><c:out value="${lodgement.getTransactionId()}" /></td>
+                                <td><c:out value="${lodgement.depositorName}" /></td>
+                                <td><fmt:formatDate value="${lodgement.createdDate}" type="date" /></td>
+                                <td><a href='#' class="btn btn-primary " onclick="getLodgmentItem('${lodgement.getId()}','${pageContext.request.contextPath}',event)"><i class='fa fa-eye'></i> View</a></td>
                               
                             </tr>
                         </c:forEach>
                   </tbody>
                     <tfoot>
                       <tr>
-                         <th>Agent Id</th>
-                        <th>Customer Id</th>
-                        <th>Amount</th>
-                        <th>Payment Mode</th>
+                        <th>SN</th>
+                        <th>Customer</th>
                         <th>Transaction Amount</th>
-                        <th>Bank Name</th>
+                        <th>Payment Mode</th>
+                        <th>Account number</th>
+                        <th>Teller/Transaction Id</th>
                         <th>Depositors Name</th>
-                        <th>Teller Number</th>
                         <th>Lodgement Date</th>
-                        <th>Verification Status</th>
+                        <th>Action</th>
                       </tr>
                     </tfoot>
                   </table>
@@ -147,6 +131,44 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
+      
+      <!--MODAL-->
+      <div class="modal fade" id="lodgmentItemModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Lodgment Items</h4>
+            </div>
+            <div class="modal-body table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>SN</th>
+                            <th>Project</th>
+                            <th>Unit name</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>SN</th>
+                            <th>Project</th>
+                            <th>Unit name</th>
+                            <th>Amount</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="modal-footer">
+              <button id="ok" type="button" onclick="" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
 
       
 <!-- Include the footer -->
@@ -159,19 +181,13 @@
 <!-- Include the bottom -->
 <%@ include file="../includes/bottom.jsp" %>
 
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/neoforce.lodgement.js"></script>
 
 <script>
         
         $(function () {
-            $("#entitylist").DataTable({
-                "autoWidth": false,
-                "columnDefs": [
-                    { "sortable": false, "width":"50px", "targets": 4 }
-                ]
-        });
-    
-      
+            $("#entitylist").DataTable();
           });
           
-          
+ </script>         
 

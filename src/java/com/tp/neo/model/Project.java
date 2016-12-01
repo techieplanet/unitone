@@ -81,7 +81,7 @@ public class Project extends BaseModel{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
     @Basic(optional = false)
     @Column(name = "name")
     private String name;
@@ -105,20 +105,20 @@ public class Project extends BaseModel{
     public Project() {
     }
 
-    public Project(Integer id) {
+    public Project(Long id) {
         this.id = id;
     }
 
-    public Project(Integer id, String name) {
+    public Project(Long id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
