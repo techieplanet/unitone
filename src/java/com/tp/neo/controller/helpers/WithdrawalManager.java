@@ -73,7 +73,7 @@ public class WithdrawalManager {
     public void disburseWithdrawals(){
         em.getTransaction().begin();
         
-        List<Withdrawal> wList = em.createNamedQuery("Withdrawal.findByApproved").setParameter("approved", 3).getResultList();
+        List<Withdrawal> wList = em.createNamedQuery("Withdrawal.findByApproved").setParameter("approved", 1).getResultList();
         
         for(int i = 0; i < wList.size(); i++){
             Withdrawal w;

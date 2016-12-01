@@ -81,6 +81,9 @@
                                     <td class="text-center">
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
                                             <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="Agent?action=view&route=approved&agentId=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
+                                        </c:if>   
+                                        <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
+                                        <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="#" onclick="agentHistory.getAgentHistory('${agent.agentId}',event)" role="button"><i class="fa fa-dollar"></i></a>
                                         </c:if>
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_agent')}">
                                             <a class="btn btn-success btn-xs anti-rcswitchwer-buttons" href="Agent?action=edit&agentId=${agent.agentId}" role="button"><i class="fa fa-pencil"></i></a> 
@@ -160,6 +163,44 @@
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
       
+      <!--MODAL-->
+      <div class="modal fade" id="accountStatementModal"  tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" >
+          <div class="modal-content" >
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Account Statement</h4>
+            </div>
+            <div class="modal-body" id="printArea">
+                <p>Account Code : <span id="accountCode"></span></p>
+                <p>Account Balance : <span id="accountBalance"></span></p>
+                
+                <div class="table-responsive">
+                    
+                    <table class="table table-striped table-hover" id="account_statement_table">
+                        <thead>
+                            <tr>
+                                <td>SN</td>
+                                <td>Date</td>
+                                <td>Amount</td>
+                                <td>Type</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+              <button id="ok" type="button" onclick="agentHistory.printAccountStatement()" class="btn btn-primary"><i class="fa fa-print"></i> Print</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+      
       
       
 
@@ -195,7 +236,7 @@
                     { "width":"100px", "targets": 3 },
                     {"sort":"asc","targets":0},
                     <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
-                        { "sortable": false, "width":"80px", "targets": 8 }
+                        { "sortable": false, "width":"120px", "targets": 8 }
                     </c:if>
                 ]
         });
@@ -219,15 +260,92 @@
       
           });
           
+
+      var agentHistory = {
           
-//    
-//    $(document).ready(function() {
-//      $('#switch-state').iphoneStyle();
-//    });
-//
-//    $('#switch-state').iphoneStyle({
-//  checkedLabel: 'YES',
-//  uncheckedLabel: 'NO'
-//});
+          getAgentHistory : function(id,evt){
+              
+              evt.preventDefault();
+              
+              $.ajax({
+                 
+                 url : '${pageContext.request.contextPath}/Agent?action=wallet',
+                 method : "GET",
+                 data : {id : id},
+                 success : function(data){
+                     
+                     console.log(data);
+                     agentHistory.prepareAccountStatement(JSON.parse(data));
+                     
+                 },
+                 error : function(xhr,status_code,status_text){
+                     console.log(xhr.responseText);
+                 }
+                  
+              });
+          },
+          
+          prepareAccountStatement : function(jsonData){
+            
+             var balance = accounting.formatMoney(jsonData.agentDetail.balance,"N",2,",",".");
+             var accountCode = jsonData.agentDetail.accountCode;
+             
+             var transactions = jsonData.transactions;
+             
+             $("#accountCode").text(accountCode);
+             $("#accountBalance").text(accounting.formatMoney(balance,"N",2,",","."));
+             
+             var count = 1;
+             
+             //Clear the table body
+             $("#accountStatementModal #account_statement_table tbody").html("");
+             
+             for(var k in transactions){
+                 
+                 var amount = accounting.formatMoney(transactions[k].amount,"N",2,",",".");
+                 var date = transactions[k].date;
+                 var type = transactions[k].type;
+                 
+                 var tr = "<tr>";
+                 
+                 tr += "<td>" + count + "</td>";
+                 tr += "<td>" + date + "</td>";
+                 tr += "<td>" + amount + "</td>";
+                 tr += "<td>" + type + "</td>";
+                 
+                 count++;
+                 
+                 $("#accountStatementModal #account_statement_table tbody").append(tr);
+                 
+             }
+             
+             $("#accountStatementModal").modal();
+            
+          },
+          
+          printAccountStatement : function(){
+              
+              var options = {
+                  mode:"iframe",
+                  popClose: true
+              }
+              $("#printArea").printArea(options);
+              /**
+              var divToPrint=document.getElementById('printArea');
+
+              var newWin = window.open('','Print-Window');
+
+              newWin.document.open();
+
+              newWin.document.write('<html><body onload="window.print()">'+divToPrint.innerHTML+'</body></html>');
+
+              newWin.document.close();
+
+              setTimeout(function(){newWin.close();},10);
+              **/
+              
+          }
+          
+      };
   </script>
   

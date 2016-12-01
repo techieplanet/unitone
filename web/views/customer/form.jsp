@@ -255,38 +255,25 @@
                             </div>
                             </fieldset>
                         </div>
-                         <div class="col-md-4">
-                             <div class="row">
-                             <div class="row text-center" id="imgholder">
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group text-center">
-                            
-                              <img <c:if test="${customer.photoPath != null && customer.photoPath != "default"}"> src="/uploads/NeoForce/images/customer/${customer.photoPath}" </c:if>
-                               <c:if test="${customer.photoPath == "default"  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"</c:if>
-                                class=" img-responsive text-center" style="max-height:220px !important;"/>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
+                         <div class="col-md-4" style="padding-top: 50px">
+                         
                             <div class="form-group">
                               <div class="btn-group btn-group-xs">
-                                  <div class="btn btn-primary btn-file">
-                      Change <span title="Change Profile Picture" class="glyphicon glyphicon-edit"></span> 
-                      <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
-                      <input type="hidden" name="customerPhotoHidden" 
-                           <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value=""
-                    </c:if><c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"
-                    </c:if> <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"
-                    </c:if> />
-                    </div>
+                                  <label for="customerPhoto" style="display:block">Customer Photo</label>
+                                  <div class="btn btn-primary">
+                                  <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
+                                  <input type="hidden" name="customerPhotoHidden" 
+                                      <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                      <c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"</c:if> 
+                                      <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"</c:if> 
+                                  />
+                                 </div>
+                                </div>
                                   
-                              </div>
-                                
-                            </div>
+                           </div>   
+                       </div>
+                                  
                         </div>
-                    </div>
-                    
-                  </div>
-                         </div>
                     </div>
                     </div>
                    
@@ -470,22 +457,24 @@
                  </div><!-- /.col-md-4 -->
                 </div><!-- /.row -->
                 </div> 
-                         
-      </div><!-- /.box -->
-      
+                   
+              
       <c:if test="${action == 'edit'}">
-          <div class="col-md-12">
-              <c:if test="${userType == 1}">
-              <button class="btn btn-success btn-lg" type="submit">Update</button>
-              </c:if>
-          </div>
+      <div class="col-md-12">
+          <c:if test="${userType == 1}">
+          <button class="btn btn-success btn-lg" type="submit">Update</button>
+          </c:if>
+      </div>
       </c:if>
       <c:if test="${action == 'new'}">
       <div class="col-md-12">
           <a class="btn btn-primary" href="#" onclick="return validateCustomerRegForm()" role="button">Proceed to Order <i class="fa fa-long-arrow-right"></i></a>
       </div>
       </c:if>
- </div><!-- /.box -->
+              
+      </div><!-- /.box -->
+      
+      
       
 <c:if test="${customer.customerId=='' || customer.customerId== null}">
                     

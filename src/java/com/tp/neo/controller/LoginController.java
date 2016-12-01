@@ -141,6 +141,10 @@ public class LoginController extends HttpServlet {
             em = emf.createEntityManager();           
             
             SystemUser user = getUserTypeObject(userType, email);
+            if(user == null){
+                redirectToLogin(request, response);
+                return;
+            }
             String storedPassword = user.getPassword();
             System.out.println("storedPassword: " + storedPassword);
             
@@ -179,10 +183,12 @@ public class LoginController extends HttpServlet {
                 
                 em.persist(auditlog);
                 em.getTransaction().commit();
-               
+                String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
+                System.out.println("RequestUrl resolve contextPath : " + context);
+                
                 if(session.getAttribute("loginCallback") == null){
                      System.out.println("THis is the login call back of the session before redirect null"+ referrerURI );
-                    response.sendRedirect(referrerURI + "Dashboard");
+                    response.sendRedirect(context + "/Dashboard");
                     ////AuthManager.ucfirst(userType
                     return;
                 }
@@ -322,6 +328,7 @@ public class LoginController extends HttpServlet {
             
             
             request.setAttribute("loginDetails", map); 
+            request.setAttribute("errors", true);
             
             request.getRequestDispatcher("home").forward(request, response);
         } catch (ServletException ex) {

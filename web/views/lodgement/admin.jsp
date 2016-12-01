@@ -55,6 +55,7 @@
                     <thead>
                       <tr>
                         <th>SN</th>  
+                        <th>Customer</th>
                         <th>Transaction Amount</th>
                         <th>Payment Mode</th>
                         <th>Account number</th>
@@ -70,6 +71,7 @@
                            
                             <tr id="row<c:out value="${lodgement.getId()}" />">
                                 <td>${pointer.count}</td> 
+                                <td><c:out value="${lodgement.getCustomer().getFullName()}" /></td>
                                 <td><fmt:formatNumber value="${lodgement.amount}" type="currency" currencySymbol="N" /></td>
                                 <td>
                                     <c:if test="${lodgement.paymentMode==1}">Bank Deposit</c:if>
@@ -89,6 +91,7 @@
                     <tfoot>
                       <tr>
                         <th>SN</th>
+                        <th>Customer</th>
                         <th>Transaction Amount</th>
                         <th>Payment Mode</th>
                         <th>Account number</th>

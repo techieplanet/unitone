@@ -837,6 +837,7 @@ public class LodgementController extends AppController {
         
     }
     
+    
     private Calendar getDateTime(){
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
         return calendar;

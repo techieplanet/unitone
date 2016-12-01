@@ -83,6 +83,7 @@ public class AgentController extends AppController {
     private static String AGENTS_WAIT = "/views/agent/waiting.jsp";
     private static String AGENTS_CREDIT_HISTORY = "/views/agent/credit_history.jsp";
     private static String AGENTS_DEBIT_HISTORY = "/views/agent/debit_history.jsp";
+    private static String AGENTS_ACCOUNT_STATEMENT = "/views/agent/account_statement.jsp";
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
     private final String APPROVED_WITHDRAWAL_REQUEST = "/views/agent/approved_withdrawal_request.jsp";
     private Agent agent = new Agent();
@@ -117,6 +118,7 @@ public class AgentController extends AppController {
          action = request.getParameter("action") != null ? request.getParameter("action") : "";
          log("action in do get: " + action);
          System.out.println("Inside do get");
+         System.out.println("is Ajax Request : " + isAjaxRequest);
          
          if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
@@ -261,7 +263,19 @@ public class AgentController extends AppController {
         else if(action.equalsIgnoreCase("approval")){
             this.processApprovalRequest(Long.parseLong(agent_id), Integer.parseInt(status), request);
         }
-        
+        else if(action.equalsIgnoreCase("wallet")){
+            
+            getAgentAccountHistory(request, response);
+            return;
+            
+        }
+        else if(action.equalsIgnoreCase("account_statement")){
+            
+            viewFile = AGENTS_ACCOUNT_STATEMENT;
+            
+            getAgentAccountHistory(request);
+            
+        }
         if(request.getAttribute("sideNav") == null){
             //Keep track of the sideBar
             request.setAttribute("sideNav", "Agent");
@@ -326,6 +340,7 @@ public class AgentController extends AppController {
                           }
                     }
                       else if(!agent_id.equalsIgnoreCase("")) { //edit mode'
+                          
                         if(!(updateStatus.isEmpty())){
                         this.processAgentAccountStatus(request,response);
                         }
@@ -398,7 +413,8 @@ public class AgentController extends AppController {
                  **********************************************************************/
                  
                 agent.setFirstname(request.getParameter("agentFirstname"));
-                agent.setLastname(request.getParameter("agentLastname"));               
+                agent.setLastname(request.getParameter("agentLastname"));
+                agent.setMiddlename(request.getParameter("agentMiddlename"));
                 agent.setEmail(request.getParameter("agentEmail"));
                // String initPass = AuthManager.generateInitialPassword();  //randomly generated password
                 agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
@@ -431,6 +447,7 @@ public class AgentController extends AppController {
                 }
                 else{
                     //agent.setPhotoPath("");
+                    errorMessages.put("AgentPhoto", "Please upload agent photo");
                     throw new PropertyException("Please upload agent picture");
                 }
                 
@@ -731,7 +748,8 @@ public class AgentController extends AppController {
                validate(agent,request);
                
                agent.setFirstname(request.getParameter("agentFirstname"));
-               agent.setLastname(request.getParameter("agentLastname"));               
+               agent.setLastname(request.getParameter("agentLastname"));  
+               agent.setMiddlename(request.getParameter("agentMiddlename"));
                agent.setEmail(request.getParameter("agentEmail"));
                //agent.setPassword(request.getParameter("agentPassword"));
                 
@@ -754,7 +772,10 @@ public class AgentController extends AppController {
                 agentFileName = FileUploader.getSubmittedFileName(request.getPart("agentPhoto"));
                 agentKinFileName = FileUploader.getSubmittedFileName(request.getPart("agentKinPhoto"));
                 
-                if(agentFileName!=null){
+                System.out.println("Agent File Name : " + agentFileName);
+                System.out.println("Agent Kin File Name : " + agentKinFileName);
+                
+                if(agentFileName != null && !agentFileName.equals("")){
                     log("Inside agent side");
                     Part filePart = request.getPart("agentPhoto");
                     String saveName = "agent_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
@@ -762,12 +783,13 @@ public class AgentController extends AppController {
                     agentFileName = saveName;
                     new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "agents", saveName, true);
                 }
-                if(agentKinFileName!=null){
+                if(agentKinFileName != null && !agentKinFileName.equals("")){
                     log("Inside kin side");
                     Part filePart = request.getPart("agentKinPhoto");
                     String saveName = "agentkin_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
                     agent.setKinPhotoPath(saveName);
                     agentKinFileName = saveName;
+                    System.out.println("kinPhot savname : " + saveName);
                     new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "agentkins", saveName, true);
                 }
                
@@ -1244,5 +1266,114 @@ public class AgentController extends AppController {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    /**
+     * This method is called when admin request for agent account history via Ajax
+     * @param request
+     * @param response
+     * @throws IOException 
+     */
+    private void getAgentAccountHistory(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        
+        em = emf.createEntityManager();
+        
+        long id = Long.parseLong(request.getParameter("id"));
+        
+        Agent agent = em.find(Agent.class, id);
+        
+        Account acct = agent.getAccount();
+        String acctCode = acct.getAccountCode();
+        
+        Query query = em.createNamedQuery("Transaction.findByAccount");
+        query.setParameter("debitAccount", acct);
+        query.setParameter("creditAccount", acct);
+        
+        List<Transaction> transactionList = query.getResultList();
+        
+        double agentBalance = getAgentBalance(id);
+        
+        List<Map> transactionMapList = new ArrayList();
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
+        
+        for(Transaction t : transactionList){
+            
+            Map<String, String> map = new HashMap();
+            
+            map.put("amount", String.format("%.2f", t.getAmount()));
+            map.put("date", sdf.format(t.getTransactionDate()));
+            if(t.getCreditAccount().getAccountCode().equalsIgnoreCase(acctCode)){
+                map.put("type", "credit");
+            }
+            else{
+                map.put("type", "debit");
+            }
+            
+            transactionMapList.add(map);
+        }
+        
+        
+        Map<String, String> agentDetails = new HashMap();
+        agentDetails.put("balance", String.format("%.2f",agentBalance));
+        agentDetails.put("accountCode", acctCode);
+        
+        Map<String, Object> jsonMap = new HashMap();
+        jsonMap.put("transactions", transactionMapList);
+        jsonMap.put("agentDetail", agentDetails);
+        
+        Gson gson = new GsonBuilder().create();
+        
+        String transactions = gson.toJson(jsonMap);
+        System.out.println("Transaction JSON : " + transactions);
+        
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(transactions);
+        response.getWriter().flush();
+        response.getWriter().close();
+        
+    }
+
+    private void getAgentAccountHistory(HttpServletRequest request) {
+        
+        em = emf.createEntityManager();
+        
+        
+        Account acct = ((Agent)sessionUser).getAccount();
+        String acctCode = ((Agent)sessionUser).getAccount().getAccountCode();
+        
+        Query query = em.createNamedQuery("Transaction.findByAccount");
+        query.setParameter("debitAccount", acct);
+        query.setParameter("creditAccount", acct);
+        
+        List<Transaction> transactionList = query.getResultList();
+        
+        double agentBalance = getAgentBalance(sessionUser.getSystemUserId());
+        
+        List<Map> transactionListMap = new ArrayList();
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
+        
+        for(Transaction t : transactionList){
+            
+            Map<String, String> map = new HashMap();
+            
+            map.put("amount", String.format("%.2f", t.getAmount()));
+            map.put("date", sdf.format(t.getTransactionDate()));
+            if(t.getCreditAccount().getAccountCode().equalsIgnoreCase(acctCode)){
+                map.put("type", "Credit");
+            }
+            else{
+                map.put("type", "Debit");
+            }
+            
+            transactionListMap.add(map);
+        }
+        
+        request.setAttribute("transactions",transactionListMap);
+        request.setAttribute("balance", agentBalance);
+        request.setAttribute("accountCode", acctCode);
+        
+    }
 
 }

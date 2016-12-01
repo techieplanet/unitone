@@ -40,7 +40,7 @@ public class AppController extends HttpServlet{
     protected long userType;
     protected SystemUser sessionUser;
     protected String callbackUrRL = "";
-    
+    protected boolean isAjaxRequest;
     
     public AppController(){
         System.out.println("Inside TPController");
@@ -64,6 +64,7 @@ public class AppController extends HttpServlet{
         req.setAttribute("notifications", getNotifications());
         req.setAttribute("loggedInUser",sessionUser);
         
+        isAjaxRequest = isXMLHttpRequest(req);
         
         super.service(req, res);
     }
@@ -206,5 +207,19 @@ public class AppController extends HttpServlet{
         emf.close();
         
         return notificationList;
+    }
+    
+    private boolean isXMLHttpRequest(HttpServletRequest request){
+        
+        boolean bool = false;
+        
+        String requestType = request.getHeader("X-Requested-With") != null ? request.getHeader("X-Requested-With") : "";
+        
+        if(requestType.equalsIgnoreCase("XMLHttpRequest")){
+            bool = true;
+        }
+        
+        return bool;
+                    
     }
 }

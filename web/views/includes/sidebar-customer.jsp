@@ -50,7 +50,7 @@
                   </li>
                   
                   <!-- Customer -->
-                  <li class="<c:out  value='${sideNav eq "Customer" ? "active":""}' />"><a href="${pageContext.request.contextPath}/Customer?action=edit&customerId=${sessionScope.user.getSystemUserId()}"><i class="fa fa-users"></i> <span>My Profile</span></a></li>
+                  <li class="<c:out  value='${sideNav eq "Customer" ? "active":""}' />"><a href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${sessionScope.user.getSystemUserId()}"><i class="fa fa-users"></i> <span>My Profile</span></a></li>
                   
                   
       </ul><!-- /.sidebar-menu -->

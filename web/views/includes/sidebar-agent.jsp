@@ -33,10 +33,11 @@
                   
                   
                   <!--AGENT-->
-                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_project')}">
+                  <c:if test="${sessionScope.user.getSystemUserTypeId() == 2}">
                         <li class="treeview <c:out  value='${sideNav eq "Agent" ? "active":""}' />">
                           <a href="#"><i class="fa fa-users"></i><span>My Wallet</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
+                            <li><a href="${pageContext.request.contextPath}/Agent?action=account_statement">Account Statement</a></li>
                             <li><a href="${pageContext.request.contextPath}/Agent?action=credit_history">Credit History</a></li>
                             <li><a href="${pageContext.request.contextPath}/Agent?action=debit_history">Withdrawal History</a></li>
                             <li><a href="${pageContext.request.contextPath}/Agent?action=withdrawal">Withdraw Funds</a></li>

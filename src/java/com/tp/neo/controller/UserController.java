@@ -12,6 +12,7 @@ import com.tp.neo.model.Role;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.User;
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.model.Agent;
 import com.tp.neo.model.utils.AuthManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -31,6 +32,9 @@ import javax.xml.bind.PropertyException;
 import com.tp.neo.model.utils.MailSender;
 import com.tp.neo.model.Permission;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.RollbackException;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -44,6 +48,7 @@ public class UserController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static final String ENTITY_LIST = "/views/user/admin.jsp"; 
     private static final String NEW_ENTITY = "/views/user/add.jsp";
+    private static final String USER_PROFILE = "/views/user/profile.jsp";
     
     private HashMap<String, String> errorMessages = new HashMap<String, String>();
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -170,6 +175,14 @@ public class UserController extends AppController {
             request.setAttribute("rolesList", rolesList);
             if(addstat == 1) request.setAttribute("success", true);
         }
+        else if(action.equalsIgnoreCase("profile")){
+            
+            viewFile = USER_PROFILE;
+            
+            request.setAttribute("user", getUser(request));
+            request.setAttribute("sideNav", "Profile");
+            
+        }
         else if (action.isEmpty() || action.equalsIgnoreCase("listusers")){
             viewFile = ENTITY_LIST;
             request.setAttribute("users", listUsers());
@@ -180,7 +193,8 @@ public class UserController extends AppController {
         }
         
         //Keep track of the sideBar
-        request.setAttribute("sideNav", "User");
+        if(request.getAttribute("sideNav") == null)
+            request.setAttribute("sideNav", "User");
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -200,6 +214,18 @@ public class UserController extends AppController {
         
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
         User user = new User();
+        
+        if(action.equalsIgnoreCase("edit_profile")){
+            
+            editProfile(request, response);
+            return;
+        }
+        
+        if(action.equalsIgnoreCase("password_change")){
+            
+            changeUserPassword(request, response);
+            return;
+        }
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(user.getPermissionName(action), request, response)){
@@ -466,6 +492,150 @@ public class UserController extends AppController {
         return userList;
     }
      
+     private User getUser(HttpServletRequest request) {
+         
+         em = emf.createEntityManager();
+         User user = em.find(User.class, Long.parseLong(request.getParameter("id")));
+         
+         em.close();
+         return user;
+    }
+    
+    private void editProfile(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        
+        em = emf.createEntityManager();
+        
+        long userId = Long.parseLong(request.getParameter("id"));
+        
+        em.getTransaction().begin();
+        User user = em.find(User.class, userId);
+        
+        Map<String,String> resMap = new HashMap();
+        
+        String fname = request.getParameter("fname");
+        String lname = request.getParameter("lname");
+        String mname = request.getParameter("mname");
+        String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
+        
+        if(fname.equalsIgnoreCase(""))
+            resMap.put("fname_error", "firstname is required");
+        if(lname.equalsIgnoreCase(""))
+            resMap.put("lname_error", "lastname is required");
+        if(phone.equalsIgnoreCase(""))
+            resMap.put("phone_error", "mobile no is required");
+        if(email.equalsIgnoreCase(""))
+            resMap.put("email_error", "email is required");
+        
+        if(!user.getEmail().equals(email) && !email.equals("") && resMap.size() < 1){
+            
+          //Check if the email is unique 
+          Query query = em.createNamedQuery("User.findByEmail");
+          query.setParameter("email", email);
+          List<User> userList = query.getResultList();
+          
+          if(userList.size() > 0){
+              resMap.put("email_error", "Email already exist");
+          }
+          else{
+              
+              user.setFirstname(fname);
+              user.setLastname(lname);
+              user.setMiddlename(mname);
+              user.setEmail(email);
+              user.setPhone(phone);
+              user.setUsername(email);
+              
+              resMap.put("success", "Profile changed successfully");
+          }
+          
+        }
+        else if(resMap.size() < 1){
+            
+              user.setFirstname(fname);
+              user.setLastname(lname);
+              user.setMiddlename(mname);
+              user.setEmail(email);
+              user.setPhone(phone);
+              user.setUsername(email);
+              
+              resMap.put("success", "Profile changed successfully");
+        }
+        
+        em.merge(user);
+        em.getTransaction().commit();
+        
+        Gson gson = new GsonBuilder().create();
+        
+        String json = gson.toJson(resMap);
+        
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(json);
+        response.getWriter().flush();
+        response.getWriter().close();
+        
+    }
+    
+    private void changeUserPassword(HttpServletRequest request, HttpServletResponse response) {
+        
+        try {
+            em = emf.createEntityManager();
+            
+            
+            
+            Map<String, String> resMap = new HashMap();
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            
+            String oldPassword = request.getParameter("old_password");
+            String pwd1 = request.getParameter("pwd1");
+            String pwd2 = request.getParameter("pwd2");
+            
+            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            em.getTransaction().begin();
+            
+            User user = em.find(User.class, id);
+            
+            
+            
+            if(AuthManager.check(oldPassword, user.getPassword())){
+                
+                if(pwd1.equals(pwd2) && !pwd1.equals("")){
+                    user.setPassword(AuthManager.getSaltedHash(pwd1));
+                    resMap.put("success", "Password changed successfully");
+                }else{
+                    resMap.put("error", "Password and Re-enter password do not match");
+                }
+                 
+            }else{
+                resMap.put("error", "Invalid old password");
+            }
+            
+            if(user != null){
+                em.merge(user);
+                
+            }
+            
+            em.getTransaction().commit();
+            em.close();
+            
+            Gson gson = new GsonBuilder().create();
+            
+            String json = gson.toJson(resMap);
+            
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(json);
+            response.getWriter().flush();
+            response.getWriter().close();
+            
+            
+        } catch (Exception ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
      
      private void setExceptionAttribbutes(User user){
         errorMessages.clear();
@@ -487,5 +657,7 @@ public class UserController extends AppController {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    
 
 }

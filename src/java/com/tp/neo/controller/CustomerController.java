@@ -32,9 +32,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -118,14 +121,21 @@ public class CustomerController extends AppController  {
         
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
-        //Ajax Get Request
-        if(action.equalsIgnoreCase("email_validation")){
+        //Check if request is XMLHttpRequest
+        if(isAjaxRequest){
             
-            validateEmail(request,response);
-            return;
+            if(action.equalsIgnoreCase("email_validation")){
+
+                validateEmail(request,response);
+                return;
+            }
+            if(action.equalsIgnoreCase("customer_lodgements")){
+                
+                getCustomerLodgments(request, response);
+                return;
+            }
+        
         }
-        
-        
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Customer().getPermissionName(action), request, response)){
@@ -184,8 +194,9 @@ public class CustomerController extends AppController  {
               //  String viewFile = AGENTS_ADMIN;
               Customer customer = new Customer();
             try{                                
-                if(!(request.getParameter("customer_id").equals(""))) { //edit mode
+                if(request.getParameter("action").equals("update")) { //edit mode
                 this.processUpdateRequest(request,response);
+                return;
                 }else{
                 this.processInsertRequest(request, response);
                 }
@@ -439,97 +450,149 @@ public class CustomerController extends AppController  {
     /*TP: Processes every update request of request type POST*/
     protected void processUpdateRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException{
-         errorMessages.clear();
-        String root = getServletContext().getRealPath("/");
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        String viewFile = CUSTOMER_NEW;
-//        Customer customer = new Customer();
-        String customerFileName = null;
-        String customerKinFileName = null;
         
-        root = root.replace("\\", "/");
-        request.setAttribute("success", false);
-        Gson gson = new GsonBuilder().create();
-            try{                                
-
-                em.getTransaction().begin();
-                
-               
-                if(!(request.getParameter("customer_id").equals(""))) { //edit mode
-                    customer = em.find(Customer.class, new Long(Integer.parseInt(request.getParameter("customer_id"))));
+           EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+           EntityManager em = emf.createEntityManager();
+        try {
+            errorMessages.clear();
+            
+            String lname = request.getParameter("lname");
+            String fname = request.getParameter("fname");
+            String mname = request.getParameter("mname");
+            String email = request.getParameter("email");
+            
+            Part customerPhoto = request.getPart("customerPhoto");
+            Part customerKinPhoto = request.getPart("customerKinPhoto");
+            
+            String street = request.getParameter("street");
+            String city = request.getParameter("city");
+            String state = request.getParameter("state");
+            String phone = request.getParameter("phone");
+            
+            String customerKinNames = request.getParameter("customerKinNames");
+            String customerKinPhone = request.getParameter("customerKinPhone");
+            String customerKinAddress = request.getParameter("customerKinAddress");
+            
+            validateCustomerUpdate(request);
+            
+            em.getTransaction().begin();
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            
+            Customer customer = em.find(Customer.class, id);
+            
+            customer.setLastname(lname);
+            customer.setFirstname(fname);
+            customer.setMiddlename(mname);
+            customer.setEmail(email);
+            customer.setStreet(street);
+            customer.setCity(city);
+            customer.setState(state);
+            customer.setPhone(phone);
+            customer.setKinName(customerKinNames);
+            customer.setKinAddress(customerKinAddress);
+            customer.setKinPhone(customerKinPhone);
+            
+            long unixTime = System.currentTimeMillis() / 1000L;
+            
+            String customerFileName = FileUploader.getSubmittedFileName(request.getPart("customerPhoto"));
+            String customerKinFileName = FileUploader.getSubmittedFileName(request.getPart("customerKinPhoto"));
+                 
+                 if(customerFileName != null && !customerFileName.equals("")){
+                    Part filePart = request.getPart("customerPhoto");
+                    String saveName = "customer_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
+                    customer.setPhotoPath(saveName);
+                    customerFileName = saveName;
+                    new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "customer", saveName, true);
                 }
-               
-               
-               Long id = Long.parseLong(request.getParameter("customerId"));
-               customer = em.find(Customer.class, id);
- 
-                validate(customer,request);
-                customerFileName = uploadCustomerPicture(customer,request,customerFileName);
-                customerKinFileName = uploadCustomerKinPicture(customer,request,customerKinFileName);
-               
-                
-                new TrailableManager(customer).registerUpdateTrailInfo(id);
-               
-                customer.setFirstname(request.getParameter("customerFirstname"));
-                customer.setLastname(request.getParameter("customerLastname"));               
-                customer.setEmail(request.getParameter("customerEmail"));
-                //customer.setPassword(request.getParameter("customerPassword"));
-                if(!request.getParameter("customerPassword").isEmpty()){
-                customer.setPassword(AuthManager.getSaltedHash(request.getParameter("customerPassword")));
+                else{
+                    
                 }
-                customer.setStreet(request.getParameter("customerStreet"));
-                customer.setCity(request.getParameter("customerCity"));
-                customer.setState(request.getParameter("customerState"));
-                customer.setPhone(request.getParameter("customerPhone"));
-                customer.setKinName(request.getParameter("customerKinName"));
-                customer.setKinPhone(request.getParameter("customerKinPhone"));
-                customer.setKinAddress(request.getParameter("customerKinAddress"));
-                
-                if(customerFileName!=null){
-                customer.setPhotoPath(customerFileName);
+                 
+                if(customerKinFileName != null && !customerKinFileName.equals("")){
+                    Part filePart = request.getPart("customerKinPhoto");
+                    String saveName = "customerKin_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
+                    customer.setKinPhotoPath(saveName);
+                    customerKinFileName = saveName;
+                    new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "customerKin", saveName, true);
                 }
-                if(customerKinFileName != null){
-                customer.setKinPhotoPath(customerKinFileName);
+                else{
+                    
                 }
-               
-                
-               //persist only on save mode
-
-                if(!em.contains(customer)){
-                    em.persist(customer);
-                   
-                }
-               
+            
+                em.merge(customer);
                 em.getTransaction().commit();
-                
                 em.close();
                 emf.close();
                 
-                viewFile = CUSTOMER_NEW;
-                request.setAttribute("customerKinPhotoHidden",customerKinFileName);
-                request.setAttribute("customerPhotoHidden",customerFileName);
-                request.setAttribute("customers", listCustomers());
-                request.setAttribute("success",true);
+                request.setAttribute("success", true);
                 request.setAttribute("customer", customer);
-                request.setAttribute("action","edit");
+                request.getRequestDispatcher("/views/customer/update.jsp").forward(request, response);
+                //response.sendRedirect("Customer?action=edit&customerId="+customer.getCustomerId());
                 
+        } catch (PropertyException ex) {
+            
+            Enumeration it = request.getParameterNames();
+            Map<String, String> map = new HashMap();
+            while(it.hasMoreElements()){
+                map.put(it.nextElement().toString(), request.getParameter(it.nextElement().toString()));
             }
-            catch(Exception e){
-                e.printStackTrace();
-                //System.out.println("inside catch area: " + e.getMessage());
-                viewFile = CUSTOMER_NEW;
-                request.setAttribute("customerKinPhotoHidden",customerKinFileName);
-                request.setAttribute("customerPhotoHidden",customerFileName);
-                request.setAttribute("customer", customer);
-                request.setAttribute("errors", errorMessages);
-                request.setAttribute("action","edit");
-                SystemLogger.logSystemIssue("Customer", gson.toJson(customer), e.getMessage());
-            }
+            
+            request.setAttribute("data", map);
+            request.setAttribute("errors", errorMessages);
+            request.getRequestDispatcher("/views/customer/update.jsp");
+            
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+         
            
+    }
+    
+    private void validateCustomerUpdate(HttpServletRequest request) throws IOException, ServletException, PropertyException{
         
-            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-            dispatcher.forward(request, response);
+        errorMessages.clear();
+         
+         String lname = request.getParameter("lname");
+         String fname = request.getParameter("fname");
+         String mname = request.getParameter("mname");
+         String email = request.getParameter("email");
+         
+         Part customerPhoto = request.getPart("customerPhoto");
+         Part customerKinPhoto = request.getPart("customerKinPhoto");
+         
+         String street = request.getParameter("street");
+         String city = request.getParameter("city");
+         String state = request.getParameter("state");
+         String phone = request.getParameter("phone");
+         
+         String customerKinNames = request.getParameter("customerKinNames");
+         String customerKinPhone = request.getParameter("customerKinPhone");
+         String customerKinAddress = request.getParameter("customerKinAddress");
+         
+         if(lname.equalsIgnoreCase(""))
+             errorMessages.put("error1", "Last Name is required");
+         if(fname.equalsIgnoreCase(""))
+             errorMessages.put("erorr2", "First Name is required");
+         if(email.equalsIgnoreCase(""))
+             errorMessages.put("error3", "Email is required");
+         if(street.equalsIgnoreCase(""))
+             errorMessages.put("error4", "Street is required");
+         if(city.equalsIgnoreCase(""))
+             errorMessages.put("error5", "City is required");
+         if(state.equalsIgnoreCase(""))
+             errorMessages.put("error6", "State is required");
+         if(phone.equalsIgnoreCase(""))
+             errorMessages.put("error7", "Phone is required");
+         if(customerKinNames.equalsIgnoreCase(""))
+             errorMessages.put("error8", "Customer Kin Name is required");
+         if(customerKinPhone.equalsIgnoreCase(""))
+             errorMessages.put("error9", "Customer Kin Phone No is required");
+         if(customerKinAddress.equalsIgnoreCase(""))
+             errorMessages.put("error10", "Customer Kin Address is required");
+         
+         if(errorMessages.size() > 0){
+             throw new PropertyException("Validation Error");
+         }
     }
 
      protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
@@ -567,6 +630,19 @@ public class CustomerController extends AppController  {
             this.delete(Integer.parseInt(request.getParameter("id")));
         }
         else if(action.equalsIgnoreCase("edit")){
+            viewFile = "/views/customer/update.jsp";
+
+            int id = Integer.parseInt(request.getParameter("customerId"));
+            Query jpqlQuery  = em.createNamedQuery("Customer.findByCustomerId");
+            jpqlQuery.setParameter("customerId", id);
+            jpqlQuery.setParameter("deleted", (short)0);
+            
+            List<Customer> customerList = jpqlQuery.getResultList();
+           
+            request.setAttribute("customer", customerList.get(0));
+            request.setAttribute("userType",sessionUser.getSystemUserTypeId());
+        }
+        else if(action.equalsIgnoreCase("profile")){
             viewFile = "/views/customer/profile.jsp";
 //            
 //            //find by ID
@@ -893,8 +969,7 @@ public class CustomerController extends AppController  {
         return customers;
     }
     
-    private Calendar getDateTime()
-    {
+    private Calendar getDateTime(){
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
         return calendar;
     }
@@ -1008,7 +1083,77 @@ public class CustomerController extends AppController  {
         }
         
     }
-
+    
+    private void getCustomerLodgments(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        
+       EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+       EntityManager em = emf.createEntityManager();
+       
+       long id = Long.parseLong(request.getParameter("id"));
+       
+       Customer customer = em.find(Customer.class, id);
+       
+       Query query = em.createNamedQuery("Lodgement.findByCustomer");
+       query.setParameter("customer", customer);
+        
+       List<Lodgement> lodgementList = query.getResultList();
+       
+       String customerName = customer.getFullName();
+       
+       List<Map> LodgementListMap = new ArrayList();
+       
+       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
+       
+       for(Lodgement l : lodgementList){
+           
+           Map<String, String> map = new HashMap();
+           
+           map.put("amount", String.format("%.2f", l.getAmount()));
+           map.put("date", sdf.format(l.getLodgmentDate()));
+           map.put("depositorName", l.getDepositorName() != null ? l.getDepositorName() : "");
+           map.put("depositorAcctName", l.getOriginAccountName() != null ? l.getOriginAccountName() : "");
+           map.put("depositorAcctNo", l.getOriginAccountNumber() != null ? l.getOriginAccountNumber() : "");
+           
+           String paymentMode = "";
+           short mode = l.getPaymentMode();
+           
+           switch(mode){
+               case 1 : paymentMode = "Bank Deposit";
+                        break;
+               case 2 : paymentMode = "Credit/Debit Card";
+                        break;
+               case 3 : paymentMode = "Cash/Cheque";
+                        break;
+               case 4 : paymentMode = "Bank Transfer";
+                        break;
+           }
+           
+           map.put("paymentMode", paymentMode);
+           map.put("companyAcctName", l.getCompanyAccountId().getAccountName());
+           map.put("status", ((Short)l.getApprovalStatus()).toString());
+           
+           LodgementListMap.add(map);
+       }
+       
+       Map<String, Object> responseMap = new HashMap();
+       
+       responseMap.put("lodgements", LodgementListMap);
+       responseMap.put("customerName",customerName);
+       
+       Gson gson = new GsonBuilder().create();
+       
+       String jsonResponse = gson.toJson(responseMap);
+       
+       System.out.println("Lodgements Json = " + jsonResponse);
+       
+       response.setContentType("text/plain");
+       response.setCharacterEncoding("UTF-8");
+       response.getWriter().write(jsonResponse);
+       response.getWriter().flush();
+       response.getWriter().close();
+       
+    }
+    
     /*TP: Getting the customer Id for public use*/
     public Long getSystemUserId(){
     return customer.getCustomerId();

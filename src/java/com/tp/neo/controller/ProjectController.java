@@ -189,6 +189,11 @@ public class ProjectController extends AppController {
             viewFile = "/views/index/units.jsp";
             request.setAttribute("projectUnits", getUnits(request));
         }
+        else if(action.equalsIgnoreCase("removeFromCart")){
+            
+            removeFromCart(request, response);
+            return;
+        }
         else if(sessionUser.getSystemUserTypeId() == 3 && action.equalsIgnoreCase("listprojects")){
             
             viewFile = ECOMMERCE;
@@ -198,11 +203,6 @@ public class ProjectController extends AppController {
             
             viewFile = ECOMMERCE_UNITS;
             request.setAttribute("projectUnits", getUnits(request));
-        }
-        else if(sessionUser.getSystemUserTypeId() == 3 && action.equalsIgnoreCase("removeFromCart")){
-            
-            removeFromCart(request, response);
-            return;
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
             viewFile = PROJECTS_ADMIN;

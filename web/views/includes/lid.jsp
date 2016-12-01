@@ -64,7 +64,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!--JQUERY UI JS-->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.12.1.js"></script>
 
-    
+    <!-- JQUERY PrintArea -->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.PrintArea.js"></script>
     
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
