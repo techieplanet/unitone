@@ -200,7 +200,7 @@
                       <div class="box box-default">
                     	<fieldset>
                         <legend style="padding-left:20px !important;">Check Out</legend>
-                        <form name="lodgementCart" method="post" action="${pageContext.request.contextPath}/Lodgement?action=morgage" >    
+                        <form name="lodgementCart" method="post" action="${pageContext.request.contextPath}/Lodgement?action=mortgage" >    
                             <div class="col-md-11" >
                             	
                                 <!-- Start of Payment Method Container -->

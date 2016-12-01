@@ -1,4 +1,5 @@
- <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+ <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!-- Main Header -->
       <header class="main-header">
 
@@ -25,7 +26,63 @@
           <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
               <!-- Messages: style can be found in dropdown.less-->
-
+              
+              
+              <!-- Customer Cart System -->
+              <c:if test="${unit_cart != null}">
+                  
+                <li class="dropdown notifications-menu">
+                
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <i class="fa fa-cart-plus fa-2x"></i>
+                  <span class="label label-success">${unit_cart.size()}</span>
+                </a>
+                <ul class="dropdown-menu">
+                    
+                    <li class="header">
+                    <div class="col-md-8">
+                            <span>You have ${unit_cart.size()} item(s) in cart </span>
+                    </div>
+                    <div class="col-md-4" style="text-align:right">
+                     <c:if test="${unit_cart.size() > 0}">   
+                         <button onclick="location.href='${pageContext.request.contextPath}/Order?action=checkOut'" class="btn btn-success btn-sm" style="color:#fff">Check out</button>
+                     </c:if>
+                    </div>
+                    <span class="clearfix"></span>
+                    </li>
+                    
+                  <li>
+                    <!-- Inner Menu: contains the notifications -->
+                    <ul class="menu list-group">
+                     <c:set var="cart_total" value="0.0" />   
+                     <c:forEach items="${unit_cart}" var="cart">
+                      <li><!-- start notification -->
+                          
+                          <a class="list-group-item">
+                          <div class="col-md-8">
+                              <span>${cart.getProject().getName()}</span><br />
+                              <span>${cart.getTitle()}</span><br />
+                              <span><fmt:formatNumber value="${cart.getCpu()}" type="currency" currencySymbol="N" /></span><br />
+                          </div>
+                          <div clas="col-md-4" style="text-align: right">
+                              <button class="btn btn-danger btn-sm" onclick="location.href='${pageContext.request.contextPath}/Project?action=removeFromCart&unit_id=${cart.getId()}'">
+                                  <i class="fa fa-trash"></i>
+                              </button>
+                          </div>
+                          </a>
+                      </li><!-- end notification -->
+                      <c:set var="cart_total" value="${cart_total + cart.getCpu()}" /> 
+                     </c:forEach>
+                    </ul>
+                  </li>
+                  <li class="header"><span>Total : </span> <fmt:formatNumber value="${cart_total}" currencySymbol="N" type="currency" /></li>
+                </ul>
+              </li>
+                  
+              </c:if>
+              <!-- Customer Cart System Ends here -->
+              
+              
               <!-- Notifications Menu -->
               <c:if test="${loggedInUser.getSystemUserTypeId() == 1}">
               <li class="dropdown notifications-menu">

@@ -19,7 +19,7 @@
 </div>
 </c:if>
 
- <c:if test='${userTypeId != null && userTypeId == "1" }'>
+ <c:if test='${userTypeId != null && action.equals("new") && userTypeId == "1" }'>
  <div class="row margin-bottom" id="agentListContainer">
      
      <section class="content-header">
@@ -51,7 +51,7 @@
                     <tbody>
                         <c:forEach items="${agents}" var="agent">
                             <tr id='row<c:out value="${agent.agentId}" />'>
-                                <td><img alt="No Image" class="img-responsive img-thumbnail" src="<c:out value='${agent.photoPath}'></c:out>" /></td>
+                                <td><img alt="No Image" class="img-responsive img-thumbnail" width="55" height="55" src="/uploads/NeoForce/images/agents/<c:out value='${agent.photoPath}'></c:out>" /></td>
                                 <td class="agentId"><c:out value="${agent.agentId}" /></td>
                                 <td class="agentFname"><c:out value="${agent.firstname}" /></td>
                                 <td class="agentMname"><c:out value="${agent.middlename}" /></td>
@@ -61,7 +61,7 @@
                                 <td class="agentState"><c:out value="${agent.state}" /></td>
                               
                                 <td>
-                                    <input type="hidden" class="agentImg" value='<c:out value="${agent.photoPath}"></c:out>' />
+                                    <input type="hidden" class="agentImg" value='/uploads/NeoForce/images/agents/<c:out value="${agent.photoPath}"></c:out>' />
                                     <a class="btn btn-primary" href="#" onclick="selectAgent('${agent.agentId}')" role="button">Choose</a>
                                 </td>
                             </tr>
@@ -100,7 +100,7 @@
                  <div class="row">
                      
                      <div class="col-md-3">
-                         <img src="" alt="No image" />
+                         <img src="" alt="No image" class="agent_img img-responsive img-thumbnail" width="80" height="80" />
                      </div>
                      
                      <div class="col-md-9">
@@ -124,7 +124,7 @@
  </div>
                                 
 </c:if>  
-<form role="form" name="customerRegistration" method="POST" action="Customer?action=new" enctype="multipart/form-data">
+<form role="form" name="customerRegistration" method="POST" action="Customer?action=new" enctype="multipart/form-data" onsubmit="return submitForm()">
   
     <input type="hidden" name="customer_id" value="" />
     <input type="hidden" name="agent_id" id="agent_id" value="" />
@@ -134,7 +134,7 @@
               <!-- general form elements -->
                
                 <!-- form start -->
-               <div class="box box-primary">
+               <div class="box box-primary" id="step1_box">
                 <div class="box-header with-border">
                   <h3 class="box-title">Customer Registration Form 
                       
@@ -170,7 +170,7 @@
                     </div>
                 </div>
           </c:if>   
-                              <c:if test="${action != 'new'}">
+                              <c:if test='${action != "new" && userType != 3}' >
                                   <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Order?action=new&customer=${customer.customerId}">Buy Product</a>
                                   &nbsp;&nbsp;&nbsp;
                                   <a class="btn btn-primary" href="Customer?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Customer</a>
@@ -255,38 +255,25 @@
                             </div>
                             </fieldset>
                         </div>
-                         <div class="col-md-4">
-                             <div class="row">
-                             <div class="row text-center" id="imgholder">
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group text-center">
-                            
-                              <img <c:if test="${customer.photoPath != null && customer.photoPath != "default"}"> src="/uploads/NeoForce/images/customer/${customer.photoPath}" </c:if>
-                               <c:if test="${customer.photoPath == "default"  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"</c:if>
-                                class=" img-responsive text-center" style="max-height:220px !important;"/>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
+                         <div class="col-md-4" style="padding-top: 50px">
+                         
                             <div class="form-group">
                               <div class="btn-group btn-group-xs">
-                                  <div class="btn btn-primary btn-file">
-                      Change <span title="Change Profile Picture" class="glyphicon glyphicon-edit"></span> 
-                      <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
-                      <input type="hidden" name="customerPhotoHidden" 
-                           <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value=""
-                    </c:if><c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"
-                    </c:if> <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"
-                    </c:if> />
-                    </div>
+                                  <label for="customerPhoto" style="display:block">Customer Photo</label>
+                                  <div class="btn btn-primary">
+                                  <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
+                                  <input type="hidden" name="customerPhotoHidden" 
+                                      <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                      <c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"</c:if> 
+                                      <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"</c:if> 
+                                  />
+                                 </div>
+                                </div>
                                   
-                              </div>
-                                
-                            </div>
+                           </div>   
+                       </div>
+                                  
                         </div>
-                    </div>
-                    
-                  </div>
-                         </div>
                     </div>
                     </div>
                    
@@ -470,22 +457,24 @@
                  </div><!-- /.col-md-4 -->
                 </div><!-- /.row -->
                 </div> 
-                         
-      </div><!-- /.box -->
-      
+                   
+              
       <c:if test="${action == 'edit'}">
-          <div class="col-md-12">
-              <c:if test="${userType == 1}">
-              <button class="btn btn-success btn-lg" type="submit">Update</button>
-              </c:if>
-          </div>
+      <div class="col-md-12">
+          <c:if test="${userType == 1}">
+          <button class="btn btn-success btn-lg" type="submit">Update</button>
+          </c:if>
+      </div>
       </c:if>
       <c:if test="${action == 'new'}">
       <div class="col-md-12">
-          <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Process to Order <i class="fa fa-long-arrow-right"></i></a>
+          <a class="btn btn-primary" href="#" onclick="return validateCustomerRegForm()" role="button">Proceed to Order <i class="fa fa-long-arrow-right"></i></a>
       </div>
       </c:if>
- </div><!-- /.box -->
+              
+      </div><!-- /.box -->
+      
+      
       
 <c:if test="${customer.customerId=='' || customer.customerId== null}">
                     
@@ -497,7 +486,7 @@
                <div class="box box-primary" id="productCartBox">
                
                 <div class="box-header with-border">
-                  <h3 class="box-title">Product Order Form</h3>
+                  <h3 class="box-title">Product Order Cart</h3>
                 </div><!-- /.box-header -->
                 <!-- form start -->
                 <div style="background:#ecf0f5 !important;">
@@ -632,7 +621,7 @@
                                 <div class="col-md-2 pull-right">
                                    <div id="addToCartLabel"  style="margin: 0 auto !important;" >
                                     	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
                                         </div> 
                                    </div>
                                </div>
@@ -912,4 +901,5 @@
           
       </div>
       -->
+          <input type="hidden" id="pageContext" value="${pageContext.request.contextPath}" />
 </form>
