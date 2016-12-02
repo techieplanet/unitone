@@ -188,12 +188,17 @@ public class LoginController extends HttpServlet {
                 
                 if(session.getAttribute("loginCallback") == null){
                     //context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
+                    if(userType.equals(userTypesEnum.CUSTOMER.toString().trim())){
+                       response.sendRedirect(context + "/Customer?action=profile&customerId="+user.getSystemUserId());
+                       return;
+                    }
                     response.sendRedirect(context + "/Dashboard");
                     ////AuthManager.ucfirst(userType
                     return;
                 }
                 else{ 
                      System.out.println("THis is the login call back of the session before redirect not null"+ referrerURI );
+                     
                     response.sendRedirect(session.getAttribute("loginCallback").toString());
                     return;
                 }

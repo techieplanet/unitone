@@ -274,7 +274,7 @@ public class DashboardHelper {
         
         for(Object[] projectDetail : projectsPerformanceList){
             Project project = (Project)projectDetail[0];
-            int projectId = project.getId();
+            Long projectId = project.getId();
             
             //get the units for this project with its their sales stock and value sums
             List<Object[]> unitsPerformanceList = em.createNamedQuery("OrderItem.findSalesSumByProjectUnit")

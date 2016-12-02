@@ -29,7 +29,7 @@ public class InvoiceController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         System.out.println("Inside invoice");
-        String viewFile = "/views/customer/invoice3.jsp";
+        String viewFile = "/views/customer/invoice.jsp";
         
         req.getRequestDispatcher(viewFile).forward(req, resp);
     }

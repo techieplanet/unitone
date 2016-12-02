@@ -58,7 +58,7 @@ public class AgentDashboardHelper {
         query.setParameter("item_aps", 1);
         query.setParameter("agentId", agentId);
         List<Object[]> itemAndAmountList = query.getResultList();
-        System.out.println("Total Agent Debts: " + gson.toJson(itemAndAmountList.get(0)[1]));
+        ///System.out.println("Total Agent Debts: " + gson.toJson(itemAndAmountList.get(0)[1]));
         
         for(Object[] itemAndAmount : itemAndAmountList){
             System.out.println("Inside getduepayemnts");
@@ -251,7 +251,7 @@ public class AgentDashboardHelper {
         
         for(Object[] projectDetail : projectsPerformanceList){
             Project project = (Project)projectDetail[0];
-            int projectId = project.getId();
+            Long projectId = project.getId();
             
             //get the units for this project with its their sales stock and value sums
             List<Object[]> unitsPerformanceList = em.createNamedQuery("Agent.findMySalesSumByProjectUnit")
