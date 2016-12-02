@@ -53,6 +53,9 @@
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Order">All Orders</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Order?action=new">New Order</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
                                 <li><a href="${pageContext.request.contextPath}/Order?action=approved">Approved</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
