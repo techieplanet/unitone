@@ -57,7 +57,7 @@
                         <th>Last Name</th>
                         <th>Phone No</th>
                         <th>State</th>
-                        <th>Active</th>
+                        <!--<th>Active</th>-->
                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
                             <th class="text-center">Action</th>
                         </c:if>
@@ -73,9 +73,10 @@
                                 <td><c:out value="${agent.lastname}" /></td>
                                 <td><c:out value="${agent.phone}" /></td>
                                 <td><c:out value="${agent.state}" /></td>
+                                <!--                                
                                 <td style="text-align:center;">
                                     <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
-                                </td>
+                                </td>-->
                                 
                                 <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
                                     <td class="text-center">
@@ -106,7 +107,7 @@
                         <th>Last Name</th>
                         <th>Phone No</th>
                         <th>State</th>
-                        <th>Active</th>
+                        <!--<th>Active</th>-->
                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
                             <th class="text-center">Action</th>
                         </c:if>
@@ -236,7 +237,7 @@
                     { "width":"100px", "targets": 3 },
                     {"sort":"asc","targets":0},
                     <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
-                        { "sortable": false, "width":"120px", "targets": 8 }
+                        { "sortable": false, "width":"80px", "targets":7 }
                     </c:if>
                 ]
         });

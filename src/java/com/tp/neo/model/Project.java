@@ -50,13 +50,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findByModifiedDate", query = "SELECT p FROM Project p WHERE p.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Project.findByModifiedBy", query = "SELECT p FROM Project p WHERE p.modifiedBy = :modifiedBy"),
 
-//    @NamedQuery(name = "Project.findWithPerformance", query = "SELECT p, pno.unit, pno.sold FROM Project p LEFT JOIN "
-//                                                              + "(SELECT unit, unit.project_id AS project_id, SUM(o.quantity) AS sold FROM ProjectUnit unit LEFT JOIN unit.orderItemCollection o ON o.approvalStatus = :approvalStatus GROUP BY unit.id)"
-//                                                              + "AS pno ON p.id = pno.project_id")
-                                                            
-//    @NamedQuery(name = "Project.findAllWithUnitStocks", query = "SELECT p, "
-//                                                                + "(SELECT SUM(quantity) FROM OrderItem o JOIN o.unit u WHERE u.project_id = p.id GROUP BY u.id ) as sold "
-//                                                                + "FROM Project p")
+
+
         
     })// end NamedQuery
 

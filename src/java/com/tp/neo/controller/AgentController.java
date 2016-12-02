@@ -772,10 +772,8 @@ public class AgentController extends AppController {
                 agentFileName = FileUploader.getSubmittedFileName(request.getPart("agentPhoto"));
                 agentKinFileName = FileUploader.getSubmittedFileName(request.getPart("agentKinPhoto"));
                 
-                System.out.println("Agent File Name : " + agentFileName);
-                System.out.println("Agent Kin File Name : " + agentKinFileName);
-                
-                if(agentFileName != null && !agentFileName.equals("")){
+
+                if(agentFileName!=null && !agentFileName.equals("")){
                     log("Inside agent side");
                     Part filePart = request.getPart("agentPhoto");
                     String saveName = "agent_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
@@ -783,7 +781,8 @@ public class AgentController extends AppController {
                     agentFileName = saveName;
                     new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "agents", saveName, true);
                 }
-                if(agentKinFileName != null && !agentKinFileName.equals("")){
+                
+                if(agentKinFileName!=null && !agentKinFileName.equals("")){
                     log("Inside kin side");
                     Part filePart = request.getPart("agentKinPhoto");
                     String saveName = "agentkin_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
