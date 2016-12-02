@@ -8,6 +8,7 @@ package com.tp.neo.controller.helpers;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
+import com.tp.neo.model.Company;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
@@ -16,18 +17,21 @@ import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.xml.bind.PropertyException;
-
+import org.apache.commons.lang3.text.StrSubstitutor;
+        
 /**
  *
  * @author swedge-mac
@@ -308,6 +312,110 @@ public class OrderManager {
         em.flush();
     }
     
+    private static String getInvoiceFileContent(String invoiceFilePath) throws IOException{
+        if(invoiceFilePath.equals(""))
+            invoiceFilePath = "/Users/mac/dev/javaee/NeoForce/build/web/views/customer/invoice3.jsp";
+        
+        Path path = Paths.get(invoiceFilePath);
+        String content = new String(Files.readAllBytes(path));
+        
+        //System.out.println("Shout: " + content);
+        //URL location = OrderManager.class.getProtectionDomain().getCodeSource().getLocation();
+        //System.out.println("location: " + location.getFile());
+        return content;
+    }
     
+    
+    private static String resolveInvoiceValues(Customer customer, Lodgement lodgement, Company company, String invoiceContent){
+        Map<String, String> invoiceValuesMap = new HashMap<String, String>();
+        
+        invoiceValuesMap.put("companyName", company.getName()); //2 placeholders
+        invoiceValuesMap.put("addressLine1", company.getAddressLine1());
+        invoiceValuesMap.put("addressLine2", company.getAddressLine2());
+        invoiceValuesMap.put("phone", company.getPhone());
+        invoiceValuesMap.put("email", company.getEmail());
+        
+        invoiceValuesMap.put("customerName", customer.getFirstname() + " " + customer.getLastname());
+        invoiceValuesMap.put("customerStreet", customer.getStreet());
+        invoiceValuesMap.put("customerCity", customer.getCity());
+        invoiceValuesMap.put("customerState", customer.getState());
+        invoiceValuesMap.put("customerPhone", customer.getPhone());
+        invoiceValuesMap.put("customerEmail", customer.getEmail());
+        
+        invoiceValuesMap.put("orderId", lodgement.getId().toString());
+        
+        List<LodgementItem> lodgementItems = (List)lodgement.getLodgementItemCollection();
+        String salesDataHTML = ""; int count = 1;
+        for(LodgementItem lodgementItem : lodgementItems ){
+            Map<String, String> salesValuesMap = new HashMap<String, String>();
+            salesValuesMap.put("SN", String.valueOf(count));
+            salesValuesMap.put("projectName", lodgementItem.getItem().getUnit().getProject().getName());
+            salesValuesMap.put("unitName", lodgementItem.getItem().getUnit().getTitle());
+            salesValuesMap.put("qty", lodgementItem.getItem().getQuantity().toString());
+            salesValuesMap.put("subTotal", String.format("%,.2f",lodgementItem.getAmount()));
+            
+            StrSubstitutor substitutor = new StrSubstitutor(salesValuesMap);
+            String resolvedString = substitutor.replace(getSaleLineHTML());
+        
+            salesDataHTML += resolvedString;
+            
+            count++;
+        }
+        
+        double gatewayCharge = 0.00;
+        double vat = 0.00;
+        
+        invoiceValuesMap.put("salesData", salesDataHTML);
+        invoiceValuesMap.put("total", String.format("%,.2f",lodgement.getAmount()));
+        invoiceValuesMap.put("vat", String.format("%,.2f", vat));
+        invoiceValuesMap.put("gatewayCharge", String.format("%,.2f", gatewayCharge));
+        invoiceValuesMap.put("grandTotal", String.format("%,.2f",(lodgement.getAmount() + vat + gatewayCharge)));
+        
+        StrSubstitutor substitutor = new StrSubstitutor(invoiceValuesMap);
+        String resolvedString = substitutor.replace(invoiceContent);
+        
+        return resolvedString;
+    }
+    
+    private static String getSaleLineHTML(){
+        return "<tr style=\"padding-top: 20px; font: normal normal 13px/20px Arial;margin: 0;\">" 
+               + "<td style=\"width:10%;border:1px solid #eee;border-right: 0;padding:10px;text-align: center;\">${SN}</td>" 
+               + "<td style=\"width:30%;border:1px solid #eee;border-right: 0;padding:10px;text-align: left;\">${projectName}</td>"
+               + "<td style=\"width:30%;border:1px solid #eee;border-right: 0;padding:10px;text-align: left;\">${unitName}</td>"
+               + "<td style=\"width:10%;border:1px solid #eee;border-right: 0;padding:10px;text-align: center;\">${qty}</td>"
+               + "<td style=\"width:20%;border:1px solid #eee;padding:10px;text-align: right;\">${subTotal}</td>"
+               + "</tr>";
+    }
+    
+    public static String createInvoice(Customer customer, Lodgement lodgement, Company company, String invoiceMarkupFilePath){
+        String resolvedString = "";
+        
+        try{
+            
+            String invoiceContent = getInvoiceFileContent(invoiceMarkupFilePath);
+            
+            resolvedString = resolveInvoiceValues(customer, lodgement, company, invoiceContent);
+            System.out.println("resolvedString: " + resolvedString);
+        }
+        catch(IOException e){
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return resolvedString;
+    }
+    
+    
+    public static void main(String[] args){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            
+            Company company = em.find(Company.class, 1);
+            Customer customer = em.find(Customer.class, 15L);
+            Lodgement lodgement = em.find(Lodgement.class, 30L);
+            
+            createInvoice(customer, lodgement, company, "");
+        
+    }
     
 }

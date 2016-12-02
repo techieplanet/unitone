@@ -138,7 +138,7 @@ public class LoginController extends HttpServlet {
         System.out.println("Password: " + password);
         
         try{
-            em = emf.createEntityManager();           
+            em = emf.createEntityManager();
             
             SystemUser user = getUserTypeObject(userType, email);
             if(user == null){
@@ -187,13 +187,18 @@ public class LoginController extends HttpServlet {
                 System.out.println("RequestUrl resolve contextPath : " + context);
                 
                 if(session.getAttribute("loginCallback") == null){
-                     System.out.println("THis is the login call back of the session before redirect null"+ referrerURI );
+                    //context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
+                    if(userType.equals(userTypesEnum.CUSTOMER.toString().trim())){
+                       response.sendRedirect(context + "/Customer?action=profile&customerId="+user.getSystemUserId());
+                       return;
+                    }
                     response.sendRedirect(context + "/Dashboard");
                     ////AuthManager.ucfirst(userType
                     return;
                 }
                 else{ 
                      System.out.println("THis is the login call back of the session before redirect not null"+ referrerURI );
+                     
                     response.sendRedirect(session.getAttribute("loginCallback").toString());
                     return;
                 }
@@ -281,27 +286,29 @@ public class LoginController extends HttpServlet {
             SystemUser user = (SystemUser)session.getAttribute("user");
             
             if(user != null){
-            String userType = session.getAttribute("userType").toString();
-                                
-            //do logging here
-            em.getTransaction().begin();
-            Auditlog auditlog = new Auditlog();
-            auditlog.setActionName("User Logout");
-                
-            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));                
+                String userType = session.getAttribute("userType").toString();
 
-            auditlog.setLogDate(calendar.getTime());
-            auditlog.setNote(String.format("User %s %s logged out as %s user at %s.",user.getFirstname(),user.getLastname(), userType, calendar.getTime()));
-            auditlog.setUsertype(user.getSystemUserTypeId());
-            auditlog.setUserId(user.getSystemUserId());
+                //do logging here
+                em.getTransaction().begin();
+                Auditlog auditlog = new Auditlog();
+                auditlog.setActionName("User Logout");
 
-            em.persist(auditlog);
-            em.getTransaction().commit();
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));                
+
+                auditlog.setLogDate(calendar.getTime());
+                auditlog.setNote(String.format("User %s %s logged out as %s user at %s.",user.getFirstname(),user.getLastname(), userType, calendar.getTime()));
+                auditlog.setUsertype(user.getSystemUserTypeId());
+                auditlog.setUserId(user.getSystemUserId());
+
+                em.persist(auditlog);
+                em.getTransaction().commit();
             }    
             String scheme = request.isSecure() ? "https" : "http";
             String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
             String host = new URI(request.getHeader("host")).toString();
             rootUrl = scheme + "://" + host + context + "/";
+            
+            System.out.println(scheme + "://|" + host + "|" + context + "|/");
             
             session.invalidate();
             response.sendRedirect(rootUrl);

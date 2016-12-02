@@ -7,7 +7,7 @@
                   <li class="header"></li>
                   <!-- Optionally, you can add icons to the links -->
                   
-                  <li class="<c:out  value='${sideNav eq "Dashboard" ? "active":""}' />""><a href="#"><i class="fa fa-tachometer"></i> <span>Dashboard</span></a></li>
+                  <li class="<c:out  value='${sideNav eq "Dashboard" ? "active":""}' />""><a href="${pageContext.request.contextPath}/Dashboard"><i class="fa fa-tachometer"></i> <span>Dashboard</span></a></li>
                   <li class="<c:out  value='${sideNav eq "Project" ? "active":""}' />""><a href="${pageContext.request.contextPath}/Project"><i class="fa fa-home"></i> <span>Projects</span></a></li>
                   
                   
@@ -52,6 +52,7 @@
                           <a href="#"><i class="fa fa-users"></i><span>Orders</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Order">All Orders</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Order?action=new">New Order</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
                                 <li><a href="${pageContext.request.contextPath}/Order?action=new">New Order</a></li>
                             </c:if>
