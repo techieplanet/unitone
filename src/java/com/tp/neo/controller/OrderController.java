@@ -125,6 +125,7 @@ public class OrderController extends AppController {
                 
         if (action.equalsIgnoreCase("checkOut") && loggedIn.equalsIgnoreCase("no")){
                
+                
                String viewFile = "/views/index/checkout.jsp";
                request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
                request.getRequestDispatcher(viewFile).forward(request, response);
@@ -246,6 +247,7 @@ public class OrderController extends AppController {
             request.setAttribute("orders", listOrders());
             request.setAttribute("title","Orders");
         }
+        
         request.setAttribute("projects", project.listProjects());
         request.setAttribute("customers",listCustomers());
         

@@ -43,8 +43,7 @@
                             <h4>Customer Picture</h4>
                             <img src="/uploads/NeoForce/images/customer/${customer.photoPath}" class="img img-responsive img-thumbnail" />
                             
-                            <h4>Next of Kin Picture</h4>
-                            <img src="/uploads/NeoForce/images/customerKin/${customer.getKinPhotoPath()}" alt="No Preview Image" class="img img-responsive img-thumbnail" />
+                            
                             
                         </div>
                         
@@ -59,9 +58,12 @@
                                             <div class="col-md-9">
                                                 <h4>${customer.getFullName()}</h4>
                                             </div>
+                                
+                                            <c:if test="${sessionScope.user.getSystemUserTypeId() == 3}">
                                             <div class="col-md-3">
                                                 <a href="#" class="pull-right" onclick="customerProfile.showPasswordModal(event)" style="text-decoration: none; border-bottom: 1px dotted blue;">Change password</a>
                                             </div>
+                                            </c:if>
                                         </th>
                                     </tr>
                                 </thead>

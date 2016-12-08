@@ -33,9 +33,7 @@ and open the template in the editor.
                 padding-top: 0;
             }
             **/
-            label {
-                color: #fff;
-            }
+            
         </style>    
     </head>
     <body>
@@ -57,7 +55,7 @@ and open the template in the editor.
              <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" style="vertical-align: central">
                 
-                <div class="row" style="height: 20px; text-align: right; color:#fff;padding-right: 40px">
+                <div class="row" style="height: 20px; text-align: right; color:#fff;padding-top: 10px; margin-bottom: 10px">
                     <c:if test="${errors}">
                         <span><i class="fa fa-warning"></i> Incorrect login details, please select and fill all fields</span>
                     </c:if>
@@ -114,7 +112,7 @@ and open the template in the editor.
              </ul> 
              </c:if>
                 
-                <form class="navbar-form navbar-right" action="${pageContext.request.contextPath}/Login" method="POST">
+                <form class="navbar-form navbar-right" action="${pageContext.request.contextPath}/Login" method="POST" style="color:#fff">
                     <label>Login as </label>
                     <select name="usertype" id="usertype" class="form-control select2" style="">
                       <option value="0">--Select--</option>

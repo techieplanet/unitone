@@ -93,6 +93,8 @@ public class AgentController extends AppController {
     private HashMap<String, String> errorMessages = new HashMap<String, String>();
     //private SystemUser sessionUser;
     
+    private final static double  minimumBalance = 1000;
+    
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em;
     Gson gson = new GsonBuilder().create();
@@ -1313,7 +1315,8 @@ public class AgentController extends AppController {
         
         
         Map<String, String> agentDetails = new HashMap();
-        agentDetails.put("balance", String.format("%.2f",agentBalance));
+        agentDetails.put("balance", String.format("%.2f",agentBalance - minimumBalance));
+        agentDetails.put("ledgerBalance", String.format("%.2f",agentBalance));
         agentDetails.put("accountCode", acctCode);
         
         Map<String, Object> jsonMap = new HashMap();
@@ -1370,7 +1373,8 @@ public class AgentController extends AppController {
         }
         
         request.setAttribute("transactions",transactionListMap);
-        request.setAttribute("balance", agentBalance);
+        request.setAttribute("balance", agentBalance - minimumBalance);
+        request.setAttribute("ledgerBalance", agentBalance);
         request.setAttribute("accountCode", acctCode);
         
     }

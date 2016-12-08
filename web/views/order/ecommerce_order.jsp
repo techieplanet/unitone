@@ -34,8 +34,25 @@
       
       <div class="row">
       <div class="col-md-12">
-
-      <div>
+          
+          <c:if test="${sessionScope.user.getSystemUserTypeId() == 2}">
+          <div class="panel panel-default">
+              
+              <div class="panel-body">
+                  
+                  <label>Select Customer </label> <br />
+                  
+                  <select name="customer_id">
+                      <option value="">--Select a customer--</option>
+                      <c:forEach items="${customers}" var="customer">
+                          <option value="${customer.getCustomerId()}">${customer.getFullName()}</option>
+                      </c:forEach>
+                      
+                  </select>
+              </div>
+              
+          </div>
+          </c:if>
           
           <div class="panel panel-primary" id="cart_panel">
               <div class="panel-heading">
@@ -99,12 +116,10 @@
                   <a href="${pageContext.request.contextPath}/Project?action=listprojects"  class="btn btn-primary">Continue shopping</a>
               </div>
          </div>
-          
-      </div>
       
-  <div class="box box-default" id="paymentCheckout" style="display:none">
-      <input type="hidden" name="dataHidden" id="dataHidden" />
-      <div class="row" style="padding-top:10px;">
+         <div class="box box-default" id="paymentCheckout" style="display:none">
+         <input type="hidden" name="dataHidden" id="dataHidden" />
+         <div class="row" style="padding-top:10px;">
       
                         
         <div class="col-md-12" >
@@ -253,17 +268,20 @@
                               </div>
                              </fieldset>
                              </div>
-                            </div>
+         
+         </div>
                                  
-                            <div class="col-md-1"></div>
+        <div class="col-md-1"></div>
                     	
-                </div> <!--/.col-md-12 -->
-            </div> <!--/.row -->
-        </div>
+        </div> 
+     </div> 
+       </div>
                           
       </div><!-- /.row -->
-              
-      <input type="hidden" name="customer_id" id="id" value="${customerId}">
+      
+      <c:if test="${sessionScope.user.getSystemUserTypeId() == 3}">
+            <input type="hidden" name="customer_id" id="id" value="${customerId}">
+      </c:if>
       <input type="hidden" name="id" id="id" value="${customerId}">
       <input type="hidden" name="cartDataJson" id="cartDataJson" />
       

@@ -33,62 +33,87 @@
           
           <div class="panel panel-default paddingtop20 paddingbottom20">
               
-              <div class="table-responsive" id="printArea">
+            <div class="row">
+             <div class="col-md-8 col-md-offset-2">  
+                 
+                  <div class="table-responsive" id="printArea">
                   
                   <div class="row marginbottom20 padding10">
+                     <div class="col-md-12"> 
+                      <div class="panel panel-warning"> <!-- Panel starts here -->
                       
-                      <div class="col-md-12"><h4>Account Code : ${accountCode}</h4></div>
-                      <div class="col-md-12"><h4>Account Balance : <fmt:formatNumber value="${balance}" type="currency" currencySymbol="N" /></h4></div>
+                      <div class="panel-body">
+                          <div class="col-md-12"><b>Account Code</b> ${accountCode}</div>
+                          <div class="col-md-6"><b>Available Balance</b> <fmt:formatNumber value="${balance}" type="currency" currencySymbol="N" /></div>
+                          <div class="col-md-6"><b>Ledger Balance</b> <fmt:formatNumber value="${ledgerBalance}" type="currency" currencySymbol="N" /></div>
+                      </div>
+                      
+                      </div> <!-- Panel ends here -->
+                     </div>
                   </div>
                   
-                  <table class="table table-striped table-hover table-bordered" >
+                  <table class="table table-striped table-hover table-bordered table-condensed" >
                       
                       <thead>
                           <tr>
-                              <td>SN</td>
+                              <td>#</td>
                               <td class="text-center">Date</td>
-                              <td class="text-center">Amount</td>
-                              <td class="text-center">Type</td>
+                              <td class="text-center">Debit</td>
+                              <td class="text-center">Credit</td>
                           </tr>
                       </thead>
                       
                       <tbody>
                           
+                          <c:set var="totalCredit" value="0" />
+                          <c:set var="totalDebit" value="0" />
+                          
                           <c:forEach items="${transactions}" var="transaction" varStatus="pointer">
+                              
+                              <c:if test='${transaction["type"] eq "Credit"}'> 
+                                  <c:set var="creditAmount" value="${transaction['amount']}"  />
+                                  <c:set var="totalCredit" value="${transaction['amount'] + totalCredit}" />
+                              </c:if>
+                              <c:if test='${transaction["type"] eq "Dedit"}'> 
+                                  <c:set var="debitAmount" value="${transaction['amount']}" />
+                                  <c:set var="totalDedit" value="${transaction['amount'] + totalDedit}" />
+                              </c:if>
+                              
+                              
                               
                               <tr>
                                   <td>${pointer.count}</td>
                                   <td class="text-center">${transaction['date']}</td>
-                                  <td class="text-right"><fmt:formatNumber value='${transaction["amount"]}' type="currency" currencySymbol="N" /></td>
-                                  
-                                  <c:if test='${transaction["type"] eq "Credit"}'>  
-                                      <td class="text-center text-green">
-                                          ${transaction["type"]}
-                                      </td>
-                                  </c:if>
-                                  <c:if test='${transaction["type"] eq "Debit"}'>  
-                                      <td class="text-center text-red">
-                                          ${transaction["type"]}
-                                      </td>
-                                  </c:if>
-                                      
-                                  
+                                  <td class="text-right"><fmt:formatNumber value="${debitAmount}" type="currency" currencySymbol="N" /></td>
+                                  <td class="text-right"><fmt:formatNumber value="${creditAmount}" type="currency" currencySymbol="N" /></td> 
                               </tr>
                               
                           </c:forEach>
                           
                       </tbody>
+                      <tfoot>
+                          <tr>
+                              <td colspan="2" class="text-center"><b>Total</b></td>
+                              <td><fmt:formatNumber value="${totalDedit}" type="currency" currencySymbol="N" /></td>
+                              <td style="text-align: right"><fmt:formatNumber value="${totalCredit}" type="currency" currencySymbol="N" /></td>
+                              
+                          </tr>
+                      </tfoot>
                       
                   </table>
                   
                   
               </div>
+                              
               
-              <div class="row padding30">
-                      <div class="col-md-12">
-                          <button class="btn btn-primary" onclick="agentHistory.printAccountStatement()"><i class="fa fa-print"></i> Print</button>
-                      </div>
-              </div>
+                  <div class="margintop10">
+                        <button class="btn btn-primary" onclick="agentHistory.printAccountStatement()"><i class="fa fa-print"></i> Print</button>
+                  </div> 
+              
+             </div>
+                              
+            </div>
+              
               
           </div>
           

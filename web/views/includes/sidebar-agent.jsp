@@ -8,7 +8,7 @@
                   <!-- Optionally, you can add icons to the links -->
                   
                   <li class="<c:out  value='${sideNav eq "Dashboard" ? "active":""}' />""><a href="${pageContext.request.contextPath}/Dashboard"><i class="fa fa-tachometer"></i> <span>Dashboard</span></a></li>
-                  <li class="<c:out  value='${sideNav eq "Project" ? "active":""}' />""><a href="${pageContext.request.contextPath}/Project"><i class="fa fa-home"></i> <span>Projects</span></a></li>
+                  <li class="<c:out  value='${sideNav eq "Project" ? "active":""}' />""><a href="${pageContext.request.contextPath}/Project?action=listprojects"><i class="fa fa-home"></i> <span>Projects</span></a></li>
                   
                   
 

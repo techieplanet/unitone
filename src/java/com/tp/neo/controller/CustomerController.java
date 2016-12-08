@@ -525,9 +525,14 @@ public class CustomerController extends AppController  {
                 em.close();
                 emf.close();
                 
+                
+                String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+                request.setAttribute("customerImageAccessDir", imageAccessDirPath + "/customer");
+                request.setAttribute("customerKinImageAccessDir", imageAccessDirPath + "/customerKin");
                 request.setAttribute("success", true);
                 request.setAttribute("customer", customer);
                 request.getRequestDispatcher("/views/customer/update.jsp").forward(request, response);
+                
                 //response.sendRedirect("Customer?action=edit&customerId="+customer.getCustomerId());
                 
         } catch (PropertyException ex) {
@@ -679,6 +684,12 @@ public class CustomerController extends AppController  {
         
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Customer");
+        
+        
+        String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+        request.setAttribute("customerImageAccessDir", imageAccessDirPath + "/customer");
+        request.setAttribute("customerKinImageAccessDir", imageAccessDirPath + "/customerKin");
+        
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -941,10 +952,15 @@ public class CustomerController extends AppController  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+        String queryString = (sessionUser.getSystemUserTypeId() == 1) ? "ProductOrder.findByALLCurrentPayingCustomer" : "ProductOrder.findByCurrentPayingCustomer";
         
-        Query JPQL = em.createNamedQuery("ProductOrder.findByCurrentPayingCustomer");
-        JPQL.setParameter("agent",agent);
+        Query JPQL = em.createNamedQuery(queryString);
+        
+        if(sessionUser.getSystemUserTypeId() == 2){
+            Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+            JPQL.setParameter("agent",agent);
+        }
+        
         List<Customer> customers = JPQL.getResultList();
         
         em.close();
@@ -957,10 +973,15 @@ public class CustomerController extends AppController  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-         Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+        String queryString = (sessionUser.getSystemUserTypeId() == 1) ? "ProductOrder.findByALLCompletedPaymentCustomer" : "ProductOrder.findByCompletedPaymentCustomer";
         
-        Query JPQL = em.createNamedQuery("ProductOrder.findByCompletedPaymentCustomer");
-        JPQL.setParameter("agent",agent);
+        Query JPQL = em.createNamedQuery(queryString);
+        
+        if(sessionUser.getSystemUserTypeId() == 2){
+            Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+            JPQL.setParameter("agent",agent);
+        }
+        
         List<Customer> customers = JPQL.getResultList();
         
         em.close();
@@ -1113,8 +1134,11 @@ public class CustomerController extends AppController  {
            map.put("depositorName", l.getDepositorName() != null ? l.getDepositorName() : "");
            map.put("depositorAcctName", l.getOriginAccountName() != null ? l.getOriginAccountName() : "");
            map.put("depositorAcctNo", l.getOriginAccountNumber() != null ? l.getOriginAccountNumber() : "");
+           map.put("transactionId", l.getTransactionId() != null ? l.getTransactionId(): "");
            
            String paymentMode = "";
+           String status = "";
+           
            short mode = l.getPaymentMode();
            
            switch(mode){
@@ -1128,9 +1152,19 @@ public class CustomerController extends AppController  {
                         break;
            }
            
+           short s = l.getApprovalStatus();
+           
+           switch(s){
+               case 0 : status = "pending";
+                        break;
+               case 1 : status = "approved";
+                        break;
+               default: status = "declined";
+           }
+           
            map.put("paymentMode", paymentMode);
+           map.put("status", status);
            map.put("companyAcctName", l.getCompanyAccountId().getAccountName());
-           map.put("status", ((Short)l.getApprovalStatus()).toString());
            
            LodgementListMap.add(map);
        }

@@ -66,13 +66,21 @@
                                 <td><c:out value="${customer.city}" /></td>
                                 <td><c:out value="${customer.state}" /></td>
                               
-                                <td>
+                                <td style="width:100px">
                                     <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}">
                                      <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
+                                     
+                                    </c:if>
+                                    
+                                     <c:if test="${sessionScope.user.getSystemUserTypeId() <= 2}">
+                                        <a class="btn btn-primary btn-xs" href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${customer.customerId}" role="button"><i class="fa fa-user"></i> </a>
+                                        <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
+                                     </c:if>
+                                     
+                                     <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}"> 
                                      <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
                                     </c:if>
                                     
-                                     <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -147,7 +155,9 @@
                                 <td>Depositor Acct Name</td>
                                 <td>Depositor Acct No</td>
                                 <td>Payment Mode</td>
+                                <td>Teller/Transaction ID</td>
                                 <td>Date</td>
+                                <td>Status</td>
                                 <td>Amount</td>
                             </tr>
                         </thead>
@@ -162,13 +172,12 @@
                 
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
-              <button id="ok" type="button" onclick="" class="btn btn-primary">OK</button>
-            </div>
+              <button type="button" class="btn btn-primary pull-right" data-dismiss="modal">Ok</button>
           </div><!-- /.modal-content -->
+          
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
-      
+      </div>
 
       
 <!-- Include the footer -->
@@ -230,7 +239,9 @@
                   tr += "<td>" + lodgements[k].depositorAcctName + "</td>";
                   tr += "<td>" + lodgements[k].depositorAcctNo + "</td>";
                   tr += "<td>" + lodgements[k].paymentMode + "</td>";
+                  tr += "<td>" + lodgements[k].transactionId + "</td>";
                   tr += "<td>" + lodgements[k].date + "</td>";
+                  tr += "<td>" + lodgements[k].status + "</td>";
                   tr += "<td>" + accounting.formatMoney(lodgements[k].amount,"N",2,",",".") + "</td>";
                   
                   tr += "</tr>";
