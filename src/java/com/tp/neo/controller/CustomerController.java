@@ -941,10 +941,18 @@ public class CustomerController extends AppController  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
         
-        Query JPQL = em.createNamedQuery("ProductOrder.findByCurrentPayingCustomer");
-        JPQL.setParameter("agent",agent);
+        
+        String queryString = (sessionUser.getSystemUserTypeId() == 1) ? "ProductOrder.findByALLCurrentPayingCustomer" : "ProductOrder.findByCurrentPayingCustomer";
+        
+        Query JPQL = em.createNamedQuery(queryString);
+        
+        if(sessionUser.getSystemUserTypeId() == 2){
+            Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+            JPQL.setParameter("agent",agent);
+        }
+        
+        
         List<Customer> customers = JPQL.getResultList();
         
         em.close();
@@ -957,10 +965,14 @@ public class CustomerController extends AppController  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-         Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+        String queryString = (sessionUser.getSystemUserTypeId() == 1) ? "ProductOrder.findByALLCompletedPaymentCustomer" : "ProductOrder.findByCompletedPaymentCustomer";
         
-        Query JPQL = em.createNamedQuery("ProductOrder.findByCompletedPaymentCustomer");
-        JPQL.setParameter("agent",agent);
+        Query JPQL = em.createNamedQuery(queryString);
+        
+        if(sessionUser.getSystemUserTypeId() == 2){
+            Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
+            JPQL.setParameter("agent",agent);
+        }
         List<Customer> customers = JPQL.getResultList();
         
         em.close();

@@ -10,7 +10,7 @@ and open the template in the editor.
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <html>
     <head>
-        <title>Realty Point</title>
+        <title>NEOFORCE</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
@@ -33,9 +33,7 @@ and open the template in the editor.
                 padding-top: 0;
             }
             **/
-            label {
-                color: #fff;
-            }
+            
         </style>    
     </head>
     <body>
@@ -50,7 +48,7 @@ and open the template in the editor.
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-                <a class="navbar-brand" href="#" style="color:#fff"><h3>RealtyPoint Limited</h3></a>
+                <a class="navbar-brand" href="#" style="color:#fff"><h3>NEOFORCE</h3></a>
             </div>
             
             
@@ -114,7 +112,7 @@ and open the template in the editor.
              </ul> 
              </c:if>
                 
-                <form class="navbar-form navbar-right" action="${pageContext.request.contextPath}/Login" method="POST">
+                    <form class="navbar-form navbar-right" action="${pageContext.request.contextPath}/Login" method="POST" style="color:#fff">
                     <label>Login as </label>
                     <select name="usertype" id="usertype" class="form-control select2" style="">
                       <option value="0">--Select--</option>
