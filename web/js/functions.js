@@ -17,9 +17,14 @@ var cartArray = []; // holds cart item objects
         $("#pwCash").hide();
         $("#paymentCheckout").hide();
         $("#pwBankTransfer").hide();
-        setTimeout(function(){
-   agreementStatusChecked();
-}, 450);
+        
+        var userType = $("#agent_reg_usertypeId").val();
+        
+        if(userType != null && userType == 2){
+            setTimeout(function(){
+               agreementStatusChecked();
+            }, 450);
+        }
        
         calculateSum();
     });
