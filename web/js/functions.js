@@ -17,9 +17,14 @@ var cartArray = []; // holds cart item objects
         $("#pwCash").hide();
         $("#paymentCheckout").hide();
         $("#pwBankTransfer").hide();
-        setTimeout(function(){
-   agreementStatusChecked();
-}, 450);
+        
+        var userType = $("#agent_reg_usertypeId").val();
+        
+        if(userType != null && userType == 2){
+            setTimeout(function(){
+               agreementStatusChecked();
+            }, 450);
+        }
        
         calculateSum();
     });
@@ -355,7 +360,7 @@ function addToCart(event){
   var cartItemObject = dataArray;
   var jsonData = JSON.stringify(dataArray);
   
-  var id = $('#productCart tr:last').attr('id'); // Get the id of the last row in the cart table
+  var id = $('#productCart tbody tr:last').attr('id'); // Get the id of the last row in the cart table
   
   if(id == null){
       id = 0;
@@ -972,8 +977,8 @@ function monthlyPayCalculator(){
     var payLeft = productAmount - productMinimumInitialAmount;
     $("#amountLeft").val(payLeft);
     var monthlyPay = payLeft / productMaximumDuration;
-    $("#productMinimumMonthlyPayment").val(monthlyPay);
-    $("#monthlyPayPerUnit").text(monthlyPay * 1);
+    $("#productMinimumMonthlyPayment").val(monthlyPay.toFixed(2));
+    $("#monthlyPayPerUnit").text((monthlyPay * 1).toFixed(2));
     $("#monthlyPayPerQuantity").text(monthlyPay * quantity);
     calculateAmountToPay();
 }

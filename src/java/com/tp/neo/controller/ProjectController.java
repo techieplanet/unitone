@@ -194,12 +194,12 @@ public class ProjectController extends AppController {
             removeFromCart(request, response);
             return;
         }
-        else if(sessionUser.getSystemUserTypeId() == 3 && action.equalsIgnoreCase("listprojects")){
+        else if(sessionUser.getSystemUserTypeId() >= 2 && action.equalsIgnoreCase("listprojects")){
             
             viewFile = ECOMMERCE;
             request.setAttribute("projects", listProjects());
         }
-        else if(sessionUser.getSystemUserTypeId() == 3 && action.equalsIgnoreCase("listunits")){
+        else if(sessionUser.getSystemUserTypeId() >= 2 && action.equalsIgnoreCase("listunits")){
             
             viewFile = ECOMMERCE_UNITS;
             request.setAttribute("projectUnits", getUnits(request));

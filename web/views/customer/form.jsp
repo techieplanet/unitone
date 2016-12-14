@@ -21,18 +21,15 @@
 
  <c:if test='${userTypeId != null && action.equals("new") && userTypeId == "1" }'>
  <div class="row margin-bottom" id="agentListContainer">
-     
-     <section class="content-header">
-         
-         
-         <div class="box">
-                <div class="box-header">
-                  <h3 class="box-title block">
-                      Select an agent
-                  </h3>
+    <div class="col-md-12">   
+         <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h2 class="panel-title">
+                      <b>Select an agent</b>
+                  </h2>
                 </div><!-- /.box-header -->
                 
-                 <div class="box-body">
+                 <div class="panel-body" id="agentListPanelBody ">
                   <table id="agentList" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
@@ -71,12 +68,15 @@
                     
                     </tfoot>
                   </table>
-                  <div><span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span></div>
-                </div><!-- /.box-body -->
-              </div><!-- /.box -->
-         
-     </section>
-     
+                </div><!-- /.panel-body -->
+                
+                <div class="panel-footer">
+                    <span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span>
+                </div>
+                
+          </div>
+  
+    </div>
  </div>
                                 
  <div class="row" id="agentSpinnerContainer" style='display:none'>
@@ -415,26 +415,28 @@
                             </div>
                             </div>
                             <div class="col-md-12">
-                                <div  class="row">
-                             <div class="col-md-4" >
+                            <div  class="row">
+                                 <div class="col-md-4" >
                                     <div class="row" >
-                            <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
-                              <label for="customerKinPhoto" style="">Next of Kin Picture</label>
-                              <c:if test="${customer.customerId != ''}"> 
-                               <img <c:if test="${customer.kinPhotoPath != null && customer.kinPhotoPath != 'default'}"> src="/uploads/NeoForce/images/customerKin/${customer.kinPhotoPath}" </c:if>
-                               <c:if test="${customer.photoPath == 'default'  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"
-                                </c:if>
-                                class="img-responsive text-center" width="50.33333333%"/>
-                                </c:if>
-                               <input type="file" class="form-control" id="customerKinPhoto" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" />
-                               <input type="hidden" name="customerKinPhotoHidden" 
-                           <c:if test="${customerKinPhotoHidden == null && customer.kinPhotoPath==null}"> value=""
-                    </c:if><c:if test="${customerKinPhotoHidden != null}"> value="${customerKinPhotoHidden}"
-                    </c:if> <c:if test="${customer.kinPhotoPath != null}"> value="${customer.kinPhotoPath}"
-                    </c:if> />
-                            </div>
-                                </div>
-                            </div>
+                                        <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
+
+                                          <div class="btn-group btn-group-xs">
+                                              <label for="customerKinPhoto" style="display:block">Customer Kin Photo</label>
+                                              <div class="btn btn-primary">
+                                                  <input type="file" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" id="customerKinPhoto" >
+                                                  <input type="hidden" name="customerKinPhotoHidden" 
+                                                      <c:if test="${customerKinPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                                      <c:if test="${customerKinPhotoHidden != null}"> value="${customerKinPhotoHidden}"</c:if> 
+                                                      <c:if test="${customer.kinPhotoPath != null}"> value="${customer.kinPhotoPath}"</c:if> 
+                                                  />
+                                              </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                 </div>
+                                  
+                                  
                                     <div class="col-md-2" style="padding-right:50% !important;"></div>
                                 <div class="col-md-6 " >
                                     <div class="row" >
@@ -658,6 +660,9 @@
                                 
               <div class="col-md-12" >
                 <div class="row" >
+                  
+                 <div class="col-md-12">   
+                    
                  <table id="productCart" class="table table-bordered table-striped table-hover" style="text-align:right !important;">
                     <thead>
                       <tr>
@@ -671,7 +676,7 @@
                         <th>Monthly Pay</th>
                         <th>Transaction Deduction</th>
                         
-                        <th>Action</th>
+                        <th style="width: 80px">Action</th>
                         
                       </tr>
                     </thead>
@@ -692,22 +697,9 @@
                     </tfoot>
                    
                   </table>
-                                    
-                                    
-                 <!-- 
-                   ***************************
-                   Checkout Button starts Here
-                   ***************************
-                 -->
-                 
-                 
-                 <!--
-                  ****************************
-                    Checkout Button ends Here
-                  ****************************
-                 -->
-                     </div>
-                   </div>  
+                 </div>
+                </div>
+               </div>  
                    <div class="col-md-2 pull-right">
                      <div class="form-group">
                         <a href="#" class="btn" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i>Checkout</a>

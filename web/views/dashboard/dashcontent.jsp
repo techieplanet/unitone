@@ -8,6 +8,21 @@
             
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
+              <div class="small-box bg-blue">
+                <div class="inner">
+                  <h3><c:out value="${totalOutstanding}" /></h3>
+                  <p class="bold">TOTAL OUTSTANDING PAYMENTS</p>
+                </div>
+                <div class="icon">
+                  <i class="fa fa-cart-plus"></i>
+                </div>
+                <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
+                <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
+              </div>
+            </div><!-- ./col -->
+    
+            <div class="col-lg-3 col-xs-6">
+              <!-- small box -->
               <div class="small-box bg-green">
                 <div class="inner">
                     <h3><c:out value="${totalDue}" /></h3>
@@ -21,15 +36,16 @@
               </div>
             </div><!-- ./col -->
             
+            
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
-              <div class="small-box bg-blue">
+              <div class="small-box bg-red">
                 <div class="inner">
-                  <h3><c:out value="${totalOutstanding}" /></h3>
-                  <p class="bold">TOTAL OUTSTANDING PAYMENTS</p>
+                    <h3><c:out value="${totalStockValue}" /></h3>
+                  <p class="bold">TOTAL STOCK VALUE</p>
                 </div>
                 <div class="icon">
-                  <i class="fa fa-cart-plus"></i>
+                  <i class="ion ion-pie-graph"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
                 <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
@@ -45,21 +61,6 @@
                 </div>
                 <div class="icon">
                   <i class="fa fa-location-arrow"></i>
-                </div>
-                <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
-              </div>
-            </div><!-- ./col -->
-          
-            <div class="col-lg-3 col-xs-6">
-              <!-- small box -->
-              <div class="small-box bg-red">
-                <div class="inner">
-                    <h3><c:out value="${totalStockValue}" /></h3>
-                  <p class="bold">TOTAL STOCK VALUE</p>
-                </div>
-                <div class="icon">
-                  <i class="ion ion-pie-graph"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
                 <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>

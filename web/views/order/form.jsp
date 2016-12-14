@@ -1,20 +1,18 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <c:if test="${userType != null && userType == 1 }">
- <div class="row margin-bottom" id="agentListContainer">
-     
-     <section class="content-header">
-         
-         
-         <div class="box">
-                <div class="box-header">
-                  <h3 class="box-title block">
-                      Select an agent
-                  </h3>
-                </div><!-- /.box-header -->
+ <div class="row">
+ <div class="col-md-12 margin-bottom" id="agentListContainer">
+
+         <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h2 class="panel-title">
+                      <b>Select an agent</b>
+                  </h2>
+                </div><!-- /.panel-header -->
                 
-                 <div class="box-body">
-                  <table id="agentList" class="table table-bordered table-striped table-hover">
+                 <div class="panel-body" id="agentListPanelBody">
+                 <table id="agentList" class="table table-bordered table-striped table-hover" >
                     <thead>
                       <tr>
                         <th>Photo</th>
@@ -52,13 +50,16 @@
                     
                     </tfoot>
                   </table>
-                  <div><span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span></div>
-                </div><!-- /.box-body -->
-        </div><!-- /.box -->
-         
-     </section>
+                </div><!-- /.panel-body -->
+                
+                <div class="panel-footer">
+                    <span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span>
+                </div>
+                
+        </div>
      
  </div>
+ </div>    
                                 
  <div class="row" id="agentSpinnerContainer" style='display:none'>
      <div class="spinner" >
@@ -104,7 +105,16 @@
      
  </div>
                                 
-</c:if>                                   
+</c:if>  
+     
+     
+ <!--
+
+ Product Order Cart Form / Customer Registration starts
+ 
+ -->
+ 
+     
  <div class="row">
     
            <div class="col-md-12">
@@ -238,7 +248,7 @@
                                     	<div class="form-group">
                                             <label for="productMinimumInitialAmount">Initial Amount(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
-                                                min initial amt /unit: <span id="initialAmountPerUnit"></span><br/>
+                                                Min initial amt /unit: <span id="initialAmountPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="minInitialAmountSpan"></span><br/>
                                             </span>
                                             <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()">
@@ -261,7 +271,7 @@
                                     	<div class="form-group">
                                             <label for="productMaximumDuration">Payment Duration</label>
                                             <span id="amountPerUnit" class="productSpan">
-                                                max payment duration /unit: <span id="payDurationPerUnit"></span><br/>
+                                                Max payment duration /unit: <span id="payDurationPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="payDurationPerQuantity"></span>
                                             </span>
                                             <div class="row">
@@ -279,7 +289,7 @@
                                     	<div class="form-group">
                                             <label for="productMinimumMonthlyPayment">Monthly Payment(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
-                                                min monthly pay / unit: <span id="monthlyPayPerUnit"></span><br/>
+                                                Min monthly pay / unit: <span id="monthlyPayPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="monthlyPayPerQuantity"></span>
                                             </span>
                                             <input type="text" class="form-control" id="productMinimumMonthlyPayment" name="productMinimumMonthlyPayment" style="width: 100%;" onKeyup="calculateDurationFromMonthlyPay()">

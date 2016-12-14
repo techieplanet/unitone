@@ -31,10 +31,10 @@
                                 <li><a href="${pageContext.request.contextPath}/Customer?action=new">New Customer</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=new">Currently Paying</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=current">Currently Paying</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=new">Completed Payment</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=completed">Completed Payment</a></li>
                             </c:if>
                           </ul>
                       </li>

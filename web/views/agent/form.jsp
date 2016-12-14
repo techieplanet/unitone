@@ -392,6 +392,7 @@
                             </div>
                                 </fieldset>
                     </div>
+                    <c:if test="${sessionScope.user.getSystemUserTypeId() == 2}">
                             <c:if test="${agent.agentId==null || agent.agentId==''}">
                             <div class="col-md-12" style="text-align:center !important;">
                                 Do you agree to the terms of the <a href="#" onclick="$('#agreementStatusModal').modal();">agreement document?</a>
@@ -399,6 +400,7 @@
                             <input type="radio" name="agreement_document" id="decline"  onclick="agreementStatusChecked(this)" value="decline"/>I disagree
                             <br/><br/><br/>
                             </c:if>
+                    </c:if>
                             <!--
 </div>-->
                          </div>
@@ -417,6 +419,7 @@
            
           </div>   <!-- /.row -->
           
+          <input type="hidden" value="${sessionScope.user.getSystemUserTypeId()}" id="agent_reg_usertypeId" />
           
              <div class="modal fade" id="agreementStatusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
          <div class="vertical-alignment-helper">

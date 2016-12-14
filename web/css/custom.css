@@ -167,7 +167,7 @@ and open the template in the editor.
     color: #000000;
 }
 
-#agentListContainer {
+#agentListPanelBody {
     height: 350px;
     overflow-y: auto;
 }
