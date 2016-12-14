@@ -66,13 +66,22 @@
                                 <td><c:out value="${customer.city}" /></td>
                                 <td><c:out value="${customer.state}" /></td>
                               
-                                <td>
+                                <td style="width:130px">
                                     <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}">
                                      <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
+                                     
+                                    </c:if>
+                                    
+                                     <c:if test="${sessionScope.user.getSystemUserTypeId() <= 2}">
+                                        <a class="btn btn-primary btn-xs" href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${customer.customerId}" role="button"><i class="fa fa-user"></i> </a>
+                                        <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button"><i class="fa fa-cart-plus"></i> </a>
+                                        <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
+                                     </c:if>
+                                     
+                                     <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}"> 
                                      <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
                                     </c:if>
                                     
-                                     <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -136,39 +145,31 @@
             <div class="modal-body">
                 
                 <h3 id="customerName"></h3>
+                
+                <div class="panel-group" id="lodgement-accordion" role="tablist" aria-multiselectable="true">
+                    
+                    
+                </div>
+                
+                <!--
                 <div class="table-responsive">
                     
-                    <table class="table table-striped table-hover" id="customer_lodgement_table">
-                        
-                        <thead>
-                            <tr>
-                                <td>SN</td>
-                                <td>Depositor Name</td>
-                                <td>Depositor Acct Name</td>
-                                <td>Depositor Acct No</td>
-                                <td>Payment Mode</td>
-                                <td>Date</td>
-                                <td>Amount</td>
-                            </tr>
-                        </thead>
-                        
-                        <tbody>
-                            
-                        </tbody>
+                    <table class="" id="customer_lodgement_table">
+                       
                         
                     </table>
                     
                 </div>
+                -->
                 
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
-              <button id="ok" type="button" onclick="" class="btn btn-primary">OK</button>
-            </div>
+              <button type="button" class="btn btn-primary pull-right" data-dismiss="modal">Ok</button>
           </div><!-- /.modal-content -->
+          
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
-      
+      </div>
 
       
 <!-- Include the footer -->
@@ -202,7 +203,7 @@
                       data : {id : id},
                       success : function(data){
                           
-                          console.log(data);
+                          
                           
                           customer.prepareLodgementTable(JSON.parse(data));
                       }
@@ -210,12 +211,29 @@
                   
               },
               
+              
+             getCustomerOrders : function(id,evt){
+                evt.preventDefault();
+                
+                $.ajax({
+                      url : '${pageContext.request.contextPath}/Customer?action=customer_orders',
+                      method : "GET",
+                      data : {id : id},
+                      success : function(data){
+                          
+                         
+                          
+                          customer.prepareLodgementTable(JSON.parse(data));
+                      }
+                  });
+             },
+              
              prepareLodgementTable : function(data){
              
                 var lodgements = data.lodgements;
                 var customerName = data.customerName;
                 
-                $("#customer_lodgement_table tbody").html("");
+                $("#lodgement-accordion").html("");
                 
                 var counter = 1;
                 
@@ -223,23 +241,119 @@
                 
                 for(var k in lodgements){
                     
-                  var tr = "<tr>";
                   
-                  tr += "<td>" + counter + "</td>";
-                  tr += "<td>" + lodgements[k].depositorName + "</td>";
-                  tr += "<td>" + lodgements[k].depositorAcctName + "</td>";
-                  tr += "<td>" + lodgements[k].depositorAcctNo + "</td>";
-                  tr += "<td>" + lodgements[k].paymentMode + "</td>";
-                  tr += "<td>" + lodgements[k].date + "</td>";
-                  tr += "<td>" + accounting.formatMoney(lodgements[k].amount,"N",2,",",".") + "</td>";
+                  var panel = document.createElement("div");
+                  panel.setAttribute("class","panel panel-primary");
                   
-                  tr += "</tr>";
+                  var panelHeader = document.createElement("div");
+                  panelHeader.setAttribute("class","panel-heading");
+                  panelHeader.setAttribute("role","tab");
+                  panelHeader.setAttribute("id","heading"+counter);
                   
-                  $("#customer_lodgement_table tbody").append(tr);
+            
+                  var panelTitle = document.createElement("h4");
+                  panelTitle.setAttribute("class","panel-title");
+                  
+                  var titleAnchor = document.createElement("a");
+                  titleAnchor.setAttribute("role","button");
+                  titleAnchor.setAttribute("data-toggle","collapse");
+                  titleAnchor.setAttribute("data-parent","#lodgement-accordion");
+                  titleAnchor.setAttribute("href","#collapse" + counter);
+                  titleAnchor.setAttribute("aria-expanded","true");
+                  titleAnchor.setAttribute("aria-controls","collapse" + counter);
+                  
+                  var anchorTextNode = document.createTextNode("Lodgement date : " + lodgements[k].date + " --- Amount : " + accounting.formatMoney(lodgements[k].amount,"N",2,",","."));
+                  
+                  titleAnchor.appendChild(anchorTextNode);
+                  panelTitle.appendChild(titleAnchor);
+                  panelHeader.appendChild(panelTitle);
+                  
+                  
+                  //Panel Collapse
+                  var panelCollapse = document.createElement("div");
+                  panelCollapse.setAttribute("id","collapse" + counter);
+                  if(counter == 1){
+                      panelCollapse.setAttribute("class","panel-collapse collapse in");
+                  }
+                  else{
+                      panelCollapse.setAttribute("class","panel-collapse collapse");
+                  }
+                  
+                  panelCollapse.setAttribute("role","tabpanel");
+                  panelCollapse.setAttribute("aria-labelledby","heading"+counter);
+                  
+                  //Panel Body
+                  var panelBody = document.createElement("div");
+                  panelBody.setAttribute("class","panel-body");
+                  
+                  panelCollapse.appendChild(panelBody);
+                  panel.appendChild(panelHeader);
+                  panel.appendChild(panelCollapse);
+                  
+                  panelCollapse.appendChild(panelBody);
+                  
+                  var table = "<table class='lodgment-tt-table'>";
+                  
+                  table += "<thead><tr data-tt-parent-id='" + k + o + "' data-tt-id='header" + k + "'>";
+                  table += "<th> Project </th>";
+                  table += "<th> Title </th>";
+                  table += "<th> Qty </th>";
+                  table += "<th> Total paid </th>";
+                  table += "<th> Balance </th>";
+                  table += "<th> Start date </th>";
+                  table += "<th> Payment Stage </th>";
+                  table += "<th> Completion Date </th>";
+                  table += "</tr></thead>";
+                  
+                  var orders = lodgements[k].Orders;
+                  
+                  var orderCount = 1;
+                  for(var o in orders){
+                      
+                      items = orders[o];
+                      
+                      var trParent = "<tr data-tt-id='" + k + o + "'>";
+                          trParent += "<td colspan=8> Order " + orderCount +   " -  Order value : " + accounting.formatMoney(items[0].orderValue,"N",2,",",".") + "</td>";
+                          trParent += "</tr>";
+                          
+                          
+                          
+                      for(var i in items){
+                          
+                          var trchild = "<tr data-tt-id='c" + k + o + + i + "' data-tt-parent-id='" + k + o + "'>";
+                          
+                          trchild += "<td style='text-align:left;padding-left:0px'>" + items[i].project_name + "</td>";
+                          trchild += "<td style='text-align:left'>" + items[i].title + "</td>";
+                          trchild += "<td>" + items[i].quantity + "</td>";
+                          trchild += "<td>" + accounting.formatMoney(items[i].total_paid,"N",2,",",".") + "</td>";
+                          trchild += "<td>" + accounting.formatMoney(items[i].balance,"N",2,",",".") + "</td>";
+                          trchild += "<td>" + items[i].startDate + "</td>";
+                          trchild += "<td>" + items[i].paymentStage + "</td>";
+                          trchild += "<td>" + items[i].completionDate + "</td>";
+                          
+                          
+                          trchild += "</tr>";
+                          
+                          trParent += trchild;
+                          
+                          //console.log("Child says : " + items[i].completionDate);
+                      }
+                      
+                      table += trParent;
+                      
+                      orderCount++;
+                  }
+                  
+                  table += "</table>";
+                  
+                  panelBody.innerHTML = table;
+                  
+                  document.getElementById("lodgement-accordion").appendChild(panel);
                   
                   counter++;
                 }
                 
+                $(".lodgment-tt-table").treetable({ expandable: true },true);
                 $("#customerLodgementsModal").modal({
                     backdrop : "static"
                 });

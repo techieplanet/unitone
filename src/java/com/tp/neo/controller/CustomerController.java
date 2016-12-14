@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.OrderItemHelper;
 import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.utils.AuthManager;
@@ -37,9 +38,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,6 +51,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
+import javax.persistence.TypedQuery;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -119,6 +123,8 @@ public class CustomerController extends AppController  {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+       
+                
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
         //Check if request is XMLHttpRequest
@@ -525,9 +531,14 @@ public class CustomerController extends AppController  {
                 em.close();
                 emf.close();
                 
+                
+                String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+                request.setAttribute("customerImageAccessDir", imageAccessDirPath + "/customer");
+                request.setAttribute("customerKinImageAccessDir", imageAccessDirPath + "/customerKin");
                 request.setAttribute("success", true);
                 request.setAttribute("customer", customer);
                 request.getRequestDispatcher("/views/customer/update.jsp").forward(request, response);
+                
                 //response.sendRedirect("Customer?action=edit&customerId="+customer.getCustomerId());
                 
         } catch (PropertyException ex) {
@@ -679,6 +690,12 @@ public class CustomerController extends AppController  {
         
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Customer");
+        
+        
+        String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+        request.setAttribute("customerImageAccessDir", imageAccessDirPath + "/customer");
+        request.setAttribute("customerKinImageAccessDir", imageAccessDirPath + "/customerKin");
+        
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -941,8 +958,7 @@ public class CustomerController extends AppController  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        
-        
+
         String queryString = (sessionUser.getSystemUserTypeId() == 1) ? "ProductOrder.findByALLCurrentPayingCustomer" : "ProductOrder.findByCurrentPayingCustomer";
         
         Query JPQL = em.createNamedQuery(queryString);
@@ -951,7 +967,6 @@ public class CustomerController extends AppController  {
             Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
             JPQL.setParameter("agent",agent);
         }
-        
         
         List<Customer> customers = JPQL.getResultList();
         
@@ -973,6 +988,7 @@ public class CustomerController extends AppController  {
             Agent agent = em.find(Agent.class,sessionUser.getSystemUserId());
             JPQL.setParameter("agent",agent);
         }
+        
         List<Customer> customers = JPQL.getResultList();
         
         em.close();
@@ -1114,19 +1130,22 @@ public class CustomerController extends AppController  {
        
        List<Map> LodgementListMap = new ArrayList();
        
-       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
+       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
        
        for(Lodgement l : lodgementList){
            
-           Map<String, String> map = new HashMap();
+           Map<String, Object> map = new HashMap();
            
            map.put("amount", String.format("%.2f", l.getAmount()));
            map.put("date", sdf.format(l.getLodgmentDate()));
            map.put("depositorName", l.getDepositorName() != null ? l.getDepositorName() : "");
            map.put("depositorAcctName", l.getOriginAccountName() != null ? l.getOriginAccountName() : "");
            map.put("depositorAcctNo", l.getOriginAccountNumber() != null ? l.getOriginAccountNumber() : "");
+           map.put("transactionId", l.getTransactionId() != null ? l.getTransactionId(): "");
            
            String paymentMode = "";
+           String status = "";
+           
            short mode = l.getPaymentMode();
            
            switch(mode){
@@ -1140,9 +1159,20 @@ public class CustomerController extends AppController  {
                         break;
            }
            
+           short s = l.getApprovalStatus();
+           
+           switch(s){
+               case 0 : status = "pending";
+                        break;
+               case 1 : status = "approved";
+                        break;
+               default: status = "declined";
+           }
+           
            map.put("paymentMode", paymentMode);
+           map.put("status", status);
            map.put("companyAcctName", l.getCompanyAccountId().getAccountName());
-           map.put("status", ((Short)l.getApprovalStatus()).toString());
+           map.put("Orders", getLodgementOrderItems(l.getId()));
            
            LodgementListMap.add(map);
        }
@@ -1164,6 +1194,82 @@ public class CustomerController extends AppController  {
        response.getWriter().flush();
        response.getWriter().close();
        
+    }
+    
+    
+    public List<List<Map>> getLodgementOrderItems(long lodgmentId){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        String sql = "SELECT OI " +
+                     " FROM OrderItem OI where OI.id in (select LI.item.id from LodgementItem LI where LI.lodgement.id = :lid)";
+        
+        TypedQuery<OrderItem> query =  em.createQuery(sql,OrderItem.class).setParameter("lid", lodgmentId);
+        
+        List<OrderItem> orderItemList = query.getResultList();
+        
+        Set<Long> set = new HashSet<Long>();
+        
+        for(OrderItem item : orderItemList){
+        
+            set.add(item.getOrder().getId());
+        
+        }
+        
+        Long[] orderId = set.toArray(new Long[set.size()]);
+        OrderItemHelper itemHelper = new OrderItemHelper();
+        
+        //Each list item represents an order containing List of OrderItem Map
+        List<List<Map>> groupedOrderItem = new ArrayList();
+        
+        for(Long oid : orderId){
+            
+           //check if order value has being set
+           boolean isOrderValueSet = false; 
+            
+           List<Map> mapList = new ArrayList();
+            
+            for(OrderItem item : orderItemList){
+               
+               if(oid == item.getOrder().getId()) {
+                   
+                   Map<String, String> map = new HashMap();
+                   Double total_paid = itemHelper.getTotalItemPaidAmount((List)item.getLodgementItemCollection());  
+                   
+                   if(!isOrderValueSet){
+                       map.put("orderValue", String.format("%.2f",itemHelper.getOrderValue(oid)));
+                       isOrderValueSet = true;
+                   }
+                   
+                   map.put("quantity", item.getQuantity().toString());
+                   map.put("initialDeposit", String.format("%.2f",item.getInitialDep()));
+                   map.put("cpu", String.format("%.2f",item.getUnit().getCpu()));
+                   map.put("title", item.getUnit().getTitle());
+                   map.put("discount", itemHelper.getOrderItemDiscount(item.getUnit().getDiscount(), item.getUnit().getCpu(), item.getQuantity()));
+                   map.put("total_paid", String.format("%.2f",total_paid));
+                   map.put("project_name", item.getUnit().getProject().getName());
+                   map.put("balance",itemHelper.getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
+                   map.put("completionDate",itemHelper.getCompletionDate(item, total_paid));
+                   map.put("paymentStage",itemHelper.getPaymentStage(item, total_paid));
+                   
+                   Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+                   cal.setTime(item.getCreatedDate());
+                   
+                   SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy");
+       
+                   String dateString = sdf.format(cal.getTime());
+                   
+                   map.put("startDate", dateString);
+                   
+                   mapList.add(map);
+               }
+            }
+            
+            groupedOrderItem.add(mapList);
+        }
+        
+        return groupedOrderItem; // return list of orderItem grouped by Order
     }
     
     /*TP: Getting the customer Id for public use*/

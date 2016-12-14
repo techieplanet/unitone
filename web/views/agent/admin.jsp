@@ -173,18 +173,24 @@
               <h4 class="modal-title">Account Statement</h4>
             </div>
             <div class="modal-body" id="printArea">
-                <p>Account Code : <span id="accountCode"></span></p>
-                <p>Account Balance : <span id="accountBalance"></span></p>
+                
+                
+                
+                <div class="row">
+                    <div class="col-md-12"><p><b>Account Code</b>  <span id="accountCode"></span></p></div>
+                    <div class="col-md-6"><p><b>Available Balance</b>  <span id="accountBalance"></span></p></div>
+                    <div class="col-md-6"><p><b>Ledger Balance</b>  <span id="ledgerBalance"></span></p></div>
+                </div>
                 
                 <div class="table-responsive">
                     
-                    <table class="table table-striped table-hover" id="account_statement_table">
+                    <table class="table table-striped table-hover table-bordered" id="account_statement_table">
                         <thead>
                             <tr>
-                                <td>SN</td>
+                                <td><b>#</b></td>
                                 <td>Date</td>
-                                <td>Amount</td>
-                                <td>Type</td>
+                                <td>Debit</td>
+                                <td>Credit</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -290,11 +296,13 @@
             
              var balance = accounting.formatMoney(jsonData.agentDetail.balance,"N",2,",",".");
              var accountCode = jsonData.agentDetail.accountCode;
+             var ledgerBalance = jsonData.agentDetail.ledgerBalance;
              
              var transactions = jsonData.transactions;
              
              $("#accountCode").text(accountCode);
              $("#accountBalance").text(accounting.formatMoney(balance,"N",2,",","."));
+             $("#ledgerBalance").text(accounting.formatMoney(ledgerBalance,"N",2,",","."));
              
              var count = 1;
              
@@ -307,12 +315,24 @@
                  var date = transactions[k].date;
                  var type = transactions[k].type;
                  
+                 var creditAmount = "";
+                 var debitAmount = "";
+                 
+                 console.log("Type : " + type);
+                 
+                 if(type === "credit"){
+                     creditAmount = amount;
+                 }
+                 else{
+                     debitAmount = amount;
+                 }
+                 
                  var tr = "<tr>";
                  
                  tr += "<td>" + count + "</td>";
                  tr += "<td>" + date + "</td>";
-                 tr += "<td>" + amount + "</td>";
-                 tr += "<td>" + type + "</td>";
+                 tr += "<td>" + debitAmount + "</td>";
+                 tr += "<td>" + creditAmount + "</td>";
                  
                  count++;
                  

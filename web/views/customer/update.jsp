@@ -69,8 +69,15 @@
                               <input type="text" name="email" id="email" class="form-control" value="${customer.getEmail()}" />
                           </div>
                           
+                          <div class="clearfix"></div>
+                          
                           <div class="col-md-4 form-group">
-                              <div class="btn-group btn-group-xs">
+                                
+                                <div>
+                                    <img width="150" height="150" src="${customerImageAccessDir}/${customer.getPhotoPath()}" class="img img-responsive img-thumbnail" />
+                                </div>
+                              
+                                <div class="btn-group btn-group-xs">
                                   <label for="customerPhoto" style="display:block">Customer Photo</label>
                                   <div class="btn btn-primary">
                                   <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
@@ -81,6 +88,7 @@
                           
                       </div>
                           
+                      <hr />
                           
                       <div class="row"> 
                           
@@ -169,6 +177,11 @@
                           </div>
                           
                           <div class="col-md-4 form-group">
+                              
+                              <div>
+                                    <img width="150" height="150" src="${customerKinImageAccessDir}/${customer.getKinPhotoPath()}" class="img img-responsive img-thumbnail" alt="No Preview Image" />
+                              </div>
+                              
                               <div class="btn-group btn-group-xs">
                                   <label for="customerKinPhoto" style="display:block">Customer Photo</label>
                                   <div class="btn btn-primary">

@@ -43,8 +43,7 @@
                             <h4>Agent Picture</h4>
                             <img src="${agentImageAccessDir}/${agent.photoPath}" class="img img-responsive img-thumbnail" />
                             
-                            <h4>Next of Kin Picture</h4>
-                            <img src="${agentKinImageAccessDir}/${agent.getKinPhotoPath()}" alt="No Preview Image" class="img img-responsive img-thumbnail" />
+                            
                             
                         </div>
                         
@@ -59,9 +58,12 @@
                                             <div class="col-md-9">
                                                 <h4>${agent.getFullName()}</h4>
                                             </div>
-                                            <div class="col-md-3">
-                                                <a href="#" class="pull-right" onclick="agentProfile.showPasswordModal(event)" style="text-decoration: none; border-bottom: 1px dotted blue;">Change password</a>
-                                            </div>
+                                            
+                                            <c:if test="${sessionScope.user.getSystemUserTypeId() == 2}">
+                                                <div class="col-md-3">
+                                                    <a href="#" class="pull-right" onclick="agentProfile.showPasswordModal(event)" style="text-decoration: none; border-bottom: 1px dotted blue;">Change password</a>
+                                                </div>
+                                            </c:if>
                                         </th>
                                     </tr>
                                 </thead>

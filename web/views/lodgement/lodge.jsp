@@ -87,11 +87,8 @@
          <div class="box box-solid">
              
              <div class="box-header with-border">
-                 <div class='col-md-6'>
+                 <div class='col-md-12'>
                     <h4>Customer Details</h4>
-                 </div>
-                 <div class='col-md-6'>
-                    <h4>Agent Details</h4>
                  </div>
              </div>
              
@@ -114,16 +111,6 @@
                          
                      </div>
                      
-                     <!-- Agents Details Box -->
-                     <div class="col-md-6">
-                         <div class="row">
-                             <div class="col-md-3"><img src="" id="agentImage" alt="No Image" class="img-thumbnail img-responsive"></div>
-                             <div class="col-md-9">
-                                 <span id="agentName"></span> <br />
-                                 <span id="agentPhone"></span> <br />
-                             </div>
-                         </div>
-                     </div>
                      
                  </div>
                  

@@ -297,6 +297,7 @@ public class DashboardHelper {
                 ProjectUnit unit = (ProjectUnit)unitDetail[0];
                 HashMap unitMap = new HashMap();
                 unitMap.put("unitName", unit.getTitle());
+                
                 if(totalUnitsSalesQuotaStock > 0)
                     unitMap.put("stockPercentage", (long)unitDetail[1] / totalUnitsSalesQuotaStock * 100);
                 else
@@ -305,6 +306,7 @@ public class DashboardHelper {
                     unitMap.put("valuePercentage", (double)unitDetail[2] / totalUnitsSalesQuotaValue * 100);
                 else
                     unitMap.put("valuePercentage", 0);
+
                 unitMapsList.add(unitMap);
             }
             
