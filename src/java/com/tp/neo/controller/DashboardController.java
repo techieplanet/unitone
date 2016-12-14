@@ -294,7 +294,7 @@ public class DashboardController extends AppController {
             switch(groupId){
                 case 1:
                     truncatedBy = "day";
-                    truncationResultFormat = "d-Mon-YYYY";
+                    truncationResultFormat = "dd-Mon-YYYY";
                     break;
                 case 2:
                     truncatedBy = "Month";
@@ -333,7 +333,7 @@ public class DashboardController extends AppController {
             switch(groupId){
                 case 1:
                     truncatedBy = "day";
-                    truncationResultFormat = "d-Mon-YYYY";
+                    truncationResultFormat = "dd-Mon-YYYY";
                     break;
                 case 2:
                     truncatedBy = "Month";
