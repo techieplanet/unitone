@@ -170,6 +170,34 @@
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
       </div>
+      
+      
+      <!--MODAL-->
+      <div class="modal fade" id="customerOrdersModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" style="width : 80% !important;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Customer Order's</h4>
+            </div>
+            <div class="modal-body">
+                
+                <h3 id="customerName"></h3>
+                
+                <div class="panel-group" id="orders-accordion" role="tablist" aria-multiselectable="true">
+                    
+                    
+                </div>
+                
+                
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary pull-right" data-dismiss="modal">Ok</button>
+          </div><!-- /.modal-content -->
+          
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+      </div>
 
       
 <!-- Include the footer -->
@@ -221,13 +249,115 @@
                       data : {id : id},
                       success : function(data){
                           
-                         
-                          
-                          customer.prepareLodgementTable(JSON.parse(data));
+                         customer.prepareOrderItemTable(JSON.parse(data));
+                      },
+                      error : function(xhr,code,text){
+                          console.log(xhr.responseText)
                       }
                   });
              },
-              
+             
+
+             prepareOrderItemTable : function(data){
+             
+                var orders = data;
+                
+                var counter = 1;
+                for(var k in orders){
+                    
+                    var items = orders[k].items;
+                    
+                    
+                      var panel = document.createElement("div");
+                      panel.setAttribute("class","panel panel-primary");
+
+                      var panelHeader = document.createElement("div");
+                      panelHeader.setAttribute("class","panel-heading");
+                      panelHeader.setAttribute("role","tab");
+                      panelHeader.setAttribute("id","heading"+counter);
+
+
+                      var panelTitle = document.createElement("h4");
+                      panelTitle.setAttribute("class","panel-title");
+
+                      var titleAnchor = document.createElement("a");
+                      titleAnchor.setAttribute("role","button");
+                      titleAnchor.setAttribute("data-toggle","collapse");
+                      titleAnchor.setAttribute("data-parent","#orders-accordion");
+                      titleAnchor.setAttribute("href","#collapse" + counter);
+                      titleAnchor.setAttribute("aria-expanded","true");
+                      titleAnchor.setAttribute("aria-controls","collapse" + counter);
+                      titleAnchor.style.display = "block"
+                   
+                      var anchorTextNode = document.createTextNode("Order #"+counter + " Date : " + orders[k].order_date);
+                      
+                      
+                      titleAnchor.appendChild(anchorTextNode);
+                      panelTitle.appendChild(titleAnchor);
+                      panelHeader.appendChild(panelTitle);
+                      
+                      
+                      //Panel Collapse
+                      var panelCollapse = document.createElement("div");
+                      panelCollapse.setAttribute("id","collapse" + counter);
+                      if(counter == 1){
+                          panelCollapse.setAttribute("class","panel-collapse collapse in");
+                      }
+                      else{
+                          panelCollapse.setAttribute("class","panel-collapse collapse");
+                      }
+
+                      panelCollapse.setAttribute("role","tabpanel");
+                      panelCollapse.setAttribute("aria-labelledby","heading"+counter);
+
+                      //Panel Body
+                      var panelBody = document.createElement("div");
+                      panelBody.setAttribute("class","panel-body");
+
+                      panelCollapse.appendChild(panelBody);
+                      panel.appendChild(panelHeader);
+                      panel.appendChild(panelCollapse);
+                      
+                      
+                      var table = "<table class='table table-hover'>";
+                      
+                      table += "<thead>";
+                      table += "<tr>";
+                      table += "<th> # </th>";
+                      table += "<th> Project Name </th>";
+                      table += "<th> Unit Name </th>";
+                      table += "<th> Cost per unit </th>";
+                      table += "<th> Qty </th>";
+                      table += "</tr>";
+                      table += "</thead>";
+                      var itemCount = 1;
+                      for(var k2 in items){
+                          
+                          var tr = "<tr>";
+                          
+                          tr += "<td>" + itemCount + "</td>"; 
+                          tr += "<td>" + items[k2].project_name + "</td>";
+                          tr += "<td>" + items[k2].unit_name + "</td>";
+                          tr += "<td>" + accounting.formatMoney(items[k2].cpu,"N",2,",",".") + "</td>";
+                          tr += "<td>" + items[k2].qty + "</td>";
+                          tr += "</tr>";
+                          table += tr;
+                          
+                          itemCount++;
+                      }
+                      
+                      panelBody.innerHTML = table;
+                      
+                      document.getElementById("orders-accordion").appendChild(panel)
+                      counter++;
+                }
+             
+                $("#customerOrdersModal").modal({
+                    backdrop : "static"
+                });
+             },
+
+
              prepareLodgementTable : function(data){
              
                 var lodgements = data.lodgements;
@@ -262,11 +392,50 @@
                   titleAnchor.setAttribute("aria-expanded","true");
                   titleAnchor.setAttribute("aria-controls","collapse" + counter);
                   
-                  var anchorTextNode = document.createTextNode("Lodgement date : " + lodgements[k].date + " --- Amount : " + accounting.formatMoney(lodgements[k].amount,"N",2,",","."));
+                  var anchorTextNode = document.createTextNode("Lodgement date : " + lodgements[k].date);
+                  var anchorTextNode2 = document.createTextNode("Amount : " + accounting.formatMoney(lodgements[k].amount,"N",2,",","."));
                   
-                  titleAnchor.appendChild(anchorTextNode);
+                  var printLodgementBtn = document.createElement("a");
+                  printLodgementBtn.setAttribute("class","btn btn-success btn-sm");
+                  printLodgementBtn.setAttribute("href","${pageContext.request.contextPath}/Customer?action=lodgement_invoice&id="+lodgements[k].id);
+                  printLodgementBtn.innerText = "Print Invoice";
+                  printLodgementBtn.style.position = "relative";
+                  printLodgementBtn.style.zIndex = "10000";
+                  
+                  var anchorDiv = document.createElement("div");
+                  anchorDiv.setAttribute("class","row");
+                  
+                  var col_md1 = document.createElement("div");
+                  col_md1.setAttribute("class","col-md-6");
+                  
+                  var col_md2 = document.createElement("div");
+                  col_md2.setAttribute("class","col-md-6");
+                  
+                  //PanelTitle Wrapper
+                  var wrapper = document.createElement("div");
+                  wrapper.setAttribute("class","row");
+                  
+                  var head_col_md10 = document.createElement("div");
+                  head_col_md10.setAttribute("class","col-md-10");
+                  head_col_md10.appendChild(panelTitle);
+                  
+                  var head_col_md2 = document.createElement("div");
+                  head_col_md2.setAttribute("class","col-md-2 text-right");
+                  head_col_md2.appendChild(printLodgementBtn);
+                  
+                  
+                  col_md1.appendChild(anchorTextNode);
+                  col_md2.appendChild(anchorTextNode2);
+                  
+                  anchorDiv.appendChild(col_md1);
+                  anchorDiv.appendChild(col_md2);
+                  
+                  wrapper.appendChild(head_col_md10);
+                  wrapper.appendChild(head_col_md2);
+                  
+                  titleAnchor.appendChild(anchorDiv);
                   panelTitle.appendChild(titleAnchor);
-                  panelHeader.appendChild(panelTitle);
+                  panelHeader.appendChild(wrapper);
                   
                   
                   //Panel Collapse
@@ -298,8 +467,10 @@
                   table += "<th> Project </th>";
                   table += "<th> Title </th>";
                   table += "<th> Qty </th>";
+                  table += "<th> Monthly </th>";
                   table += "<th> Total paid </th>";
                   table += "<th> Balance </th>";
+                  table += "<th> Advance </th>";
                   table += "<th> Start date </th>";
                   table += "<th> Payment Stage </th>";
                   table += "<th> Completion Date </th>";
@@ -312,8 +483,8 @@
                       
                       items = orders[o];
                       
-                      var trParent = "<tr data-tt-id='" + k + o + "'>";
-                          trParent += "<td colspan=8> Order " + orderCount +   " -  Order value : " + accounting.formatMoney(items[0].orderValue,"N",2,",",".") + "</td>";
+                      var trParent = "<tr class='expanded' data-tt-id='" + k + o + "'>";
+                          trParent += "<td colspan=10> Order " + orderCount +   " -  Order value : " + accounting.formatMoney(items[0].orderValue,"N",2,",",".") + "</td>";
                           trParent += "</tr>";
                           
                           
@@ -325,8 +496,10 @@
                           trchild += "<td style='text-align:left;padding-left:0px'>" + items[i].project_name + "</td>";
                           trchild += "<td style='text-align:left'>" + items[i].title + "</td>";
                           trchild += "<td>" + items[i].quantity + "</td>";
+                          trchild += "<td>" + accounting.formatMoney(items[i].monthly,"N",2,",",".") + "</td>";
                           trchild += "<td>" + accounting.formatMoney(items[i].total_paid,"N",2,",",".") + "</td>";
                           trchild += "<td>" + accounting.formatMoney(items[i].balance,"N",2,",",".") + "</td>";
+                          trchild += "<td>" + accounting.formatMoney(items[i].advance,"N",2,",",".") + "</td>";
                           trchild += "<td>" + items[i].startDate + "</td>";
                           trchild += "<td>" + items[i].paymentStage + "</td>";
                           trchild += "<td>" + items[i].completionDate + "</td>";
@@ -353,7 +526,7 @@
                   counter++;
                 }
                 
-                $(".lodgment-tt-table").treetable({ expandable: true },true);
+                $(".lodgment-tt-table").treetable({ expandable: true,initialState: "expanded" },true);
                 $("#customerLodgementsModal").modal({
                     backdrop : "static"
                 });

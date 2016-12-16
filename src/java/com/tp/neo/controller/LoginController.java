@@ -135,6 +135,11 @@ public class LoginController extends HttpServlet {
         String password = request.getParameter("password") != null ? request.getParameter("password") : "";//[B@3c9a818d
         String userType = request.getParameter("usertype") != null ? request.getParameter("usertype") : "";
         
+        if(userType.equals("0")){
+            
+            redirectToLogin(request, response);
+        }
+        
         System.out.println("Password: " + password);
         
         try{

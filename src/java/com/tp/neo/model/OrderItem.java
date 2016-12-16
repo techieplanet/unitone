@@ -103,9 +103,9 @@ public class OrderItem extends BaseModel {
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "initial_dep")
     private Double initialDep;
-    @Column(name = "discount_amt")
-    private Double discountAmt;
     @Column(name = "discount_percentage")
+    private Double discountAmt;
+    @Column(name = "discount_amt")
     private Double discountPercentage;
     @Column(name = "deleted")
     private Short deleted;

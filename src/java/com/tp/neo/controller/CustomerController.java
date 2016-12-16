@@ -629,8 +629,13 @@ public class CustomerController extends AppController  {
                request.setAttribute("projects", project.listProjects());
                request.setAttribute("action","new");
                request.setAttribute("companyAccount",CompanyAccountHelper.getCompanyAccounts());
+               
+               request.setAttribute("sideNav", "Customer");
+               request.setAttribute("sideNavAction",action);
+               
                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
                dispatcher.forward(request, response);
+               
                
                return;
         }
@@ -639,6 +644,7 @@ public class CustomerController extends AppController  {
         else if(action.equalsIgnoreCase("delete")){
            
             this.delete(Integer.parseInt(request.getParameter("id")));
+            action = "";
         }
         else if(action.equalsIgnoreCase("edit")){
             viewFile = "/views/customer/update.jsp";
@@ -652,6 +658,8 @@ public class CustomerController extends AppController  {
            
             request.setAttribute("customer", customerList.get(0));
             request.setAttribute("userType",sessionUser.getSystemUserTypeId());
+            
+            action = "";
         }
         else if(action.equalsIgnoreCase("profile")){
             viewFile = "/views/customer/profile.jsp";
@@ -675,6 +683,8 @@ public class CustomerController extends AppController  {
             }else{
             request.setAttribute("customers", listCustomers());
             }
+            
+            action = "";
         }
         else if(action.equalsIgnoreCase("current")){
             
@@ -686,10 +696,21 @@ public class CustomerController extends AppController  {
             viewFile = CUSTOMER_COMPLETED_PAYMENT;
             request.setAttribute("customers",getCompletedPaymentCustomers());
         }
+        else if(action.equalsIgnoreCase("lodgement_invoice")){
+            action = "";
+            getLodgmentInvoice(request, response);
+            return;
+        }
+        else if(action.equalsIgnoreCase("customer_orders")){
+            action = "";
+            getCustomerOrders(request, response);
+            return;
+        }
         request.setAttribute("projects", project.listProjects());
         
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Customer");
+        request.setAttribute("sideNavAction",action);
         
         
         String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
@@ -1135,6 +1156,7 @@ public class CustomerController extends AppController  {
            
            Map<String, Object> map = new HashMap();
            
+           map.put("id", l.getId());
            map.put("amount", String.format("%.2f", l.getAmount()));
            map.put("date", sdf.format(l.getLodgmentDate()));
            map.put("depositorName", l.getDepositorName() != null ? l.getDepositorName() : "");
@@ -1251,6 +1273,9 @@ public class CustomerController extends AppController  {
                    map.put("balance",itemHelper.getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
                    map.put("completionDate",itemHelper.getCompletionDate(item, total_paid));
                    map.put("paymentStage",itemHelper.getPaymentStage(item, total_paid));
+                   map.put("advance", String.format("%.2f", ((total_paid - item.getInitialDep()) % item.getUnit().getMonthlyPay())));
+                   map.put("monthly", String.format("%.2f", (item.getUnit().getMonthlyPay())));
+                   
                    
                    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
                    cal.setTime(item.getCreatedDate());
@@ -1269,6 +1294,90 @@ public class CustomerController extends AppController  {
         }
         
         return groupedOrderItem; // return list of orderItem grouped by Order
+    }
+    
+    public void getLodgmentInvoice(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+        
+        EntityManagerFactory emf  = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long lodgement_id = Long.parseLong(request.getParameter("id"));
+        
+        Lodgement lodgement = em.find(Lodgement.class, lodgement_id);
+        
+        TypedQuery<OrderItem> query = em.createQuery("SELECT LI.item FROM LodgementItem LI WHERE LI.lodgement.id = :id ",OrderItem.class);
+        List<OrderItem> orderItem = query.setParameter("id", lodgement.getId()).getResultList();
+        
+        
+        Date date = lodgement.getCreatedDate();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
+        String dateString = sdf.format(date);
+
+        double vat = 0.00;
+        double gateWayCharge = 0.00;
+        Map map = getInvoicData(orderItem, vat, gateWayCharge);
+
+        String viewFile = "/views/customer/invoice.jsp";
+        request.getSession().setAttribute("print", 1);
+        request.getSession().setAttribute("orderItemInvoice", orderItem);
+        request.getSession().setAttribute("transactionDate", dateString);
+        request.getSession().setAttribute("customerInvoice", lodgement.getCustomer());
+        request.getSession().setAttribute("totalInvoice", (Double)map.get("total"));
+        request.getSession().setAttribute("grandTotalInvoice", (Double)map.get("grandTotal"));
+        request.getSession().setAttribute("vatInvoice", vat);
+        request.getSession().setAttribute("gatewayChargeInvoice", gateWayCharge);
+        
+        request.getRequestDispatcher(viewFile).forward(request, response);
+    }
+    
+    public void getCustomerOrders(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em  = emf.createEntityManager();
+        
+        Long customerId = Long.parseLong(request.getParameter("id"));
+        
+        Customer customer = em.find(Customer.class, customerId);
+        Query query = em.createNamedQuery("ProductOrder.findByCustomer");
+        
+        List<ProductOrder> orders = query.setParameter("customerId",customer).getResultList();
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
+        
+        List<Map> ordersMapList = new ArrayList();
+        
+        for(ProductOrder order : orders){
+            
+            Map<String, Object> orderMap = new HashMap();
+            List<OrderItem> items = em.createNamedQuery("OrderItem.findByOrder").setParameter("order", order).getResultList();
+            
+            orderMap.put("order_date", sdf.format(order.getCreatedDate()));
+            List<Map> itemMapList = new ArrayList();
+            
+            for(OrderItem item : items){
+                
+                Map<String,String> map = new HashMap();
+                
+                map.put("project_name", item.getUnit().getProject().getName());
+                map.put("unit_name", item.getUnit().getTitle());
+                map.put("qty", item.getQuantity().toString());
+                map.put("cpu", String.format("%.2f", item.getUnit().getAmountPayable()));
+                
+                itemMapList.add(map);
+            }
+            
+            orderMap.put("items", itemMapList);
+            
+            ordersMapList.add(orderMap);
+        }
+        
+        Gson gson = new GsonBuilder().create();
+        
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(gson.toJson(ordersMapList));
+        response.getWriter().flush();
+        response.getWriter().close();
     }
     
     /*TP: Getting the customer Id for public use*/
