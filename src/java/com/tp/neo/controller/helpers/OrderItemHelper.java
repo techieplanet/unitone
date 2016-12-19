@@ -25,7 +25,15 @@ import javax.persistence.Query;
 public class OrderItemHelper {
     
     
-    public Double getTotalItemPaidAmount(List<LodgementItem> lodgementItem){
+    
+   /**
+    * 
+    * @param List<lodgementItem>
+    * @return Double Total amount paid for an OrderItem
+    * This method returns the total amount paid for an item,
+    * By looping through a collection of LodgementItem
+    */ 
+   public Double getTotalItemPaidAmount(List<LodgementItem> lodgementItem){
        
        double totalAmount = 0.00;
        
@@ -100,7 +108,7 @@ public class OrderItemHelper {
             cal.setTime(date);
             return sdf.format(cal.getTime());
        }else{
-             months = Math.ceil((total_paid - item.getInitialDep()) / (mortgage * qty));
+             months = Math.floor((total_paid - item.getInitialDep()) / (mortgage * qty));
        }
        
        

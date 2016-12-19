@@ -147,9 +147,7 @@
 <%@ include file="../includes/footer.jsp" %>      
 <%@ include file="../includes/bottom.jsp" %>
 <script type="text/javascript" src="plugins/rcswitcher-master/js/rcswitcher.min.js"></script>
-<!--<script src="plugins/bootstrap-switch/docs/js/highlight.js"></script>
-    <script src="plugins/bootstrap-switch/dist/js/bootstrap-switch.js"></script>
-    <script src="plugins/bootstrap-switch/docs/js/main.js"></script>-->
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.PrintArea.js"></script>
 <script>
           
 

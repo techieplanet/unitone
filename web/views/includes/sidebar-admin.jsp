@@ -15,7 +15,7 @@
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Project">All Projects</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'create_project')}">
-                                <li><a href="${pageContext.request.contextPath}/Project?action=new">New Project</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Project?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Project'}"> <c:out value='style=color:#fff' /></c:if> >New Project</a></li>
                             </c:if>
                           </ul>
                       </li>
@@ -26,15 +26,15 @@
                     <li class="treeview <c:out value='${sideNav eq "Customer" ? "active":""}' />" >
                           <a href="${pageContext.request.contextPath}/Customer"><i class="fa fa-user-plus"></i><span>Customers</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
-                            <li><a href="${pageContext.request.contextPath}/Customer">All Customers</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Customer" <c:if test="${sideNavAction eq '' && sideNav eq 'Customer'}"> <c:out value='style=color:#fff' /></c:if> >All Customers</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'create_customer')}">
-                                <li><a href="${pageContext.request.contextPath}/Customer?action=new">New Customer</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Customer'}"> <c:out value='style=color:#fff' /></c:if> >New Customer</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Customer?action=current">Currently Paying</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=current" <c:if test="${sideNavAction eq 'current' && sideNav eq 'Customer'}"> <c:out value='style=color:#fff' /></c:if>>Currently Paying</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Customer?action=completed">Completed Payment</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=completed" <c:if test="${sideNavAction eq 'completed' && sideNav eq 'Customer'}"> <c:out value='style=color:#fff' /></c:if> >Completed Payment</a></li>
                             </c:if>
                           </ul>
                       </li>
@@ -46,15 +46,15 @@
                         <li class="treeview <c:out value='${sideNav eq "Agent" ? "active":""}' />" >
                           <a href="#"><i class="fa fa-users"></i><span>Agents</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
-                            <li><a href="${pageContext.request.contextPath}/Agent">Approved Agents</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Agent" <c:if test="${sideNavAction eq '' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if>>Approved Agents</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'create_agent')}">
-                                <li><a href="${pageContext.request.contextPath}/Agent?action=new">New Agent</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Agent?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if> >New Agent</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_wallet')}">
-                                <li><a href="${pageContext.request.contextPath}/Agent?action=withdrawApproval">Pending Withdrawal Request</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Agent?action=withdrawApproval" <c:if test="${sideNavAction eq 'withdrawApproval' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if> >Pending Withdrawal Request</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_wallet')}">
-                                <li><a href="${pageContext.request.contextPath}/Agent?action=approvedWithdrawal">Approved Withdrawal Request</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Agent?action=approvedWithdrawal" <c:if test="${sideNavAction eq 'approvedWithdrawal' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if> >Approved Withdrawal Request</a></li>
                             </c:if>
                           </ul>
                       </li>
@@ -66,22 +66,22 @@
                         <li class="treeview <c:out value='${sideNav eq "Order" ? "active":""}' />" >
                           <a href="#"><i class="fa fa-users"></i><span>Orders</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
-                            <li><a href="${pageContext.request.contextPath}/Order">All Orders</a></li>
-                            <li><a href="${pageContext.request.contextPath}/Order?action=new">New Order</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Order" <c:if test="${sideNavAction eq '' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >All Orders</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Order?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if>>New Order</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=approved">Approved</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=approved" <c:if test="${sideNavAction eq 'approved' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >Approved</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=declined">Declined</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=declined" <c:if test="${sideNavAction eq 'declined' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >Declined</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=processing">Processing</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=processing" <c:if test="${sideNavAction eq 'processing' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >Processing</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=current">Ongoing Payments</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=current" <c:if test="${sideNavAction eq 'current' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >Ongoing Payments</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Order?action=completed">Completed Payments</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Order?action=completed" <c:if test="${sideNavAction eq 'completed' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >Completed Payments</a></li>
                             </c:if>
                           </ul>
                         </li>
@@ -93,18 +93,18 @@
                         <li class="treeview <c:out value='${sideNav eq "Lodgement" ? "active":""}' />" >
                           <a href="#"><i class="fa fa-users"></i><span>Lodgement</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
-                            <li><a href="${pageContext.request.contextPath}/Lodgement">All</a></li>
+                            <li><a href="${pageContext.request.contextPath}/Lodgement" <c:if test="${sideNavAction eq '' && sideNav eq 'Lodgement'}"> <c:out value='style=color:#fff' /></c:if> >All</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=approval">Pending Lodgment</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=approval" <c:if test="${sideNavAction eq 'approval' && sideNav eq 'Lodgement'}"> <c:out value='style=color:#fff' /></c:if> >Pending Lodgment</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=new">Make Lodgment</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Lodgement'}"> <c:out value='style=color:#fff' /></c:if> >Make Lodgment</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=list_approved">Approved Lodgment</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=list_approved" <c:if test="${sideNavAction eq 'list_approved' && sideNav eq 'Lodgement'}"> <c:out value='style=color:#fff' /></c:if> >Approved Lodgment</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
-                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=list_unapproved">Declined Lodgment</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Lodgement?action=list_unapproved" <c:if test="${sideNavAction eq 'list_unapproved' && sideNav eq 'Lodgement'}"> <c:out value='style=color:#fff' /></c:if> >Declined Lodgment</a></li>
                             </c:if>
                           </ul>
                         </li>

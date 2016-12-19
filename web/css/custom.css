@@ -265,4 +265,10 @@ body .modal .modal-lg {
     height: 10px;
 }
 
-
+@media print
+{    
+    .no-print-area, .no-print-area *
+    {
+        display: none !important;
+    }
+}

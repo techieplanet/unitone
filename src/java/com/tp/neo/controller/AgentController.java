@@ -281,6 +281,7 @@ public class AgentController extends AppController {
         if(request.getAttribute("sideNav") == null){
             //Keep track of the sideBar
             request.setAttribute("sideNav", "Agent");
+            request.setAttribute("sideNavAction",action);
         }
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
