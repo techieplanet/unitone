@@ -71,7 +71,7 @@
    
       <div class="container">
           
-          <section class="invoice" style="min-height: 600px">
+          <section class="invoice" style="min-height: 600px" id="printArea">
           <!-- title row -->
           <div class="row">
             <div class="col-xs-12">
@@ -106,14 +106,16 @@
             <div class="col-sm-4 invoice-col">
               <b>Invoice #</b><br>
               <br>
-              <b>Order ID:</b> ${productOrderInvoice.getId()}<br>
+              <c:if test="${empty print}">
+                <b>Order ID:</b> ${productOrderInvoice.getId()}<br>
+              </c:if>
             </div><!-- /.col -->
           </div><!-- /.row -->
 
           <!-- Table row -->
-          <div class="row">
+          <div class="row" >
             <div class="col-xs-12 table-responsive">
-              <table class="table table-bordered">
+              <table class="table table-bordered" >
                 <thead>
                   <tr>
                     <th style="text-align:center">S/N</th>
@@ -139,8 +141,8 @@
                         <td colspan="3" style="text-align: right">Total : </td>
                         <td><fmt:formatNumber value="${totalInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
-                    <tr>
-                        <td colspan="3" style="text-align: right">VAT : </td>
+                    <tr>                        <td colspan="3" style="text-align: right">VAT : </td>
+
                         <td><fmt:formatNumber value="${vatInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
@@ -163,13 +165,54 @@
                     <c:remove var="grandTotalInvoice" scope="session" />
             </div><!-- /.col -->
             
-            <div class="col-md-12">
-                <a href="${pageContext.request.contextPath}/Dashboard" class="btn btn-primary">Continue to Dashboard</a>
-            </div>
+            
           </div><!-- /.row -->
 
         </section>
-          
+        
+            
+        <div class="row" style="padding:20px">
+            
+            <div class="col-md-2 no-print-area">
+                <a href="${pageContext.request.contextPath}/Dashboard" class="btn btn-primary"><i class="fa fa-chevron-left"></i> Back</a>
+            </div>
+            
+            <div class="col-md-2 pull-right text-right no-print-area">
+                <a href="#"><i class="fa fa-envelope" style="color:#FFCD7E"></i></a> &nbsp;
+                <a href="#"><i class="fa fa-file-pdf-o" style="color:#F64934"></i></a> &nbsp;
+                <a href="#"><i class="fa fa-download"></i></a> &nbsp;
+                <a href="#"><i class="fa fa-print" onclick="invoice.printInvoice(event)"></i></a> &nbsp;
+            </div>
+            
+        </div>   
+            
+            
       </div>
+       
+    
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.PrintArea.js"></script>
+       
+    <script>
+        
+        var invoice = {
+            
+            printInvoice : function(evt){
+              
+              evt.preventDefault();
+              
+              var options = {
+                  mode:"iframe",
+                  popClose: true
+              };
+              
+              $("#printArea").printArea(options);
+          }
+            
+        };
+
+    </script>     
+    
 
   </body>
+  
+</html>

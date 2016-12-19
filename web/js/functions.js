@@ -1283,10 +1283,10 @@ function validateCustomerRegForm()
     {
         errors.push("Please enter first name");
     }
-    if($("#customerMiddlename").val().trim() == '')
-    {
-        errors.push("Please enter middle name");
-    }
+//    if($("#customerMiddlename").val().trim() == '')
+//    {
+//        errors.push("Please enter middle name");
+//    }
     if($("#customerLastname").val().trim() == '')
     {
         errors.push("Please enter last name");

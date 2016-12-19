@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
 import com.tp.neo.controller.helpers.NotificationsManager;
+import com.tp.neo.controller.helpers.OrderItemHelper;
 import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.controller.helpers.OrderObjectWrapper;
 import com.tp.neo.interfaces.SystemUser;
@@ -246,6 +247,7 @@ public class OrderController extends AppController {
             viewFile = ORDER_ADMIN;
             request.setAttribute("orders", listOrders());
             request.setAttribute("title","Orders");
+            action = "";
         }
         
         request.setAttribute("projects", project.listProjects());
@@ -259,6 +261,7 @@ public class OrderController extends AppController {
         
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Order");
+        request.setAttribute("sideNavAction",action);
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -891,22 +894,23 @@ public class OrderController extends AppController {
        List<OrderItem> orderItemList = (List)productOrder.getOrderItemCollection();
        
        List<Map> orderItemMap = new ArrayList();
-      
+       
+       OrderItemHelper itemHelper = new OrderItemHelper();
        
        for(OrderItem item : orderItemList){
            Map<String,String> map = new HashMap(); 
-           Double total_paid = getTotalItemPaidAmount((List)item.getLodgementItemCollection());
+           Double total_paid = itemHelper.getTotalItemPaidAmount((List)item.getLodgementItemCollection());
            
            map.put("id", item.getId().toString());
            map.put("quantity", item.getQuantity().toString());
            map.put("initialDeposit", String.format("%.2f",item.getInitialDep()));
            map.put("cpu", String.format("%.2f",item.getUnit().getCpu()));
            map.put("title", item.getUnit().getTitle());
-           map.put("discount", getOrderItemDiscount(item.getUnit().getDiscount(), item.getUnit().getCpu(), item.getQuantity()));
+           map.put("discount", itemHelper.getOrderItemDiscount(item.getUnit().getDiscount(), item.getUnit().getCpu(), item.getQuantity()));
            map.put("total_paid", String.format("%.2f",total_paid));
            map.put("project_name", item.getUnit().getProject().getName());
-           map.put("balance",getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
-           map.put("completionDate",getCompletionDate(item, total_paid));
+           map.put("balance",itemHelper.getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
+           map.put("completionDate",itemHelper.getCompletionDate(item, total_paid));
            
            orderItemMap.add(map);
        }
@@ -922,64 +926,8 @@ public class OrderController extends AppController {
        response.getWriter().close();
    }
    
-   /**
-    * 
-    * @param List<lodgementItem>
-    * @return Double Total amount paid for an OrderItem
-    * This method returns the total amount paid for an item,
-    * By looping through a collection of LodgementItem
-    */
-   private Double getTotalItemPaidAmount(List<LodgementItem> lodgementItem){
-       
-       double totalAmount = 0.00;
-       
-       for(LodgementItem item : lodgementItem){
-           totalAmount += item.getAmount();
-       }
-       
-       return totalAmount;
-   }
    
-   private String getOrderItemBalance(double amtPayable, int qty, double amountPaid){
-       
-       String amt = String.format("%.2f", (Double)((amtPayable * qty) - amountPaid));
-       return amt;
-   }
    
-   private String getOrderItemDiscount(double discountPercent, double cpu, int qty){
-       
-       String amt = String.format("%.2f", (Double)((discountPercent / 100 ) * (cpu * qty)));
-       return amt;
-   }
-    
-   private String getCompletionDate(OrderItem item, double total_paid){
-       
-       //Get monthly Pay
-       double mortgage = item.getUnit().getMonthlyPay();
-       double balance = Double.parseDouble(getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
-       int qty = item.getQuantity();
-       
-       double months = Math.ceil(balance / (mortgage * qty));
-       Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
-       
-       if(months <= 0){
-           
-           Date d = item.getOrder().getModifiedDate();
-          cal.setTime(d);
-       }
-       else{
-           
-         cal.add(Calendar.MONTH, (int)months);
-       }
-       
-       System.out.println("Month = " + (int)months);
-       
-       SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy");
-       
-       String date = sdf.format(cal.getTime());
-       
-       return date;
-   }
    
    private List<Customer> listCustomers(){
         

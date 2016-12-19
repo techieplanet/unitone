@@ -216,6 +216,7 @@ public class ProjectController extends AppController {
 
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Project");
+        request.setAttribute("sideNavAction",action);
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);

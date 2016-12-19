@@ -171,6 +171,7 @@ public class LodgementController extends AppController {
          else if(action.equals("getOrders")) {
              
              listCustomerOrders(request, response);
+             action = "";
          }
          else if(action.equalsIgnoreCase("lodgmentItems")){
              
@@ -229,7 +230,8 @@ public class LodgementController extends AppController {
          }
         
             //Keep track of the sideBar
-            request.setAttribute("sideNav", "Lodgement");   
+            request.setAttribute("sideNav", "Lodgement"); 
+            request.setAttribute("sideNavAction",action);
      
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
