@@ -267,8 +267,8 @@ public class OrderManager {
         em.getTransaction().begin();
         
         //credit the customer account to the tune of the lodgment 
-        Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
+        //Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
+        //new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
         
         //create new order system notification
         String route =  applicationContext + "/Order?action=notification&id=" + order.getId();
