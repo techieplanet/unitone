@@ -34,6 +34,7 @@
     <class>com.tp.neo.model.AgentBalance</class>
     <class>com.tp.neo.model.Notification_1</class>
     <class>com.tp.neo.model.Company</class>
+    <class>com.tp.neo.model.ProspectCustomer</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/xforce"/>
