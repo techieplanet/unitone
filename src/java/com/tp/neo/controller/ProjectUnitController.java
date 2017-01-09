@@ -133,7 +133,7 @@ public class ProjectUnitController extends AppController {
 
             map.put("amt_payable", projectUnit.getAmountPayable()+ "");
             map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
-            map.put("unit_type_id", projectUnit.getUnitType().getId().toString());
+            map.put("unit_type_id", projectUnit.getUnitType() != null ? projectUnit.getUnitType().getId().toString() : "0");
 
             
             Gson gson = new GsonBuilder().create();

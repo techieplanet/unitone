@@ -38,7 +38,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "AgentProspect.findByEmail", query = "SELECT a FROM AgentProspect a WHERE a.email = :email"),
     @NamedQuery(name = "AgentProspect.findByPhoneNo", query = "SELECT a FROM AgentProspect a WHERE a.phoneNo = :phoneNo"),
     @NamedQuery(name = "AgentProspect.findByCompany", query = "SELECT a FROM AgentProspect a WHERE a.company = :company"),
-    @NamedQuery(name = "AgentProspect.findByPost", query = "SELECT a FROM AgentProspect a WHERE a.post = :post")})
+    @NamedQuery(name = "AgentProspect.findByPost", query = "SELECT a FROM AgentProspect a WHERE a.post = :post"),
+    @NamedQuery(name = "AgentProspect.findByAgent", query = "SELECT a FROM AgentProspect a WHERE a.agent = :agent")})
 public class AgentProspect implements Serializable {
 
     private static final long serialVersionUID = 1L;

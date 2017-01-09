@@ -30,7 +30,7 @@
                     <tbody>
                         <c:forEach items="${agents}" var="agent">
                             <tr id='row<c:out value="${agent.agentId}" />'>
-                                <td><img alt="No Image" class="img-responsive img-thumbnail" src="<c:out value='${agentImageAccessDir}/${agent.photoPath}'></c:out>" /></td>
+                                <td><img alt="No Image" class="img-responsive img-thumbnail" width="50px" height="50px" src="<c:out value='${agentImageAccessDir}/${agent.photoPath}'></c:out>" /></td>
                                 <td class="agentId"><c:out value="${agent.agentId}" /></td>
                                 <td class="agentFname"><c:out value="${agent.firstname}" /></td>
                                 <td class="agentMname"><c:out value="${agent.middlename}" /></td>
@@ -40,7 +40,7 @@
                                 <td class="agentState"><c:out value="${agent.state}" /></td>
                               
                                 <td>
-                                    <input type="hidden" class="agentImg" value='<c:out value="${agent.photoPath}"></c:out>' />
+                                    <input type="hidden" class="agentImg" value='<c:out value="${agentImageAccessDir}/${agent.photoPath}"></c:out>' />
                                     <a class="btn btn-primary" href="#" onclick="selectAgent('${agent.agentId}')" role="button">Select</a>
                                 </td>
                             </tr>
@@ -82,7 +82,7 @@
                  <div class="row">
                      
                      <div class="col-md-3">
-                         <img src="" alt="No image" />
+                         <img src="" class="agent_img img img-responsive img-thumbnail" width="100px" height="100px" alt="No image" />
                      </div>
                      
                      <div class="col-md-9">
@@ -204,7 +204,7 @@
 <!--                                              /.form-group select product -->
                                     </div>
                                
-                                	<div class="col-md-3">
+                                   <div class="col-md-3">
                                     	<div class="form-group">
                                           <input type="hidden" id="pUnitId" />
                                             <label for="selectUnit">Select Unit</label>
@@ -217,7 +217,7 @@
 <!--                                              /.form-group  select unit-->
                                     </div>
                                 
-                                	<div class="col-md-3">
+                                <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="selectQuantity">Select Quantity</label>
                                             
@@ -285,7 +285,7 @@
                                         </div> <!-- /.form-group Duration -->
                                     </div>
                                
-                                	<div class="col-md-2">
+                                    <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMinimumMonthlyPayment">Monthly Payment(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
@@ -296,24 +296,39 @@
                                             <span id="finalAmount" style="display:block"></span>
                                         </div> <!--/.form-group amount -->
                                     </div>
+                               
+                                    <c:if test="${userType != null && userType == 1 }">     
+                                          <div class="col-md-2">
+                                              <div class="form-group">
+                                                  <label>
+                                                      Commission(%)
+                                                  </label>
+                                                  <span class="productSpan">This is the commission payable to an agent</span>
+                                                  <input type="text" class="form-control" value="0" name="commp" id="commp"/>
+                                              </div>
+                                          </div>
+                                    </c:if>  
                                                 
                                 </div>
-                                              <div class="row">
-                                                    <div class="col-md-12 box-footer">
-                                                        <div class="row">
-                                                            <div class="col-md-4">
-                                                            <div id="errorText" style="color:#722F37 !important; font-weight:bold !important;"></div>
-                                                            </div>
-                                                            <div class="col-md-2 pull-right">
-                                                   <div id="addToCartLabel"  style="margin: 0 auto !important;" >
-                                    	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
-                                        </div> 
-                                                   </div>
-                                                   </div>
-                                                   </div>
-                            </div>
-                                              </div>
+                                              
+                                             
+                                              
+                                  <div class="row">
+                                        <div class="col-md-12 box-footer">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div id="errorText" style="color:#722F37 !important; font-weight:bold !important;"></div>
+                                            </div>
+                                            <div class="col-md-2 pull-right">
+                                               <div id="addToCartLabel"  style="margin: 0 auto !important;" >
+                                                    <div class="form-group">
+                                                        <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                                    </div> 
+                                               </div>
+                                           </div>
+                                           </div>
+                                    </div>
+                                </div>
                             </div> <!--/.col-md-12 -->
                     	</fieldset>
                   	</div> <!--/.col-md-12 -->

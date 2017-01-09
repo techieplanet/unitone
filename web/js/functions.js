@@ -343,12 +343,12 @@ function addToCart(event){
   var monthlyPayPerUnit = accounting.unformat($("#monthlyPayPerUnit").text());
   var monthlyPayPerQuantity = accounting.unformat($("#monthlyPayPerQuantity").text());
   var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
-  
+  var commission = $('#commp').val();
    
   
   var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuantity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
-  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment}
+  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment,commp : commission};
   
   /**
    * 
@@ -690,6 +690,7 @@ $("#amountUnit").text("");
  $('span[id="qty"]').text("");
 $("#finalAmount").text("");
 $("#amountLeft").val("");
+$("#commp").val("0");
 $("#addToCart").attr("disabled",false);
 $('#selectUnit').empty(); //select 
     
@@ -889,7 +890,7 @@ function getProjectUnits(appName, entityName){
            var resp = JSON.parse(data);
            $('#selectUnit').empty();
            $('#selectUnit').append($('<option>', {value: "",text: "-- choose --"}));
-
+           $('#commp').val('0');
            $.each( resp, function( key, value ) {
 
                    $('#selectUnit').append($('<option>', {
@@ -1114,7 +1115,7 @@ function calculateProductAmount(){
     
     $("#productMinimumInitialAmount").val( resp.lid * quantity);
   
-    
+    $("#commp").val(resp.commp);
     
     //alert(totalDuration);
      var message = "month";

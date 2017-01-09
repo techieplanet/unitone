@@ -612,6 +612,18 @@
                                             <span id="finalAmount" style="display:block"></span>
                                         </div> <!--/.form-group amount -->
                                     </div>
+                               
+                                    <c:if test="${userTypeId != null && userTypeId == 1 }">     
+                                          <div class="col-md-2">
+                                              <div class="form-group">
+                                                  <label>
+                                                      Commission(%)
+                                                  </label>
+                                                  <span class="productSpan">This is the commission payable to an agent</span>
+                                                  <input type="text" class="form-control" value="0" name="commp" id="commp"/>
+                                              </div>
+                                          </div>
+                                    </c:if>
                                                 
                                 </div>
                   <div class="row">

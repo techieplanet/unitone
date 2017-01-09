@@ -45,6 +45,7 @@ public class EmailHelper {
         
         //System.err.println("email " + agent.getEmail() + " email: " + defaultEmail + " subject: " + emailSubject + " message: " + message);
        new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, emailSubject, message);
+
     }
     
     protected void sendAgentWalletCreditAlert(Customer customer, ProjectUnit unit, double amount){

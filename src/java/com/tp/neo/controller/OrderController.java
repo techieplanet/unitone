@@ -302,8 +302,7 @@ public class OrderController extends AppController {
     private SaleItemObjectsList processJsonData(String json) {
         Gson gson = new GsonBuilder().create();
         System.out.println(json);
-        //String str = "{sales:[{\"productName\":\"Kali Homes\",productId:1,productUnitName:\"2 Bedroom Duplex\",productUnitId:5,productQuanity:1,productAmount:1500000,amountUnit:1500000,amountTotalUnit:1500000,initialAmountPerUnit:250000,minInitialAmountSpan:250000,productMinimumInitialAmount:250000,amountLeft:1250000,payDurationPerUnit:\"24 months\",payDurationPerQuantity:\"24 months\",productMaximumDuration:5,monthlyPayPerUnit:250000,monthlyPayPerQuantity:250000,productMinimumMonthlyPayment:250000}]}";
-        //Type collectionType = new TypeToken<ArrayList<SalesObject>>(){}.getType();
+        
         SaleItemObjectsList salesObj = gson.fromJson(json,SaleItemObjectsList.class);
         
         ArrayList<SaleItemObject> sales = salesObj.sales;
@@ -312,7 +311,8 @@ public class OrderController extends AppController {
             System.out.println("Product Name : " + s.productName);
             System.out.println("Product Qty : " + s.productQuantity);
             System.out.println("Product Amount Per Unit " + s.amountUnit);
-            System.out.println("Product Cost" + s.amountTotalUnit);
+            System.out.println("Product Cost " + s.amountTotalUnit);
+            System.out.println("Commision Payable : " + s.commp);
         }
         
         return salesObj;
@@ -461,6 +461,10 @@ public class OrderController extends AppController {
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
             orderItem.setCreatedDate(getDateTime().getTime());
+            
+            if(sessionUser.getSystemUserTypeId() == 1){
+                orderItem.setCommissionPercentage(saleItem.commp);
+            }
             if(sessionUser != null){
                 orderItem.setCreatedBy(sessionUser.getSystemUserId()); 
             }
