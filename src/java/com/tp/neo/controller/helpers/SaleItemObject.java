@@ -29,6 +29,7 @@ public class SaleItemObject {
     public float monthlyPayPerUnit;
     public float monthlyPayPerQuantity;
     public float productMinimumMonthlyPayment;
+    public float commp ;
 
     
 

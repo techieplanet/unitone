@@ -44,7 +44,7 @@ public class EmailHelper {
             message = String.format(declineMessage, agent.getFirstname(), agent.getLastname(), APP_NAME);
         
         //System.err.println("email " + agent.getEmail() + " email: " + defaultEmail + " subject: " + emailSubject + " message: " + message);
-       // new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, emailSubject, message);
+        new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, emailSubject, message);
     }
     
     protected void sendAgentWalletCreditAlert(Customer customer, ProjectUnit unit, double amount){
