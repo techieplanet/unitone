@@ -34,7 +34,7 @@ import javax.servlet.http.HttpSession;
  */
 public class AppController extends HttpServlet{
     public static final String APP_NAME = "NeoForce";
-    public static final String defaultEmail = "no-reply@tplocalhost.com";
+    public static final String defaultEmail = "noreply@techieplanet.net.com";
     
     public Calendar calendar;
     protected long userType;

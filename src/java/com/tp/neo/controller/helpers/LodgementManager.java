@@ -145,13 +145,12 @@ public class LodgementManager {
      * @throws RollbackException 
      */
     public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
-        
         em.getTransaction().begin();
         
         //approve the lodgement
         lodgement.setApprovalStatus((short)1);
         new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.flush();
+        em.merge(lodgement);
         
         notification.setStatus((short)2);
         em.merge(notification);
@@ -163,7 +162,6 @@ public class LodgementManager {
         
         for(int i=0; i < lodgementItems.size(); i++){
             LodgementItem thisItem = lodgementItems.get(i);
-      
             //set the item as approved
             thisItem.setApprovalStatus((short)1);
             new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
@@ -185,7 +183,6 @@ public class LodgementManager {
         }//end for       
         em.merge(lodgement);
         em.getTransaction().commit();
-        
         updateMortgageStatus(order);
     }
     
@@ -226,22 +223,22 @@ public class LodgementManager {
     }
     
     private void splitUnitFunds(Customer customer, ProjectUnit unit, LodgementItem lodgementItem){
-        TransactionManager transactionManager = new TransactionManager(sessionUser);
+        System.out.println("Inside splitUnitFunds");
         
         //Split commissions - credit agent wallet - double entry
-        transactionManager.doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), lodgementItem.getItem().getCommissionAmount());
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), lodgementItem.getItem().getCommissionAmount());
         
         //Split property dev cost - debit unit, credit property dev  - double entry
         Account propertyDevelopmentAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "PROPERTY_DEV").getSingleResult();
-        transactionManager.doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), propertyDevelopmentAccount, lodgementItem.getItem().getUnit().getBuildingCost());
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), propertyDevelopmentAccount, lodgementItem.getItem().getUnit().getBuildingCost());
         
         //Split services cost - debit unit, credit property dev  - double entry
         Account servicesAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "SERVICES").getSingleResult();
-        transactionManager.doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), servicesAccount, lodgementItem.getItem().getUnit().getServiceValue());
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), servicesAccount, lodgementItem.getItem().getUnit().getServiceValue());
         
         //Split income amount - debit unit, credit property dev  - double entry
         Account incomeAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "INCOME").getSingleResult();
-        transactionManager.doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), incomeAccount, lodgementItem.getItem().getUnit().getIncome());
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), incomeAccount, lodgementItem.getItem().getUnit().getIncome());
     }
     
     

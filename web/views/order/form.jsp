@@ -30,7 +30,7 @@
                     <tbody>
                         <c:forEach items="${agents}" var="agent">
                             <tr id='row<c:out value="${agent.agentId}" />'>
-                                <td><img alt="No Image" class="img-responsive img-thumbnail" src="<c:out value='${agent.photoPath}'></c:out>" /></td>
+                                <td><img alt="No Image" class="img-responsive img-thumbnail" src="<c:out value='${agentImageAccessDir}/${agent.photoPath}'></c:out>" /></td>
                                 <td class="agentId"><c:out value="${agent.agentId}" /></td>
                                 <td class="agentFname"><c:out value="${agent.firstname}" /></td>
                                 <td class="agentMname"><c:out value="${agent.middlename}" /></td>

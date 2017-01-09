@@ -27,6 +27,7 @@ import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -188,7 +189,8 @@ public class OrderController extends AppController {
         request.setAttribute("userType", sessionUser.getSystemUserTypeId());
         request.setAttribute("agents",agent.listAgents());
        
-        
+        String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+        request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
         
         //Project listprojects = project.listProjects();
         if (action.equalsIgnoreCase("new")){
