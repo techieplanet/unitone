@@ -60,6 +60,8 @@
                                           <th>Unit Title</th>
                                           <th>Initial Deposit</th>
                                           <th style="text-align: center">Qty</th>
+                                          <th>Default Commission(%)</th>
+                                          <th>Negotiated Commission(%)</th>
                                           <th style="text-align: center">Approve</th>
                                           <th style="text-align: center">Decline</th>
                                       </tr>
@@ -71,6 +73,8 @@
                                             <td>${order.getUnitTitle(orderItemCount.index)}</td>
                                             <td style="text-align: right"><fmt:formatNumber value='${orderItem.getInitialDep()}' type='currency' currencySymbol='N' /></td>
                                             <td style="text-align: center">${orderItem.getQuantity()}</td>
+                                            <td style="text-align: right">${orderItem.getUnit().getCommissionPercentage()}%</td>
+                                            <td style="text-align: right;background-color: #D73925;color:#fff">${orderItem.getCommissionPercentage()}%</td>
                                             <td style="background-color: #008D4C; text-align: center;">
                                                 <input type="checkbox" name="order-item-approve" class="order-item-approve chkbox1" value="${orderItem.getId()}" />
                                             </td>

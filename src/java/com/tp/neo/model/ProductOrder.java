@@ -6,7 +6,6 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -272,6 +271,5 @@ public class ProductOrder extends BaseModel {
         this.mortgageStatus = mortgageStatus;
     }
 
-   
     
 }

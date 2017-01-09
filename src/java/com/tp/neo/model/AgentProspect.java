@@ -17,39 +17,31 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author hp
+ * @author swedge-mac
  */
 @Entity
-@Table(name = "prospect_customer")
+@Table(name = "agent_prospect")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "ProspectCustomer.findAll", query = "SELECT p FROM ProspectCustomer p"),
-    @NamedQuery(name = "ProspectCustomer.findById", query = "SELECT p FROM ProspectCustomer p WHERE p.id = :id"),
-    @NamedQuery(name = "ProspectCustomer.findByFirstName", query = "SELECT p FROM ProspectCustomer p WHERE p.firstName = :firstName"),
-    @NamedQuery(name = "ProspectCustomer.findByMiddleName", query = "SELECT p FROM ProspectCustomer p WHERE p.middleName = :middleName"),
-    @NamedQuery(name = "ProspectCustomer.findByLastName", query = "SELECT p FROM ProspectCustomer p WHERE p.lastName = :lastName"),
-    @NamedQuery(name = "ProspectCustomer.findByState", query = "SELECT p FROM ProspectCustomer p WHERE p.state = :state"),
-    @NamedQuery(name = "ProspectCustomer.findByCity", query = "SELECT p FROM ProspectCustomer p WHERE p.city = :city"),
-    @NamedQuery(name = "ProspectCustomer.findByStreet", query = "SELECT p FROM ProspectCustomer p WHERE p.street = :street"),
-    @NamedQuery(name = "ProspectCustomer.findByEmail", query = "SELECT p FROM ProspectCustomer p WHERE p.email = :email"),
-    @NamedQuery(name = "ProspectCustomer.findByAgent", query = "SELECT p FROM ProspectCustomer p WHERE p.agent = :agent ORDER BY p.id DESC"),
-    @NamedQuery(name = "ProspectCustomer.findByPhoneNo", query = "SELECT p FROM ProspectCustomer p WHERE p.phoneNo = :phoneNo")})
-public class ProspectCustomer implements Serializable {
-    @Size(max = 30)
-    @Column(name = "company")
-    private String company;
-    @Size(max = 30)
-    @Column(name = "post")
-    private String post;
-    @JoinColumn(name = "agent", referencedColumnName = "agent_id")
-    @ManyToOne(optional = false)
-    private Agent agent;
+    @NamedQuery(name = "AgentProspect.findAll", query = "SELECT a FROM AgentProspect a"),
+    @NamedQuery(name = "AgentProspect.findById", query = "SELECT a FROM AgentProspect a WHERE a.id = :id"),
+    @NamedQuery(name = "AgentProspect.findByFirstName", query = "SELECT a FROM AgentProspect a WHERE a.firstName = :firstName"),
+    @NamedQuery(name = "AgentProspect.findByMiddleName", query = "SELECT a FROM AgentProspect a WHERE a.middleName = :middleName"),
+    @NamedQuery(name = "AgentProspect.findByLastName", query = "SELECT a FROM AgentProspect a WHERE a.lastName = :lastName"),
+    @NamedQuery(name = "AgentProspect.findByState", query = "SELECT a FROM AgentProspect a WHERE a.state = :state"),
+    @NamedQuery(name = "AgentProspect.findByCity", query = "SELECT a FROM AgentProspect a WHERE a.city = :city"),
+    @NamedQuery(name = "AgentProspect.findByStreet", query = "SELECT a FROM AgentProspect a WHERE a.street = :street"),
+    @NamedQuery(name = "AgentProspect.findByEmail", query = "SELECT a FROM AgentProspect a WHERE a.email = :email"),
+    @NamedQuery(name = "AgentProspect.findByPhoneNo", query = "SELECT a FROM AgentProspect a WHERE a.phoneNo = :phoneNo"),
+    @NamedQuery(name = "AgentProspect.findByCompany", query = "SELECT a FROM AgentProspect a WHERE a.company = :company"),
+    @NamedQuery(name = "AgentProspect.findByPost", query = "SELECT a FROM AgentProspect a WHERE a.post = :post"),
+    @NamedQuery(name = "AgentProspect.findByAgent", query = "SELECT a FROM AgentProspect a WHERE a.agent = :agent")})
+public class AgentProspect implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,53 +49,44 @@ public class ProspectCustomer implements Serializable {
     @Column(name = "id")
     private Long id;
     @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 30)
     @Column(name = "first_name")
     private String firstName;
-    @Size(max = 30)
     @Column(name = "middle_name")
     private String middleName;
     @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 30)
     @Column(name = "last_name")
     private String lastName;
     @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 20)
     @Column(name = "state")
     private String state;
     @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 20)
     @Column(name = "city")
     private String city;
     @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 50)
     @Column(name = "street")
     private String street;
-    // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 30)
     @Column(name = "email")
     private String email;
     @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 20)
     @Column(name = "phone_no")
     private String phoneNo;
+    @Column(name = "company")
+    private String company;
+    @Column(name = "post")
+    private String post;
+    @JoinColumn(name = "agent", referencedColumnName = "agent_id")
+    @ManyToOne(optional = false)
+    private Agent agent;
 
-    public ProspectCustomer() {
+    public AgentProspect() {
     }
 
-    public ProspectCustomer(Long id) {
+    public AgentProspect(Long id) {
         this.id = id;
     }
 
-    public ProspectCustomer(Long id, String firstName, String lastName, String state, String city, String street, String email, String phoneNo) {
+    public AgentProspect(Long id, String firstName, String lastName, String state, String city, String street, String email, String phoneNo) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -185,47 +168,6 @@ public class ProspectCustomer implements Serializable {
     public void setPhoneNo(String phoneNo) {
         this.phoneNo = phoneNo;
     }
-    
-    public String getFullName(){
-        String fname = getFirstName();
-        String mname = (getMiddleName().equals("")) ? " " : " " + getMiddleName() + " ";
-        String lname = getLastName();
-        
-        return lname + mname + fname;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof ProspectCustomer)) {
-            return false;
-        }
-        ProspectCustomer other = (ProspectCustomer) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "com.tp.neo.model.ProspectCustomer[ id=" + id + " ]";
-    }
-
-    public Agent getAgent() {
-        return agent;
-    }
-
-    public void setAgent(Agent agent) {
-        this.agent = agent;
-    }
 
     public String getCompany() {
         return company;
@@ -241,6 +183,48 @@ public class ProspectCustomer implements Serializable {
 
     public void setPost(String post) {
         this.post = post;
+    }
+
+    public Agent getAgent() {
+        return agent;
+    }
+
+    public void setAgent(Agent agent) {
+        this.agent = agent;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof AgentProspect)) {
+            return false;
+        }
+        AgentProspect other = (AgentProspect) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "com.tp.neo.model.AgentProspect[ id=" + id + " ]";
+    }
+    
+    
+    public String getFullName(){
+        String fname = getFirstName();
+        String mname = (getMiddleName().equals("")) ? " " : " " + getMiddleName() + " ";
+        String lname = getLastName();
+        
+        return lname + mname + fname;
     }
     
 }

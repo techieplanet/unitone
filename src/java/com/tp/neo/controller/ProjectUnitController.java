@@ -13,6 +13,7 @@ import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.ProjectUnit;
+import com.tp.neo.model.ProjectUnitType;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -121,6 +122,9 @@ public class ProjectUnitController extends AppController {
             Map<String, String> map = new HashMap<String, String>();
             map.put("title", projectUnit.getTitle());
             map.put("cpu", projectUnit.getCpu().toString());
+            map.put("building_cost", projectUnit.getBuildingCost().toString());
+            map.put("service_value", projectUnit.getServiceValue().toString());
+            map.put("income", projectUnit.getIncome().toString());
             map.put("lid", projectUnit.getLeastInitDep().toString());
             map.put("discount", projectUnit.getDiscount().toString());
             map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
@@ -129,7 +133,7 @@ public class ProjectUnitController extends AppController {
 
             map.put("amt_payable", projectUnit.getAmountPayable()+ "");
             map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
-            
+            map.put("unit_type_id", projectUnit.getUnitType() != null ? projectUnit.getUnitType().getId().toString() : "0");
 
             
             Gson gson = new GsonBuilder().create();
@@ -193,11 +197,15 @@ public class ProjectUnitController extends AppController {
                 
                 projectUnit.setTitle(request.getParameter("title"));
                 projectUnit.setCpu(Double.parseDouble(request.getParameter("cpu")));
+                projectUnit.setBuildingCost(Double.parseDouble(request.getParameter("building_cost")));
+                projectUnit.setServiceValue(Double.parseDouble(request.getParameter("service_value")));
                 projectUnit.setLeastInitDep(Double.parseDouble(request.getParameter("lid")));
                 projectUnit.setDiscount(Double.parseDouble(request.getParameter("discount")));
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
+                projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
+                projectUnit.setUnitType(em.find(ProjectUnitType.class, Integer.parseInt(request.getParameter("unittype"))));
 
                 projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
@@ -270,8 +278,12 @@ public class ProjectUnitController extends AppController {
                 map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
                 map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
                 map.put("commp", projectUnit.getCommissionPercentage().toString());
+                map.put("building_cost", projectUnit.getBuildingCost().toString());
+                map.put("income", projectUnit.getIncome().toString());
+                map.put("service_value", projectUnit.getServiceValue().toString());
 
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
+                
             }
         
            //boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
@@ -304,14 +316,18 @@ public class ProjectUnitController extends AppController {
                 
                 projectUnit.setTitle(request.getParameter("title"));
                 projectUnit.setCpu(Double.parseDouble(request.getParameter("cpu")));
+                projectUnit.setBuildingCost(Double.parseDouble(request.getParameter("building_cost")));
+                projectUnit.setServiceValue(Double.parseDouble(request.getParameter("service_value")));
                 projectUnit.setLeastInitDep(Double.parseDouble(request.getParameter("lid")));
                 projectUnit.setDiscount(Double.parseDouble(request.getParameter("discount")));
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
+                projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
 
                 projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
+                projectUnit.setUnitType(em.find(ProjectUnitType.class, Integer.parseInt(request.getParameter("unittype"))));
                 
                 new TrailableManager(projectUnit).registerUpdateTrailInfo(sessionUser.getSystemUserId());
                 
@@ -355,7 +371,9 @@ public class ProjectUnitController extends AppController {
                 map.put("amt_payable", projectUnit.getAmountPayable()+ "");
                 map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
                 map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
-                map.put("commp", projectUnit.getCommissionPercentage().toString());
+                map.put("buidling_cost", projectUnit.getBuildingCost().toString());
+                map.put("service_value", projectUnit.getServiceValue().toString());
+                map.put("income", projectUnit.getIncome().toString());
 
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
             }
@@ -442,6 +460,15 @@ public class ProjectUnitController extends AppController {
         if(!request.getParameter("quantity").matches("^\\d+(\\.?\\d+$)?")){
             errorMessages.put("quantity", "Please enter a valid Quantity");
         }
+        
+        if(!request.getParameter("building_cost").matches("^\\d+(\\.?\\d+$)?")){
+            errorMessages.put("building_cost", "Please enter valid money value");
+        }
+        
+        if(!request.getParameter("service_value").matches("^\\d+(\\.?\\d+$)?")){
+            errorMessages.put("service_value", "Please enter valid money value");
+        }
+        
         
         if(!(errorMessages.isEmpty())) throw new PropertyException("");
         
