@@ -21,6 +21,12 @@
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'create_customer')}">
                                 <li><a href="${pageContext.request.contextPath}/Customer?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Customer'}"> <c:out value='style=color:#fff' /></c:if> >New Customer</a></li>
                             </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'create_customer')}">
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=new_prospect" <c:if test="${sideNavAction eq 'new_prospect' && sideNav eq 'Customer'}"> <c:out value='style=color:#fff' /></c:if> >New Prospect</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'create_customer')}">
+                                <li><a href="${pageContext.request.contextPath}/Customer?action=list_prospects" <c:if test="${sideNavAction eq 'list_prospects' && sideNav eq 'Customer'}"> <c:out value='style=color:#fff' /></c:if> >Prospects List</a></li>
+                            </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
                                 <li><a href="${pageContext.request.contextPath}/Customer?action=current" <c:if test="${sideNavAction eq 'current' && sideNav eq 'Customer'}"><c:out value='style=color:#fff' /></c:if> >Currently Paying</a></li>
                             </c:if>
@@ -97,6 +103,14 @@
                         </li>
                   </c:if>     
                 
+                  <!--MESSAGE-->
+                  <li class="treeview <c:out value='${sideNav eq "Message" ? "active":""}' /> ">
+                      <a href="#"><i class="fa fa-envelope"></i><span>Messages</span><i class="fa fa-angle-left pull-right"></i></a>
+                      <ul class="treeview-menu">
+                        <li><a href="${pageContext.request.contextPath}/Message?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Message'}"> <c:out value='style=color:#fff' /></c:if> >New</a></li>
+                      </ul>
+                  </li>
+                            
                   <!--ANNOUNCEMENT-->
                   <li class="treeview">
                       <a href="#"><i class="fa fa-microphone"></i><span>Announcements</span><i class="fa fa-angle-left pull-right"></i></a>
