@@ -27,7 +27,7 @@
 
 <!--MODAL-->
       <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog form-modal">
+          <div class="modal-dialog form-modal" style="width:750px !important;">
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -68,12 +68,15 @@
       
       
 <script>
-    function launchEditUnitForm(unitId, context){        
+    function launchEditUnitForm(unitId, context){
         $.get(context+'/ProjectUnit',{action:'edit',id:unitId},function(response){
-                                console.log(response);
+                                //console.log(response);
                                 unit = JSON.parse(response);
                                 $('#title').val(unit.title);
                                 $('#cpu').val(parseFloat(unit.cpu).toFixed(2));
+                                $('#building_cost').val(parseFloat(unit.building_cost).toFixed(2));
+                                $('#service_value').val(parseFloat(unit.service_value).toFixed(2));
+                                $('#income').val(parseFloat(unit.income).toFixed(2));
                                 $('#lid').val(parseFloat(unit.lid).toFixed(2));
                                 $('#discount').val(unit.discount);
                                 $('#mpd').val(unit.mpd);
@@ -83,7 +86,7 @@
                                 $('#monthly_pay').val(parseFloat(unit.monthly_pay).toFixed(2));
                                 $('#amt_payable').val(parseFloat(unit.amt_payable).toFixed(2));
 
-                                
+                                $('#unittype').val(unit.unit_type_id);
                                 $('#loading').addClass("hidden");
         });
         

@@ -465,4 +465,5 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         return fullname;
     }
 
+
 }

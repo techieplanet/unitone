@@ -6,16 +6,9 @@
       <div class="box-header with-border">
         <h3 class="box-title">
             <span class="title-text"></span>
-            <%--<c:choose>--%>
-                <%--<c:when test="${project.id > 0}">--%>
-                    <!--Edit Unit-->
-                <%--</c:when>--%>    
-                <%--<c:otherwise>--%>
-                    <!--New Unit-->
-                <%--</c:otherwise>--%>
-            <%--</c:choose>--%>
+            
+            <!--<span class="income-text pull-right">Income: <span id="income-value"></span></span>-->
                     
-            <!--${project.id == null ? "New Project" : "Edit Project"}-->
             <span id="loading" class="hidden" style="float:right;">
                 <small>Fetching Data... &nbsp;&nbsp;&nbsp;</small> 
                 <img src="${pageContext.request.contextPath}/images/uploadProgress.gif" />
@@ -65,9 +58,37 @@
           </div>
 
           <div class="form-group marginbottom10">
+            <label for="unittype" class="col-sm-4 control-label">Unit Type*</label>
+            <div class="col-sm-7">      
+                <select class="form-control" name="unittype" id="unittype">
+                    <option value="0" selected="selected">--Select--</option>
+                    <c:forEach items="${unitTypes}" var="unitType">
+                        <option value="${unitType.id}">
+                            ${unitType.title}
+                        </option>
+                    </c:forEach>
+                </select>
+            </div>
+          </div>
+          
+          <div class="form-group marginbottom10">
             <label for="cpu" class="col-sm-4 control-label">Project Cost Per Unit*</label>
             <div class="col-sm-7">
                 <input type="text" name="cpu" id="cpu" class="form-control text-right medium" value="">
+            </div>
+          </div>
+          
+          <div class="form-group marginbottom10">
+            <label for="building_cost" class="col-sm-4 control-label">Building/Land Cost*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="building_cost" id="building_cost" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          <div class="form-group marginbottom10">
+            <label for="service_value" class="col-sm-4 control-label">Service Value*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="service_value" id="service_value" class="form-control medium text-right" value="">
             </div>
           </div>
           
@@ -78,6 +99,24 @@
             </div>
           </div>
           
+          <div class="form-group marginbottom10">
+            <label for="commp" class="col-sm-4 control-label">Commission Percentage*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="commp" id="commp" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          
+          
+          <div class="form-group marginbottom10">
+            <label for="income" class="col-sm-4 control-label">Income</label>
+            <div class="col-sm-7">            
+                <input type="text" name="income" id="income" readonly="readonly" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          <br/>
+          <h4 style="border-bottom: 1px solid #cccccc;">Payment</h4>
           <div class="form-group marginbottom10">
             <label for="amt_payable" class="col-sm-4 control-label">Amount Payable*</label>
             <div class="col-sm-7">            
@@ -105,14 +144,6 @@
                 <input type="text" name="monthly_pay" id="monthly_pay" readonly="readony" class="form-control medium text-right" value="">
             </div>
           </div>
-          
-          <div class="form-group marginbottom10">
-            <label for="commp" class="col-sm-4 control-label">Commission Percentage*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="commp" id="commp" class="form-control medium text-right" value="">
-            </div>
-          </div>
-          
           
           
 
@@ -169,6 +200,40 @@
             
             console.log("cpu: " + cpu, "discount: " + discount, "amt: " + amt_payable);
             console.log("lid " + lid, "mpd " + mpd, "amt_payable " + amt_payable, "monthly_pay: " + monthly_pay);
+        });
+        
+        
+        
+        //this is used to calculate the income on keyup of relevant fields
+        $("#discount, #cpu, #building_cost, #service_value, #commp").on("keyup", function(){
+            var cpu = parseFloat($("#cpu").val());
+            cpu = !isNaN(cpu) ? cpu : 0; 
+            $("#cpu").val(cpu);
+            
+            var discountPercentage = parseFloat($("#discount").val());
+            discountPercentage = !isNaN(discountPercentage) ? discountPercentage : 0; 
+            $("#discount").val(discountPercentage);
+            var discountValue = cpu * discountPercentage / 100;
+            
+            var buildingCost = parseFloat($("#building_cost").val());
+            buildingCost = !isNaN(buildingCost) ? buildingCost : 0; 
+            $("#building_cost").val(buildingCost);
+            
+            var serviceValue = parseFloat($("#service_value").val());
+            serviceValue = !isNaN(serviceValue) ? serviceValue : 0; 
+            $("#service_value").val(serviceValue);
+            
+            var commissionPercentage = parseFloat($("#commp").val());
+            commissionPercentage = !isNaN(commissionPercentage) ? commissionPercentage : 0; 
+            $("#commp").val(commissionPercentage);
+            
+            var commissionValue = (cpu * commissionPercentage / 100);
+            
+            var income = cpu - discountValue - buildingCost - serviceValue - commissionValue;
+            income = !isNaN(income) ? income : 0; 
+            $("#income").val(income.toFixed(2));
+            
+            
         });
         
         
