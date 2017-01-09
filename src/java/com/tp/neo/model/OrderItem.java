@@ -83,6 +83,8 @@ public class OrderItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "commission_percentage")
+    private Double commissionPercentage;
     @JoinColumn(name = "unit_id", referencedColumnName = "id")
     @ManyToOne
     private ProjectUnit unit;
@@ -262,14 +264,31 @@ public class OrderItem extends BaseModel {
 
     public void setUnit(ProjectUnit unit) {
         this.unit = unit;
+    } 
+
+    public Double getCommissionPercentage() {
+        return commissionPercentage;
+    }
+
+    public void setCommissionPercentage(Double commissionPercentage) {
+        this.commissionPercentage = commissionPercentage;
     }
     
     /****************** UTIL ********************/
+    /**
+     * Old Implementation
     public double getCommissionAmount(){
         DecimalFormat df = new DecimalFormat(".##");
         double amount = this.getUnit().getCpu() * this.getUnit().getCommissionPercentage() / 100;
         String amountString = df.format(amount); //rounded to two decimal places
         return Double.parseDouble(amountString); //change back to double and return
-    } 
+    }
+    */
     
+    public double getCommissionAmount(){
+        DecimalFormat df = new DecimalFormat(".##");
+        double amount = this.getUnit().getCpu() * this.getCommissionPercentage() / 100;
+        String amountString = df.format(amount); //rounded to two decimal places
+        return Double.parseDouble(amountString); //change back to double and return
+    }
 }

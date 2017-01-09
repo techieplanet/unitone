@@ -979,6 +979,7 @@ public class CustomerController extends AppController  {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
+
         String queryString = (sessionUser.getSystemUserTypeId() == 1) ? "ProductOrder.findByALLCurrentPayingCustomer" : "ProductOrder.findByCurrentPayingCustomer";
         
         Query JPQL = em.createNamedQuery(queryString);

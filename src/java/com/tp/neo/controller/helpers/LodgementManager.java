@@ -13,6 +13,7 @@ import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
 import java.util.List;
@@ -144,13 +145,12 @@ public class LodgementManager {
      * @throws RollbackException 
      */
     public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
-        
         em.getTransaction().begin();
         
         //approve the lodgement
         lodgement.setApprovalStatus((short)1);
         new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.flush();
+        em.merge(lodgement);
         
         notification.setStatus((short)2);
         em.merge(notification);
@@ -162,7 +162,6 @@ public class LodgementManager {
         
         for(int i=0; i < lodgementItems.size(); i++){
             LodgementItem thisItem = lodgementItems.get(i);
-      
             //set the item as approved
             thisItem.setApprovalStatus((short)1);
             new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
@@ -170,13 +169,13 @@ public class LodgementManager {
             //double entry - take the money out of their customer account and fund the project unit
             TransactionManager transactionManager = new TransactionManager(sessionUser);
             transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
-
+            
+            //split funds into respective accounts - buidling, service, income. Others can be added later too.
+            this.splitUnitFunds(customer, thisItem.getItem().getUnit(), thisItem);
+            
             //send approval alerts (email and SMS) to agent and customer
             AlertManager alertManager = new AlertManager();
             alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-
-            //credit agent wallet - double entry
-            transactionManager.doDoubleEntry(thisItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getItem().getCommissionAmount());
 
             //send wallet credit alert
             alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
@@ -184,7 +183,6 @@ public class LodgementManager {
         }//end for       
         em.merge(lodgement);
         em.getTransaction().commit();
-        
         updateMortgageStatus(order);
     }
     
@@ -223,6 +221,27 @@ public class LodgementManager {
 //        
 //        em.getTransaction().commit();
     }
+    
+    private void splitUnitFunds(Customer customer, ProjectUnit unit, LodgementItem lodgementItem){
+        System.out.println("Inside splitUnitFunds");
+        
+        //Split commissions - credit agent wallet - double entry
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), lodgementItem.getItem().getCommissionAmount());
+        
+        //Split property dev cost - debit unit, credit property dev  - double entry
+        Account propertyDevelopmentAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "PROPERTY_DEV").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), propertyDevelopmentAccount, lodgementItem.getItem().getUnit().getBuildingCost());
+        
+        //Split services cost - debit unit, credit property dev  - double entry
+        Account servicesAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "SERVICES").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), servicesAccount, lodgementItem.getItem().getUnit().getServiceValue());
+        
+        //Split income amount - debit unit, credit property dev  - double entry
+        Account incomeAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "INCOME").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), incomeAccount, lodgementItem.getItem().getUnit().getIncome());
+    }
+    
+    
     
     private void setLodgementStatus(Lodgement lodgement, short status) throws PropertyException, RollbackException{
         lodgement.setApprovalStatus(status);

@@ -297,8 +297,16 @@ public class DashboardHelper {
                 ProjectUnit unit = (ProjectUnit)unitDetail[0];
                 HashMap unitMap = new HashMap();
                 unitMap.put("unitName", unit.getTitle());
-                unitMap.put("stockPercentage",  totalUnitsSalesQuotaStock != 0 ? (long)unitDetail[1] / totalUnitsSalesQuotaStock * 100 : 0);
-                unitMap.put("valuePercentage", totalUnitsSalesQuotaValue != 0 ? (double)unitDetail[2] / totalUnitsSalesQuotaValue * 100 : 0);
+                
+                if(totalUnitsSalesQuotaStock > 0)
+                    unitMap.put("stockPercentage", (long)unitDetail[1] / totalUnitsSalesQuotaStock * 100);
+                else
+                    unitMap.put("stockPercentage", 0);
+                if(totalUnitsSalesQuotaStock > 0)
+                    unitMap.put("valuePercentage", (double)unitDetail[2] / totalUnitsSalesQuotaValue * 100);
+                else
+                    unitMap.put("valuePercentage", 0);
+
                 unitMapsList.add(unitMap);
             }
             
@@ -332,13 +340,22 @@ public class DashboardHelper {
         //Redeclare here as these variables will not be available in AJAX mode
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
+        
+        String extractor = "";
+        if(truncatedBy.equalsIgnoreCase("day"))
+            extractor = "doy";
+        else if(truncatedBy.equalsIgnoreCase("month"))
+            extractor = "month";
+        else if(truncatedBy.equalsIgnoreCase("year"))
+            extractor = "year";
     
         String query = "SELECT COUNT(DISTINCT(o.order_id)) as orderscount, SUM(o.quantity * u.amount_payable) as ordersvalue, " +
-                                                                           "to_char(date_trunc('" + truncatedBy + "', o.modified_date),'" + truncationResultFormat + "') as grouper " +
+                                                                           "to_char(date_trunc('" + truncatedBy + "', o.modified_date),'" + truncationResultFormat + "') as grouper, " +
+                                                                           "EXTRACT(" + extractor + " from o.modified_date) AS orderer " +
                                                                            "FROM order_item o JOIN project_unit u ON o.unit_id = u.id " +
                                                                            "WHERE o.approval_status = 1 AND (date(o.modified_date) >= '" + startDate.toString() + "' AND date(o.modified_date) <= '" + endDate.toString() + "') " +
-                                                                           "GROUP BY grouper";
-
+                                                                           "GROUP BY orderer, grouper ORDER BY orderer";
+        System.out.println("Order query: " + query);
         List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
         
         List<HashMap> summaryMapsList = new ArrayList<HashMap>();

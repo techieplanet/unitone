@@ -74,6 +74,15 @@ public class ProjectUnit extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "building_cost")
+    private Double buildingCost;
+    @Column(name = "service_value")
+    private Double serviceValue;
+    @Column(name = "income")
+    private Double income;
+    @JoinColumn(name = "unit_type", referencedColumnName = "id")
+    @ManyToOne
+    private ProjectUnitType unitType;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Account account;
@@ -312,6 +321,38 @@ public class ProjectUnit extends BaseModel {
 
     public void setAccount(Account account) {
         this.account = account;
+    }
+
+    public Double getBuildingCost() {
+        return buildingCost;
+    }
+
+    public void setBuildingCost(Double buildingCost) {
+        this.buildingCost = buildingCost;
+    }
+
+    public Double getServiceValue() {
+        return serviceValue;
+    }
+
+    public void setServiceValue(Double serviceValue) {
+        this.serviceValue = serviceValue;
+    }
+
+    public Double getIncome() {
+        return income;
+    }
+
+    public void setIncome(Double income) {
+        this.income = income;
+    }
+
+    public ProjectUnitType getUnitType() {
+        return unitType;
+    }
+
+    public void setUnitType(ProjectUnitType unitType) {
+        this.unitType = unitType;
     }
 
     

@@ -13,6 +13,7 @@ import com.tp.neo.model.Project;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.ProjectUnit;
+import com.tp.neo.model.ProjectUnitType;
 
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
@@ -159,7 +160,7 @@ public class ProjectController extends AppController {
 
         else if(action.equalsIgnoreCase("edit") && !(stringId.equals(""))){
             viewFile = PROJECTS_NEW;
-            
+            log("thru edit");
             //find by ID
             long id = Long.parseLong(stringId);
             
@@ -173,19 +174,26 @@ public class ProjectController extends AppController {
             Query query = em.createNamedQuery("ProjectUnit.findByProjectAndActive")
                                                 .setParameter("project", project)
                                                 .setParameter("deleted", 0);
-            List<ProjectUnit> projectUnits = query.getResultList();
+            List<ProjectUnit> projectUnits = query.getResultList();    
             
             //good to do this to put every object/entity in sync
             project.setProjectUnitCollection(projectUnits);
             
-            
+            /*
+                Get the project unit types
+            */
+            List<ProjectUnitType> unitTypes = em.createNamedQuery("ProjectUnitType.findByActive").setParameter("active", 1).getResultList();
+                    
+            log("length: " + unitTypes.size());
             request.setAttribute("units", projectUnits);
+            request.setAttribute("unitTypes", unitTypes);
             request.setAttribute("project", project);
             request.setAttribute("action", "edit");
             request.setAttribute("id", id);
             if(addstat == 1) request.setAttribute("success", true);
         }
         else if(action.equalsIgnoreCase("listunits") && loggedIn.equalsIgnoreCase("no")){
+            log("thru listunits");
             viewFile = "/views/index/units.jsp";
             request.setAttribute("projectUnits", getUnits(request));
         }
