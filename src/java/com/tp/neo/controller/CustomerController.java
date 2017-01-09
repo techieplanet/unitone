@@ -24,7 +24,7 @@ import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProductOrder;
-import com.tp.neo.model.ProspectCustomer;
+import com.tp.neo.model.AgentProspect;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
@@ -1419,14 +1419,14 @@ public class CustomerController extends AppController  {
         
         try{
             
-            validateProspectCustomer(request);
+            validateAgentProspect(request);
             
             emf = Persistence.createEntityManagerFactory("NeoForcePU");
             em =emf.createEntityManager();
             
             //Check if email already exists
-            Query query = em.createNamedQuery("ProspectCustomer.findByEmail").setParameter("email", request.getParameter("email"));
-            List<ProspectCustomer> prospect = query.getResultList();
+            Query query = em.createNamedQuery("AgentProspect.findByEmail").setParameter("email", request.getParameter("email"));
+            List<AgentProspect> prospect = query.getResultList();
             
             if(prospect.size() > 0){
                 errorMessages.put("Email", "Email alredy exists for " + prospect.get(0).getFullName());
@@ -1435,7 +1435,7 @@ public class CustomerController extends AppController  {
             
             em.getTransaction().begin();
             
-            ProspectCustomer customer = new ProspectCustomer();
+            AgentProspect customer = new AgentProspect();
             customer.setFirstName(request.getParameter("fname"));
             customer.setMiddleName(request.getParameter("mname"));
             customer.setLastName(request.getParameter("lname"));
@@ -1486,7 +1486,7 @@ public class CustomerController extends AppController  {
         
         try{
             
-            validateProspectCustomer(request);
+            validateAgentProspect(request);
             
             emf = Persistence.createEntityManagerFactory("NeoForcePU");
             em =emf.createEntityManager();
@@ -1495,7 +1495,7 @@ public class CustomerController extends AppController  {
             
             em.getTransaction().begin();
             
-            ProspectCustomer customer = em.find(ProspectCustomer.class, prospectId);
+            AgentProspect customer = em.find(AgentProspect.class, prospectId);
             
             customer.setFirstName(request.getParameter("fname"));
             customer.setMiddleName(request.getParameter("mname"));
@@ -1514,7 +1514,7 @@ public class CustomerController extends AppController  {
             
             em.getTransaction().commit();
             
-            request.setAttribute("prospect", em.find(ProspectCustomer.class, customer.getId()));
+            request.setAttribute("prospect", em.find(AgentProspect.class, customer.getId()));
             request.setAttribute("success", "Prospective client details has been updated successfully");
             
         }catch(PropertyException pe){
@@ -1542,7 +1542,7 @@ public class CustomerController extends AppController  {
         
     }
     
-    private void validateProspectCustomer(HttpServletRequest request) throws PropertyException{
+    private void validateAgentProspect(HttpServletRequest request) throws PropertyException{
         
         errorMessages.clear();
         
@@ -1589,16 +1589,16 @@ public class CustomerController extends AppController  {
         
     }
     
-    private List<ProspectCustomer> getProspectiveCustomers(HttpServletRequest request) {
+    private List<AgentProspect> getProspectiveCustomers(HttpServletRequest request) {
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
         Agent agent = em.find(Agent.class, sessionUser.getSystemUserId());
         
-        Query query = em.createNamedQuery("ProspectCustomer.findByAgent").setParameter("agent", agent);
+        Query query = em.createNamedQuery("AgentProspect.findByAgent").setParameter("agent", agent);
         
-        List<ProspectCustomer> prospects = query.getResultList();
+        List<AgentProspect> prospects = query.getResultList();
         System.out.println("Prospects count : " + prospects.size());
         
         //em.close();
@@ -1607,14 +1607,14 @@ public class CustomerController extends AppController  {
     }
     
     
-    private ProspectCustomer getProspect(HttpServletRequest request) {
+    private AgentProspect getProspect(HttpServletRequest request) {
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
         long id = Long.parseLong(request.getParameter("id"));
         
-        ProspectCustomer pc =  em.find(ProspectCustomer.class, id);
+        AgentProspect pc =  em.find(AgentProspect.class, id);
         em.close();
         
         return pc;
