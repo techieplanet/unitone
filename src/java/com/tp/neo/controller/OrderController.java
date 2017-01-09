@@ -461,6 +461,10 @@ public class OrderController extends AppController {
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
             orderItem.setCreatedDate(getDateTime().getTime());
+            
+            if(sessionUser.getSystemUserTypeId() == 1){
+                orderItem.setCommissionPercentage(saleItem.commp);
+            }
             if(sessionUser != null){
                 orderItem.setCreatedBy(sessionUser.getSystemUserId()); 
             }

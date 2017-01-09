@@ -40,7 +40,7 @@
                                 <td class="agentState"><c:out value="${agent.state}" /></td>
                               
                                 <td>
-                                    <input type="hidden" class="agentImg" value='<c:out value="${agent.photoPath}"></c:out>' />
+                                    <input type="hidden" class="agentImg" value='<c:out value="${agentImageAccessDir}/${agent.photoPath}"></c:out>' />
                                     <a class="btn btn-primary" href="#" onclick="selectAgent('${agent.agentId}')" role="button">Select</a>
                                 </td>
                             </tr>
@@ -82,7 +82,7 @@
                  <div class="row">
                      
                      <div class="col-md-3">
-                         <img src="" alt="No image" />
+                         <img src="" class="agent_img img img-responsive img-thumbnail" width="100px" height="100px" alt="No image" />
                      </div>
                      
                      <div class="col-md-9">
