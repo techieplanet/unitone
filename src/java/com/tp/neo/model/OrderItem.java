@@ -47,6 +47,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name="OrderItem.findByOrderAndUattendedItem", query = "SELECT o FROM OrderItem o WHERE o.order = :orderId AND o.approvalStatus = :approvalStatus ORDER BY o.id DESC"),
     @NamedQuery(name="OrderItem.findByOrder", query = "SELECT o FROM OrderItem o WHERE o.order = :order"),
     @NamedQuery(name="OrderItem.findByUnit", query = "SELECT o FROM OrderItem o WHERE o.unit = :unit"),
+    @NamedQuery(name="OrderItem.findByCustomer", query = "SELECT o FROM OrderItem o WHERE o.order.id in (select p.id from ProductOrder p where p.customer = :customer )"),
     @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy"),
     
     @NamedQuery(name = "OrderItem.findByUncompletedOrder", query = "SELECT o FROM OrderItem o JOIN FETCH o.order po WHERE po.approvalStatus < :approvalStatus"),

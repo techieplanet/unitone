@@ -24,6 +24,7 @@ import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.ProspectCustomer;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
@@ -72,6 +73,8 @@ public class CustomerController extends AppController  {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static String CUSTOMER_ADMIN = "/views/customer/admin.jsp"; 
     private static String CUSTOMER_NEW = "/views/customer/add.jsp";
+    private static String CUSTOMER_NEW_PROSPECT = "/views/customer/prospective_customer.jsp";
+    private static String LIST_PROSPECT = "/views/customer/list_prospective_customer.jsp";
     private static String CUSTOMER_COMPLETED_PAYMENT = "/views/customer/completed_payment.jsp";
     private static String CUSTOMER_CURRENT_PAYING = "/views/customer/current_paying.jsp";
     private static String CUSTOMER_PROFILE = "/views/customer/profile.jsp";
@@ -201,10 +204,21 @@ public class CustomerController extends AppController  {
               Customer customer = new Customer();
             try{                                
                 if(request.getParameter("action").equals("update")) { //edit mode
-                this.processUpdateRequest(request,response);
-                return;
-                }else{
-                this.processInsertRequest(request, response);
+                    this.processUpdateRequest(request,response);
+                    return;
+                }
+                else if(request.getParameter("action").equals("new_prospect")){
+                    
+                    addNewProspect(request,response);
+                    return;
+                }
+                else if(request.getParameter("action").equals("edit_prospect")){
+                    
+                    updateProspect(request,response);
+                    return;
+                }
+                else{
+                    this.processInsertRequest(request, response);
                 }
                
             }
@@ -639,8 +653,25 @@ public class CustomerController extends AppController  {
                
                return;
         }
-//        else {
-//             if(super.hasActiveUserSession(request, response, request.getRequestURL().toString())){
+        else if(action.equalsIgnoreCase("new_prospect")){
+            
+            viewFile = CUSTOMER_NEW_PROSPECT;
+            
+            
+        }
+        else if(action.equalsIgnoreCase("list_prospects")){
+            
+            viewFile = LIST_PROSPECT;
+            
+            request.setAttribute("prospects", getProspectiveCustomers(request));
+            
+        }
+        else if(action.equalsIgnoreCase("edit_prospect")){
+            viewFile = "/views/customer/edit_prospect.jsp";
+            
+            request.setAttribute("prospect", getProspect(request));
+            action = "lis_prospects";
+        }
         else if(action.equalsIgnoreCase("delete")){
            
             this.delete(Integer.parseInt(request.getParameter("id")));
@@ -1381,6 +1412,214 @@ public class CustomerController extends AppController  {
         response.getWriter().close();
     }
     
+    private void addNewProspect(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+        
+        try{
+            
+            validateProspectCustomer(request);
+            
+            emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            em =emf.createEntityManager();
+            
+            //Check if email already exists
+            Query query = em.createNamedQuery("ProspectCustomer.findByEmail").setParameter("email", request.getParameter("email"));
+            List<ProspectCustomer> prospect = query.getResultList();
+            
+            if(prospect.size() > 0){
+                errorMessages.put("Email", "Email alredy exists for " + prospect.get(0).getFullName());
+                throw new PropertyException("Email Already Exist");
+            }
+            
+            em.getTransaction().begin();
+            
+            ProspectCustomer customer = new ProspectCustomer();
+            customer.setFirstName(request.getParameter("fname"));
+            customer.setMiddleName(request.getParameter("mname"));
+            customer.setLastName(request.getParameter("lname"));
+            customer.setEmail(request.getParameter("email"));
+            customer.setState(request.getParameter("state"));
+            customer.setCity(request.getParameter("city"));
+            customer.setStreet(request.getParameter("street"));
+            customer.setPhoneNo(request.getParameter("phone"));
+            customer.setCompany(request.getParameter("customer_comapany_name"));
+            customer.setPost(request.getParameter("customer_post"));
+            
+            customer.setAgent((Agent)sessionUser);
+            
+            em.persist(customer);
+            
+            em.getTransaction().commit();
+            
+            request.setAttribute("success", "Prospective client details has been registered successfully");
+            
+        }catch(PropertyException pe){
+            
+            System.out.println("PropertyException : " + pe.getMessage());
+            request.setAttribute("errors", errorMessages );
+        }
+        catch(RollbackException rbe){
+            System.out.println("Transaction Rolled Back : " + rbe.getMessage());
+            
+        }
+        finally{
+            
+            if(em != null){
+                em.close();
+            }
+            
+            if(emf != null){
+                emf.close();
+            }
+            
+            String viewFile = CUSTOMER_NEW_PROSPECT;
+            request.getRequestDispatcher(viewFile).forward(request, response);
+        }
+    }
+    
+    private void updateProspect(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+        
+        try{
+            
+            validateProspectCustomer(request);
+            
+            emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            em =emf.createEntityManager();
+            
+            long prospectId = Long.parseLong(request.getParameter("id"));
+            
+            em.getTransaction().begin();
+            
+            ProspectCustomer customer = em.find(ProspectCustomer.class, prospectId);
+            
+            customer.setFirstName(request.getParameter("fname"));
+            customer.setMiddleName(request.getParameter("mname"));
+            customer.setLastName(request.getParameter("lname"));
+            customer.setEmail(request.getParameter("email"));
+            customer.setState(request.getParameter("state"));
+            customer.setCity(request.getParameter("city"));
+            customer.setStreet(request.getParameter("street"));
+            customer.setPhoneNo(request.getParameter("phone"));
+            customer.setCompany(request.getParameter("customer_comapany_name"));
+            customer.setPost(request.getParameter("customer_post"));
+            
+            customer.setAgent((Agent)sessionUser);
+            
+            em.merge(customer);
+            
+            em.getTransaction().commit();
+            
+            request.setAttribute("prospect", em.find(ProspectCustomer.class, customer.getId()));
+            request.setAttribute("success", "Prospective client details has been updated successfully");
+            
+        }catch(PropertyException pe){
+            
+            System.out.println("PropertyException : " + pe.getMessage());
+            request.setAttribute("errors", errorMessages );
+        }
+        catch(RollbackException rbe){
+            System.out.println("Transaction Rolled Back : " + rbe.getMessage());
+            
+        }
+        finally{
+            
+            if(em != null){
+                em.close();
+            }
+            
+            if(emf != null){
+                emf.close();
+            }
+            
+            String viewFile = "/views/customer/edit_prospect.jsp";
+            request.getRequestDispatcher(viewFile).forward(request, response);
+        }
+        
+    }
+    
+    private void validateProspectCustomer(HttpServletRequest request) throws PropertyException{
+        
+        errorMessages.clear();
+        
+        if(request.getParameter("fname").isEmpty()){
+            errorMessages.put("First Name", "First name is required");
+        }
+        
+        if(request.getParameter("lname").isEmpty()){
+            errorMessages.put("Last Name", "Last name is required");
+        }
+        
+        if(request.getParameter("street").isEmpty()){
+            errorMessages.put("Street", "Street is required");
+        }
+        
+        if(request.getParameter("city").isEmpty()){
+            errorMessages.put("City", "City is required");
+        }
+        
+        if(request.getParameter("state").isEmpty()){
+            errorMessages.put("State", "State is required");
+        }
+        
+        if(request.getParameter("phone").isEmpty()){
+            errorMessages.put("Phone", "Phone is required");
+        }
+        
+        if(request.getParameter("email").isEmpty()){
+            errorMessages.put("Email", "Email is required");
+        }
+        
+        if(request.getParameter("customer_comapany_name").isEmpty()){
+            errorMessages.put("Company Name", "Company name is required");
+        }
+        
+        if(request.getParameter("customer_post").isEmpty()){
+            errorMessages.put("Customer Post", "Customer post is required");
+        }
+        
+        if(!errorMessages.isEmpty()){
+            
+            throw new PropertyException("Prospective Customer validation error");
+        }
+        
+    }
+    
+    private List<ProspectCustomer> getProspectiveCustomers(HttpServletRequest request) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Agent agent = em.find(Agent.class, sessionUser.getSystemUserId());
+        
+        Query query = em.createNamedQuery("ProspectCustomer.findByAgent").setParameter("agent", agent);
+        
+        List<ProspectCustomer> prospects = query.getResultList();
+        System.out.println("Prospects count : " + prospects.size());
+        
+        //em.close();
+        
+        return prospects;
+    }
+    
+    
+    private ProspectCustomer getProspect(HttpServletRequest request) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long id = Long.parseLong(request.getParameter("id"));
+        
+        ProspectCustomer pc =  em.find(ProspectCustomer.class, id);
+        em.close();
+        
+        return pc;
+    }
+    
     /*TP: Getting the customer Id for public use*/
     public Long getSystemUserId(){
     return customer.getCustomerId();
@@ -1395,6 +1634,14 @@ public class CustomerController extends AppController  {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    
+
+    
+
+    
+
+    
 
     
     

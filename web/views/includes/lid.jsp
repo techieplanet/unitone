@@ -70,6 +70,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- JQUERY PrintArea -->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.PrintArea.js"></script>
     
+    <!-- CKEditor plugin -->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ckeditor/ckeditor.js"></script>
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>

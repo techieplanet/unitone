@@ -35,6 +35,7 @@
     <class>com.tp.neo.model.Notification_1</class>
     <class>com.tp.neo.model.Company</class>
     <class>com.tp.neo.model.ProjectUnitType</class>
+    <class>com.tp.neo.model.ProspectCustomer</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <!--LOCALHOST-->
     <properties>

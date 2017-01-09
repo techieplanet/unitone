@@ -9,6 +9,7 @@ import com.tp.neo.interfaces.IRestricted;
 import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -110,6 +111,8 @@ public class Agent extends BaseModel implements SystemUser  {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
+    private Collection<ProspectCustomer> prospectCustomerCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
     private Collection<Withdrawal> withdrawalCollection;
 
@@ -545,6 +548,16 @@ public class Agent extends BaseModel implements SystemUser  {
     }
 
     
+
+
+    @XmlTransient
+    public Collection<ProspectCustomer> getProspectCustomerCollection() {
+        return prospectCustomerCollection;
+    }
+
+    public void setProspectCustomerCollection(Collection<ProspectCustomer> prospectCustomerCollection) {
+        this.prospectCustomerCollection = prospectCustomerCollection;
+    }
 
 
 }
