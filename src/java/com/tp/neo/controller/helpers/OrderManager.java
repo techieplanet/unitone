@@ -5,16 +5,20 @@
  */
 package com.tp.neo.controller.helpers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Company;
+import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
@@ -22,13 +26,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.PropertyException;
 import org.apache.commons.lang3.text.StrSubstitutor;
         
@@ -405,16 +413,128 @@ public class OrderManager {
         return resolvedString;
     }
     
+    public List<OrderItem> prepareOrderItem(SaleItemObjectsList salesItemObject, Agent agent){
+        List<OrderItem> orderItemList = new ArrayList();
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<SaleItemObject> salesItem = salesItemObject.sales;
+        for(SaleItemObject saleItem : salesItem) {
+            
+            OrderItem orderItem = new OrderItem();
+            
+            short approval = 0;
+            long unitId = saleItem.productUnitId;
+            ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
+            
+            orderItem.setQuantity(saleItem.productQuantity);
+            orderItem.setInitialDep((double)(saleItem.productMinimumInitialAmount));
+            orderItem.setDiscountAmt(projectUnit.getDiscount());
+            orderItem.setDiscountPercentage(projectUnit.getDiscount());
+            orderItem.setCreatedDate(getDateTime().getTime());
+            
+            if(sessionUser.getSystemUserTypeId() == 1){
+                orderItem.setCommissionPercentage(saleItem.commp);
+            }
+            if(sessionUser != null){
+                orderItem.setCreatedBy(sessionUser.getSystemUserId()); 
+            }
+            orderItem.setApprovalStatus(approval);
+            orderItem.setUnit(projectUnit);
+            
+            orderItemList.add(orderItem);
+        }
+        
+        return orderItemList;
+    }
+    
+    public Lodgement prepareLodgement(Map request, Agent agent) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Lodgement lodgement = new Lodgement();
+        
+        Short paymentMethod = Short.parseShort(request.get("paymentMethod").toString());
+        
+        CompanyAccount companyAccount = em.find(CompanyAccount.class, Integer.parseInt(request.get("companyAccount").toString()));
+        
+        lodgement.setPaymentMode(paymentMethod);
+        lodgement.setLodgmentDate(this.getDateTime().getTime());
+        lodgement.setCreatedDate(this.getDateTime().getTime());
+        if(sessionUser != null) {
+            lodgement.setCreatedBy(sessionUser.getSystemUserId());
+            lodgement.setCreatedByUserType(Short.parseShort((sessionUser.getSystemUserTypeId()).toString()));
+        }
+        lodgement.setCompanyAccountId(companyAccount);
+        lodgement.setApprovalStatus((short)0);
+        
+        if(paymentMethod == 1) {
+            lodgement.setTransactionId(request.get("tellerNumber").toString());
+            lodgement.setAmount(Double.parseDouble(request.get("tellerAmount").toString()));
+            lodgement.setDepositorName(request.get("depositorsName").toString());
+            lodgement.setLodgmentDate(getDateTime().getTime());
+        }
+        else if(paymentMethod == 2){
+            lodgement.setAmount(Double.parseDouble(request.get("cardAmount").toString()));
+        }
+        else if(paymentMethod == 3){
+            
+            lodgement.setAmount(Double.parseDouble(request.get("cashAmount").toString()));
+            
+        }
+        else if(paymentMethod == 4) {
+            
+            lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
+            lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
+            lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
+            lodgement.setLodgmentDate(getDateTime().getTime());
+            
+        }
+        
+        return lodgement;
+    }
+    
+    public SaleItemObjectsList getCartData(String orderItemsJsonString) {
+        SaleItemObjectsList saleObj = this.processJsonData(orderItemsJsonString);
+        return saleObj;
+    }
+    
+    //This method processes the new order items, sent as json data via request attribute from new order form
+    private SaleItemObjectsList processJsonData(String json) {
+        Gson gson = new GsonBuilder().create();
+        System.out.println(json);
+        
+        SaleItemObjectsList salesObj = gson.fromJson(json,SaleItemObjectsList.class);
+        
+        ArrayList<SaleItemObject> sales = salesObj.sales;
+        
+        for(SaleItemObject s : sales) {
+            System.out.println("Product Name : " + s.productName);
+            System.out.println("Product Qty : " + s.productQuantity);
+            System.out.println("Product Amount Per Unit " + s.amountUnit);
+            System.out.println("Product Cost " + s.amountTotalUnit);
+            System.out.println("Commision Payable : " + s.commp);
+        }
+        
+        return salesObj;
+    }
+    
+    private Calendar getDateTime(){
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        return calendar;
+    }
     
     public static void main(String[] args){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-            EntityManager em = emf.createEntityManager();
-            
-            Company company = em.find(Company.class, 1);
-            Customer customer = em.find(Customer.class, 15L);
-            Lodgement lodgement = em.find(Lodgement.class, 30L);
-            
-            createInvoice(customer, lodgement, company, "");
+//        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+//            EntityManager em = emf.createEntityManager();
+//            
+//            Company company = em.find(Company.class, 1);
+//            Customer customer = em.find(Customer.class, 15L);
+//            Lodgement lodgement = em.find(Lodgement.class, 30L);
+//            
+//            createInvoice(customer, lodgement, company, "");
         
     }
     
