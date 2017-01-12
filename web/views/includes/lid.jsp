@@ -79,6 +79,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    
+    <!-- ngwidgets -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/js/ngwidgets/styles/ngx.base.css" type="text/css" />
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/angular.min.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxcore.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxbuttons.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxscrollbar.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxlistbox.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxdata.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxinput.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxdropdownlist.js"></script>
   </head>
   <!--
   BODY TAG OPTIONS:

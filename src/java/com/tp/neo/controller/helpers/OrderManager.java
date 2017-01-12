@@ -444,6 +444,8 @@ public class OrderManager {
             orderItem.setUnit(projectUnit);
             
             orderItemList.add(orderItem);
+            
+            System.out.println("Notification ID : " + saleItem.dayOfNotification);
         }
         
         return orderItemList;

@@ -261,6 +261,11 @@ public class OrderController extends AppController {
             request.setAttribute("customerId",customerId);
         }
         
+        
+        String imageAccessDirPathCustomer = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+        request.setAttribute("customerImageAccessDir", imageAccessDirPathCustomer + "/customer");
+        request.setAttribute("customerKinImageAccessDir", imageAccessDirPathCustomer + "/customerKin");
+        
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Order");
         request.setAttribute("sideNavAction",action);
@@ -334,7 +339,7 @@ public class OrderController extends AppController {
             
             OrderManager orderManager = new OrderManager(sessionUser);
             SaleItemObjectsList saleItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
-            
+           
             //Get Session User
             //SystemUser user  = sessionUser;
             

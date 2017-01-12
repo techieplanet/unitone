@@ -87,6 +87,13 @@ public class CompanyAccount implements Serializable {
         this.lodgementCollection = lodgementCollection;
     }
 
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_company_account";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_company_account";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_company_account";
+        else return "view_company_account";
+    }
+    
     @Override
     public int hashCode() {
         int hash = 0;

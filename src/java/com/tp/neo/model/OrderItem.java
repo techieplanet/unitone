@@ -73,7 +73,8 @@ import javax.xml.bind.annotation.XmlTransient;
                                                                     + "FROM ProjectUnit u LEFT JOIN u.orderItemCollection item ON item.approvalStatus = :item_aps "
                                                                     + "LEFT JOIN item.lodgementItemCollection l ON l.approvalStatus = :aps "
                                                                     + "WHERE u.project.id = :projectId AND u.project.deleted = 0 "
-                                                                    + "GROUP BY u.id ORDER  BY u.id"),
+                                                                    + "GROUP BY u.id ORDER  BY u.id")
+       // @NamedQuery(name = "OrderItem.findByDayOfReminder", query = "SELECT o, o.order.customer.customerId as 'customerId' FROM OrderItem o JOIN ProductOrder po  WHERE o.dayOfNotification = :notificationDay ORDER BY o.order.customer.customerId"),
         
     })
 

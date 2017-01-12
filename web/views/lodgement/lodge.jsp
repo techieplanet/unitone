@@ -12,7 +12,7 @@
           
    <section class="content-header">
       <h1>
-        Lodgement
+          <a href="${pageContext.request.contextPath}/Lodgement">Lodgement</a>
       </h1>
     </section>
        
@@ -63,9 +63,6 @@
                 </tr>
             </c:forEach>
       </tbody>
-        <tfoot>
-
-        </tfoot>
       </table>
       <div><span><a href="#" onclick="showSelectedCustomer()">View selected customer <i class="fa fa-chevron-right"></i></a> </span></div>
     </div><!-- /.box-body -->
@@ -387,13 +384,13 @@
                 ]
             });
     
-        $("#lodgementCartTable").DataTable({
-                "autoWidth": false,
-                "columnDefs": [
-                    { "sortable": false}
-                ]
-        });
+            $("#lodgementCartTable").DataTable({
+                    "autoWidth": false,
+                    "columnDefs": [
+                        { "sortable": false}
+                    ]
+            });
       
           });
-          
+  </script>        
  
