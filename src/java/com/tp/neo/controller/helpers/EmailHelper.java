@@ -11,10 +11,12 @@ import static com.tp.neo.controller.components.AppController.defaultEmail;
 import static com.tp.neo.controller.components.AppController.APP_NAME;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
 import com.tp.neo.model.Withdrawal;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -238,7 +240,7 @@ public class EmailHelper {
     
     protected void sendLodgementApprovalEmailToAgent(Customer customer, ProjectUnit unit, double amount){
         String messageBody =   "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
-                      + "<br/>" + "A lodgement has been approved for your customer - " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "," 
+                      + "<br/>" + "A lodgement has been approved for your customer - " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")" 
                       + "Item: " + unit.getTitle() + " in " + unit.getProject().getName() + "."
                       + "Number of Units: " + unit.getQuantity()
                       + "This sale has been advanced by the sum of " + String.format("%.2f", amount) + "."
@@ -252,6 +254,41 @@ public class EmailHelper {
         
         new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
     }
+    
+    
+    
+    
+    /*********************************** LODGEMENT DECLINE ***********************************/
+    protected void sendLodgementDeclineEmailToCustomer(Customer customer, Lodgement lodgement, double amount){
+        String messageBody =   "Dear " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
+                      + "<br/>" + "Your lodgement of " + lodgement.getAmount() + " on " + lodgement.getCreatedDate() + " has been declined. " 
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "Please contact your agent or our customer care for further details."
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": Lodgement Decline";
+        
+        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    protected void sendLodgementDeclineEmailToAgent(Customer customer, Lodgement lodgement, double amount){
+        String messageBody =   "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
+                      + "<br/>" + "A lodgement of your customer -  " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ") has been declined." 
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "Please contact your agent or our customer care for further details."
+                      + "<br/>"  
+                      + "<br/>"  
+                      + "<br/>" + APP_NAME;
+        
+        String emailSubject = APP_NAME + ": New Lodgement Approval";
+        
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
     
     
     
@@ -284,5 +321,39 @@ public class EmailHelper {
         
        for(int i=0; i < recipientsList.size(); i++)            
            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+    }
+    
+    
+    
+    /************************** REMINDER ALERT ****************************************/
+    protected void sendReminderAlert(List customerAndItemsList, int dueDays){
+        String orderItemsString = "<ul>";
+        for(Object customerAndItems : customerAndItemsList){
+            HashMap customerAndItemsMap = (HashMap) customerAndItems;
+            Customer customer = (Customer)customerAndItemsMap.get("customer");
+            List<OrderItem> orderItemsList = (List)customerAndItemsMap.get("order_items");
+            
+            for(Object itemListElement: orderItemsList){
+                HashMap itemMap = (HashMap)itemListElement;
+                OrderItem item = (OrderItem)itemMap.get("order_item");
+                double balance = (Double)itemMap.get("balance");
+                orderItemsString += "<li>" + item.getUnit().getTitle() + " (" + item.getUnit().getProject().getName() + "): " + balance + "</li>";
+            }
+            
+            orderItemsString += "</ul>";
+        
+        
+            String messageBody =   "Dear Customer (" + customer.getFirstname() + " " + customer.getLastname() + "(" + customer.getAccount().getAccountCode() + ")" 
+                            + "<br/>Reminder on your orders with payment due in " + dueDays + "."
+                            + "<br/>" + orderItemsString
+                            + "<br/><br/>" + "Please take necessary actions."
+                            + "<br/>"  
+                            + "<br/>"  
+                            + "<br/>" + APP_NAME;
+
+            String emailSubject = APP_NAME + ": Payment Due in " + dueDays;
+
+            new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+        }
     }
 }

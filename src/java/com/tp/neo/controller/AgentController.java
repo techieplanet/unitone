@@ -756,9 +756,9 @@ public class AgentController extends AppController {
                agent.setEmail(request.getParameter("agentEmail"));
                //agent.setPassword(request.getParameter("agentPassword"));
                 
-               if(!request.getParameter("agentPassword").isEmpty()){
-                    agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
-               }
+//               if(!request.getParameter("agentPassword").isEmpty()){
+//                    agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
+//               }
                 
                 agent.setStreet(request.getParameter("agentStreet"));
                 agent.setCity(request.getParameter("agentCity"));

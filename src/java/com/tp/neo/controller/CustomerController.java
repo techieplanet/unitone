@@ -362,7 +362,7 @@ public class CustomerController extends AppController  {
                 SaleItemObjectsList saleItemObjectList = order.getCartData(request);
                 Map requestParameters = order.getRequestParameters(request);
                 
-                List<OrderItem> orderItem =  order.prepareOrderItem(saleItemObjectList, agent);
+                List<OrderItem> orderItem =  order.prepareOrderItem(saleItemObjectList, agent,sessionUser);
                 Lodgement lodgement = order.prepareLodgement(requestParameters, agent);
                 lodgement.setCustomer(customer);
                 

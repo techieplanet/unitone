@@ -126,12 +126,19 @@ public class LodgementManager {
         ProductOrder order = lodgementItems.get(0).getItem().getOrder();
         
         if(order.getApprovalStatus() == 0){ //unattended, create new order notification
-            //this method will handle the process: credit the customer account, create order notification and send new order alerts to admins
-            new OrderManager(sessionUser).processOrderLevelLodgementApproval(lodgement, order, lodgement.getCustomer(), applicationContext);
-            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification,order);
+            System.out.println("Inside approveLodgement order side");
+            //process lodgement approval for a fresh  new order
+            processLodgementApproval(lodgement, lodgement.getCustomer(), notification);
+            
+            //now this method will create the alerts for the order 
+            new OrderManager(sessionUser).createNewOrderAlerts(lodgement, order, lodgement.getCustomer(), applicationContext);
+            //processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification,order);
         }
         else{//mortgage lodgement
-            processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification, order);
+            System.out.println("Inside make lodgement route");
+            //processLodgementApproval(lodgement, lodgementItems, lodgement.getCustomer(), notification, order);
+            processLodgementApproval(lodgement, lodgement.getCustomer(), notification);
+            processApprovedLodgementItems(lodgementItems, lodgement.getCustomer(), order);
         }
     }
     
@@ -144,7 +151,7 @@ public class LodgementManager {
      * @throws PropertyException
      * @throws RollbackException 
      */
-    public void processLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
+    private void processLodgementApproval1(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
         em.getTransaction().begin();
         
         //approve the lodgement
@@ -166,7 +173,7 @@ public class LodgementManager {
             thisItem.setApprovalStatus((short)1);
             new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
             
-            //double entry - take the money out of their customer account and fund the project unit
+            //double entry - take the money out of the customer account and fund the project unit
             TransactionManager transactionManager = new TransactionManager(sessionUser);
             transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
             
@@ -186,47 +193,113 @@ public class LodgementManager {
         updateMortgageStatus(order);
     }
     
-    
-    public void declineLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer) throws PropertyException, RollbackException{
+    /**
+     * 1. This method is used to approve the lodgment made for a new order i.e. it is run when approve lodgement is clicked
+     * 2. It also clears the lodgment notification
+     * 3. It credits the customer account since the lodgement has been approved
+     * 4. Commits changes to database
+     * @param lodgement
+     * @param customer
+     * @param notification
+     * @throws PropertyException
+     * @throws RollbackException 
+     */
+    private void processLodgementApproval(Lodgement lodgement, Customer customer, Notification notification) throws PropertyException, RollbackException{
+        em.getTransaction().begin();
         
+        //approve the lodgement
+        lodgement.setApprovalStatus((short)1);
+        new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+        em.merge(lodgement);
+        
+        //set the lodgement items as approved to ensure the order can be traced for fresh order process flow
+        List<LodgementItem> lodgmeItems = (List)lodgement.getLodgementItemCollection();
+        for(LodgementItem thisItem : lodgmeItems){
+            thisItem.setApprovalStatus((short)1);
+            new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+            em.merge(thisItem);
+        }
+        
+        notification.setStatus((short)2);
+        em.merge(notification);
+        
+        //double entry: debit cash, credit customer account to the tune of the lodgment
+        Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
+        
+        em.getTransaction().commit();
+    }
+    
+    
+    /**
+     * This will process approved (a new order may not have order items approved and so not all lodgment items  ) lodgement items from an approved lodgement
+     * @param lodgementItems
+     * @param customer
+     * @param order
+     * @throws PropertyException
+     * @throws RollbackException 
+     */
+    protected void processApprovedLodgementItems(List<LodgementItem> lodgementItems, Customer customer, ProductOrder order) throws PropertyException, RollbackException{
+        em.getTransaction().begin();
+        System.out.println("processApprovedLodgementItems LITEMS SIZE: " + lodgementItems.size());
+        
+        for(int i=0; i < lodgementItems.size(); i++){
+            System.out.println("Insude processApprovedLodgementItems loop");
+            LodgementItem thisItem = lodgementItems.get(i);
+            
+            //set the item as approved
+            thisItem.setApprovalStatus((short)1);
+            new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+            
+            //double entry - take the money out of the customer account and fund the project unit
+            TransactionManager transactionManager = new TransactionManager(sessionUser);
+            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
+            
+            //split funds into respective accounts - buidling, service, income. Others can be added later too.
+            this.splitUnitFunds(customer, thisItem.getItem().getUnit(), thisItem);
+            
+            //send approval alerts (email and SMS) to agent and customer
+            AlertManager alertManager = new AlertManager();
+            alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+
+            //send wallet credit alert
+            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+            em.merge(thisItem);
+        }//end for       
+        
+        em.getTransaction().commit();
+        
+        updateMortgageStatus(order);
+    }
+    
+    
+    
+    
+    public void declineLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
 //        em.getTransaction().begin();
 //        
 //        //decline the lodgement
 //        lodgement.setApprovalStatus((short)2);
 //        new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-//        em.flush();
+//        em.merge(lodgement);
 //        
-//        for(int i=0; i < lodgementItems.size(); i++){
-//            LodgementItem thisItem = lodgementItems.get(i);
-//      
-//            //set the item as approved
-//            thisItem.setApprovalStatus((short)2);
-//            new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-//            
-//            //double entry - take the money out of ther customert account and fund the project unit
-//            TransactionManager transactionManager = new TransactionManager(sessionUser);
-//            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
+//        notification.setStatus((short)2);
+//        em.merge(notification);   
 //
-//            //send approval alerts (email and SMS) to agent and customer
-//            AlertManager alertManager = new AlertManager();
-//            alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+//        //decline the whole lodgement
+//        AlertManager alertManager = new AlertManager();
+//        alertManager.sendLodgementDeclineAlerts(customer, lodgement, lodgement.getAmount());
 //
-//            //credit agent wallet - double entry
-//            transactionManager.doDoubleEntry(thisItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getItem().getCommissionAmount());
-//
-//            //send wallet credit alert
-//            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-//            
-//        }//end for       
-//        
+//        em.merge(lodgement);
 //        em.getTransaction().commit();
+//        updateMortgageStatus(order);
     }
     
     private void splitUnitFunds(Customer customer, ProjectUnit unit, LodgementItem lodgementItem){
-        System.out.println("Inside splitUnitFunds");
         
         //Split commissions - credit agent wallet - double entry
-        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), lodgementItem.getItem().getCommissionAmount());
+        double commissionAmount = lodgementItem.getItem().getCommissionAmount(lodgementItem.getAmount());
+        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), commissionAmount);
         
         //Split property dev cost - debit unit, credit property dev  - double entry
         Account propertyDevelopmentAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "PROPERTY_DEV").getSingleResult();
