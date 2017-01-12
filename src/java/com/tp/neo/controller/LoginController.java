@@ -156,6 +156,7 @@ public class LoginController extends HttpServlet {
             if(AuthManager.check(password, storedPassword)){
                 log("logged in");
                 System.out.println("This is the stored password "+ storedPassword);
+                System.out.println("UserType : " + user.getSystemUserTypeId());
                 //start the session
                 HttpSession session = request.getSession();
                 session.setMaxInactiveInterval(900); //15 minutes

@@ -359,7 +359,7 @@ public class OrderController extends AppController {
             //Get Session User
             SystemUser user  = sessionUser;
             
-            List<OrderItem> orderItems = prepareOrderItem(saleItemObject, agent);
+            List<OrderItem> orderItems = prepareOrderItem(saleItemObject, agent, sessionUser);
             Lodgement lodgement = prepareLodgement(getRequestParameters(request), agent);
             lodgement.setCustomer(customer);
             
@@ -441,7 +441,7 @@ public class OrderController extends AppController {
         return map;
     }
     
-    public List<OrderItem> prepareOrderItem(SaleItemObjectsList salesItemObject, Agent agent){
+    public List<OrderItem> prepareOrderItem(SaleItemObjectsList salesItemObject, Agent agent, SystemUser sessionUser){
         List<OrderItem> orderItemList = new ArrayList();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -461,6 +461,8 @@ public class OrderController extends AppController {
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
             orderItem.setCreatedDate(getDateTime().getTime());
+            
+            
             
             if(sessionUser.getSystemUserTypeId() == 1){
                 orderItem.setCommissionPercentage(saleItem.commp);
@@ -739,16 +741,18 @@ public class OrderController extends AppController {
                     + "ORDER  BY p.id";
 
         TypedQuery<ProductOrder> orders =  em.createQuery(q, ProductOrder.class).setParameter("aps", 1);
+        
 
         List<ProductOrder> ordersList = orders.getResultList();
         
-         System.out.println("Product Count : " + ordersList.size());
+        
         
         List<OrderObjectWrapper> orderWrapperList = new ArrayList();
         
         for(ProductOrder order : ordersList)
         {
-            List<OrderItem> orderItems = getSalesByOrder(order);
+            //Checking for orders that has unapproved/undeclined orderitem in them
+            List<OrderItem> orderItems = getOrderItemByOrder(order);
             if(orderItems.size() < 1){
                 continue;
             }
@@ -756,12 +760,13 @@ public class OrderController extends AppController {
             orderWrapperList.add(ordersWrapper);
         }
         
+         System.out.println("ObjectWrappper : " + orderWrapperList.size()); 
         
        return orderWrapperList;
         
     }
     
-    private List<OrderItem> getSalesByOrder(ProductOrder order) {
+    private List<OrderItem> getOrderItemByOrder(ProductOrder order) {
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
@@ -775,6 +780,7 @@ public class OrderController extends AppController {
         
         List<OrderItem> resultSet = jplQuery.getResultList();
         
+        System.out.println("Order items count " + resultSet.size() + ", for order " + order.getId());
        
         return resultSet;
     }

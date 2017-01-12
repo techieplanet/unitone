@@ -6,14 +6,17 @@
 package com.tp.neo.controller.helpers;
 
 import static com.tp.neo.controller.components.AppController.APP_NAME;
+import static com.tp.neo.controller.components.AppController.defaultEmail;
 import com.tp.neo.model.utils.SMSSender;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
 import com.tp.neo.model.Withdrawal;
 import com.tp.neo.model.utils.MailSender;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -191,6 +194,36 @@ public class SMSHelper {
     
     
     
+    /************** LODGEMENT DECLINES *******************/
+    protected void sendLodgementDeclineSMSToCustomer(Customer customer, Lodgement lodgement, double amount){
+        String phone = "";
+        String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
+                      + "Lodgement decline: " + lodgement.getAmount() + " on " + lodgement.getCreatedDate() + ". " 
+                      + "Please contact your agent or customer care for details.";
+              
+        
+        if(customer.getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + customer.getPhone().substring(1);
+        
+        new SMSSender(phone,message).start();        
+    }
+    
+    protected void sendLodgementDeclineSMSToAgent(Customer customer, Lodgement lodgement, double amount){
+        String phone ="";
+        String message =   "Customer: " + customer.getFirstname() + " " + customer.getLastname() + customer.getAccount().getAccountCode() + ","
+                      + "Lodgement decline: " + lodgement.getAmount() + " on " + lodgement.getCreatedDate() + ". " 
+                      + "Please contact your agent or customer care for details.";
+        
+        if(customer.getAgent().getPhone().matches("^[0-9]{8,11}$"))
+            phone = "234" + customer.getAgent().getPhone().substring(1);
+        
+        new SMSSender(phone,message).start();      
+    }
+    
+    
+    
+    
+    
     /************************************  WITHDRAWAL ********************************/
     protected void sendWithdrawalRequestEmailToAgent(Withdrawal w){
         String phone = "";
@@ -202,5 +235,38 @@ public class SMSHelper {
             phone = "234" + w.getAgent().getPhone().substring(1);
         
         new SMSSender(phone,message).start(); 
+    }
+    
+    
+    
+    
+    /************************** REMINDER ALERT ****************************************/
+    protected void sendReminderAlert(List customerAndItemsList, int dueDays){
+        String orderItemsString = ""; String phone="";
+        for(Object customerAndItems : customerAndItemsList){
+            HashMap customerAndItemsMap = (HashMap) customerAndItems;
+            Customer customer = (Customer)customerAndItemsMap.get("customer");
+            List<OrderItem> orderItemsList = (List)customerAndItemsMap.get("order_items");
+            
+            for(Object itemListElement: orderItemsList){
+                HashMap itemMap = (HashMap)itemListElement;
+                OrderItem item = (OrderItem)itemMap.get("order_item");
+                double balance = (Double)itemMap.get("balance");
+                orderItemsString += item.getUnit().getTitle() + " (" + item.getUnit().getProject().getName() + "): " + balance + "; ";
+            }
+            
+            orderItemsString = orderItemsString.substring(0, orderItemsString.length()-1);
+        
+        
+            String message =   "Dear Customer (" + customer.getFirstname() + " " + customer.getLastname() + "(" + customer.getAccount().getAccountCode() + ")" 
+                            + "<br/>Reminder on your orders with payment due in " + dueDays + "."
+                            + "<br/>" + orderItemsString
+                            + "<br/><br/>" + "Please take necessary actions.";
+
+            if(customer.getPhone().matches("^[0-9]{8,11}$"))
+                phone = "234" + customer.getPhone().substring(1);
+        
+            new SMSSender(phone,message).start(); 
+        }
     }
 }
