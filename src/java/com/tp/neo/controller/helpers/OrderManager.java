@@ -175,7 +175,10 @@ public class OrderManager {
         
         em.getTransaction().begin();
         
-        AlertManager alertManager = new AlertManager();
+        //AlertManager alertManager = new AlertManager();
+        
+        //this list will be used to collect all approved lodgmentItems
+        List<LodgementItem> approvedLodgementItems = new ArrayList<LodgementItem>();
         
         //get the unapproved order items for this order
         List<OrderItem> allItems = (List)order.getOrderItemCollection();
@@ -201,27 +204,35 @@ public class OrderManager {
                 
                 //get/set corresponding lodgment item
 
-                List list = (List)thisItem.getLodgementItemCollection();
-                LodgementItem lodgementItem = (LodgementItem) list.get(0);
+                List lodgementItems = (List)thisItem.getLodgementItemCollection();
+                LodgementItem lodgementItem = (LodgementItem) lodgementItems.get(0);
 
                 setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
                 
-                //double entry: debit customer, credit unit
-                TransactionManager transactionManager = new TransactionManager(sessionUser);
-                System.out.println("Customer Account = " + customer.getAccount());
-                System.out.println("Unit Account = " + thisItem.getUnit().getAccount());
-                System.out.println("Initial Deposit = " + thisItem.getInitialDep() );
+                approvedLodgementItems.add(lodgementItem);
                 
-                transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getUnit().getAccount(), thisItem.getInitialDep());
+                //the lodgement has been approved before we can get here. 
+                //Now process the lodgment item, which is a part of the whole lodgement 
+                //double entry: debit customer, credit unit
+                //TransactionManager transactionManager = new TransactionManager(sessionUser);
+                //System.out.println("Customer Account = " + customer.getAccount());
+                //System.out.println("Unit Account = " + thisItem.getUnit().getAccount());
+                //System.out.println("Initial Deposit = " + thisItem.getInitialDep() );
+                
+                //transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getUnit().getAccount(), thisItem.getInitialDep());
                 
                 //send approval alerts (email and SMS) to agent and customer
-                alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
+                //alertManager.sendOrderApprovalAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
-                //double entry (credit agent wallet): credit agent, debit unit
-                transactionManager.doDoubleEntry(thisItem.getUnit().getAccount(), customer.getAgent().getAccount(), thisItem.getCommissionAmount());
+                //double entry (credit agent wallet): credit agent, debit unit                
+                //double commissionAmount = thisItem.getCommissionAmount(lodgementItem.getAmount());
+                //System.out.println("LODGEMENT AMOUNT: " + lodgementItem.getAmount());
+                //System.out.println("COMMISSION PCENT: " + thisItem.getCommissionPercentage());
+                //System.out.println("COMMISSION AMOUNT: " + commissionAmount);
+                //transactionManager.doDoubleEntry(thisItem.getUnit().getAccount(), customer.getAgent().getAccount(), commissionAmount);
                 
                 //send wallet credit alert
-                alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
+                //alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getUnit(), thisItem.getInitialDep());
                 
             }
             
@@ -239,10 +250,12 @@ public class OrderManager {
             
         }//end for
         
+        
+        //send the list of approved lodgmentitems to the LMngr's processApprovedLodgementItems method 
+        new LodgementManager(sessionUser).processApprovedLodgementItems(approvedLodgementItems, customer, order);
+        /*******************************************************************************************************/
+        
         //set the resultant status of the order based on the statuses of the items in it
-
-        
-        
         if(approvedItems.size() + declinedItems.size()  == allItems.size()){ //each item has either approved or declined status
             setOrderStatus(order, (short)2); //complete the order
             
@@ -265,13 +278,15 @@ public class OrderManager {
     }
     
     /**
-     * This is the approval method for the first lodgement when the order is initially made
+     * This was the approval method for the first lodgement when the order is initially made
+     * It has been stripped down in functionality to just do alerts for the new order
      * @param lodgement the lodgement class
      * @param order the order class
      * @param customer the customer making the purchase
      * @param applicationContext  the application context path
      */
-    public void processOrderLevelLodgementApproval(Lodgement lodgement, ProductOrder order, Customer customer, String applicationContext){
+    //public void processOrderLevelLodgementApproval(Lodgement lodgement, ProductOrder order, Customer customer, String applicationContext){
+    public void createNewOrderAlerts(Lodgement lodgement, ProductOrder order, Customer customer, String applicationContext){
         em.getTransaction().begin();
         
         //credit the customer account to the tune of the lodgment 

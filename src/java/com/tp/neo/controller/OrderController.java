@@ -340,11 +340,11 @@ public class OrderController extends AppController {
             OrderManager orderManager = new OrderManager(sessionUser);
             SaleItemObjectsList saleItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
            
-            //Get Session User
-            //SystemUser user  = sessionUser;
+            
             
             List<OrderItem> orderItems = orderManager.prepareOrderItem(saleItemObject, agent);
             Lodgement lodgement = orderManager.prepareLodgement(getRequestParameters(request), agent);
+
             lodgement.setCustomer(customer);
             
             ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, request.getContextPath());
@@ -639,16 +639,18 @@ public class OrderController extends AppController {
                     + "ORDER  BY p.id";
 
         TypedQuery<ProductOrder> orders =  em.createQuery(q, ProductOrder.class).setParameter("aps", 1);
+        
 
         List<ProductOrder> ordersList = orders.getResultList();
         
-         System.out.println("Product Count : " + ordersList.size());
+        
         
         List<OrderObjectWrapper> orderWrapperList = new ArrayList();
         
         for(ProductOrder order : ordersList)
         {
-            List<OrderItem> orderItems = getSalesByOrder(order);
+            //Checking for orders that has unapproved/undeclined orderitem in them
+            List<OrderItem> orderItems = getOrderItemByOrder(order);
             if(orderItems.size() < 1){
                 continue;
             }
@@ -656,12 +658,13 @@ public class OrderController extends AppController {
             orderWrapperList.add(ordersWrapper);
         }
         
+         System.out.println("ObjectWrappper : " + orderWrapperList.size()); 
         
        return orderWrapperList;
         
     }
     
-    private List<OrderItem> getSalesByOrder(ProductOrder order) {
+    private List<OrderItem> getOrderItemByOrder(ProductOrder order) {
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
@@ -675,6 +678,7 @@ public class OrderController extends AppController {
         
         List<OrderItem> resultSet = jplQuery.getResultList();
         
+        System.out.println("Order items count " + resultSet.size() + ", for order " + order.getId());
        
         return resultSet;
     }

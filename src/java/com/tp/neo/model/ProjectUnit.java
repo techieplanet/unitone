@@ -354,7 +354,6 @@ public class ProjectUnit extends BaseModel {
     public void setUnitType(ProjectUnitType unitType) {
         this.unitType = unitType;
     }
-
     
     
 }

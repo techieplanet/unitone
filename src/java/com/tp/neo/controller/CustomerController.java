@@ -359,12 +359,13 @@ public class CustomerController extends AppController  {
                 emf.close();
                 
                 OrderManager orderManager = new OrderManager(sessionUser);
-                
+
                 SaleItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
                 Map requestParameters = getRequestParameters(request);
                 
                 List<OrderItem> orderItem =  orderManager.prepareOrderItem(saleItemObjectList, agent);
                 Lodgement lodgement = orderManager.prepareLodgement(requestParameters, agent);
+
                 lodgement.setCustomer(customer);
                 
                 if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
