@@ -458,7 +458,7 @@
                                             <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
                                                 <option value="">--Select Account--</option>
                                                 <c:forEach items="${companyAccount}" var="CA">
-                                                    <option value="${CA.getId()}">${CA.getAccountName()}</option>
+                                                    <option value="${CA.getId()}">${CA.getAccountDetails()}</option>
                                                 </c:forEach>
                                             </select>
                                         </div> 

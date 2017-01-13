@@ -903,16 +903,7 @@ public class CustomerController extends AppController  {
         } 
     }
     
-    private List<CompanyAccount> getCompanyAccount() {
-        
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        Query jplQuery = em.createNamedQuery("CompanyAccount.findAll");
-        List<CompanyAccount> resultSet = jplQuery.getResultList();
-        
-        return resultSet;
-    }
+    
     /*Validate the customers details*/
     /*TP: Validation is done here*/
     private void validate(Customer customer, HttpServletRequest request) throws PropertyException, ServletException, IOException{
@@ -1182,8 +1173,9 @@ public class CustomerController extends AppController  {
        
        Customer customer = em.find(Customer.class, id);
        
-       Query query = em.createNamedQuery("Lodgement.findByCustomer");
+       Query query = em.createNamedQuery("Lodgement.findByCustomerApproval");
        query.setParameter("customer", customer);
+       query.setParameter("approvalStatus",1);
         
        List<Lodgement> lodgementList = query.getResultList();
        

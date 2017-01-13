@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.tp.neo.controller.helpers;
+package com.tp.neo.controller;
 
+import com.tp.neo.controller.helpers.AlertManager;
+import com.tp.neo.controller.helpers.OrderItemHelper;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.OrderItem;
 import java.io.IOException;
@@ -29,7 +31,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author hp
  */
 @WebServlet(name ="LodgementReminder" , urlPatterns = {"/LodgementReminder"})
-public class LodgementReminder extends HttpServlet {
+public class LodgementReminderController extends HttpServlet {
     
     EntityManagerFactory emf ;
     EntityManager em ;
@@ -48,7 +50,7 @@ public class LodgementReminder extends HttpServlet {
         emf = Persistence.createEntityManagerFactory("NeoForcePU");
         em = emf.createEntityManager();
         
-        int[] days = new int[]{19,7,1};
+        int[] days = new int[]{15,7,1};
         
         for(int day : days) {
             

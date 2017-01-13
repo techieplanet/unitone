@@ -44,6 +44,8 @@ public class CompanyAccount implements Serializable {
     private String accountName;
     @Column(name = "account_number")
     private String accountNumber;
+    @Column(name = "bank_name")
+    private String bankName;
     @OneToMany(mappedBy = "companyAccountId")
     private Collection<Lodgement> lodgementCollection;
 
@@ -76,6 +78,19 @@ public class CompanyAccount implements Serializable {
 
     public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+    
+    public String getAccountDetails(){
+        
+        return bankName + " - " + accountNumber + " - " + accountName;
     }
 
     @XmlTransient

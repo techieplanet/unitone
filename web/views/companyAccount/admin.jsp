@@ -33,7 +33,10 @@
                 <div class="box-header">
                   <h3 class="box-title block">
                       Company's Accounts List
+                      
+                      <a href="${pageContext.request.contextPath}/CompanyAccount?action=new" class="btn btn-primary pull-right">New Company Account</a>
                   </h3>
+                  
                 </div><!-- /.box-header -->
                 
                  <div class="box-body">
@@ -42,6 +45,7 @@
                     <thead>
                       <tr>
                         <th>SN</th>
+                        <th>Bank Name</th>
                         <th>Account Number</th>
                         <th>Account Name</th>
                         <!--<th>Active</th>-->
@@ -54,6 +58,7 @@
                         <c:forEach items="${companyAccounts}" var="account" varStatus="pointer">
                             <tr id="row<c:out value="${account.getId()}" />">
                                 <td><c:out value="${pointer.count}" /></td>
+                                <td><c:out value="${account.getBankName()}" /></td>
                                 <td><c:out value="${account.getAccountNumber()}" /></td>
                                 <td><c:out value="${account.getAccountName()}" /></td>
                                 
@@ -61,10 +66,10 @@
                                <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_company_account') || fn:contains(sessionScope.user.permissions, 'delete_company_account')}">
                                     <td class="text-center">
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_company_account')}">
-                                            <a class="btn btn-success btn-xs anti-rcswitchwer-buttons" href="CompanyAccount?action=edit&accountId=${account.getId()}" role="button"><i class="fa fa-pencil"></i></a> 
+                                            <a class="btn btn-success btn-xs anti-rcswitchwer-buttons" href="CompanyAccount?action=edit&id=${account.getId()}" role="button"><i class="fa fa-pencil"></i></a> 
                                         </c:if>
-                                        <c:if test="${fn:contains(sessionScope.user.permissions, 'delete_agent')}">
-                                            <a class="btn btn-danger btn-xs anti-rcswitchwer-buttons" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${account.getId()}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                                        <c:if test="${fn:contains(sessionScope.user.permissions, 'delete_company_account')}">
+                                            <a class="btn btn-danger btn-xs anti-rcswitchwer-buttons" href="#" onclick="companyAccount.showDeleteModal('${pageContext.request.contextPath}/CompanyAccount?action=delete&id=${account.getId()}',event)" role="button"><i class="fa fa-remove"></i></a>
                                         </c:if>
                                     </td>
                                 </c:if>
@@ -75,6 +80,7 @@
                     <tfoot>
                       <tr>
                         <th>SN</th>
+                        <th>Bank Name</th>
                         <th>Account Number</th>
                         <th>Account Name</th>
                         <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_company_account') || fn:contains(sessionScope.user.permissions, 'delete_company_account')}">
@@ -86,6 +92,10 @@
                  
                     
                 </div><!-- /.box-body -->
+                
+                <div class="box-footer">
+                    <a href="${pageContext.request.contextPath}/CompanyAccount?action=new" class="btn btn-primary pull-right">New Company Account</a>
+                </div>
               </div><!-- /.box -->
         </section><!-- /.content -->
       </div><!-- /.content-wrapper -->
@@ -103,7 +113,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
-              <button id="ok" type="button" onclick="" class="btn btn-primary">OK</button>
+              <button id="ok" type="button" onclick="companyAccount.deleteCompanyAccount()" class="btn btn-primary">OK</button>
             </div>
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -143,120 +153,35 @@
             $("#entitylist").DataTable({
                 "autoWidth": false,
                 "columnDefs": [
-                    { "width":"100px", "targets": 3 },
-                    {"sort":"asc","targets":0},
-                    <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
-                        { "sortable": false, "width":"80px", "targets":7 }
-                    </c:if>
+                    {"sort":"asc","targets":0}
                 ]
         });
-    
-            
-    
-                                
-    
-                                
-      
-          });
+    });
           
 
       var companyAccount = {
           
-          getAgentHistory : function(id,evt){
-              
-              evt.preventDefault();
-              
-              $.ajax({
-                 
-                 url : '${pageContext.request.contextPath}/Agent?action=wallet',
-                 method : "GET",
-                 data : {id : id},
-                 success : function(data){
-                     
-                     console.log(data);
-                     companyAccount.prepareAccountStatement(JSON.parse(data));
-                     
-                 },
-                 error : function(xhr,status_code,status_text){
-                     console.log(xhr.responseText);
-                 }
-                  
-              });
-          },
+          url : "",
           
-          prepareAccountStatement : function(jsonData){
+          showDeleteModal : function(url, evt){
             
-             var balance = accounting.formatMoney(jsonData.agentDetail.balance,"N",2,",",".");
-             var accountCode = jsonData.agentDetail.accountCode;
-             var ledgerBalance = jsonData.agentDetail.ledgerBalance;
-             
-             var transactions = jsonData.transactions;
-             
-             $("#accountCode").text(accountCode);
-             $("#accountBalance").text(accounting.formatMoney(balance,"N",2,",","."));
-             $("#ledgerBalance").text(accounting.formatMoney(ledgerBalance,"N",2,",","."));
-             
-             var count = 1;
-             
-             //Clear the table body
-             $("#accountStatementModal #account_statement_table tbody").html("");
-             
-             for(var k in transactions){
-                 
-                 var amount = accounting.formatMoney(transactions[k].amount,"N",2,",",".");
-                 var date = transactions[k].date;
-                 var type = transactions[k].type;
-                 
-                 var creditAmount = "";
-                 var debitAmount = "";
-                 
-                 console.log("Type : " + type);
-                 
-                 if(type === "credit"){
-                     creditAmount = amount;
-                 }
-                 else{
-                     debitAmount = amount;
-                 }
-                 
-                 var tr = "<tr>";
-                 
-                 tr += "<td>" + count + "</td>";
-                 tr += "<td>" + date + "</td>";
-                 tr += "<td>" + debitAmount + "</td>";
-                 tr += "<td>" + creditAmount + "</td>";
-                 
-                 count++;
-                 
-                 $("#accountStatementModal #account_statement_table tbody").append(tr);
-                 
-             }
-             
-             $("#accountStatementModal").modal();
+            evt.preventDefault();
+            
+            companyAccount.url = url;
+            
+            $("#deleteModal").modal({
+                
+                backDrop : false
+                
+            });
+            
             
           },
           
-          printAccountStatement : function(){
+          deleteCompanyAccount : function(){
               
-              var options = {
-                  mode:"iframe",
-                  popClose: true
-              }
-              $("#printArea").printArea(options);
-              /**
-              var divToPrint=document.getElementById('printArea');
-
-              var newWin = window.open('','Print-Window');
-
-              newWin.document.open();
-
-              newWin.document.write('<html><body onload="window.print()">'+divToPrint.innerHTML+'</body></html>');
-
-              newWin.document.close();
-
-              setTimeout(function(){newWin.close();},10);
-              **/
-              
+              $("#deleteModal").modal("hide");
+              location.href = companyAccount.url;
           }
           
       };

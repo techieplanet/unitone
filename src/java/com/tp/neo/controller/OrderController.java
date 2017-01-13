@@ -324,7 +324,7 @@ public class OrderController extends AppController {
             customer  = em.find(Customer.class, customerId);
             
             if(sessionUser.getSystemUserTypeId() == 1){
-                long agentId = Long.parseLong(request.getParameter("agent_id"));
+                long agentId = !request.getParameter("agent_id").equalsIgnoreCase("") ? Long.parseLong(request.getParameter("agent_id")) : customer.getAgent().getAgentId();
                 agent = em.find(Agent.class, agentId);
             }
             else if(sessionUser.getSystemUserTypeId() == 2)
