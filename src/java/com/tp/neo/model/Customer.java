@@ -460,7 +460,6 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public String getFullName(){
         String mName = middlename!=null?middlename:"";
         String fullname = lastname + " " + mName + " " + firstname;
-        System.out.println("Customer FullName : " + fullname);
         
         return fullname;
     }

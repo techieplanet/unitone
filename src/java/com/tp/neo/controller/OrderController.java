@@ -261,6 +261,11 @@ public class OrderController extends AppController {
             request.setAttribute("customerId",customerId);
         }
         
+        
+        String imageAccessDirPathCustomer = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+        request.setAttribute("customerImageAccessDir", imageAccessDirPathCustomer + "/customer");
+        request.setAttribute("customerKinImageAccessDir", imageAccessDirPathCustomer + "/customerKin");
+        
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Order");
         request.setAttribute("sideNavAction",action);
@@ -293,30 +298,9 @@ public class OrderController extends AppController {
             initOrderProcess(request,response);
         }
     }
+
     
-    public SaleItemObjectsList getCartData(HttpServletRequest request) {
-        SaleItemObjectsList saleObj = this.processJsonData(request.getParameter("cartDataJson").toString());
-        return saleObj;
-    }
     
-    private SaleItemObjectsList processJsonData(String json) {
-        Gson gson = new GsonBuilder().create();
-        System.out.println(json);
-        
-        SaleItemObjectsList salesObj = gson.fromJson(json,SaleItemObjectsList.class);
-        
-        ArrayList<SaleItemObject> sales = salesObj.sales;
-        
-        for(SaleItemObject s : sales) {
-            System.out.println("Product Name : " + s.productName);
-            System.out.println("Product Qty : " + s.productQuantity);
-            System.out.println("Product Amount Per Unit " + s.amountUnit);
-            System.out.println("Product Cost " + s.amountTotalUnit);
-            System.out.println("Commision Payable : " + s.commp);
-        }
-        
-        return salesObj;
-    }
     
     public void initOrderProcess(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
         try {
@@ -340,7 +324,7 @@ public class OrderController extends AppController {
             customer  = em.find(Customer.class, customerId);
             
             if(sessionUser.getSystemUserTypeId() == 1){
-                long agentId = Long.parseLong(request.getParameter("agent_id"));
+                long agentId = !request.getParameter("agent_id").equalsIgnoreCase("") ? Long.parseLong(request.getParameter("agent_id")) : customer.getAgent().getAgentId();
                 agent = em.find(Agent.class, agentId);
             }
             else if(sessionUser.getSystemUserTypeId() == 2)
@@ -352,18 +336,17 @@ public class OrderController extends AppController {
                 agent = customer.getAgent();
             }
             
-            System.out.println("Customer id :" + customer.getCustomerId() + ", Agent id: " + agent.getAgentId());
             
-            SaleItemObjectsList saleItemObject = getCartData(request);
+            OrderManager orderManager = new OrderManager(sessionUser);
+            SaleItemObjectsList saleItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
+           
             
-            //Get Session User
-            SystemUser user  = sessionUser;
             
-            List<OrderItem> orderItems = prepareOrderItem(saleItemObject, agent, sessionUser);
-            Lodgement lodgement = prepareLodgement(getRequestParameters(request), agent);
+            List<OrderItem> orderItems = orderManager.prepareOrderItem(saleItemObject, agent);
+            Lodgement lodgement = orderManager.prepareLodgement(getRequestParameters(request), agent);
+
             lodgement.setCustomer(customer);
             
-            OrderManager orderManager = new OrderManager(user);
             ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, request.getContextPath());
             
             if(productOrder != null){
@@ -439,91 +422,6 @@ public class OrderController extends AppController {
         }
         
         return map;
-    }
-    
-    public List<OrderItem> prepareOrderItem(SaleItemObjectsList salesItemObject, Agent agent, SystemUser sessionUser){
-        List<OrderItem> orderItemList = new ArrayList();
-        
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        List<SaleItemObject> salesItem = salesItemObject.sales;
-        for(SaleItemObject saleItem : salesItem) {
-            
-            OrderItem orderItem = new OrderItem();
-            
-            short approval = 0;
-            long unitId = saleItem.productUnitId;
-            ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
-            
-            orderItem.setQuantity(saleItem.productQuantity);
-            orderItem.setInitialDep((double)(saleItem.productMinimumInitialAmount));
-            orderItem.setDiscountAmt(projectUnit.getDiscount());
-            orderItem.setDiscountPercentage(projectUnit.getDiscount());
-            orderItem.setCreatedDate(getDateTime().getTime());
-            
-            
-            
-            if(sessionUser.getSystemUserTypeId() == 1){
-                orderItem.setCommissionPercentage(saleItem.commp);
-            }
-            if(sessionUser != null){
-                orderItem.setCreatedBy(sessionUser.getSystemUserId()); 
-            }
-            orderItem.setApprovalStatus(approval);
-            orderItem.setUnit(projectUnit);
-            
-            orderItemList.add(orderItem);
-        }
-        
-        return orderItemList;
-    }
-    
-    public Lodgement prepareLodgement(Map request, Agent agent) {
-        
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        Lodgement lodgement = new Lodgement();
-        
-        Short paymentMethod = Short.parseShort(request.get("paymentMethod").toString());
-        
-        CompanyAccount companyAccount = em.find(CompanyAccount.class, Integer.parseInt(request.get("companyAccount").toString()));
-        
-        lodgement.setPaymentMode(paymentMethod);
-        lodgement.setLodgmentDate(this.getDateTime().getTime());
-        lodgement.setCreatedDate(this.getDateTime().getTime());
-        if(sessionUser != null) {
-            lodgement.setCreatedBy(sessionUser.getSystemUserId());
-            lodgement.setCreatedByUserType(Short.parseShort((sessionUser.getSystemUserTypeId()).toString()));
-        }
-        lodgement.setCompanyAccountId(companyAccount);
-        lodgement.setApprovalStatus((short)0);
-        
-        if(paymentMethod == 1) {
-            lodgement.setTransactionId(request.get("tellerNumber").toString());
-            lodgement.setAmount(Double.parseDouble(request.get("tellerAmount").toString()));
-            lodgement.setDepositorName(request.get("depositorsName").toString());
-            lodgement.setLodgmentDate(getDateTime().getTime());
-        }
-        else if(paymentMethod == 2){
-            lodgement.setAmount(Double.parseDouble(request.get("cardAmount").toString()));
-        }
-        else if(paymentMethod == 3){
-            
-            lodgement.setAmount(Double.parseDouble(request.get("cashAmount").toString()));
-            
-        }
-        else if(paymentMethod == 4) {
-            
-            lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
-            lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
-            lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
-            lodgement.setLodgmentDate(getDateTime().getTime());
-            
-        }
-        
-        return lodgement;
     }
     
     private long getAgentId(HttpServletRequest request) {

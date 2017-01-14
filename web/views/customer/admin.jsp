@@ -12,7 +12,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Customers
+              <a href="${pageContext.request.contextPath}/Customer">Customers</a>
             <!--<small>Optional description</small>-->
           </h1>
 <!--          <ol class="breadcrumb">
@@ -140,6 +140,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
               <h4 class="modal-title">Customer's Lodgments</h4>
             </div>
             <div class="modal-body">
@@ -263,6 +264,9 @@
                 var orders = data;
                 
                 var counter = 1;
+                
+                $("#orders-accordion").html("");
+                
                 for(var k in orders){
                     
                     var items = orders[k].items;

@@ -74,6 +74,8 @@ import javax.xml.bind.annotation.XmlTransient;
                                                                     + "LEFT JOIN item.lodgementItemCollection l ON l.approvalStatus = :aps "
                                                                     + "WHERE u.project.id = :projectId AND u.project.deleted = 0 "
                                                                     + "GROUP BY u.id ORDER  BY u.id"),
+       @NamedQuery(name = "OrderItem.findByDayOfReminder", query = "SELECT OI, PO.customer FROM OrderItem OI "
+               + "                                                  JOIN ProductOrder PO ON OI.order.customer.customerId = PO.customer.customerId  WHERE OI.monthlyPayDay = :notificationDay ORDER BY PO.customer.customerId "),
         
     })
 

@@ -30,6 +30,7 @@ public class SaleItemObject {
     public float monthlyPayPerQuantity;
     public float productMinimumMonthlyPayment;
     public Double commp ;
+    public int dayOfNotification;
 
     
 

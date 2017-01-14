@@ -44,6 +44,8 @@ public class CompanyAccount implements Serializable {
     private String accountName;
     @Column(name = "account_number")
     private String accountNumber;
+    @Column(name = "bank_name")
+    private String bankName;
     @OneToMany(mappedBy = "companyAccountId")
     private Collection<Lodgement> lodgementCollection;
 
@@ -78,6 +80,19 @@ public class CompanyAccount implements Serializable {
         this.accountNumber = accountNumber;
     }
 
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+    
+    public String getAccountDetails(){
+        
+        return bankName + " - " + accountNumber + " - " + accountName;
+    }
+
     @XmlTransient
     public Collection<Lodgement> getLodgementCollection() {
         return lodgementCollection;
@@ -87,6 +102,13 @@ public class CompanyAccount implements Serializable {
         this.lodgementCollection = lodgementCollection;
     }
 
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_company_account";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_company_account";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_company_account";
+        else return "view_company_account";
+    }
+    
     @Override
     public int hashCode() {
         int hash = 0;

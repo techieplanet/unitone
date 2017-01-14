@@ -51,6 +51,12 @@ public class OrderItemHelper {
         String amt = String.format("%.2f", (Double) ((amtPayable * qty) - amountPaid));
         return amt;
     }
+    
+    public double getOrderItemBalance(double amtPayable, int qty, double amountPaid, String returnType) {
+
+        double amt = (Double) ((amtPayable * qty) - amountPaid);
+        return amt;
+    }
 
     public String getOrderItemDiscount(double discountPercent, double cpu, int qty) {
 

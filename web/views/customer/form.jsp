@@ -626,6 +626,23 @@
                                     </c:if>
                                                 
                                 </div>
+                                              
+                                
+                                <div class="row">
+                                      
+                                      <div class="col-md-2">
+                                              <div class="form-group">
+                                                  <label>
+                                                      Notification Day
+                                                  </label>
+                                                  <span class="productSpan">Select the day of the month to receive monthly notification</span>
+                                                  <input type="number" class="form-control" min="1" max="31" value="1" name="day_of_notification" id="day_of_notification"/>
+                                              </div>
+                                      </div>
+                                      
+                                  </div>               
+                                              
+                                              
                   <div class="row">
                         <div class="col-md-12 box-footer">
                             <div class="row">
@@ -750,7 +767,7 @@
                                             <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
                                                 <option value="">--Select Account--</option>
                                                 <c:forEach items="${companyAccount}" var="CA">
-                                                    <option value="${CA.getId()}">${CA.getAccountName()}</option>
+                                                    <option value="${CA.getId()}">${CA.getAccountDetails()}</option>
                                                 </c:forEach>
                                             </select>
                                         </div> 

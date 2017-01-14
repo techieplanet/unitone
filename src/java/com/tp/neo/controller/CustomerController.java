@@ -358,21 +358,20 @@ public class CustomerController extends AppController  {
                 em.close();
                 emf.close();
                 
-                OrderController order = new OrderController();
-                SaleItemObjectsList saleItemObjectList = order.getCartData(request);
-                Map requestParameters = order.getRequestParameters(request);
+                OrderManager orderManager = new OrderManager(sessionUser);
+
+                SaleItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
+                Map requestParameters = getRequestParameters(request);
                 
-                List<OrderItem> orderItem =  order.prepareOrderItem(saleItemObjectList, agent,sessionUser);
-                Lodgement lodgement = order.prepareLodgement(requestParameters, agent);
+                List<OrderItem> orderItem =  orderManager.prepareOrderItem(saleItemObjectList, agent);
+                Lodgement lodgement = orderManager.prepareLodgement(requestParameters, agent);
+
                 lodgement.setCustomer(customer);
                 
                 if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
                     user = (SystemUser)customer;
                 }
                 
-                OrderManager orderManager = new OrderManager(user);
-                
-               
                 ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItem, request.getContextPath());
                 
                 if(productOrder != null){
@@ -387,8 +386,8 @@ public class CustomerController extends AppController  {
                 }
 
                 
-                viewFile = CUSTOMER_PROFILE;
                 
+                //Check if a customer is the one registering him/her self 
                 if(requestFrom.equalsIgnoreCase("customerRegistrationController")){
                     if(lodgement.getPaymentMode() == 2){
                         
@@ -415,6 +414,16 @@ public class CustomerController extends AppController  {
                         viewFile = "/views/customer/success.jsp";
                         request.setAttribute("customer",customer);
                     }
+                }
+                else{
+                    
+                    //Registration is done by agent/admin, so forward them to customer profile
+                    
+                    viewFile = "Customer?action=profile&customerId="+customer.getCustomerId();
+                    response.sendRedirect(viewFile);
+                    return;
+                    //request.setAttribute("action","profile");
+                    //request.setAttribute("customerId", customer.getCustomerId());
                 }
                 
                 request.setAttribute("customerKinPhotoHidden",customerKinFileName);
@@ -894,16 +903,7 @@ public class CustomerController extends AppController  {
         } 
     }
     
-    private List<CompanyAccount> getCompanyAccount() {
-        
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        Query jplQuery = em.createNamedQuery("CompanyAccount.findAll");
-        List<CompanyAccount> resultSet = jplQuery.getResultList();
-        
-        return resultSet;
-    }
+    
     /*Validate the customers details*/
     /*TP: Validation is done here*/
     private void validate(Customer customer, HttpServletRequest request) throws PropertyException, ServletException, IOException{
@@ -1173,8 +1173,9 @@ public class CustomerController extends AppController  {
        
        Customer customer = em.find(Customer.class, id);
        
-       Query query = em.createNamedQuery("Lodgement.findByCustomer");
+       Query query = em.createNamedQuery("Lodgement.findByCustomerApproval");
        query.setParameter("customer", customer);
+       query.setParameter("approvalStatus",1);
         
        List<Lodgement> lodgementList = query.getResultList();
        
@@ -1618,6 +1619,24 @@ public class CustomerController extends AppController  {
         em.close();
         
         return pc;
+    }
+    
+    
+    /**
+     * @param HttpServletRequest 
+     * @return  Map 
+     * This method returns the parameters of an HTTP request as a Map object 
+     */
+    public Map getRequestParameters(HttpServletRequest request) {
+        Map<String, String> map = new HashMap();
+        Enumeration params = request.getParameterNames();
+        while(params.hasMoreElements())
+        {
+            String elem = params.nextElement().toString();
+            map.put(elem, request.getParameter(elem));
+        }
+        
+        return map;
     }
     
     /*TP: Getting the customer Id for public use*/

@@ -1,65 +1,61 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<c:if test="${userType != null && userType == 1 }">
- <div class="row">
- <div class="col-md-12 margin-bottom" id="agentListContainer">
 
-         <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h2 class="panel-title">
-                      <b>Select an agent</b>
-                  </h2>
-                </div><!-- /.panel-header -->
+<script>
+    var app = angular.module("app",["ngwidgets"]);
+       
+       app.controller("customerDropDownController",function($scope){
+           
+           $scope.customerId = "";
+           
+           var dataArray = [];
+           
+           dataArray.push({name:"--Select Customer",id : "",img : ""})
+           
+           <c:forEach items="${customers}" var="customer">
+           
+                var fullName = "${customer.getFullName()}";
+                var imgPath = "${customerImageAccessDir}" + "/" + "${customer.getPhotoPath()}";
+                var customer_id = "${customer.getCustomerId()}";
                 
-                 <div class="panel-body" id="agentListPanelBody">
-                 <table id="agentList" class="table table-bordered table-striped table-hover" >
-                    <thead>
-                      <tr>
-                        <th>Photo</th>
-                        <th>ID</th>
-                        <th>First Name</th>
-                        <th>Middle Name</th>
-                        <th>Last Name</th>
-                        <th>Phone No</th>
-                        <th>Email</th>
-                        <th>State</th>
-                        <th>Action</th>
-                        
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${agents}" var="agent">
-                            <tr id='row<c:out value="${agent.agentId}" />'>
-                                <td><img alt="No Image" class="img-responsive img-thumbnail" width="50px" height="50px" src="<c:out value='${agentImageAccessDir}/${agent.photoPath}'></c:out>" /></td>
-                                <td class="agentId"><c:out value="${agent.agentId}" /></td>
-                                <td class="agentFname"><c:out value="${agent.firstname}" /></td>
-                                <td class="agentMname"><c:out value="${agent.middlename}" /></td>
-                                <td class="agentLname"><c:out value="${agent.lastname}" /></td>
-                                <td class="agentPhone"><c:out value="${agent.phone}" /></td>
-                                <td class="agentEmail"><c:out value="${agent.email}" /></td>
-                                <td class="agentState"><c:out value="${agent.state}" /></td>
-                              
-                                <td>
-                                    <input type="hidden" class="agentImg" value='<c:out value="${agentImageAccessDir}/${agent.photoPath}"></c:out>' />
-                                    <a class="btn btn-primary" href="#" onclick="selectAgent('${agent.agentId}')" role="button">Select</a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                  </tbody>
-                    <tfoot>
+                dataArray.push({name:fullName,id : customer_id,img : imgPath});
+                
+           </c:forEach>
+           
+           $scope.selectItem = function(event){
+               //console.log(event.args.item);
+               $scope.customerId = event.args.item.value;
+           };
+           
+           $scope.settings = {
+               
+               filterable: true, selectedIndex: 0, source: dataArray, itemHeight: 70, height: 30, width : "100%",
+               displayMember: 'name',
+               valueMember: 'id',
+                renderer: function (index, label, value) {
                     
-                    </tfoot>
-                  </table>
-                </div><!-- /.panel-body -->
-                
-                <div class="panel-footer">
-                    <span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span>
-                </div>
-                
-        </div>
-     
- </div>
- </div>    
+                    if(index == 0){
+                        return "<p style='padding:10px 20px 10px 20px'>" + label + "</p>";
+                    }
+                    
+                    var img = '<img height="50" width="50" src="' + dataArray[index].img + '"/>';
+                    var table = '<table style="min-width: 130px;"><tr><td style="width: 80px;">' + img + '</td><td>' + label + '</td></tr></table>';
+                    return table;
+                },
+                selectionRenderer: function (element, index, label, value) {
+                    var text = label.replace(/<br>/g, " ");
+                    return "<span style='left: 4px; top: 6px; position: relative;'>" + text + "</span>";
+                }
+               
+           };
+           
+       });
+       
+</script>
+
+
+<c:if test="${userType != null && userType == 1 }">
+  
                                 
  <div class="row" id="agentSpinnerContainer" style='display:none'>
      <div class="spinner" >
@@ -115,9 +111,9 @@
  -->
  
      
- <div class="row">
+ <div class="row" ng-app="app">
     
-           <div class="col-md-12">
+           <div class="col-md-12" ng-controller="customerDropDownController">
               <!-- general form elements -->
                
                 <!-- form start -->
@@ -172,10 +168,16 @@
                         	<legend style="padding-left:20px !important;">Product Details</legend>
                             <div class="col-md-12">
                             	<div class="row">
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                     	<div class="form-group">
                                             <label for="selectProdcut">Select Customer</label>
                                             
+                                            <input type="hidden" value="{{customerId}}" name="customer_id" />
+                                            
+                                            <ngx-drop-down-list ngx-on-select="selectItem(event)" ngx-settings="settings">
+                                            </ngx-drop-down-list>
+                                            
+                                            <!--
                                             <select class="form-control select2" id="selectCustomer" name="customer_id" style="width: 100%;" onchange="" <c:if test="${customer.customerId != null && customer.customerId!=''}">disabled</c:if>>
                                               
                                               <c:if test="${userType != 3}">  
@@ -186,6 +188,7 @@
                                               <option  value="${customer.customerId}"  <c:if test="${customerId == customer.customerId}"> <jsp:text>selected</jsp:text> </c:if> >${customer.firstname} ${customer.lastname}</option>
                                               </c:forEach>
                                             </select>
+                                            -->
                                         </div>
 <!--                                              /.form-group select product -->
                                     </div>
@@ -217,7 +220,7 @@
 <!--                                              /.form-group  select unit-->
                                     </div>
                                 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="selectQuantity">Select Quantity</label>
                                             
@@ -311,7 +314,19 @@
                                                 
                                 </div>
                                               
-                                             
+                                  <div class="row">
+                                      
+                                      <div class="col-md-2">
+                                              <div class="form-group">
+                                                  <label>
+                                                      Notification Day
+                                                  </label>
+                                                  <span class="productSpan">Select the day of the month to receive monthly notification</span>
+                                                  <input type="number" class="form-control" min="1" max="31" name="day_of_notification" value="1" id="day_of_notification"/>
+                                              </div>
+                                      </div>
+                                      
+                                  </div>           
                                               
                                   <div class="row">
                                         <div class="col-md-12 box-footer">
@@ -443,7 +458,7 @@
                                             <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
                                                 <option value="">--Select Account--</option>
                                                 <c:forEach items="${companyAccount}" var="CA">
-                                                    <option value="${CA.getId()}">${CA.getAccountName()}</option>
+                                                    <option value="${CA.getId()}">${CA.getAccountDetails()}</option>
                                                 </c:forEach>
                                             </select>
                                         </div> 
@@ -576,7 +591,7 @@
 
       </div><!-- /.row -->
               
-      <input type="hidden" name="customer_id" id="id" value="${customerId}">
+      
       <input type="hidden" name="id" id="id" value="${customerId}">
       <input type="hidden" name="cartDataJson" id="cartDataJson" />
       
@@ -611,10 +626,13 @@
       
 <script>
     
-    $(function(){
+    $(document).ready(function(){
        
        $("#agentSpinnerContainer:visible").toggle();
        $("#agentDetailContainer:visible").toggle();
+       
+       
+       
     });
     
 </script>

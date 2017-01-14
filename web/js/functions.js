@@ -344,11 +344,12 @@ function addToCart(event){
   var monthlyPayPerQuantity = accounting.unformat($("#monthlyPayPerQuantity").text());
   var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
   var commission = $('#commp').val();
+  var dayOfNotification = $("#day_of_notification").val();
    
   
   var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuantity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
-  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment,commp : commission};
+  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment,commp : commission, dayOfNotification : dayOfNotification};
   
   /**
    * 
@@ -377,9 +378,9 @@ function addToCart(event){
   
   if($("#editMode").val()=="" || $("#editMode").val()== null){
           var newId = parseInt(id) + 1;
-      }else{
+    }else{
           var newId = $("#editMode").val();
-      }
+    }
  // alert(id);
  
   //alert(newId);
@@ -480,7 +481,7 @@ function editDataFromCart(id){
     //alert(datajson);
     var dataArray = JSON.parse(datajson);
     
-    var productName =  dataArray.productName;
+  var productName =  dataArray.productName;
   var productId = dataArray.productId;
   var productUnitName = dataArray.productUnitName;
   var productUnitId = dataArray.productUnitId;
@@ -499,6 +500,10 @@ function editDataFromCart(id){
   var monthlyPayPerUnit = dataArray.monthlyPayPerUnit;
   var monthlyPayPerQuantity = dataArray.monthlyPayPerQuantity;
   var productMinimumMonthlyPayment = dataArray.productMinimumMonthlyPayment;
+  
+  var commission = dataArray.commp;
+  var dayOfNotification = dataArray.dayOfNotification;
+  
  // alert(dataArray[14]);
     
     var baseUrl = getBaseUrl().toString();
@@ -530,6 +535,11 @@ function editDataFromCart(id){
     $("#addToCart").val("Update Cart");
     document.getElementById("selectUnit").value = productUnitId;
     $("#pUnitId").val(productUnitId);
+    $('#commp').val(commission);
+    $("#day_of_notification").val(dayOfNotification);
+    
+    console.log("commission : " + commission);
+    console.log("day_of_notification : " + dayOfNotification);
     
     getProjectUnits(baseUrl, 'Project');
     
@@ -1404,17 +1414,6 @@ function removeLoadingState(){
     $(".overlay").remove();
 }
 
-   
-
-
-
-
-
-
-
-
-
-
 /*****************************************************
  * Use this as a generic ajax call method
  *****************************************************/
@@ -1459,7 +1458,7 @@ function thousandSeparator(number){
     return value;
 }
 
-    function submitForm(){
+function submitForm(){
            
            var submitOk = true;
            

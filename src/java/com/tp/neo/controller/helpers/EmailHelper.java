@@ -337,7 +337,7 @@ public class EmailHelper {
                 HashMap itemMap = (HashMap)itemListElement;
                 OrderItem item = (OrderItem)itemMap.get("order_item");
                 double balance = (Double)itemMap.get("balance");
-                orderItemsString += "<li>" + item.getUnit().getTitle() + " (" + item.getUnit().getProject().getName() + "): " + balance + "</li>";
+                orderItemsString += "<li>" + item.getUnit().getTitle() + " (" + item.getUnit().getProject().getName() + "): " + String.format("%.2f",balance) + "</li>";
             }
             
             orderItemsString += "</ul>";
@@ -354,6 +354,8 @@ public class EmailHelper {
             String emailSubject = APP_NAME + ": Payment Due in " + dueDays;
 
             new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+            
+            
         }
     }
 }
