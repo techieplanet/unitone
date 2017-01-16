@@ -713,6 +713,7 @@ public class CustomerController extends AppController  {
 //            
             request.setAttribute("customer", customerList.get(0));
             request.setAttribute("action","edit");
+            request.setAttribute("history",getRequestHistory(request));
             request.setAttribute("userType",sessionUser.getSystemUserTypeId());
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
@@ -1639,6 +1640,16 @@ public class CustomerController extends AppController  {
         return map;
     }
     
+    private String getRequestHistory(HttpServletRequest request) {
+        
+        
+        String url = request.getHeader("referer");
+        System.out.println("History : " + url);
+        return url;
+    }
+
+    
+    
     /*TP: Getting the customer Id for public use*/
     public Long getSystemUserId(){
     return customer.getCustomerId();
@@ -1654,6 +1665,7 @@ public class CustomerController extends AppController  {
         return "Short description";
     }// </editor-fold>
 
+    
     
 
     

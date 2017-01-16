@@ -83,6 +83,10 @@
                                 </td>
                                 <td>
                                     <a class="btn btn-primary" onclick="getOrder(event,${order.id})" href="#" role="button">View <i class="fa fa-eye"></i> </a>
+                                    <c:if test="${userType == 1}">
+                                     &nbsp;
+                                     <a href="${pageContext.request.contextPath}/Order?action=approval" class="btn btn-success" role="button">Approval</a>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>

@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<form name="roleform" id="companyAccount" method="POST" action="CompanyAccount?action=${action}&id=${id}" class="form-horizontal"> 
+<form name="roleform" id="companyAccount" method="POST" action="CompanyAccount?action=${action}&id=${account.getId()}" class="form-horizontal"> 
     <div class="box box-primary">
       <div class="box-header with-border">
         <h3 class="box-title">
@@ -43,6 +43,7 @@
         <div class="row padding10">  
           <div class="form-group col-md-5">
               <label for="bank_name">Bank Name</label>
+              <input type="hidden" name="id" value="${account.getId()}" />
               <input type="text" class="form-control" name="bank_name" id="bank_name" value="${account.getBankName()}" required="" />
           </div>
         </div>

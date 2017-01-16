@@ -32,6 +32,7 @@
                filterable: true, selectedIndex: 0, source: dataArray, itemHeight: 70, height: 30, width : "100%",
                displayMember: 'name',
                valueMember: 'id',
+               searchMode : 'containsignorecase',
                 renderer: function (index, label, value) {
                     
                     if(index == 0){

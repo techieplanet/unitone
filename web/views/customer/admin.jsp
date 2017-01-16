@@ -262,7 +262,7 @@
              prepareOrderItemTable : function(data){
              
                 var orders = data;
-                
+                var orderApprovalUrl = "${pageContext.request.contextPath}";
                 var counter = 1;
                 
                 $("#orders-accordion").html("");
@@ -349,6 +349,17 @@
                           
                           itemCount++;
                       }
+                      
+                        
+                            
+                            var approvalButton = "<a class='btn btn-primary' href='${pageContext.request.contextPath}/Order?action=approval'>Approval</a>";
+                            table += "<tfoot>"; 
+                            table += "<tr><td colspan=5 class='text-right'>" + approvalButton + "</td></tr>";
+                            table += "</tfoot>";
+                                
+                        
+                            
+                        table += "</table>";
                       
                       panelBody.innerHTML = table;
                       

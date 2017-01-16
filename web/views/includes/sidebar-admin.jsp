@@ -72,6 +72,9 @@
                                 <li><a href="${pageContext.request.contextPath}/Order?action=approved" <c:if test="${sideNavAction eq 'approved' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >Approved</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
+                                <li><a href="${pageContext.request.contextPath}/Order?action=approval" <c:if test="${sideNavAction eq 'approved' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >Pending Orders</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
                                 <li><a href="${pageContext.request.contextPath}/Order?action=declined" <c:if test="${sideNavAction eq 'declined' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >Declined</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
