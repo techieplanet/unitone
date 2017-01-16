@@ -92,6 +92,7 @@ public class ProjectController extends AppController {
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
+                System.out.println("passed haspermission");
                 if(action.equalsIgnoreCase("punits")){
                   long id = Long.parseLong(request.getParameter("project_id"));
                   sendProjectUnitsData(request, response,id);
@@ -141,6 +142,7 @@ public class ProjectController extends AppController {
             throws ServletException, IOException {        
         response.setContentType("text/html;charset=UTF-8");
     
+        System.out.println("Inside get project");
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         viewFile = PROJECTS_ADMIN; 

@@ -7,18 +7,17 @@ package com.tp.neo.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Role;
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.controller.helpers.PermissionHelper;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -52,6 +51,7 @@ public class RoleController extends AppController {
     private String action = "";
     private String viewFile = "";
     
+    PermissionHelper permissionHelper = new PermissionHelper();
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -114,11 +114,11 @@ public class RoleController extends AppController {
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         int addstat = request.getParameter("addstat") != null   ? Integer.parseInt(request.getParameter("addstat")) : 0;
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
+        HashMap allAndSelectedPermissionsMap = new HashMap();
         
         if (action.equalsIgnoreCase("new")){
                viewFile = ROLE_NEW;
-               request.setAttribute("permissionsList", new ArrayList<String>());
-               request.setAttribute("permissionsList", getSystemPermissionsEntitiesMap());
+               request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
                request.setAttribute("roleId", "");
         }
         else if(action.equalsIgnoreCase("delete")){
@@ -132,7 +132,8 @@ public class RoleController extends AppController {
             cleanRequest(request);
             Role role = em.find(Role.class, id);
             log("Logging permissions: " + role.getPermissions());
-            request.setAttribute("selectedPermissions", getSelectedPermissionsCollection(role.getPermissions()));
+            request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+            request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(role.getPermissions()));
             if(addstat == 1) request.setAttribute("success", true);
             setRequestAttributes(request, role, "edit"); //set others
             
@@ -140,6 +141,14 @@ public class RoleController extends AppController {
         else if (action.isEmpty() || action.equalsIgnoreCase("listroles")){
             viewFile = ROLE_ADMIN;
             request.setAttribute("roles", listRoles());
+        }
+        else if(action.equalsIgnoreCase("rolechange")){
+            HashMap permissionsListMap = permissionHelper.getSystemPermissionsEntitiesMap(); //all permissions
+            Role selectedRole = em.find(Role.class, Integer.parseInt(request.getParameter("role_id")));
+            List selectedRolePermissions = permissionHelper.getSelectedPermissionsCollection(selectedRole.getPermissions());
+            
+            allAndSelectedPermissionsMap.put("all", permissionsListMap);
+            allAndSelectedPermissionsMap.put("selected", selectedRolePermissions);
         }
         else{
             viewFile = ROLE_ADMIN;
@@ -149,8 +158,13 @@ public class RoleController extends AppController {
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Role");
         
-        RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-        dispatcher.forward(request, response);
+        if(request.getParameter("mode") != null && request.getParameter("mode").equalsIgnoreCase("ajax")){
+            response.getWriter().write(gson.toJson(allAndSelectedPermissionsMap));
+        }else{
+            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+            dispatcher.forward(request, response);
+        }
+        
             
     }
 
@@ -275,7 +289,7 @@ public class RoleController extends AppController {
                 setRequestAttributes(request, role, "edit");
                 request.setAttribute("success", true);
                 request.setAttribute("selectedPermissions", new ArrayList<String>());
-                request.setAttribute("selectedPermissions", getSelectedPermissionsCollection(role.getPermissions()));
+                request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(role.getPermissions()));
                
                 em.close();
                 
@@ -305,18 +319,12 @@ public class RoleController extends AppController {
     private void setRequestAttributes(HttpServletRequest request, Role role, String action){            
         request.setAttribute("role", role);
         request.setAttribute("permissionsList", "");
-        request.setAttribute("permissionsList", getSystemPermissionsEntitiesMap()); //all system permissions
+        request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap()); //all system permissions
         request.setAttribute("action", action);
         request.setAttribute("id", role.getRoleId());
     }
     
-    private ArrayList<String> getSelectedPermissionsCollection(String permissions){
-        System.out.println("getSelectedPermissionsCollection: " + permissions);
-        Type str = new TypeToken<ArrayList<String>>(){}.getType();
-        ArrayList<String> selectedPermissions = gson.fromJson(permissions, str);
-        
-        return selectedPermissions;
-    }
+    
     
     
     public void delete(int id){

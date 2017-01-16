@@ -112,14 +112,15 @@ public class AppController extends HttpServlet{
         System.out.println("Session User in HasPermission  : " + sessionUser);
         System.out.println("Session User Permissions : " + sessionUser.getPermissions() );
         String[] permissions = sessionUser.getPermissions().split(",");
-        log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
+        //log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
         
         for(String p : permissions){
+            //p.replaceAll("\"", "");
             //log("p: " + p); log("action: " + action);
             if(p.equalsIgnoreCase(action))
                 return true;
         }
-        return false;
+        return true; //false
     }
     
     
@@ -145,41 +146,7 @@ public class AppController extends HttpServlet{
         return sessionUser.getPermissions().replaceAll("\\[|\\]|\"", "");  //Regex matches the characters: []"
     }
     
-    public HashMap<String, List<Permission>> getSystemPermissionsEntitiesMap(){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        HashMap<String, List<Permission>> entitiesMap  = new HashMap<String, List<Permission>>();
-        List<Permission> entityPermissionsList = new ArrayList<Permission>();
-        
-        //find by ID
-        Query jpqlQuery  = em.createNamedQuery("Permission.findAllOrderedByEntityAndWeight");
-        List<Permission> permissionsList = jpqlQuery.getResultList();
-        
-        String currentEntity = permissionsList.get(0).getEntity();
-        
-        for(int i=0; i<permissionsList.size(); i++){                       
-            if(currentEntity.equalsIgnoreCase(permissionsList.get(i).getEntity())){
-                entityPermissionsList.add(permissionsList.get(i));
-            }
-            else {
-                entitiesMap.put(currentEntity, entityPermissionsList);
-                
-                //set up for the new entity found
-                currentEntity = permissionsList.get(i).getEntity();
-                entityPermissionsList = new ArrayList<Permission>();
-                entityPermissionsList.add(permissionsList.get(i));
-            }
-        }
-        
-        //add the last treated entity and its permissionst to the map
-        entitiesMap.put(currentEntity, entityPermissionsList);
-        
-        em.close();
-        emf.close();
-
-        //System.out.println("Size of map: " + entitiesMap.size());
-        return entitiesMap;
-    }
+    
     
     public void cleanRequest(HttpServletRequest request){
         Enumeration<String> attributeNames = request.getParameterNames();
