@@ -57,7 +57,7 @@
         <div class="row padding10">   
           <div class="form-group col-md-5">
               <label for="account_name">Account Name</label>
-              <input type="text" class="form-control" name="account_name" id="account_name" value="${account.getAccountName()}" required="" />
+              <input type="text" class="form-control" name="account_name" id="account_name" value="${account.getAccountName()}"  />
           </div>
         </div>    
           
