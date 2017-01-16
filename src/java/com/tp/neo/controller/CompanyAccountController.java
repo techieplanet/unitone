@@ -135,12 +135,12 @@ public class CompanyAccountController extends AppController {
         
         if(action.equals("new")){
             
-            insertCompanyAccount(request, response);
+            processInsertCompanyAccount(request, response);
             
         }
         else if(action.equalsIgnoreCase("edit")){
             
-            updateCompanyAccount(request, response);
+            processUpdateCompanyAccount(request, response);
             
         }
         else if(action.equalsIgnoreCase("delete")){
@@ -150,14 +150,14 @@ public class CompanyAccountController extends AppController {
         
     }
     
-    private void insertCompanyAccount(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    private void processInsertCompanyAccount(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         
         EntityManagerFactory emf = null;
         EntityManager em = null;
+        CompanyAccount account = new CompanyAccount();
+        String viewFile = "/views/companyAccount/add.jsp";
         
         try{
-            
-            validate(request);
             
             emf = Persistence.createEntityManagerFactory("NeoForcePU");
             em = emf.createEntityManager();
@@ -166,29 +166,33 @@ public class CompanyAccountController extends AppController {
             String accountNo = request.getParameter("account_no");
             String accountName = request.getParameter("account_name");
             
-            CompanyAccount account = new CompanyAccount();
-            
             em.getTransaction().begin();
             
             account.setBankName(bankName);
             account.setAccountNumber(accountNo);
             account.setAccountName(accountName);
             
+            validate(account);
+            
             em.persist(account);
             
             em.getTransaction().commit();
             em.refresh(account);
             
-            String viewFile = "/views/companyAccount/add.jsp";
-            
             request.setAttribute("success", true);
             request.setAttribute("action", "new");
             request.getRequestDispatcher(viewFile).forward(request, response);
         }
-        catch(PropertyException pex){
-            
-            String viewFile = "/views/companyAccount/add.jsp";
-            
+        catch(PropertyException pex){            
+            request.setAttribute("account", account);
+            request.setAttribute("action", "new");
+            request.setAttribute("errors", errorMessages);
+            request.getRequestDispatcher(viewFile).forward(request, response);
+        }
+        catch(Exception ex){
+                        
+            request.setAttribute("account", account);
+            request.setAttribute("action", "new");
             request.setAttribute("errors", errorMessages);
             request.getRequestDispatcher(viewFile).forward(request, response);
         }
@@ -202,14 +206,14 @@ public class CompanyAccountController extends AppController {
         
     }
     
-    private void updateCompanyAccount(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    private void processUpdateCompanyAccount(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         
         EntityManagerFactory emf = null;
         EntityManager em = null;
+        CompanyAccount account = new CompanyAccount();
+        String viewFile = "/views/companyAccount/add.jsp";
         
         try{
-            
-            validate(request);
             
             emf = Persistence.createEntityManagerFactory("NeoForcePU");
             em = emf.createEntityManager();
@@ -219,18 +223,18 @@ public class CompanyAccountController extends AppController {
             String bankName = request.getParameter("bank_name");
             String accountNo = request.getParameter("account_no");
             String accountName = request.getParameter("account_name");
-            
-            CompanyAccount account = em.find(CompanyAccount.class,accountId);
            
             em.getTransaction().begin();
             
+            account = em.find(CompanyAccount.class,accountId);
             account.setBankName(bankName);
             account.setAccountNumber(accountNo);
             account.setAccountName(accountName);
             
+            validate(account);
+            
             em.getTransaction().commit();
             
-            String viewFile = "/views/companyAccount/add.jsp";
             
             request.setAttribute("success", true);
             request.setAttribute("account", account);
@@ -240,8 +244,15 @@ public class CompanyAccountController extends AppController {
         }
         catch(PropertyException pex){
             
-            String viewFile = "/views/companyAccount/add.jsp";
-            
+            request.setAttribute("account", account);
+            request.setAttribute("action", "edit");
+            request.setAttribute("errors", errorMessages);
+            request.getRequestDispatcher(viewFile).forward(request, response);
+        }
+        catch(Exception ex){
+                        
+            request.setAttribute("account", account);
+            request.setAttribute("action", "edit");
             request.setAttribute("errors", errorMessages);
             request.getRequestDispatcher(viewFile).forward(request, response);
         }
@@ -255,17 +266,17 @@ public class CompanyAccountController extends AppController {
         
     }
     
-    private void validate(HttpServletRequest request) throws PropertyException{
+    private void validate(CompanyAccount account) throws PropertyException{
         
         errorMessages.clear();
         
-        if(request.getParameter("bank_name").equalsIgnoreCase("")){
+        if(account.getBankName().equalsIgnoreCase("")){
             errorMessages.put("Bank Name", "Bank name is required");
         }
-        if(request.getParameter("account_no").equalsIgnoreCase("")){
-            errorMessages.put("Account Number", "Account number is required");
+        if(account.getAccountNumber().equalsIgnoreCase("") || account.getAccountNumber().matches("[0-9].{10}")){
+            errorMessages.put("Account Number", "Account number is required, must be numbers only and must be of length 10");
         }
-        if(request.getParameter("account_name").equalsIgnoreCase("")){
+        if(account.getAccountName().equalsIgnoreCase("")){
             errorMessages.put("Account Name", "Account name is required");
         }
         

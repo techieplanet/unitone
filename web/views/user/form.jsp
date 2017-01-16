@@ -59,19 +59,25 @@
                                     <label for="firstname" class="control-label">First Name*</label>
                                     <input type="text" name="firstname" id="firstname" class="form-control col-md-10" value="${reqUser.firstname}">
                                 </div>
+                                
+                                <div class="form-group">
+                                    <label for="middlename" class="control-label">Middle Name</label>
+                                    <input type="text" name="middlename" id="middlename" class="form-control col-md-4" value="${reqUser.middlename}">
+                                </div>
 
                                 <div class="form-group">
-                                    <label for="email" class="control-label">Email*</label>
-                                      <input type="text" name="email" id="email" class="form-control" value="${reqUser.email}">
+                                    <label for="lastname" class="control-label">Last Name*</label>
+                                      <input type="text" name="lastname" id="lastname" class="form-control" value="${reqUser.lastname}">
                                 </div>
                         </div>
                         <div class="col-md-1"></div>
 
                     
                         <div class="col-md-3">
+                                
                                 <div class="form-group">
-                                    <label for="middlename" class="control-label">Middle Name</label>
-                                    <input type="text" name="middlename" id="middlename" class="form-control col-md-4" value="${reqUser.middlename}">
+                                    <label for="email" class="control-label">Email*</label>
+                                      <input type="text" name="email" id="email" class="form-control" value="${reqUser.email}">
                                 </div>
 
                                 <div class="form-group">
@@ -83,10 +89,6 @@
                         <div class="col-md-1"></div>
 
                         <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="lastname" class="control-label">Last Name*</label>
-                                      <input type="text" name="lastname" id="lastname" class="form-control" value="${reqUser.lastname}">
-                                </div>
 
                                 <div class="form-group">
                                     <label for="role" class="control-label">System Role*</label>
@@ -100,34 +102,48 @@
                         </div>
                     </div>
 
-                          
                     
-<!--                    <div class="col-md-6">
-                        <h3 class="box-title">System Access</h3>
-                                            
-                        
-                        <div class="form-group">
-                            <label for="username" class="col-sm-3 control-label">User Name*</label>
-                            <div class="col-sm-9">
-                              <input type="text" name="username" id="username" class="form-control medium" value="${reqUser.username}">
-                            </div>
+                                
+                    <!--PERMISSIONS--> 
+                    <div class="row">
+                <div class="col-md-12">
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Permissions <span class="pull-right"><input class="minimal" type="checkbox" name="select-all" id="select-all"> SELECT ALL</span></h3>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="username" class="col-sm-3 control-label">Password*</label>
-                            <div class="col-sm-9">
-                                <input type="password" name="password" id="password" class="form-control medium" value="">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="confirm" class="col-sm-3 control-label">Confirm Password*</label>
-                            <div class="col-sm-9 margintop10">
-                              <input type="password" name="confirm" id="confirm" class="form-control medium" value="">
-                            </div>
-                        </div>
-                        
-                    </div>-->
+
+                        <!-- Table -->
+                        <table class="table" id='permissions_table'>                            
+                          <tbody>
+
+                              <c:forEach items="${permissionsList}" var="entity">
+                              <tr>
+                                  <td class="paddingtop20 bold bgeee" style="width:15%;">
+                                      ${entity.key}
+                                  </td>
+
+                                  <td>
+                                      <c:forEach items="${entity.value}" var="permission">
+                                          <div class="col-sm-2">
+                                            <label class="checkbox-inline">
+                                              <input class="minimal" type="checkbox" name="permissions" 
+                                                     ${selectedPermissions.contains(permission.alias) ? "checked" : ""}
+                                                     id="${permission.alias}" value="${permission.alias}">
+                                                     ${permission.action}
+                                            </label>
+                                          </div>
+                                      </c:forEach>
+                                  </td>
+                              </tr>
+                              </c:forEach>
+                          </tbody>
+                        </table>
+                </div>
+                  
+                  
+              </div><!-- /.col -->
+          </div> <!-- /.row -->
                     
                     
                     <div class="col-md-12">
@@ -145,3 +161,49 @@
 
         </div><!-- /. box -->
 </form>
+                        
+<script>
+    $(document).ready(function(){
+        $("#role_id").on("change",function(){
+           var selectedValue = $("#role_id").val();
+           var data = {"role_id": selectedValue, "action":"rolechange","mode":"ajax"};
+           genericAjax('${pageContext.request.contextPath}', 'Role', "GET", data, updatePermissionListDOM);
+        });
+       
+        $('#select-all').on('ifChecked', function(event){
+            $('#permissions_table input[type="checkbox"].minimal').iCheck('check')
+        });
+        
+        $('#select-all').on('ifUnchecked', function(event){
+            $('#permissions_table input[type="checkbox"].minimal').iCheck('uncheck')
+        });
+    });
+    
+    function updatePermissionListDOM(permissionsDetails){
+        //console.log(permissionsDetails);
+        var permissionsDetailsObj = JSON.parse(permissionsDetails);
+        var allPermissions = permissionsDetailsObj["all"];
+        var selectedPermissions = permissionsDetailsObj["selected"];
+        console.log("selectedPermissions: " + selectedPermissions);
+        
+           <c:forEach items="allPermissions" var="sspermission">
+                   //console.log(<c:out value="${sspermission}" />);
+           </c:forEach>
+        
+            <c:forEach items="${permissionsList}" var="entity">
+                                <c:forEach items="${entity.value}" var="permission">
+                                    var permissionAlias = '${permission.alias}';
+                                    console.log("alias: " + permissionAlias);
+                                    if(selectedPermissions.indexOf(permissionAlias) != -1){
+                                        $("#"+permissionAlias).iCheck('check');
+                                    }
+                                    else{
+                                        $("#"+permissionAlias).iCheck('uncheck');
+                                    }
+                                </c:forEach>
+            </c:forEach>
+                
+    }
+    
+    
+</script>

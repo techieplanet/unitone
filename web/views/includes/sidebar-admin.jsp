@@ -120,11 +120,26 @@
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_user')}">
                     <li class="<c:out value='${sideNav eq "User" ? "active":""}' />" ><a href="${pageContext.request.contextPath}/User"><i class="fa fa-users"></i> <span>Users</span></a></li>
                   </c:if>
+                  
+                  
+                  
+                  <!--Settings-->
+<!--                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_settings')}">
+                        <li class="treeview <c:out value='${sideNav eq "Settings" ? "active":""}' />" >
+                          <a href="#"><i class="fa fa-users"></i><span>Settings</span><i class="fa fa-angle-left pull-right"></i></a>
+                          <ul class="treeview-menu">                            
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_company_account')}">
+                                <li><a href="${pageContext.request.contextPath}/CompanyAccount" <c:if test="${sideNavAction eq 'approval' && sideNav eq 'Lodgement'}"> <c:out value='style=color:#fff' /></c:if> >Company Accounts</a></li>
+                            </c:if>
+                          </ul>
+                        </li>
+                  </c:if>-->
+                            
                     
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_user')}">
                       <li class="<c:out value='${sideNav eq "Profile" ? "active":""}' />"><a href="${pageContext.request.contextPath}/User?action=profile&id=${sessionScope.user.getSystemUserId()}"><i class="fa fa-users"></i> <span>My Profile</span></a></li>
                   </c:if>
+                  
                     
-                    
-                  <li class=""><a href="#"><i class="fa fa-microphone"></i> <span>Announcements</span><small class="label pull-right bg-yellow">2</small></a></li>
+                  <!--<li class=""><a href="#"><i class="fa fa-microphone"></i> <span>Announcements</span><small class="label pull-right bg-yellow">2</small></a></li>-->
                 </ul><!-- /.sidebar-menu -->

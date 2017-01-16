@@ -45,13 +45,15 @@
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
       <property name="javax.persistence.jdbc.password" value="postgres"/>
     </properties>
+    
     <!--APPSERVER-->
-    <!--    <properties>
+<!--    <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://108.161.136.211:5432/xforce"/>
       <property name="javax.persistence.jdbc.user" value="postgres"/>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
       <property name="javax.persistence.jdbc.password" value="Postm@n0"/>
     </properties>-->
+    
     <!--AWS CONFIGURATION-->
     <!--    <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://db949.cehusrnzup8i.us-east-1.rds.amazonaws.com:5432/xforce"/>
