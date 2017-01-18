@@ -453,6 +453,22 @@ public class Customer implements Serializable, ITrailable, SystemUser {
             return "delete_customer";
         else if(action.toUpperCase().equals("LISTCUSTOMERS")) 
             return "view_customer";
+        else if(action.toUpperCase().equals("NEW_PROSPECT")) 
+            return "new_prospect";
+        else if(action.toUpperCase().equals("LIST_PROSPECTS")) 
+            return "list_prospects";
+        else if(action.toUpperCase().equals("EDIT_PROSPECT")) 
+            return "edit_prospect";
+        else if(action.toUpperCase().equals("PROFILE")) 
+            return "customer_profile";
+        else if(action.toUpperCase().equals("CURRENT")) 
+            return "current_paying_customer";
+        else if(action.toUpperCase().equals("COMPLETED")) 
+            return "completed_payment_customer";
+        else if(action.toUpperCase().equals("LODGEMENT_INVOICE")) 
+            return "print_lodgement_invoice";
+        else if(action.toUpperCase().equals("CUSTOMER_ORDERS")) 
+            return "view_customer_orders";
         else 
             return "view_customer";
     }

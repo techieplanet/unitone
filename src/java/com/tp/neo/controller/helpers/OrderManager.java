@@ -254,7 +254,7 @@ public class OrderManager {
         //send the list of approved lodgmentitems to the LMngr's processApprovedLodgementItems method 
         new LodgementManager(sessionUser).processApprovedLodgementItems(approvedLodgementItems, customer, order);
         /*******************************************************************************************************/
-        
+        System.out.println("Approved Items : " + approvedItems.size() + ", All Items : " + allItems.size());
         //set the resultant status of the order based on the statuses of the items in it
         if(approvedItems.size() + declinedItems.size()  == allItems.size()){ //each item has either approved or declined status
             setOrderStatus(order, (short)2); //complete the order
@@ -262,6 +262,7 @@ public class OrderManager {
             //set the notification status here
             notification.setStatus((short)2);
             em.merge(notification);
+            
         }
         else if(declinedItems.size() == allItems.size()){
             setOrderStatus(order, (short)3); //decline order
@@ -273,6 +274,7 @@ public class OrderManager {
             //no need to treat lodgement items
             
         }
+        em.flush();
         em.merge(order);
         em.getTransaction().commit();
     }

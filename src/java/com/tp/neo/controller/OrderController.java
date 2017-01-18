@@ -619,6 +619,7 @@ public class OrderController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
+        emf.getCache().evictAll();
 //        Query jplQuery = em.createNamedQuery("ProductOrder.findByNotApprovalStatus");
 //        Short s = 3; // Get Orders that are not declined approved
 //        jplQuery.setParameter("approvalStatus", s);
@@ -660,6 +661,10 @@ public class OrderController extends AppController {
         
          System.out.println("ObjectWrappper : " + orderWrapperList.size()); 
         
+         
+         em.close();
+         emf.close();
+         
        return orderWrapperList;
         
     }
@@ -688,6 +693,7 @@ public class OrderController extends AppController {
     private void approveOrder(HttpServletRequest request,HttpServletResponse response, String viewFile){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
+        emf.getCache().evictAll();
         
         try{
         
@@ -726,9 +732,10 @@ public class OrderController extends AppController {
             }
         }
         
+        
+        
         em.getTransaction().commit();
-        em.close();
-        emf.close();
+        
         
         if(orderItemList.size() > 0){
             
@@ -736,9 +743,11 @@ public class OrderController extends AppController {
             customer = item.getOrder().getCustomer();
             productOrder = item.getOrder();
             
-            /***********************************************************************************************/
-            Notification notification = new Notification(); //this object is plain. Values should go into it
-            /***********************************************************************************************/
+            Query jpQl = em.createNamedQuery("Notification.findByRemoteId");
+            jpQl.setParameter("remoteId", productOrder.getId());
+            jpQl.setParameter("typeTitle","Order");
+
+            Notification notification = (Notification)jpQl.getSingleResult();
             
             OrderManager orderManager = new OrderManager(sessionUser);
             orderManager.processOrderApproval(productOrder, orderItemList, customer, notification);
@@ -746,7 +755,11 @@ public class OrderController extends AppController {
             
         }
         
-            redirectToPendingOrder(request, response, viewFile);
+        
+        em.close();
+        emf.close();
+        
+        redirectToPendingOrder(request, response, viewFile);
     }
     catch(PropertyException pe){
         pe.printStackTrace();
@@ -761,6 +774,7 @@ public class OrderController extends AppController {
         try {
             EntityManagerFactory emf =  Persistence.createEntityManagerFactory("NeoForcePU");
             EntityManager em = emf.createEntityManager();
+            emf.getCache().evictAll();
             
             long productOrderId = Long.parseLong(request.getParameter("id"));
             ProductOrder productOrder = em.find(ProductOrder.class, productOrderId);
@@ -769,6 +783,8 @@ public class OrderController extends AppController {
             request.setAttribute("singleOrderId",productOrder.getId());
             
             
+            em.close();
+            emf.close();
             
         } catch (IOException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);

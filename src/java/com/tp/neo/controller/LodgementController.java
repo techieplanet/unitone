@@ -121,12 +121,12 @@ public class LodgementController extends AppController {
         }
         
         if(super.hasActiveUserSession(request, response)){
-//            if(super.hasActionPermission(new Lodgement().getPermissionName(action), request, response)){
-//        processGetRequest(request, response);
-//            }else{
-//                super.errorPageHandler("forbidden", request, response);
-//            }
-            processGetRequest(request, response);
+            if(super.hasActionPermission(new Lodgement().getPermissionName(action), request, response)){
+                processGetRequest(request, response);
+            }else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+            
         }
         
     }
@@ -531,6 +531,8 @@ public class LodgementController extends AppController {
             
             LodgementManager manager = new LodgementManager(sessionUser);
             manager.approveLodgement(lodgement, notification, request.getContextPath());
+            
+            
             
             request.getSession().setAttribute("success", true);
             
