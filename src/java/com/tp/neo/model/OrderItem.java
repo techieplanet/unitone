@@ -86,6 +86,8 @@ public class OrderItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @OneToMany(mappedBy = "itemId")
+    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "monthly_pay_day")
     private Integer monthlyPayDay;
     @Column(name = "commission_percentage")
@@ -303,5 +305,14 @@ public class OrderItem extends BaseModel {
 
     public void setMonthlyPayDay(Integer monthlyPayDay) {
         this.monthlyPayDay = monthlyPayDay;
+    }
+
+    @XmlTransient
+    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
+        return loyaltyHistoryCollection;
+    }
+
+    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
+        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
     }
 }
