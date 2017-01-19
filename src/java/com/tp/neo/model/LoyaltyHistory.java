@@ -6,6 +6,8 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +19,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -32,6 +36,19 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "LoyaltyHistory.findByRewardPoints", query = "SELECT l FROM LoyaltyHistory l WHERE l.rewardPoints = :rewardPoints"),
     @NamedQuery(name = "LoyaltyHistory.findByType", query = "SELECT l FROM LoyaltyHistory l WHERE l.type = :type")})
 public class LoyaltyHistory implements Serializable {
+
+    @Column(name = "deleted")
+    private Short deleted;
+    @Column(name = "created_by")
+    private BigInteger createdBy;
+    @Column(name = "created_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+    @Column(name = "modified_by")
+    private BigInteger modifiedBy;
+    @Column(name = "modified_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modifiedDate;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -120,6 +137,46 @@ public class LoyaltyHistory implements Serializable {
     @Override
     public String toString() {
         return "com.tp.neo.model.LoyaltyHistory[ id=" + id + " ]";
+    }
+
+    public Short getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Short deleted) {
+        this.deleted = deleted;
+    }
+
+    public BigInteger getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(BigInteger createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public BigInteger getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(BigInteger modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
     
 }

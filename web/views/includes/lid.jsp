@@ -27,16 +27,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     
     <!-- iCheck for checkboxes and radio inputs -->
-    <link rel="stylesheet" href="plugins/iCheck/all.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/plugins/iCheck/all.css">
 
     <!--JQUERY UI CSS-->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery-ui-1.12.1.css" type="text/css" />
     
     <!-- DataTables -->
-    <link rel="stylesheet" href="plugins/datatables/dataTables.bootstrap.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/plugins/datatables/dataTables.bootstrap.css">
     
     <!-- bootstrap wysihtml5 - text editor -->
-    <link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
     
     <!-- Theme style -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminLTE.min.css" type="text/css" />
@@ -47,7 +47,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           apply the skin class to the body tag so the changes take effect.
     -->
     <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/css/skin-blue.min.css" type="text/css" />-->
-    <link rel="stylesheet" href="css/skins/skin-blue.min.css" type="text/css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/skins/skin-blue.min.css" type="text/css" />
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/custom.css" type="text/css" />
     

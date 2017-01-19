@@ -272,3 +272,19 @@ body .modal .modal-lg {
         display: none !important;
     }
 }
+
+
+
+.inner-sidebar-item:hover, .inner-sidebar-item.active{
+    background: #3c8dbc;
+    color: #fff;
+}
+
+.inner-sidebar-item:hover a, .inner-sidebar-item.active a{
+    color: #fff;
+}
+
+.inner-sidebar-item a {
+    display: block;
+    font-weight: bold;
+}

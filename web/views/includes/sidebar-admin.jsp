@@ -136,9 +136,9 @@
                   </c:if>-->
                             
                     
-                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_user')}">
+                  <!--<c:if test="${fn:contains(sessionScope.user.permissions, 'view_user')}">-->
                       <li class="<c:out value='${sideNav eq "Profile" ? "active":""}' />"><a href="${pageContext.request.contextPath}/User?action=profile&id=${sessionScope.user.getSystemUserId()}"><i class="fa fa-users"></i> <span>My Profile</span></a></li>
-                  </c:if>
+                  <!--</c:if>-->
                   
                     
                   <!--<li class=""><a href="#"><i class="fa fa-microphone"></i> <span>Announcements</span><small class="label pull-right bg-yellow">2</small></a></li>-->
