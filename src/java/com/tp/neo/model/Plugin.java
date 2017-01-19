@@ -6,6 +6,7 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +16,8 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -30,8 +33,13 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Plugin.findByPluginName", query = "SELECT p FROM Plugin p WHERE p.pluginName = :pluginName"),
     @NamedQuery(name = "Plugin.findByInstallationStatus", query = "SELECT p FROM Plugin p WHERE p.installationStatus = :installationStatus"),
     @NamedQuery(name = "Plugin.findByActive", query = "SELECT p FROM Plugin p WHERE p.active = :active"),
-    @NamedQuery(name = "Plugin.findBySettings", query = "SELECT p FROM Plugin p WHERE p.settings = :settings")})
-public class Plugin implements Serializable {
+    @NamedQuery(name = "Plugin.findBySettings", query = "SELECT p FROM Plugin p WHERE p.settings = :settings"),
+    @NamedQuery(name = "Plugin.findByDeleted", query = "SELECT p FROM Plugin p WHERE p.deleted = :deleted"),
+    @NamedQuery(name = "Plugin.findByCreatedBy", query = "SELECT p FROM Plugin p WHERE p.createdBy = :createdBy"),
+    @NamedQuery(name = "Plugin.findByCreatedDate", query = "SELECT p FROM Plugin p WHERE p.createdDate = :createdDate"),
+    @NamedQuery(name = "Plugin.findByModifiedBy", query = "SELECT p FROM Plugin p WHERE p.modifiedBy = :modifiedBy"),
+    @NamedQuery(name = "Plugin.findByModifiedDate", query = "SELECT p FROM Plugin p WHERE p.modifiedDate = :modifiedDate")})
+public class Plugin extends BaseModel{
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -47,6 +55,18 @@ public class Plugin implements Serializable {
     private Short active;
     @Column(name = "settings")
     private String settings;
+    @Column(name = "deleted")
+    private Short deleted;
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "created_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @Column(name = "modified_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modifiedDate;
 
     public Plugin() {
     }
@@ -95,6 +115,46 @@ public class Plugin implements Serializable {
         this.settings = settings;
     }
 
+    public Short getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Short deleted) {
+        this.deleted = deleted;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Long getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(Long modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -102,6 +162,13 @@ public class Plugin implements Serializable {
         return hash;
     }
 
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) return "create_plugins";
+        else if(action.toUpperCase().equals("EDIT")) return "edit_plugins";
+        else if(action.toUpperCase().equals("DELETE")) return "delete_plugins";
+        else return "view_plugins";
+    }
+    
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set

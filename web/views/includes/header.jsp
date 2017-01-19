@@ -121,13 +121,13 @@
                 <!-- Menu Toggle Button -->
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                   <!-- The user image in the navbar-->
-                  <img src="images/img/boxed-bg.jpg" class="user-image" alt="User Image">
+                  <img src="${pageContext.request.contextPath}/images/img/boxed-bg.jpg" class="user-image" alt="User Image">
                   <span class="hidden-xs">${user.firstname} ${user.lastname}</span>
                 </a>
                 <ul class="dropdown-menu">
                   <!-- The user image in the menu -->
                   <li class="user-header">
-                    <img src="images/img/boxed-bg.jpg" class="img-circle" alt="User Image">
+                    <img src="${pageContext.request.contextPath}/images/img/boxed-bg.jpg" class="img-circle" alt="User Image">
                     <p>
                       ${user.firstname} ${user.lastname}
                       <small>Member since Nov. 2012</small>
@@ -158,7 +158,8 @@
               </li>
               <!-- Control Sidebar Toggle Button -->
               <li>
-                <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                <!--<a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>-->
+                &nbsp;&nbsp;&nbsp;&nbsp;
               </li>
             </ul>
           </div>

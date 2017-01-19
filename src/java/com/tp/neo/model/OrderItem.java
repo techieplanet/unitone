@@ -315,4 +315,5 @@ public class OrderItem extends BaseModel {
     public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
         this.loyaltyHistoryCollection = loyaltyHistoryCollection;
     }
+
 }

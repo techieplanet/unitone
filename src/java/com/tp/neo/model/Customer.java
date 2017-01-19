@@ -475,5 +475,4 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         this.loyaltyHistoryCollection = loyaltyHistoryCollection;
     }
 
-
 }
