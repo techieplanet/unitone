@@ -86,6 +86,9 @@ public class OrderItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "approval_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date approvalDate;
     @OneToMany(mappedBy = "itemId")
     private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "monthly_pay_day")
@@ -314,6 +317,14 @@ public class OrderItem extends BaseModel {
 
     public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
         this.loyaltyHistoryCollection = loyaltyHistoryCollection;
+    }
+
+    public Date getApprovalDate() {
+        return approvalDate;
+    }
+
+    public void setApprovalDate(Date approvalDate) {
+        this.approvalDate = approvalDate;
     }
 
 }

@@ -70,6 +70,8 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "reward_points")
+    private Integer rewardPoints;
     @OneToMany(mappedBy = "customerId")
     private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @OneToMany(mappedBy = "customer")
@@ -473,6 +475,14 @@ public class Customer implements Serializable, ITrailable, SystemUser {
 
     public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
         this.loyaltyHistoryCollection = loyaltyHistoryCollection;
+    }
+
+    public Integer getRewardPoints() {
+        return rewardPoints;
+    }
+
+    public void setRewardPoints(Integer rewardPoints) {
+        this.rewardPoints = rewardPoints;
     }
 
 }

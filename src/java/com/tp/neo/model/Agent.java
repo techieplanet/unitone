@@ -556,5 +556,4 @@ public class Agent extends BaseModel implements SystemUser  {
         this.agentProspectCollection = agentProspectCollection;
     }
 
-
 }
