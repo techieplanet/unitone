@@ -37,6 +37,7 @@
             <th>Phone No</th>
             <th>Email</th>
             <th>State</th>
+            <th>Reward Point</th>
             <th>Action</th>
 
           </tr>
@@ -52,7 +53,7 @@
                     <td class="customerPhone"><c:out value="${customer.phone}" /></td>
                     <td class="customerEmail"><c:out value="${customer.email}" /></td>
                     <td class="customerState"><c:out value="${customer.state}" /></td>
-
+                    <td class="customerLoyaltyPoint" style="text-align:right">${customer.getRewardPoints()}</td>
                     <td>
                         <input type="hidden" class="customerImg" value='<c:out value="/uploads/NeoForce/images/customer/${customer.photoPath}"></c:out>' />
                         <input type="hidden" class="agentImg" value='<c:out value="/uploads/NeoForce/images/agent/${customer.agent.photoPath}"></c:out>' />
@@ -357,6 +358,25 @@
             <div class="modal-footer">
               <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
               <button id="ok" type="button" onclick="" class="btn btn-primary">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+      
+      
+      <!--MODAL-->
+      <div class="modal fade" id="rewardPointError" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">NEOFORCE</h4>
+            </div>
+            <div class="modal-body">
+              <p>You have exceeded your reward point</p>
+            </div>
+            <div class="modal-footer">
+              <button id="ok" type="button" data-dismiss="modal" class="btn btn-primary pull-right">OK</button>
             </div>
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->

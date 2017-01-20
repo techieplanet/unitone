@@ -126,6 +126,8 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Short active;
     @Column(name = "verification_status")
     private Short verificationStatus;
+    @Column(name = "reward_points")
+    private Short rewardPoints;
     
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
@@ -434,6 +436,16 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public void setCustomerBalance(CustomerBalance customerBalance) {
         this.customerBalance = customerBalance;
     }
+
+    public Short getRewardPoints() {
+        return rewardPoints == null ? 0 : rewardPoints;
+    }
+
+    public void setRewardPoints(Short rewardPoints) {
+        this.rewardPoints = rewardPoints;
+    }
+    
+    
 
     @XmlTransient
     public Collection<Lodgement> getLodgementCollection() {

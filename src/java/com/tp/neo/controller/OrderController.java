@@ -796,13 +796,13 @@ public class OrderController extends AppController {
        
         try {
             
-            request.setAttribute("pendingOrders", listPendingOrders());
-            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-            dispatcher.forward(request, response);
+//            request.setAttribute("pendingOrders", listPendingOrders());
+//            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+//            dispatcher.forward(request, response);
+            
+            response.sendRedirect(request.getContextPath() + "/Order?action=approval");
             
         } catch (IOException ex) {
-            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ServletException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
         }
    }

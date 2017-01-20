@@ -299,15 +299,29 @@ function lodgePaymentCheck(){
 /*TP: calculate the sum of the total amount of items in the cart*/
 function calculateSum(){
     var sum = 0;
-// iterate through each td based on class and add the values
-$(".payOut").each(function() {
+  
+  
+  //If loyaltyPlugin is enabled
+    if(isLoyaltyEnabled == 1){
+        
+        for(var cart in cartArray){
+            
+            sum += cart.productMinimumInitialAmount + (parseFloat(cart.rewardPoint) * pointToCurrency);
+            
+        }
+        
+    }  
+    else{
+        // iterate through each td based on class and add the values
+        $(".payOut").each(function() {
 
-    var value = $(this).val();
-    // add only if the value is number
-    if(!isNaN(value) && value.length != 0) {
-        sum += parseFloat(value);
+            var value = $(this).val();
+            if(!isNaN(value) && value.length != 0) {
+                sum += parseFloat(value);
+            }
+        });
     }
-});
+    
     if(sum==0){
        $("#checkOutToPay").attr("disabled",true);
     }else{
@@ -345,11 +359,21 @@ function addToCart(event){
   var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
   var commission = $('#commp').val();
   var dayOfNotification = $("#day_of_notification").val();
-   
+  var loyaltyPoint = 0;
+  
+  //If loyaltyPlugin is enabled
+    if(isLoyaltyEnabled == 1){
+        var point = parseInt($("#productLoyaltyPoint").val()) || 0;
+        //productMinimumInitialAmount += pointToCurrency * point;
+        loyaltyPoint = point;
+        console.log(point);
+    }
+    
+    
   
   var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuantity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
-  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment,commp : commission, dayOfNotification : dayOfNotification};
+  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment,commp : commission, dayOfNotification : dayOfNotification, rewardPoint : loyaltyPoint};
   
   /**
    * 
@@ -381,14 +405,11 @@ function addToCart(event){
     }else{
           var newId = $("#editMode").val();
     }
- // alert(id);
- 
-  //alert(newId);
   var buttonsData = '<a class="btn btn-success btn-xs" href="#" role="button" onclick="return editDataFromCart('+newId+')" title="Edit product details"><i class="fa fa-pencil"></i></a>\n\
 <a class="btn btn-danger btn-xs" href="#" title="Remove product from cart"  onclick="return showDeleteCartModal('+newId+')" role="button"><i class="fa fa-remove"></i></a>';
 
   var payOutField = "<input type='hidden' class='payOut' value='" + productMinimumInitialAmount + "' />";
-  //var newId = id + 1;
+  
   var dataTr = "<tr id='"+newId+"' align='left'>";
       dataTr += "<td>"+productName+"</td>";
       dataTr += "<td>"+productUnitName+"</td>";
@@ -403,8 +424,7 @@ function addToCart(event){
       var rowId ="tr"+newId;
       
       dataTr +="<td class='cart-td'><input type='hidden' id='"+rowId+"' value='"+jsonData+"'/>"+buttonsData+"</td>";
-      //alert($("#editMode").val());
-    //$("#" + id).html();
+      
       $("#productCart tbody").focus();
       
       if($("#editMode").val() == "")
@@ -432,7 +452,6 @@ function addToCart(event){
       
       $("#editMode").val("");
      resetForm();
-    // $("#editMode").val("");
      $("#selectProduct").val("");
      $("#productCart tbody").focus();
      $("#addToCart").text("");
@@ -542,12 +561,6 @@ function editDataFromCart(id){
     console.log("day_of_notification : " + dayOfNotification);
     
     getProjectUnits(baseUrl, 'Project');
-    
-    
-    //alert(productUnitId);
-//    $("#selectUnit").val(productUnitId);
-//    $("#selectUnit").val(productUnitId);
-//    alert(productUnitId);
     getProjectQuantity(baseUrl, 'ProjectUnit');
     
     
@@ -994,33 +1007,56 @@ function monthlyPayCalculator(){
     calculateAmountToPay();
 }
 
+
+function getTotalUsedPoints(){
+    
+    var points = 0;
+    
+    for(var cart in cartArray){
+        points += cart.rewardPoints;
+    }
+    
+    return points;
+}
+
 /*TP: calculate the amount to pay*/
 function calculateAmountToPay(){
-   // alert("we are working here");
    
     $("#addToCart").attr("disabled",false);
-    var userInitialAmount = $("#productMinimumInitialAmount").val();
-     var data = $("#dataHidden").val();
-    //alert(data);
+    var userInitialAmount = parseInt($("#productMinimumInitialAmount").val());
+    
+    //If loyaltyPlugin is enabled
+    if(isLoyaltyEnabled == 1){
+        var point = parseInt($("#productLoyaltyPoint").val()) || 0;
+        
+        
+        var totalUsedPoints = getTotalUsedPoints() + point;
+        if( totalUsedPoints > customerPoints){
+            $("#addToCart").attr("disabled",true);
+            $("#rewardPointError").modal();
+            return;
+        }
+        else{
+            userInitialAmount += pointToCurrency * point;
+        }
+    }
+    
+    var data = $("#dataHidden").val();
     var resp = JSON.parse(data);
     var quantity = $("#selectQuantity").val();
-//    alert(quantity);
-//    alert(userInitialAmount);
     var lid = resp.lid;  
     var leastInitialDeposit = lid * quantity;
-    //alert(leastInitialDeposit);
     
     var productAmount = $("#productAmount").val();
+    
     if(userInitialAmount<leastInitialDeposit){
-        //alert("The Initial Deposit must not be less than the default minimum initial amount specified by the system i.e ( N"+leastInitialDeposit+")");
-        //jQuery.data( $("#errorText"), "errorDInitDep", "The Initial Deposit must not be less than the default minimum initial amount specified by the system i.e ( N"+leastInitialDeposit+")" );
+        
         if($("#errorInitDep").length <= 0){
         var htmlMessage = $('<p id="errorInitDep">The Initial Deposit must not be less than the default minimum initial amount specified by the system i.e ( N'+leastInitialDeposit+')</p>')
         $("#errorText").append(htmlMessage);
     }
-        //$("#errorText").text("<p id='errorInitDep'>The Initial Deposit must not be less than the default minimum initial amount specified by the system i.e ( N"+leastInitialDeposit+")</p>");
-    
-            $("#addToCart").attr("disabled",true);
+        
+        $("#addToCart").attr("disabled",true);
         $("#productMinimumInitialAmount").focus();
     }else{
         $("#errorInitDep").remove();
