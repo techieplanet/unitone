@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -198,8 +199,9 @@ public class OrderManager {
             if(thisItem.getApprovalStatus() == 1){//approve
                 approvedItems.add(thisItem);
                 
-                //if(order.getApprovalStatus() != 2) approveOrder(order);
-                setOrderItemStatus(thisItem);
+                //note that 1 has been set for the item approval status already
+                //this wil also set the audit dates and approval date
+                setOrderItemDates(thisItem); 
                 
                 
                 //get/set corresponding lodgment item
@@ -239,7 +241,7 @@ public class OrderManager {
             if(thisItem.getApprovalStatus() == 2){//decline
                 declinedItems.add(thisItem);
                 
-                setOrderItemStatus(thisItem);
+                setOrderItemDates(thisItem);
                 
                 //get/set corresponding lodgment item
                 LodgementItem lodgementItem = ((List<LodgementItem>)thisItem.getLodgementItemCollection()).get(0);
@@ -318,7 +320,9 @@ public class OrderManager {
         em.flush();
     }
     
-    private void setOrderItemStatus(OrderItem orderItem) throws PropertyException, RollbackException{
+    private void setOrderItemDates(OrderItem orderItem) throws PropertyException, RollbackException{
+        //set approval date first
+        orderItem.setApprovalDate(new Date());
         new TrailableManager(orderItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         em.flush();
     }

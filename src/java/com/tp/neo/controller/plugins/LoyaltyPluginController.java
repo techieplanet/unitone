@@ -7,12 +7,17 @@ package com.tp.neo.controller.plugins;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.PluginsController;
 import com.tp.neo.model.Plugin;
+import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -21,6 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.PropertyException;
 
 /**
  *
@@ -99,7 +105,17 @@ public class LoyaltyPluginController extends PluginsController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        Plugin plugin = new Plugin();
+        
+        if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(plugin.getPermissionName(action), request, response)){
+                    processUpdateRequest(request, response);
+            }
+            else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+        }
     }
 
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
@@ -117,11 +133,14 @@ public class LoyaltyPluginController extends PluginsController {
             List<Plugin> pluginsList = super.listPlugins();
             
             //find by name
-            Plugin loyaltyPlugin = (Plugin) em.createNamedQuery("Plugin.findByPluginName").setParameter("pluginName", "Loyalty").getSingleResult();
+            Plugin loyaltyPlugin = (Plugin) em.createNamedQuery("Plugin.findByPluginName").setParameter("pluginName", "Loyalty").getSingleResult();            
             
             request.setAttribute("loyaltyPlugin", loyaltyPlugin); 
             request.setAttribute("plugins", pluginsList); 
             request.setAttribute("currentpluginName", "loyalty"); 
+            request.setAttribute("settingsMap", decodeJsonToMap(loyaltyPlugin.getSettings())); 
+
+                
         }
         
         //Keep track of the sideBar
@@ -134,6 +153,101 @@ public class LoyaltyPluginController extends PluginsController {
     }
     
     
+    protected void processUpdateRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        em = emf.createEntityManager();
+        String viewFile = "/views/plugins/loyalty/admin.jsp"; 
+        
+        HashMap settingsMap = new HashMap();
+        Plugin loyaltyPlugin = new Plugin();
+        Gson gson = new GsonBuilder().create();
+        boolean success = false;
+        
+        try{                 
+                em.getTransaction().begin();
+                
+                loyaltyPlugin = (Plugin) em.createNamedQuery("Plugin.findByPluginName").setParameter("pluginName", "Loyalty").getSingleResult();
+                int installationValue = request.getParameter("install_status").equalsIgnoreCase("on") ? 1 : 0;
+                loyaltyPlugin.setInstallationStatus((short)installationValue);
+                
+                int activeValue = request.getParameter("active").equalsIgnoreCase("on") ? 1 : 0;
+                loyaltyPlugin.setActive((short)activeValue);
+                
+                loyaltyPlugin.setSettings(request.getParameter("reward_value"));
+                
+                double rewardValue = 0;
+                
+                validate(loyaltyPlugin);
+                
+                rewardValue = Double.parseDouble(request.getParameter("reward_value"));
+                
+                settingsMap.put("reward_value", rewardValue);
+                loyaltyPlugin.setSettings(gson.toJson(settingsMap)); //replace the value with a map
+                                
+                new TrailableManager(loyaltyPlugin).registerUpdateTrailInfo(sessionUser.getSystemUserId());   
+                
+                em.getTransaction().commit();
+                
+                success=true;
+                request.setAttribute("loyaltyPlugin", loyaltyPlugin);
+                request.setAttribute("success", success);
+                request.setAttribute("plugins", super.listPlugins()); 
+                request.setAttribute("currentpluginName", "loyalty"); 
+                request.setAttribute("settingsMap", decodeJsonToMap(loyaltyPlugin.getSettings())); 
+                em.close();
+                
+            }
+            catch(PropertyException e){
+                e.printStackTrace();
+                System.out.println("inside catch area: " + e.getMessage());
+                request.setAttribute("loyaltyPlugin", loyaltyPlugin);
+                request.setAttribute("errors", errorMessages);
+                request.setAttribute("plugins", super.listPlugins()); 
+                request.setAttribute("currentpluginName", "loyalty");
+                settingsMap.put("reward_value", loyaltyPlugin.getSettings());
+                request.setAttribute("settingsMap", settingsMap); 
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+            
+//            if(success){
+//                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Plugins/LoyaltyPlugin";
+//                response.sendRedirect(page);
+//            }
+//            else {
+//                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+//                dispatcher.forward(request, response);
+//            }
+            
+            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+            dispatcher.forward(request, response);
+    }
+    
+    
+    private Map<String, String> decodeJsonToMap(String jsonElement){
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> settingsMap = gson.fromJson(jsonElement, type);
+        
+//        for (Map.Entry<String, String> entry : settingsMap.entrySet())
+//        {
+//           System.out.println(entry.getKey() + "/" + entry.getValue());
+//        }
+
+        return settingsMap;
+    }
+    
+    private void validate(Plugin plugin) throws PropertyException{
+        errorMessages.clear();
+        
+        if(!plugin.getSettings().matches("\\d+(\\.\\d{1,2})?")) {
+            errorMessages.put("reward_value", "Enter valid currency value for reward value");
+            throw new PropertyException("");
+        }
+        
+        if(!(errorMessages.isEmpty())) throw new PropertyException("");
+    }
     /**
      * Returns a short description of the servlet.
      *

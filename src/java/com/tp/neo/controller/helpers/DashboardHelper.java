@@ -57,7 +57,7 @@ public class DashboardHelper {
             OrderItem orderItem = (OrderItem)itemAndAmount[0];
             double paidSum = (Double)itemAndAmount[1];
             
-            Date orderItemApprovalDate = orderItem.getModifiedDate();
+            Date orderItemApprovalDate = orderItem.getApprovalDate();
             int monthsElapsed = DateFunctions.getNumberOfMonthsBetweenDates(orderItemApprovalDate, new Date());
             double expectedMortgageTotal = orderItem.getUnit().getMonthlyPay() * monthsElapsed;
             

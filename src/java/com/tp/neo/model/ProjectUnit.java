@@ -355,5 +355,4 @@ public class ProjectUnit extends BaseModel {
         this.unitType = unitType;
     }
     
-    
 }

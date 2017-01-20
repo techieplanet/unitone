@@ -30,7 +30,7 @@
                 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
                 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-                <form name="projectform" id="projectform" method="POST" action="Project?action=${action}&id=${id}"> 
+                <form name="loyaltypluginform" id="loyaltypluginform" method="POST" action="LoyaltyPlugin"> 
                     <div class="box box-primary">
                       <div class="box-header with-border">
                         <h3 class="box-title">
@@ -39,14 +39,23 @@
                       </div><!-- /.box-header -->
 
                       <div class="box-body">
+                          <c:if test="${fn:length(errors) > 0 }">
+                            <div class="row">
+                                <div class="col-md-12 ">
+                                    <p class="bg-danger padding10">
+                                      <c:forEach items="${errors}" var="error">
+                                          <c:out value="${error.value}" /><br/>
+                                      </c:forEach>
+                                    </p>
+                                </div>
+                            </div>
+                        </c:if>
+                          
                           <c:if test="${success}">
                               <div class="row">
                                     <div class="col-md-12 ">
                                         <p class="bg-success padding10" style="width:60%">
                                           <i class="fa fa-check"></i>Saved Successfully
-                                          <span class="pull-right">
-                                              <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Project">Back to list</a>
-                                          </span>
                                         </p>
                                     </div>
                                 </div>
@@ -54,14 +63,16 @@
 
                           <div class="form-group">
                             <label>Plugin Name</label>
-                            <input type="text" name="pname" id="pname" class="form-control medium" value="${project.name}" readonly="readonly">
+                            <input type="text" name="pname" id="pname" class="form-control medium" value="${loyaltyPlugin.pluginName}" readonly="readonly">
                           </div>
 
                           <!-- textarea -->
                           <div class="form-group">
                                 <div class="col-sm-2">
+                                    
                                     <label class="checkbox-inline">
-                                      <input class="minimal" type="checkbox" name="install_status" id="install_status">Installed
+                                      <input class="minimal" type="checkbox" name="install_status" id="install_status"
+                                             <c:if test="${loyaltyPlugin.installationStatus==1}">checked</c:if> >Installed
                                     </label>
                                 </div>
                               
@@ -69,7 +80,8 @@
                               
                               <div class="col-sm-2">
                                     <label class="checkbox-inline">
-                                      <input class="minimal" type="checkbox" name="active" id="active">Active
+                                      <input class="minimal" type="checkbox" name="active" id="active"
+                                             <c:if test="${loyaltyPlugin.active==1}">checked</c:if> >Active
                                     </label>
                                 </div>
                                 <label></label> <!--used to ensure block display-->
@@ -87,7 +99,7 @@
                                 </div>
                                 <div class="col-sm-1">=</div>
                                 <div class="col-sm-2" style="margin-top: -5px;">
-                                    <input type="text" name="settings" id="settings" class="form-control medium" value="${project.name}">
+                                    <input type="text" name="reward_value" id="reward_value" class="form-control medium" value="${settingsMap.reward_value}">
                                     <small>Enter amount per reward point in Naira</small>
                                 </div>
                                 <label></label>
