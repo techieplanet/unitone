@@ -298,15 +298,17 @@ function lodgePaymentCheck(){
 
 /*TP: calculate the sum of the total amount of items in the cart*/
 function calculateSum(){
+    
     var sum = 0;
-  
-  
   //If loyaltyPlugin is enabled
     if(isLoyaltyEnabled == 1){
         
-        for(var cart in cartArray){
+        
+        
+        for(var k in cartArray){
             
-            sum += cart.productMinimumInitialAmount + (parseFloat(cart.rewardPoint) * pointToCurrency);
+            sum = sum +  parseFloat(cartArray[k].productMinimumInitialAmount) + (parseFloat(cartArray[k].rewardPoint) * parseFloat(pointToCurrency));
+            console.log("productMinimumInitialAmount : " + cartArray[k].productMinimumInitialAmount);
             
         }
         
@@ -523,6 +525,8 @@ function editDataFromCart(id){
   var commission = dataArray.commp;
   var dayOfNotification = dataArray.dayOfNotification;
   
+  
+  
  // alert(dataArray[14]);
     
     var baseUrl = getBaseUrl().toString();
@@ -557,6 +561,11 @@ function editDataFromCart(id){
     $('#commp').val(commission);
     $("#day_of_notification").val(dayOfNotification);
     
+    if(isLoyaltyEnabled == 1){
+      var point = dataArray.rewardPoint;
+      $("#productLoyaltyPoint").val(point);
+    }
+    
     console.log("commission : " + commission);
     console.log("day_of_notification : " + dayOfNotification);
     
@@ -584,6 +593,7 @@ function updateUnit(id){
      var datajson = $("#tr"+id).val();
     //alert(datajson);
     var dataArray = JSON.parse(datajson);
+    
     var productUnitId = dataArray.productUnitId;
     var productQuantity = dataArray.productQuantity;
     var productMinimumInitialAmount = dataArray.productMinimumInitialAmount;
@@ -998,6 +1008,13 @@ function monthlyPayCalculator(){
     var quantity = $("#selectQuantity").val();
     var productMinimumInitialAmount = $("#productMinimumInitialAmount").val();
     var productMaximumDuration = $("#productMaximumDuration").val();
+    
+    if(isLoyaltyEnabled == 1){
+        var point = $("#productLoyaltyPoint").val() || 0;
+        productMinimumInitialAmount = parseInt(productMinimumInitialAmount) + parseInt((parseInt(point) * parseInt(pointToCurrency)));
+        console.log("Initial Amount : " + productMinimumInitialAmount);
+    }
+    
     var payLeft = productAmount - productMinimumInitialAmount;
     $("#amountLeft").val(payLeft);
     var monthlyPay = payLeft / productMaximumDuration;
@@ -1027,6 +1044,7 @@ function calculateAmountToPay(){
     
     //If loyaltyPlugin is enabled
     if(isLoyaltyEnabled == 1){
+        
         var point = parseInt($("#productLoyaltyPoint").val()) || 0;
         
         
@@ -1034,6 +1052,7 @@ function calculateAmountToPay(){
         if( totalUsedPoints > customerPoints){
             $("#addToCart").attr("disabled",true);
             $("#rewardPointError").modal();
+            calculateDurationFromMonthlyPay();
             return;
         }
         else{
@@ -1173,21 +1192,20 @@ function calculateProductAmount(){
     text: "-- choose --"
 }));
           
-          var message = "month";
-          for(var i=1;i<=totalDuration;i++){
-              // $('#selectUnit').empty();
-              if(i>1){
-                  message = "months";
-              }
-              
-               $('#productMaximumDuration').append($('<option>', {
-    value: i,
-    text: i+" "+message,
-    selected: true
-}));
-$(this).attr("selected","selected");
+  var message = "month";
+  for(var i=1;i<=totalDuration;i++){
+      if(i>1){
+          message = "months";
+      }
 
-          }
+       $('#productMaximumDuration').append($('<option>', {
+            value: i,
+            text: i+" "+message,
+            selected: true
+        }));
+    $(this).attr("selected","selected");
+
+  }
           
    
     

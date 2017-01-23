@@ -198,6 +198,19 @@ function createOrderItemList(id, count, table, agentName) {
 }
 
 
+function getTotalLoyaltyPointUsed(){
+    
+    var points = 0;
+    
+    if(!cartData.lodgements)
+        cartData.lodgements = [];
+    
+    for(var cart in cartData.lodgements){
+        points += parseInt(cart.rewardPoint);
+    }
+    
+    return points;
+}
 
 function addToCart(project,unitName,qty,orderItemId,rowId){
     
@@ -206,9 +219,9 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
     var amountFieldSelector = "#" + rowId + " .lodgement-amount";
     var amount = $(amountFieldSelector).val();
     var amountFormatted = accounting.formatMoney(amount,"N",2,",",".");
-    var point = parseInt($("#"+rowId+" .points").val()) || 0;
+    var itemPoint = 0;
     
-    var item = {"orderItemId":orderItemId,"amount":amount};
+    
     if(!cartData.lodgements)
         cartData.lodgements = [];
     
@@ -217,6 +230,18 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
         return;
     }
     
+    //Check if loyalty Plugin is enabled
+    if(isLoyaltyEnabled == 1){
+        itemPoint = parseInt($("#"+rowId+" .points").val()) || 0;
+        var points = getTotalLoyaltyPointUsed() + itemPoint;
+        
+        if(points > customerLoyaltyPoint){
+            $("#rewardPointError").modal();
+            return;
+        }
+    }
+    
+    var item = {"orderItemId":orderItemId,"amount":amount,"rewardPoint":itemPoint};
     cartData.lodgements.push(item);
     console.log("Cart : " + JSON.stringify(cartData));
     
@@ -257,7 +282,13 @@ function calculateLodgementCartTotal(){
     
     for(var k in cart){
         
-        total = total +  parseFloat(cart[k].amount);
+        if(isLoyaltyEnabled == 1){
+            total += parseFloat(cart[k].amount) + parseFloat(cart[k].rewardPoint * pointToCurrency);
+        }
+        else
+        {
+            total = total +  parseFloat(cart[k].amount);
+        }
     }
     
     console.log("Total = " + total);
@@ -327,7 +358,13 @@ function checkOut(){
     
     for(var k in cart){
         
-        total = total +  parseFloat(cart[k].amount);
+        if(isLoyaltyEnabled == 1){
+            total += parseFloat(cart[k].amount) + parseFloat(cart[k].rewardPoint * pointToCurrency);
+        }
+        else
+        {
+           total += parseFloat(cart[k].amount);
+        }
     }
     
     $("#checkout .amount-box").each(function(){
@@ -460,7 +497,7 @@ function startLoading(){
 
 function checkLoyaltyPoint(rowId,elem){
     
-    var totalPoints = getAllPoints();
+    var totalPoints = getTotalLoyaltyPointUsed() + parseInt($(elem).val()) || 0;
     
     if(totalPoints > customerLoyaltyPoint){
         

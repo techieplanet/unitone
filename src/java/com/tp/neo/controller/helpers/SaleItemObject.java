@@ -31,6 +31,7 @@ public class SaleItemObject {
     public float productMinimumMonthlyPayment;
     public Double commp ;
     public int dayOfNotification;
+    public double rewardPoint;
 
     
 
