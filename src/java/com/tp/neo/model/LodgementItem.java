@@ -47,6 +47,8 @@ public class LodgementItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "reward_amount")
+    private Double rewardAmount;
     @Column(name = "approval_status")
     private Short approvalStatus;
 
@@ -174,6 +176,14 @@ public class LodgementItem extends BaseModel {
 
     public void setApprovalStatus(Short approvalStatus) {
         this.approvalStatus = approvalStatus;
+    }
+
+    public Double getRewardAmount() {
+        return rewardAmount;
+    }
+
+    public void setRewardAmount(Double rewardAmount) {
+        this.rewardAmount = rewardAmount;
     }
     
 }

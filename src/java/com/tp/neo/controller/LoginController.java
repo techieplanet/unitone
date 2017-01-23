@@ -12,6 +12,7 @@ import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Auditlog;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.Role;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.AuthManager;
@@ -163,7 +164,8 @@ public class LoginController extends HttpServlet {
                 session.setAttribute("user", user);
                 session.setAttribute("userType", userType);
                 session.setAttribute("userTypes", userTypes);
-                                
+                session.setAttribute("availablePlugins", getAvailableplugins());
+                
                 if(user.getSystemUserTypeId() == 2){//agent or customer so go get the permissions from db
                     user.setPermissions(this.getUserTypePermissions(user,"Agent"));
                 }
@@ -350,6 +352,29 @@ public class LoginController extends HttpServlet {
             Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+    
+    
+    private HashMap<String, Plugin> getAvailableplugins(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<Plugin> pluginslist = em.createNamedQuery("Plugin.findAvailable")
+                                    .setParameter("installationStatus", 1)
+                                    .setParameter("active",1)
+                                    .setParameter("deleted", 0)
+                                    .getResultList();
+        
+        HashMap<String, Plugin> pluginsMap = new HashMap<String, Plugin>();
+        for(Plugin plugin : pluginslist){
+            pluginsMap.put(plugin.getPluginName().toLowerCase(), plugin);
+        }
+        
+        for (HashMap.Entry<String, Plugin> entry : pluginsMap.entrySet())
+        {
+           System.out.println("Available plugin: " + entry.getKey() + "/" + entry.getValue());
+        }
+        return pluginsMap;
     }
     
     /**
