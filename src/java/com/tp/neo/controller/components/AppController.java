@@ -8,14 +8,12 @@ package com.tp.neo.controller.components;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Permission;
+import com.tp.neo.model.Plugin;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -174,6 +172,25 @@ public class AppController extends HttpServlet{
         emf.close();
         
         return notificationList;
+    }
+    
+    
+    public HashMap<String, Plugin> getAvailableplugins(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<Plugin> pluginslist = em.createNamedQuery("Plugin.findAvailable")
+                                    .setParameter("installationStatus", 1)
+                                    .setParameter("active",1)
+                                    .setParameter("deleted", 0)
+                                    .getResultList();
+        
+        HashMap<String, Plugin> pluginsMap = new HashMap<String, Plugin>();
+        for(Plugin plugin : pluginslist){
+            pluginsMap.put(plugin.getPluginName().toLowerCase(), plugin);
+        }
+        
+        return pluginsMap;
     }
     
     private boolean isXMLHttpRequest(HttpServletRequest request){

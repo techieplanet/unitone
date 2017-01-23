@@ -38,7 +38,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Plugin.findByCreatedBy", query = "SELECT p FROM Plugin p WHERE p.createdBy = :createdBy"),
     @NamedQuery(name = "Plugin.findByCreatedDate", query = "SELECT p FROM Plugin p WHERE p.createdDate = :createdDate"),
     @NamedQuery(name = "Plugin.findByModifiedBy", query = "SELECT p FROM Plugin p WHERE p.modifiedBy = :modifiedBy"),
-    @NamedQuery(name = "Plugin.findByModifiedDate", query = "SELECT p FROM Plugin p WHERE p.modifiedDate = :modifiedDate")})
+    @NamedQuery(name = "Plugin.findByModifiedDate", query = "SELECT p FROM Plugin p WHERE p.modifiedDate = :modifiedDate"),
+    @NamedQuery(name = "Plugin.findAvailable", query = "SELECT p FROM Plugin p WHERE p.installationStatus = :installationStatus AND p.active = :active AND p.deleted = :deleted")})
+
 public class Plugin extends BaseModel{
 
     private static final long serialVersionUID = 1L;
