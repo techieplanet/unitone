@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.PropertyException;
 import com.tp.neo.model.utils.MailSender;
+import java.net.URI;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,10 +61,10 @@ public class UserController extends AppController {
     
     String newEmailSubject = "Your NeoForce login details";
     String newRegEmail = "Dear %s,<br/>" +
-                        "You have been registered as a new user on NeoForce Sales Force Solution. You may login with your email and password.<br/>" +
+                        "You have been registered as a new user on NeoForce Sales Force Solution. You may login with your email and password.<br/><br/>" +
                         "Your newly created password is %s.<br/><br/>" +
-                        "To login, visit this <a href=\"localhost:8080/NeoForce\">link</a>. If the link does not work, copy the following URL and paste in directly in your address bar.<br/><br/>" +
-                        "<p style=\"text-align: center;\">localhost:8080/NeoForce</p>";
+                        "To login, visit this <a href=\"%s\">link</a>. If the link does not work, copy the following URL and paste in directly in your address bar.<br/><br/>" +
+                        "<p style=\"text-align: center;\">%s</p>";
             
     
     public void init(ServletConfig config) throws ServletException {
@@ -294,8 +295,13 @@ public class UserController extends AppController {
                 em.close();
                
                 //send email to user on new registration 
-                String message = String.format(newRegEmail, user.getFirstname(), initPass);
+                String scheme = request.isSecure() ? "https" : "http";
+                String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
+                String host = new URI(request.getHeader("host")).toString();
+                String rootUrl = scheme + "://" + host + context + "/";
+                String message = String.format(newRegEmail, user.getFirstname(), initPass, rootUrl, rootUrl);
                 new MailSender().sendHtmlEmail(user.getEmail(), defaultEmail, newEmailSubject, message);
+                System.out.println("user message: " + message);
                 
             }
             catch(PropertyException e){

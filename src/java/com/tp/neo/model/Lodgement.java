@@ -6,7 +6,6 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -58,6 +57,8 @@ public class Lodgement extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "reward_amount")
+    private Double rewardAmount;
     @Column(name = "created_by_user_type")
     private Short createdByUserType;
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
@@ -272,6 +273,11 @@ public class Lodgement extends BaseModel {
         this.createdByUserType = createdByUserType;
     }
 
- 
-    
+    public Double getRewardAmount() {
+        return rewardAmount;
+    }
+
+    public void setRewardAmount(Double rewardAmount) {
+        this.rewardAmount = rewardAmount;
+    }
 }
