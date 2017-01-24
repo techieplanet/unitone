@@ -277,5 +277,7 @@ public class ProductOrder extends BaseModel {
     public void setMortgageStatus(Short mortgageStatus) {
         this.mortgageStatus = mortgageStatus;
     }
+
+
     
 }

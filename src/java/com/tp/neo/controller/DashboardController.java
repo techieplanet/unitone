@@ -13,6 +13,7 @@ import com.tp.neo.controller.helpers.DashboardHelper;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
 import com.tp.utils.DateFunctions;
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class DashboardController extends AppController {
         em = emf.createEntityManager();
         
         //get total due
-        DashboardHelper helper = new DashboardHelper();
+        DashboardHelper helper = new DashboardHelper((HashMap<String, Plugin>)request.getSession().getAttribute("availablePlugins"));
         
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
 
@@ -190,7 +191,7 @@ public class DashboardController extends AppController {
         em = emf.createEntityManager();
         
         //get total due
-        AgentDashboardHelper helper = new AgentDashboardHelper();
+        AgentDashboardHelper helper = new AgentDashboardHelper((HashMap<String, Plugin>)request.getSession().getAttribute("availablePlugins"));
         
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         Long agentId = sessionUser.getSystemUserId();
@@ -367,44 +368,3 @@ public class DashboardController extends AppController {
     }// </editor-fold>
 
 }
-
-
-//        String q = "SELECT o.agent.firstname FROM ProductOrder o WHERE o.id = :id";
-//        TypedQuery<String> orders =  em.createQuery(q, String.class).setParameter("id", 5);
-//        List<String> oStrings = orders.getResultList();
-//        System.out.println("List.size: " + oStrings.get(0));
-//        System.out.println("Single String: " + orders.getSingleResult());
-        
-        //multiple
-//        q = "SELECT o.agent.firstname, o.agent.lastname FROM ProductOrder o WHERE o.id = :id";
-//        TypedQuery<Object[]> agents =  em.createQuery(q, Object[].class).setParameter("id", 5);
-//        List<Object[]> agentStringList = agents.getResultList();
-//        for(Object[] thisAgent : agentStringList ){
-//            System.out.println("First name" + thisAgent[0] + " Last name: " + thisAgent[1]);
-//        }
-        
-//        String q = "SELECT p FROM ProductOrder p " 
-//                    + "JOIN p.orderItemCollection q "
-//                    + "JOIN q.lodgementItemCollection r "
-//                    + "WHERE r.approvalStatus = :aps "
-//                    + "GROUP BY p.id "
-//                    + "ORDER  BY p.id";
-//        TypedQuery<ProductOrder> orders =  em.createQuery(q, ProductOrder.class).setParameter("aps", 1);
-//        List<ProductOrder> ordersList = orders.getResultList();
-//        for(ProductOrder order : ordersList)
-//            System.out.println("Order Id: " + order.getId());
-//        
-//        RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-//        dispatcher.forward(request, response);
-
-
-//          String q = "SELECT p, r FROM ProductOrder p " 
-//                    + "JOIN p.orderItemCollection q "
-//                    + "JOIN q.lodgementItemCollection r "
-//                    + "WHERE r.approvalStatus = :aps "
-//                    + "GROUP BY p.id, r.id "
-//                    + "ORDER  BY p.id";
-//        TypedQuery<Object[]> ordersAndL =  em.createQuery(q, Object[].class).setParameter("aps", 1);
-//        List<Object[]> ordersAndLList = ordersAndL.getResultList();
-//        for(Object[] orderAndL : ordersAndLList)
-//            System.out.println("Order Id: " + ((ProductOrder)orderAndL[0]).getId() + ", Lodgement Id: " + ((LodgementItem)orderAndL[1]).getId());

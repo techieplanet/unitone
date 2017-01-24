@@ -8,6 +8,7 @@ package com.tp.neo.controller.helpers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.utils.DateFunctions;
@@ -36,11 +37,18 @@ public class DashboardHelper {
     Query query;
     
     Gson gson = new GsonBuilder().create();
-
+    HashMap<String, Plugin> availablePlugins;
     
     public DashboardHelper(){
         emf.getCache().evictAll();
     }
+    
+    public DashboardHelper(HashMap<String, Plugin> availablePlugins){
+        emf.getCache().evictAll();
+        this.availablePlugins = availablePlugins;
+    }
+    
+    
     
     public double getTotalDuePayments(){
         double totalDue = 0;
@@ -386,8 +394,13 @@ public class DashboardHelper {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
+        String loyaltyQueryHook = "";
+        if(availablePlugins.containsKey("loyalty")) 
+            loyaltyQueryHook = "SUM(l.reward_amount) as rvalue ";
+        
         String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount) as lvalue, " +
-                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper " +
+                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper, " +
+                       loyaltyQueryHook + " " +
                        "FROM lodgement_item l " +
                        "WHERE l.approval_status = 1 AND (date(l.modified_date) >= '" + startDate.toString() + "' AND date(l.modified_date) <= '" + endDate.toString() + "') " +
                        "GROUP BY grouper";
@@ -401,6 +414,7 @@ public class DashboardHelper {
             summaryMap.put("count", summary[0]);
             summaryMap.put("value", summary[1]);
             summaryMap.put("date", summary[2]);
+            if(availablePlugins.containsKey("loyalty")) summaryMap.put("loyalty_value", summary[3]);
             summaryMapsList.add(summaryMap);
         }
         

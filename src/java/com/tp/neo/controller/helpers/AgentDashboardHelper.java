@@ -11,6 +11,7 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.AgentBalance;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
@@ -40,12 +41,17 @@ public class AgentDashboardHelper {
     Query query;
     
     Gson gson = new GsonBuilder().create();
-
+    HashMap<String, Plugin> availablePlugins;
     
     public AgentDashboardHelper(){
         emf.getCache().evictAll();
     }
     
+    
+    public AgentDashboardHelper(HashMap<String, Plugin> availablePlugins){
+        emf.getCache().evictAll();
+        this.availablePlugins = availablePlugins;
+    }
     
     
     public HashMap<String, Number> getTotalAgentDebts(Long agentId){
@@ -347,8 +353,13 @@ public class AgentDashboardHelper {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
+        String loyaltyQueryHook = "";
+        if(availablePlugins.containsKey("loyalty")) 
+            loyaltyQueryHook = "SUM(l.reward_amount) as rvalue ";
+        
         String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount) as lvalue, " +
-                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper " +
+                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper, " +
+                       loyaltyQueryHook + " " +
                        "FROM lodgement_item l JOIN order_item o ON l.item_id = o.id JOIN product_order po ON po.id = o.order_id JOIN agent a ON po.agent_id = a.agent_id " +
                        "WHERE a.agent_id= " + agentId + " AND l.approval_status = 1 AND (date(l.modified_date) >= '" + startDate.toString() + "' AND date(l.modified_date) <= '" + endDate.toString() + "') " +
                        "GROUP BY grouper";
@@ -362,6 +373,7 @@ public class AgentDashboardHelper {
             summaryMap.put("count", summary[0]);
             summaryMap.put("value", summary[1]);
             summaryMap.put("date", summary[2]);
+            if(availablePlugins.containsKey("loyalty")) summaryMap.put("loyalty_value", summary[3]);
             summaryMapsList.add(summaryMap);
         }
         

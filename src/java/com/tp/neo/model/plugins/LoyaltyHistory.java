@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.tp.neo.model;
+package com.tp.neo.model.plugins;
 
+import com.tp.neo.model.Customer;
+import com.tp.neo.model.LodgementItem;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
@@ -34,9 +36,24 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "LoyaltyHistory.findAll", query = "SELECT l FROM LoyaltyHistory l"),
     @NamedQuery(name = "LoyaltyHistory.findById", query = "SELECT l FROM LoyaltyHistory l WHERE l.id = :id"),
     @NamedQuery(name = "LoyaltyHistory.findByRewardPoints", query = "SELECT l FROM LoyaltyHistory l WHERE l.rewardPoints = :rewardPoints"),
-    @NamedQuery(name = "LoyaltyHistory.findByType", query = "SELECT l FROM LoyaltyHistory l WHERE l.type = :type")})
+    @NamedQuery(name = "LoyaltyHistory.findByType", query = "SELECT l FROM LoyaltyHistory l WHERE l.type = :type"),
+    @NamedQuery(name = "LoyaltyHistory.findByDeleted", query = "SELECT l FROM LoyaltyHistory l WHERE l.deleted = :deleted"),
+    @NamedQuery(name = "LoyaltyHistory.findByCreatedBy", query = "SELECT l FROM LoyaltyHistory l WHERE l.createdBy = :createdBy"),
+    @NamedQuery(name = "LoyaltyHistory.findByCreatedDate", query = "SELECT l FROM LoyaltyHistory l WHERE l.createdDate = :createdDate"),
+    @NamedQuery(name = "LoyaltyHistory.findByModifiedBy", query = "SELECT l FROM LoyaltyHistory l WHERE l.modifiedBy = :modifiedBy"),
+    @NamedQuery(name = "LoyaltyHistory.findByModifiedDate", query = "SELECT l FROM LoyaltyHistory l WHERE l.modifiedDate = :modifiedDate")})
 public class LoyaltyHistory implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    private Long id;
+    @Column(name = "reward_points")
+    private Integer rewardPoints;
+    @Column(name = "type")
+    private Short type;
     @Column(name = "deleted")
     private Short deleted;
     @Column(name = "created_by")
@@ -49,23 +66,12 @@ public class LoyaltyHistory implements Serializable {
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "id")
-    private Long id;
-    @Column(name = "reward_points")
-    private Integer rewardPoints;
-    @Column(name = "type")
-    private Short type;
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     @ManyToOne
     private Customer customerId;
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     @ManyToOne
-    private OrderItem itemId;
+    private LodgementItem itemId;
 
     public LoyaltyHistory() {
     }
@@ -96,47 +102,6 @@ public class LoyaltyHistory implements Serializable {
 
     public void setType(Short type) {
         this.type = type;
-    }
-
-    public Customer getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Customer customerId) {
-        this.customerId = customerId;
-    }
-
-    public OrderItem getItemId() {
-        return itemId;
-    }
-
-    public void setItemId(OrderItem itemId) {
-        this.itemId = itemId;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof LoyaltyHistory)) {
-            return false;
-        }
-        LoyaltyHistory other = (LoyaltyHistory) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "com.tp.neo.model.LoyaltyHistory[ id=" + id + " ]";
     }
 
     public Short getDeleted() {
@@ -177,6 +142,47 @@ public class LoyaltyHistory implements Serializable {
 
     public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
+    }
+
+    public Customer getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Customer customerId) {
+        this.customerId = customerId;
+    }
+
+    public LodgementItem getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(LodgementItem itemId) {
+        this.itemId = itemId;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof LoyaltyHistory)) {
+            return false;
+        }
+        LoyaltyHistory other = (LoyaltyHistory) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "com.tp.neo.model.plugins.LoyaltyHistory[ id=" + id + " ]";
     }
     
 }

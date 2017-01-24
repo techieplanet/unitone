@@ -5,18 +5,25 @@
  */
 package com.tp.neo.controller.helpers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
-import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.utils.TrailableManager;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -31,11 +38,20 @@ import javax.xml.bind.PropertyException;
 public class LodgementManager {
     
     SystemUser sessionUser;
+    HashMap<String, Plugin> availablePlugins = new HashMap<String, Plugin>();
+    
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em = emf.createEntityManager();
     
+    Gson gson = new GsonBuilder().create();
+    
     public LodgementManager(SystemUser sessionUser){
         this.sessionUser = sessionUser;
+    }
+    
+    public LodgementManager(SystemUser sessionUser, HashMap<String, Plugin> availablePlugins){
+        this.sessionUser = sessionUser;
+        this.availablePlugins = availablePlugins;
     }
     
     /**
@@ -151,47 +167,47 @@ public class LodgementManager {
      * @throws PropertyException
      * @throws RollbackException 
      */
-    private void processLodgementApproval1(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
-        em.getTransaction().begin();
-        
-        //approve the lodgement
-        lodgement.setApprovalStatus((short)1);
-        new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.merge(lodgement);
-        
-        notification.setStatus((short)2);
-        em.merge(notification);
-        
-        //double entry: debit cash, credit customer account to the tune of the lodgment
-        Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
-        
-        
-        for(int i=0; i < lodgementItems.size(); i++){
-            LodgementItem thisItem = lodgementItems.get(i);
-            //set the item as approved
-            thisItem.setApprovalStatus((short)1);
-            new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-            
-            //double entry - take the money out of the customer account and fund the project unit
-            TransactionManager transactionManager = new TransactionManager(sessionUser);
-            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
-            
-            //split funds into respective accounts - buidling, service, income. Others can be added later too.
-            this.splitUnitFunds(customer, thisItem.getItem().getUnit(), thisItem);
-            
-            //send approval alerts (email and SMS) to agent and customer
-            AlertManager alertManager = new AlertManager();
-            alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-
-            //send wallet credit alert
-            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-            em.merge(thisItem);
-        }//end for       
-        em.merge(lodgement);
-        em.getTransaction().commit();
-        updateMortgageStatus(order);
-    }
+//    private void processLodgementApproval1(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
+//        em.getTransaction().begin();
+//        
+//        //approve the lodgement
+//        lodgement.setApprovalStatus((short)1);
+//        new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+//        em.merge(lodgement);
+//        
+//        notification.setStatus((short)2);
+//        em.merge(notification);
+//        
+//        //double entry: debit cash, credit customer account to the tune of the lodgment
+//        Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
+//        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
+//        
+//        
+//        for(int i=0; i < lodgementItems.size(); i++){
+//            LodgementItem thisItem = lodgementItems.get(i);
+//            //set the item as approved
+//            thisItem.setApprovalStatus((short)1);
+//            new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+//            
+//            //double entry - take the money out of the customer account and fund the project unit
+//            TransactionManager transactionManager = new TransactionManager(sessionUser);
+//            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
+//            
+//            //split funds into respective accounts - buidling, service, income. Others can be added later too.
+//            this.splitUnitFunds(customer, thisItem.getItem().getUnit(), thisItem);
+//            
+//            //send approval alerts (email and SMS) to agent and customer
+//            AlertManager alertManager = new AlertManager();
+//            alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+//
+//            //send wallet credit alert
+//            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+//            em.merge(thisItem);
+//        }//end for       
+//        em.merge(lodgement);
+//        em.getTransaction().commit();
+//        updateMortgageStatus(order);
+//    }
     
     /**
      * 1. This method is used to approve the lodgment made for a new order i.e. it is run when approve lodgement is clicked
@@ -225,7 +241,7 @@ public class LodgementManager {
         
         //double entry: debit cash, credit customer account to the tune of the lodgment
         Account cashAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "CASH").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
+        new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount() + lodgement.getRewardAmount());
         
         em.getTransaction().commit();
     }
@@ -244,7 +260,6 @@ public class LodgementManager {
         System.out.println("processApprovedLodgementItems LITEMS SIZE: " + lodgementItems.size());
         
         for(int i=0; i < lodgementItems.size(); i++){
-            System.out.println("Insude processApprovedLodgementItems loop");
             LodgementItem thisItem = lodgementItems.get(i);
             
             //set the item as approved
@@ -258,6 +273,8 @@ public class LodgementManager {
             //split funds into respective accounts - buidling, service, income. Others can be added later too.
             this.splitUnitFunds(customer, thisItem.getItem().getUnit(), thisItem);
             
+            
+            
             //send approval alerts (email and SMS) to agent and customer
             AlertManager alertManager = new AlertManager();
             alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
@@ -269,7 +286,15 @@ public class LodgementManager {
         
         em.getTransaction().commit();
         
+        //set the mortgage status for the order based on the resultant of the order items
         updateMortgageStatus(order);
+        
+        //make sure to process loyalty after order mortgage status has been set
+        if(this.availablePlugins.containsKey("loyalty")){
+            for(LodgementItem lodgementItem : lodgementItems){
+                this.processLoyaltyDetails(lodgementItem, customer, order);
+            }
+        }
     }
     
     
@@ -296,24 +321,63 @@ public class LodgementManager {
     }
     
     private void splitUnitFunds(Customer customer, ProjectUnit unit, LodgementItem lodgementItem){
+        Account unitAccount = lodgementItem.getItem().getUnit().getAccount();
         
         //Split commissions - credit agent wallet - double entry
         double commissionAmount = lodgementItem.getItem().getCommissionAmount(lodgementItem.getAmount());
-        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), customer.getAgent().getAccount(), commissionAmount);
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, customer.getAgent().getAccount(), commissionAmount);
         
         //Split property dev cost - debit unit, credit property dev  - double entry
         Account propertyDevelopmentAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "PROPERTY_DEV").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), propertyDevelopmentAccount, lodgementItem.getItem().getUnit().getBuildingCost());
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, propertyDevelopmentAccount, lodgementItem.getItem().getUnit().getBuildingCost());
         
         //Split services cost - debit unit, credit property dev  - double entry
         Account servicesAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "SERVICES").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), servicesAccount, lodgementItem.getItem().getUnit().getServiceValue());
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, servicesAccount, lodgementItem.getItem().getUnit().getServiceValue());
+        
+        
+        //Split reward cost - debit unit, credit loyalty  - double entry
+        Account loyaltyAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "LOYALTY").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, loyaltyAccount, lodgementItem.getRewardAmount());
         
         //Split income amount - debit unit, credit property dev  - double entry
         Account incomeAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "INCOME").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(lodgementItem.getItem().getUnit().getAccount(), incomeAccount, lodgementItem.getItem().getUnit().getIncome());
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, incomeAccount, lodgementItem.getItem().getUnit().getIncome() - lodgementItem.getRewardAmount());
     }
     
+    
+    private void processLoyaltyDetails(LodgementItem lodgementItem, Customer customer, ProductOrder order){
+        if(lodgementItem.getRewardAmount()==0) return;
+        
+        EntityManager em = emf.createEntityManager();
+        
+        em.getTransaction().begin();
+        
+        
+                //loyalty history
+                LoyaltyHistory loyaltyHistory = new LoyaltyHistory();
+                loyaltyHistory.setCustomerId(customer);
+                loyaltyHistory.setItemId(lodgementItem);
+                
+                Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+                Map<String, String> loyaltySettingsMap = gson.fromJson(availablePlugins.get("loyalty").getSettings(), mapType);
+                double amountPerRewardPoint =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+                
+                int rewardPoints = (int)(lodgementItem.getRewardAmount() / amountPerRewardPoint);
+                loyaltyHistory.setRewardPoints(rewardPoints);
+                loyaltyHistory.setType((short)order.getMortgageStatus());
+                em.persist(em);
+                
+                //customer point deductions
+                if(order.getMortgageStatus() == 1)
+                    customer.setRewardPoints(customer.getRewardPoints() + rewardPoints);
+                else
+                    customer.setRewardPoints(customer.getRewardPoints() - rewardPoints);
+       
+        
+        em.getTransaction().commit();
+        
+    }
     
     
     private void setLodgementStatus(Lodgement lodgement, short status) throws PropertyException, RollbackException{

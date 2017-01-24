@@ -300,4 +300,5 @@ public class Lodgement extends BaseModel {
     public void setRewardAmount(Double rewardAmount) {
         this.rewardAmount = rewardAmount;
     }
+
 }

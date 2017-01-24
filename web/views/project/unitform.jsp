@@ -107,6 +107,22 @@
           </div>
           
           
+          <div class="form-group marginbottom10">
+            <label for="vatp" class="col-sm-4 control-label">V.A.T Percentage*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="vatp" id="vatp" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          
+          <div class="form-group marginbottom10">
+            <label for="reward_points" class="col-sm-4 control-label">Reward Points</label>
+            <div class="col-sm-7">            
+                <input type="text" name="reward_points" id="reward_points" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          
           
           <div class="form-group marginbottom10">
             <label for="income" class="col-sm-4 control-label">Income</label>
@@ -171,6 +187,7 @@
         
         //on key up for diacount and cost per unit, calculating amount payable
         $("#discount, #cpu, #lid, #mpd").on("keyup", function(){
+            
             var cpu = parseFloat($("#cpu").val());
             cpu = !isNaN(cpu) ? cpu : 0; 
             $("#cpu").val(cpu);
@@ -205,7 +222,7 @@
         
         
         //this is used to calculate the income on keyup of relevant fields
-        $("#discount, #cpu, #building_cost, #service_value, #commp").on("keyup", function(){
+        $("#discount, #cpu, #building_cost, #service_value, #commp, #vatp").on("blur", function(){
             var cpu = parseFloat($("#cpu").val());
             cpu = !isNaN(cpu) ? cpu : 0; 
             $("#cpu").val(cpu);
@@ -227,9 +244,19 @@
             commissionPercentage = !isNaN(commissionPercentage) ? commissionPercentage : 0; 
             $("#commp").val(commissionPercentage);
             
-            var commissionValue = (cpu * commissionPercentage / 100);
+            var VATPercentage = parseFloat($("#vatp").val());
+            VATPercentage = !isNaN(VATPercentage) ? VATPercentage : 0; 
+            $("#vatp").val(VATPercentage);
             
-            var income = cpu - discountValue - buildingCost - serviceValue - commissionValue;
+            var rewardPoints = parseFloat($("#reward_points").val());
+            rewardPoints = !isNaN(rewardPoints) ? rewardPoints : 0; 
+            $("#reward_points").val(rewardPoints);
+            
+            
+            var commissionValue = (cpu * commissionPercentage / 100);
+            var VATValue = (cpu * VATPercentage / 100);
+            
+            var income = cpu - discountValue - buildingCost - serviceValue - commissionValue - VATValue;
             income = !isNaN(income) ? income : 0; 
             $("#income").val(income.toFixed(2));
             

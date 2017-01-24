@@ -5,7 +5,9 @@
  */
 package com.tp.neo.model;
 
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -17,10 +19,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -47,6 +51,8 @@ public class LodgementItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @OneToMany(mappedBy = "itemId")
+    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "reward_amount")
     private Double rewardAmount;
     @Column(name = "approval_status")
@@ -185,5 +191,15 @@ public class LodgementItem extends BaseModel {
     public void setRewardAmount(Double rewardAmount) {
         this.rewardAmount = rewardAmount;
     }
+
+    @XmlTransient
+    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
+        return loyaltyHistoryCollection;
+    }
+
+    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
+        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
+    }
+
     
 }

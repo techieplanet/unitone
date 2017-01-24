@@ -164,6 +164,8 @@ public class OrderManager {
         lodgementItem.setItem(orderItem);
         lodgementItem.setLodgement(lodgement);
         lodgementItem.setApprovalStatus((short)0);
+        lodgement.setRewardAmount(orderItem.getRewardAmount());
+        
         new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
         em.persist(lodgementItem);
@@ -201,7 +203,7 @@ public class OrderManager {
                 approvedItems.add(thisItem);
                 
                 //note that 1 has been set for the item approval status already
-                //this wil also set the audit dates and approval date
+                //this will now set the audit dates and approval date
                 setOrderItemDates(thisItem); 
                 
                 
