@@ -74,6 +74,10 @@ public class ProjectUnit extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "vat_percentage")
+    private Double vatPercentage;
+    @Column(name = "reward_points")
+    private Integer rewardPoints;
     @Column(name = "building_cost")
     private Double buildingCost;
     @Column(name = "service_value")
@@ -354,5 +358,22 @@ public class ProjectUnit extends BaseModel {
     public void setUnitType(ProjectUnitType unitType) {
         this.unitType = unitType;
     }
+
+    public Integer getRewardPoints() {
+        return rewardPoints;
+    }
+
+    public void setRewardPoints(Integer rewardPoints) {
+        this.rewardPoints = rewardPoints;
+    }
+
+    public Double getVatPercentage() {
+        return vatPercentage;
+    }
+
+    public void setVatPercentage(Double vatPercentage) {
+        this.vatPercentage = vatPercentage;
+    }
+
     
 }

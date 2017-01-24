@@ -370,10 +370,6 @@ public class LoginController extends HttpServlet {
             pluginsMap.put(plugin.getPluginName().toLowerCase(), plugin);
         }
         
-        for (HashMap.Entry<String, Plugin> entry : pluginsMap.entrySet())
-        {
-           System.out.println("Available plugin: " + entry.getKey() + "/" + entry.getValue());
-        }
         return pluginsMap;
     }
     

@@ -7,6 +7,7 @@ package com.tp.neo.model;
 
 import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -70,10 +71,10 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-    @Column(name = "reward_points")
-    private Integer rewardPoints;
     @OneToMany(mappedBy = "customerId")
     private Collection<LoyaltyHistory> loyaltyHistoryCollection;
+    @Column(name = "reward_points")
+    private Integer rewardPoints;
     @OneToMany(mappedBy = "customer")
     private Collection<Lodgement> lodgementCollection;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
@@ -484,5 +485,6 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public void setRewardPoints(Integer rewardPoints) {
         this.rewardPoints = rewardPoints;
     }
+
 
 }

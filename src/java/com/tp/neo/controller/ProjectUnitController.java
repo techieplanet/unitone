@@ -129,6 +129,8 @@ public class ProjectUnitController extends AppController {
             map.put("discount", projectUnit.getDiscount().toString());
             map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
             map.put("commp", projectUnit.getCommissionPercentage().toString());
+            map.put("vatp", projectUnit.getVatPercentage().toString());
+            map.put("reward_points", projectUnit.getRewardPoints().toString());
             map.put("quantity", projectUnit.getQuantity() + "");
 
             map.put("amt_payable", projectUnit.getAmountPayable()+ "");
@@ -203,6 +205,8 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setDiscount(Double.parseDouble(request.getParameter("discount")));
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
+                projectUnit.setVatPercentage(Double.parseDouble(request.getParameter("vatp")));
+                projectUnit.setRewardPoints(Integer.parseInt(request.getParameter("reward_points")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
                 projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
                 projectUnit.setUnitType(em.find(ProjectUnitType.class, Integer.parseInt(request.getParameter("unittype"))));
@@ -278,6 +282,8 @@ public class ProjectUnitController extends AppController {
                 map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
                 map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
                 map.put("commp", projectUnit.getCommissionPercentage().toString());
+                map.put("vatp", projectUnit.getVatPercentage().toString());
+                map.put("reward_points", projectUnit.getRewardPoints().toString());
                 map.put("building_cost", projectUnit.getBuildingCost().toString());
                 map.put("income", projectUnit.getIncome().toString());
                 map.put("service_value", projectUnit.getServiceValue().toString());
@@ -322,6 +328,8 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setDiscount(Double.parseDouble(request.getParameter("discount")));
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
+                projectUnit.setVatPercentage(Double.parseDouble(request.getParameter("vatp")));
+                projectUnit.setRewardPoints(Integer.parseInt(request.getParameter("reward_points")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
                 projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
 
@@ -374,6 +382,10 @@ public class ProjectUnitController extends AppController {
                 map.put("buidling_cost", projectUnit.getBuildingCost().toString());
                 map.put("service_value", projectUnit.getServiceValue().toString());
                 map.put("income", projectUnit.getIncome().toString());
+                map.put("commp", projectUnit.getCommissionPercentage().toString());
+                map.put("vatp", projectUnit.getVatPercentage().toString());
+                map.put("reward_points", projectUnit.getRewardPoints().toString());
+                
 
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
             }
@@ -457,7 +469,15 @@ public class ProjectUnitController extends AppController {
             errorMessages.put("commp", "Please enter Commission Percentage");
         }    
         
-        if(!request.getParameter("quantity").matches("^\\d+(\\.?\\d+$)?")){
+        if(!request.getParameter("vatp").matches("^\\d+(\\.?\\d+$)?")){
+            errorMessages.put("vatp", "Please enter VAT Percentage");
+        }    
+        
+        if(!request.getParameter("reward_points").matches("^\\d+$")){
+            errorMessages.put("reward_points", "Please enter a valid Reward Point value");
+        }
+        
+        if(!request.getParameter("quantity").matches("^\\d+$")){
             errorMessages.put("quantity", "Please enter a valid Quantity");
         }
         

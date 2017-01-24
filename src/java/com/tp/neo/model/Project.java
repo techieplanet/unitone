@@ -61,6 +61,7 @@ public class Project extends BaseModel{
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
 
     
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "project")
@@ -256,5 +257,5 @@ public class Project extends BaseModel{
     public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
         this.projectUnitCollection = projectUnitCollection;
     }
-    
+
 }

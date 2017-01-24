@@ -81,6 +81,8 @@
                                 $('#discount').val(unit.discount);
                                 $('#mpd').val(unit.mpd);
                                 $('#commp').val(unit.commp);
+                                $('#vatp').val(unit.vatp);
+                                $('#reward_points').val(unit.reward_points);
                                 $('#quantity').val(unit.quantity);
 
                                 $('#monthly_pay').val(parseFloat(unit.monthly_pay).toFixed(2));

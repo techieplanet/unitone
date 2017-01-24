@@ -5,6 +5,7 @@
  */
 package com.tp.neo.model;
 
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -86,6 +87,9 @@ public class OrderItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+
+    transient double rewardAmount = 0;
+    
     @Column(name = "approval_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date approvalDate;
@@ -325,6 +329,10 @@ public class OrderItem extends BaseModel {
 
     public void setApprovalDate(Date approvalDate) {
         this.approvalDate = approvalDate;
+    }
+
+    public double getRewardAmount() {
+        return rewardAmount;
     }
 
 }
