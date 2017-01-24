@@ -467,11 +467,11 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         else if(action.toUpperCase().equals("PROFILE")) 
             return "customer_profile";
         else if(action.toUpperCase().equals("CURRENT")) 
-            return "current_paying_customer";
+            return "currently_paying_customer";
         else if(action.toUpperCase().equals("COMPLETED")) 
             return "completed_payment_customer";
         else if(action.toUpperCase().equals("LODGEMENT_INVOICE")) 
-            return "print_lodgement_invoice";
+            return "view_customer";
         else if(action.toUpperCase().equals("CUSTOMER_ORDERS")) 
             return "view_customer_orders";
         else 

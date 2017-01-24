@@ -5,7 +5,7 @@
     
     var customersLoyaltyList = [];
     var customerPoints = 0;
-    var isLoyaltyEnabled = 1;
+    var isLoyaltyEnabled = "${plugins.containsKey('loyalty') ? 1 : 0}";
     var pointToCurrency = 10000;
     
     var app = angular.module("app",["ngwidgets"]);
@@ -43,9 +43,10 @@
                    return;
                }
                
-               for(var c in customersLoyaltyList){
-                   if(c.id == id){
-                       customerPoints = c.points;
+               for(var k in customersLoyaltyList){
+                   if(customersLoyaltyList[k].id == id){
+                       console.log("c.id : " + customersLoyaltyList[k].id + ", id : " + id);
+                       customerPoints = customersLoyaltyList[k].points;
                        break;
                    } 
                }
@@ -683,7 +684,7 @@
        $("#agentDetailContainer:visible").toggle();
        
        
-       
+       $("#checkOutToPay").attr("disabled",true);
     });
     
 </script>

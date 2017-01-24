@@ -393,6 +393,13 @@
 <!-- Include the bottom -->
 <%@ include file="../includes/bottom.jsp" %>
 
+<script>
+    var customerLoyaltyPoint = 0;
+    var isLoyaltyEnabled = "${plugins.containsKey('loyalty') ? 1 : 0}";
+    var pointToCurrency = 10000;
+    console.log("isLoyaltyEnabled : " + isLoyaltyEnabled);
+</script>
+
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/neoforce.lodgement.js"></script>
 <script>
         

@@ -15,6 +15,7 @@ import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
+import com.tp.neo.model.LoyaltyHistory;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
@@ -434,14 +435,14 @@ public class OrderManager {
         return resolvedString;
     }
     
-    public List<OrderItem> prepareOrderItem(SaleItemObjectsList salesItemObject, Agent agent){
+    public List<OrderItem> prepareOrderItem(OrderItemObjectsList salesItemObject, Agent agent){
         List<OrderItem> orderItemList = new ArrayList();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        List<SaleItemObject> salesItem = salesItemObject.sales;
-        for(SaleItemObject saleItem : salesItem) {
+        List<OrderItemObject> salesItem = salesItemObject.sales;
+        for(OrderItemObject saleItem : salesItem) {
             
             OrderItem orderItem = new OrderItem();
             
@@ -454,6 +455,7 @@ public class OrderManager {
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
             orderItem.setCreatedDate(getDateTime().getTime());
+            orderItem.setMonthlyPayDay(saleItem.dayOfNotification);
             
             if(sessionUser.getSystemUserTypeId() == 1){
                 orderItem.setCommissionPercentage(saleItem.commp);
@@ -470,6 +472,19 @@ public class OrderManager {
         }
         
         return orderItemList;
+    }
+    
+    public List<LoyaltyHistory> prepareLoyaltyHistory(OrderItemObjectsList orderItemObject){
+        
+        List<LoyaltyHistory> loyaltyHistoryList = new ArrayList();
+        
+        for(OrderItemObject itemObj : orderItemObject.sales){
+            
+            LoyaltyHistory history = new LoyaltyHistory();
+            
+        }
+        
+        return loyaltyHistoryList;
     }
     
     public Lodgement prepareLodgement(Map request, Agent agent) {
@@ -519,21 +534,21 @@ public class OrderManager {
         return lodgement;
     }
     
-    public SaleItemObjectsList getCartData(String orderItemsJsonString) {
-        SaleItemObjectsList saleObj = this.processJsonData(orderItemsJsonString);
+    public OrderItemObjectsList getCartData(String orderItemsJsonString) {
+        OrderItemObjectsList saleObj = this.processJsonData(orderItemsJsonString);
         return saleObj;
     }
     
     //This method processes the new order items, sent as json data via request attribute from new order form
-    private SaleItemObjectsList processJsonData(String json) {
+    private OrderItemObjectsList processJsonData(String json) {
         Gson gson = new GsonBuilder().create();
         System.out.println(json);
         
-        SaleItemObjectsList salesObj = gson.fromJson(json,SaleItemObjectsList.class);
+        OrderItemObjectsList salesObj = gson.fromJson(json,OrderItemObjectsList.class);
         
-        ArrayList<SaleItemObject> sales = salesObj.sales;
+        ArrayList<OrderItemObject> sales = salesObj.sales;
         
-        for(SaleItemObject s : sales) {
+        for(OrderItemObject s : sales) {
             System.out.println("Product Name : " + s.productName);
             System.out.println("Product Qty : " + s.productQuantity);
             System.out.println("Product Amount Per Unit " + s.amountUnit);

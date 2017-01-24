@@ -232,6 +232,11 @@ public class LodgementController extends AppController {
             //Keep track of the sideBar
             request.setAttribute("sideNav", "Lodgement"); 
             request.setAttribute("sideNavAction",action);
+            
+            //Get Available Plugins
+            HttpSession session = request.getSession();
+            Map plugins = (Map)session.getAttribute("availablePlugins");
+            request.setAttribute("plugins",plugins);
      
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);

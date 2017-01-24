@@ -8,9 +8,7 @@ var orderTable = null;
 var cid = 1;
 var countId = 1;
 var cartData = {};
-var customerLoyaltyPoint = 0;
-var isLoyaltyEnabled = 1;
-var pointToCurrency = 10000;
+
 
 function selectCustomer(contextPath,id) {
    $("#customerListContainer:visible").toggle();
@@ -205,8 +203,8 @@ function getTotalLoyaltyPointUsed(){
     if(!cartData.lodgements)
         cartData.lodgements = [];
     
-    for(var cart in cartData.lodgements){
-        points += parseInt(cart.rewardPoint);
+    for(var k in cartData.lodgements){
+        points += parseInt(cartData.lodgements[k].rewardPoint);
     }
     
     return points;
@@ -497,7 +495,10 @@ function startLoading(){
 
 function checkLoyaltyPoint(rowId,elem){
     
-    var totalPoints = getTotalLoyaltyPointUsed() + parseInt($(elem).val()) || 0;
+    var pointsUsed = getTotalLoyaltyPointUsed();
+    var totalPoints = pointsUsed + parseInt($(elem).val()) || 0;
+    
+    console.log("Points used : " + pointsUsed + ", totalPoints : " + totalPoints );
     
     if(totalPoints > customerLoyaltyPoint){
         

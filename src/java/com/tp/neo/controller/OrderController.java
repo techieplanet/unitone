@@ -20,8 +20,8 @@ import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
-import com.tp.neo.controller.helpers.SaleItemObject;
-import com.tp.neo.controller.helpers.SaleItemObjectsList;
+import com.tp.neo.controller.helpers.OrderItemObject;
+import com.tp.neo.controller.helpers.OrderItemObjectsList;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
@@ -270,6 +270,11 @@ public class OrderController extends AppController {
         request.setAttribute("sideNav", "Order");
         request.setAttribute("sideNavAction",action);
         
+        //Get Available Plugins
+        HttpSession session = request.getSession();
+        Map plugins = (Map)session.getAttribute("availablePlugins");
+        request.setAttribute("plugins",plugins);
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
@@ -301,7 +306,13 @@ public class OrderController extends AppController {
 
     
     
-    
+    /**
+     * This method processes New Orders
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException 
+     */
     public void initOrderProcess(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
         try {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -338,13 +349,15 @@ public class OrderController extends AppController {
             
             
             OrderManager orderManager = new OrderManager(sessionUser);
-            SaleItemObjectsList saleItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
+            OrderItemObjectsList orderItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
            
             
             
-            List<OrderItem> orderItems = orderManager.prepareOrderItem(saleItemObject, agent);
+            List<OrderItem> orderItems = orderManager.prepareOrderItem(orderItemObject, agent);
             Lodgement lodgement = orderManager.prepareLodgement(getRequestParameters(request), agent);
-
+            
+            
+            
             lodgement.setCustomer(customer);
             
             ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, request.getContextPath());
@@ -619,7 +632,6 @@ public class OrderController extends AppController {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        emf.getCache().evictAll();
 //        Query jplQuery = em.createNamedQuery("ProductOrder.findByNotApprovalStatus");
 //        Short s = 3; // Get Orders that are not declined approved
 //        jplQuery.setParameter("approvalStatus", s);

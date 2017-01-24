@@ -494,7 +494,7 @@ public class Agent extends BaseModel implements SystemUser  {
         else if(action.toUpperCase().equals("DELETE")) return "delete_agent";
         else if(action.toUpperCase().equals("REGISTRATION")) return "agent_registration";
         else if(action.toUpperCase().equals("WAITING")) return "pending_agent";
-        else if(action.toUpperCase().equals("LISTAGENTS")) return "listagents";
+        else if(action.toUpperCase().equals("LISTAGENTS")) return "waiting_agents";
         else if(action.toUpperCase().equals("CREDIT_HISTORY")) return "credit_history";
         else if(action.toUpperCase().equals("DEBIT_HISTORY")) return "debit_history";
         else if(action.toUpperCase().equals("WITHDRAWAPPROVAL")) return "view_withdrawal_request";

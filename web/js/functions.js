@@ -26,7 +26,7 @@ var cartArray = []; // holds cart item objects
             }, 450);
         }
        
-        calculateSum();
+        //calculateSum();
     });
 
 /**
@@ -726,11 +726,16 @@ $("#amountLeft").val("");
 $("#commp").val("0");
 $("#addToCart").attr("disabled",false);
 $('#selectUnit').empty(); //select 
+$("#commp").val("0");
+$("#day_of_notification").val("1")
+    if(isLoyaltyEnabled == 1){
+        $("#productLoyaltyPoint").val("0");
+    }
     
       $('#selectUnit').append($('<option>', {
-    value: "",
-    text: "-- choose --"
-}));
+        value: "",
+        text: "-- choose --"
+        }));
 
 $('#productMaximumDuration').append($('<option>', {
     value: "",
@@ -1029,8 +1034,8 @@ function getTotalUsedPoints(){
     
     var points = 0;
     
-    for(var cart in cartArray){
-        points += cart.rewardPoints;
+    for(var k in cartArray){
+        points += cartArray[k].rewardPoint;
     }
     
     return points;
@@ -1047,12 +1052,15 @@ function calculateAmountToPay(){
         
         var point = parseInt($("#productLoyaltyPoint").val()) || 0;
         
+        var usedPoints = getTotalUsedPoints();
+        console.log("Used Points : " + usedPoints + ", customer points : " + customerPoints);
         
-        var totalUsedPoints = getTotalUsedPoints() + point;
+        var totalUsedPoints = usedPoints + point;
         if( totalUsedPoints > customerPoints){
             $("#addToCart").attr("disabled",true);
+            $("#productLoyaltyPoint").focus();
             $("#rewardPointError").modal();
-            calculateDurationFromMonthlyPay();
+            
             return;
         }
         else{

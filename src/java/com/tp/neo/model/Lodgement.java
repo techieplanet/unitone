@@ -226,7 +226,7 @@ public class Lodgement extends BaseModel {
         else if(action.toUpperCase().equals("LIST_PENDING") || action.equalsIgnoreCase("notification"))
             return "list_pending_lodgement";
         else if(action.toUpperCase().equals("APPROVAL"))
-            return "lodgement_approval";
+            return "list_pending_lodgement";
         else if(action.toUpperCase().equals("APPROVE"))
             return "approve_lodgement";
         else if(action.toUpperCase().equals("DECLINE"))

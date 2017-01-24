@@ -244,7 +244,7 @@ public class ProductOrder extends BaseModel {
             return "view_declined_order";
         else if(action.toUpperCase().equals("PROCESSING")) 
             return "view_processing_order";
-        else if(action.toUpperCase().equals("CURRENT")) return "view_current_paying_order";
+        else if(action.toUpperCase().equals("CURRENT")) return "view_currently_paying_order";
         else if(action.toUpperCase().equals("COMPLETED")) return "view_completed_payment_order";
         else if(action.toUpperCase().equals("NOTIFICATION")) return "approve_order";
         else

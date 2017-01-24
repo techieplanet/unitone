@@ -17,7 +17,7 @@ import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
-import com.tp.neo.controller.helpers.SaleItemObjectsList;
+import com.tp.neo.controller.helpers.OrderItemObjectsList;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.CompanyAccount;
@@ -360,7 +360,7 @@ public class CustomerController extends AppController  {
                 
                 OrderManager orderManager = new OrderManager(sessionUser);
 
-                SaleItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
+                OrderItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
                 Map requestParameters = getRequestParameters(request);
                 
                 List<OrderItem> orderItem =  orderManager.prepareOrderItem(saleItemObjectList, agent);
