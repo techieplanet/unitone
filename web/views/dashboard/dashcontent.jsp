@@ -417,6 +417,10 @@
         var seriesArray = new Array();
         var countsObject = {name: 'Payments Count', type: 'column', data: new Array()};
         var valuesObject = {name: 'Payments Value', type: 'spline', yAxis: 1, color: '#00a65a', data: new Array()};
+        <c:if test="${sessionScope.availablePlugins.loyalty != null}">
+            var loyaltyObject = {name: 'Loyalty Value', type: 'column', data: new Array()};
+        </c:if>
+            
         var categoriesArray = new Array();
         
         console.log("lodgementSummaryJSON " + JSON.stringify(lodgementSummaryJSON))
@@ -442,11 +446,19 @@
                 console.log("loop");
                 var summary = lodgementSummaryList[i];
                 countsObject.data.push(summary.count); 
+                
+                <c:if test="${sessionScope.availablePlugins.loyalty != null}">
+                    loyaltyObject.data.push(summary.reward_value); 
+                </c:if>
+                    
                 valuesObject.data.push(summary.value);
                 categoriesArray.push(summary.date)
         }
             
             seriesArray.push(countsObject);
+            <c:if test="${sessionScope.availablePlugins.loyalty != null}">
+                seriesArray.push(loyaltyObject);
+            </c:if>
             seriesArray.push(valuesObject);
             
             
