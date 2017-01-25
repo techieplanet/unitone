@@ -369,10 +369,7 @@ public class LodgementManager {
                 em.persist(em);
                 
                 //customer point deductions
-                if(order.getMortgageStatus() == 1)
-                    customer.setRewardPoints(customer.getRewardPoints() + rewardPoints);
-                else
-                    customer.setRewardPoints(customer.getRewardPoints() - rewardPoints);
+                customer.setRewardPoints(customer.getRewardPoints() - rewardPoints);
        
         
         em.getTransaction().commit();

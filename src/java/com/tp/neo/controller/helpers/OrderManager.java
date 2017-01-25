@@ -215,6 +215,9 @@ public class OrderManager {
                 
                 approvedLodgementItems.add(lodgementItem);
                 
+                //add the credit points to the customer
+                customer.setRewardPoints(customer.getRewardPoints() + thisItem.getRewardPoints());
+                
                 //the lodgement has been approved before we can get here. 
                 //Now process the lodgment item, which is a part of the whole lodgement 
                 //double entry: debit customer, credit unit
