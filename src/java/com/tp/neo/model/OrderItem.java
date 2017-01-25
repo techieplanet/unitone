@@ -88,7 +88,8 @@ public class OrderItem extends BaseModel {
     @Column(name = "modified_by")
     private Long modifiedBy;
 
-    transient double rewardAmount = 0;
+    transient Double rewardAmount = 0.0;
+    transient Integer rewardPoints = 0;
     
     @Column(name = "approval_date")
     @Temporal(TemporalType.TIMESTAMP)
@@ -331,8 +332,21 @@ public class OrderItem extends BaseModel {
         this.approvalDate = approvalDate;
     }
 
-    public double getRewardAmount() {
+    
+    public Double getRewardAmount() {
         return rewardAmount;
+    }
+    
+    public void setRewardAmount(Double rewardAmount) {
+        this.rewardAmount = rewardAmount;
+    }
+    
+    public Integer getRewardPoints() {
+        return rewardPoints;
+    }
+    
+    public void setRewardPoints(Integer rewardPoints) {
+        this.rewardPoints = rewardPoints;
     }
 
 }
