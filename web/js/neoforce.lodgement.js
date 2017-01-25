@@ -82,14 +82,21 @@ function prepareOrderListTable(jsonString){
             tr += "<td>" + accounting.formatMoney(amountPaid,"N",2,",",".") + "</td>";
             tr += "<td>" + accounting.formatMoney(amountPayable,"N",2,",",".") + "</td>";
             tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' value='' /></td>";
-            tr += "<td><input type='text'  class='points' name='' id='' value='0' onkeyup='checkLoyaltyPoint(" + rowId + ",this)' /></td>";
+            if(isLoyaltyEnabled == 1){
+                tr += "<td><input type='text'  class='points' name='' id='' value='0' onkeyup='checkLoyaltyPoint(" + rowId + ",this)' /></td>";
+            }
             tr += "<td><button class='btn btn-success addToCart' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add to Cart</button></td>";
             rows += tr;
         }
         
         var table = "<table class='table table-bordered table-striped table-hover'>";
         table += "<thead><tr>";
-        table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th>Loyalty Point</th><th></th>";
+        if(isLoyaltyEnabled == 1){
+            table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th>Loyalty Point</th><th>Action</th>";
+        }
+        else{
+            table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th>Action</th>";
+        }
         table += "</tr></thead>";
         table += rows  + "</table>";
      

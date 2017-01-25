@@ -27,6 +27,7 @@ import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
@@ -272,8 +273,18 @@ public class OrderController extends AppController {
         
         //Get Available Plugins
         HttpSession session = request.getSession();
-        Map plugins = (Map)session.getAttribute("availablePlugins");
+        Map<String, Plugin> plugins = (Map)session.getAttribute("availablePlugins");
         request.setAttribute("plugins",plugins);
+        
+        double pointToCurrency = 0;
+        
+        if(plugins.containsKey("loyalty")){
+            Gson gson = new Gson();
+            Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+            Map<String, String> loyaltySettingsMap = gson.fromJson(plugins.get("loyalty").getSettings(), mapType);
+            pointToCurrency =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+        }
+        request.setAttribute("pointToCurrency", pointToCurrency);
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -347,8 +358,16 @@ public class OrderController extends AppController {
                 agent = customer.getAgent();
             }
             
+            //Get Available Plugins
+            HttpSession session = request.getSession();
+            Map<String, Plugin> plugins = (Map)session.getAttribute("availablePlugins");
             
             OrderManager orderManager = new OrderManager(sessionUser);
+            
+            if(plugins.containsKey("loyalty")){
+                orderManager = new OrderManager(sessionUser,plugins);
+            }
+            
             OrderItemObjectsList orderItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
            
             
@@ -356,7 +375,12 @@ public class OrderController extends AppController {
             List<OrderItem> orderItems = orderManager.prepareOrderItem(orderItemObject, agent);
             Lodgement lodgement = orderManager.prepareLodgement(getRequestParameters(request), agent);
             
-            
+            if(plugins.containsKey("loyalty")){
+                lodgement = orderManager.setLodgementRewardPoint(lodgement, orderItems);
+            }
+            else{
+                lodgement.setRewardAmount(new Double(0));
+            }
             
             lodgement.setCustomer(customer);
             

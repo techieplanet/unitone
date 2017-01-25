@@ -88,13 +88,14 @@ public class OrderItem extends BaseModel {
     @Column(name = "modified_by")
     private Long modifiedBy;
 
-    transient double rewardAmount = 0;
+    transient Double rewardAmount = 0.0;
+    transient Integer rewardPoint = 0;
     
     @Column(name = "approval_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date approvalDate;
-    @OneToMany(mappedBy = "itemId")
-    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
+//    @OneToMany(mappedBy = "itemId")
+//    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "monthly_pay_day")
     private Integer monthlyPayDay;
     @Column(name = "commission_percentage")
@@ -314,14 +315,14 @@ public class OrderItem extends BaseModel {
         this.monthlyPayDay = monthlyPayDay;
     }
 
-    @XmlTransient
-    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
-        return loyaltyHistoryCollection;
-    }
-
-    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
-        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
-    }
+//    @XmlTransient
+//    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
+//        return loyaltyHistoryCollection;
+//    }
+//
+//    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
+//        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
+//    }
 
     public Date getApprovalDate() {
         return approvalDate;
@@ -330,9 +331,23 @@ public class OrderItem extends BaseModel {
     public void setApprovalDate(Date approvalDate) {
         this.approvalDate = approvalDate;
     }
-
-    public double getRewardAmount() {
+    
+    public void setRewardAmount(Double rewardPoint) {
+        this.rewardAmount = rewardPoint;
+    }
+    
+    public Double getRewardAmount() {
         return rewardAmount;
     }
+
+    public Integer getRewardPoint() {
+        return rewardPoint;
+    }
+
+    public void setRewardPoint(Integer rewardPoint) {
+        this.rewardPoint = rewardPoint;
+    }
+    
+    
 
 }

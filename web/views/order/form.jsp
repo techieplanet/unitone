@@ -6,7 +6,7 @@
     var customersLoyaltyList = [];
     var customerPoints = 0;
     var isLoyaltyEnabled = "${plugins.containsKey('loyalty') ? 1 : 0}";
-    var pointToCurrency = 10000;
+    var pointToCurrency = "${pointToCurrency}";
     
     var app = angular.module("app",["ngwidgets"]);
        
@@ -16,7 +16,7 @@
            
            var dataArray = [];
            
-           dataArray.push({name:"--Select Customer",id : "",img : ""})
+           dataArray.push({name:"--Select Customer--",id : "",img : ""})
            
            <c:forEach items="${customers}" var="customer">
            
@@ -286,16 +286,17 @@
                                         </div> 
 <!--                                            /.form-group initial monthly amount -->
                                         </div>
-                                                  
-                                      <div class="col-md-2" >
-                                          <div class="form-group">
-                                              <label for="productLoyaltyPoint">Loyalty Point</label>
-                                              <span class="productSpan">Amount of loyalty point to use for Item</span>
-                                              <input type="text" size="4" class="form-control" name="productLoyaltyPoint" id="productLoyaltyPoint" onkeyup="calculateAmountToPay()">
-                                          </div>
-                                      </div>         
-                                              
-                                              <div class="col-md-2">
+                                      
+                                      <c:if test="${plugins.containsKey('loyalty')}">
+                                          <div class="col-md-2" >
+                                              <div class="form-group">
+                                                  <label for="productLoyaltyPoint">Loyalty Point</label>
+                                                  <span class="productSpan">Amount of loyalty point to use for Item</span>
+                                                  <input type="text" size="4" class="form-control" name="productLoyaltyPoint" id="productLoyaltyPoint" onkeyup="calculateAmountToPay()">
+                                              </div>
+                                          </div>         
+                                      </c:if>        
+                                      <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="amountLeft">Balance Payable(N)</label>
                                             <span id="amountPerUnit" class="productSpan">

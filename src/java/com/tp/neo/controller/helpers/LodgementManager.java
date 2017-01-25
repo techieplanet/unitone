@@ -290,11 +290,11 @@ public class LodgementManager {
         updateMortgageStatus(order);
         
         //make sure to process loyalty after order mortgage status has been set
-        if(this.availablePlugins.containsKey("loyalty")){
-            for(LodgementItem lodgementItem : lodgementItems){
-                this.processLoyaltyDetails(lodgementItem, customer, order);
-            }
-        }
+//        if(this.availablePlugins.containsKey("loyalty")){
+//            for(LodgementItem lodgementItem : lodgementItems){
+//                this.processLoyaltyDetails(lodgementItem, customer, order);
+//            }
+//        }
     }
     
     
@@ -338,7 +338,9 @@ public class LodgementManager {
         
         //Split reward cost - debit unit, credit loyalty  - double entry
         Account loyaltyAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "LOYALTY").getSingleResult();
+        System.out.println("Account : " + loyaltyAccount.getAccountCode() + ", LodgementItem RewardPoint : " + lodgementItem.getRewardAmount());
         new TransactionManager(sessionUser).doDoubleEntry(unitAccount, loyaltyAccount, lodgementItem.getRewardAmount());
+        
         
         //Split income amount - debit unit, credit property dev  - double entry
         Account incomeAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "INCOME").getSingleResult();

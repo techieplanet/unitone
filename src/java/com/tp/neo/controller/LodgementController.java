@@ -46,6 +46,7 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.NotificationType;
+import com.tp.neo.model.Plugin;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -235,8 +236,18 @@ public class LodgementController extends AppController {
             
             //Get Available Plugins
             HttpSession session = request.getSession();
-            Map plugins = (Map)session.getAttribute("availablePlugins");
+            Map<String, Plugin> plugins = (Map)session.getAttribute("availablePlugins");
             request.setAttribute("plugins",plugins);
+            
+            double pointToCurrency = 0;
+        
+            if(plugins.containsKey("loyalty")){
+                Gson gson = new Gson();
+                Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+                Map<String, String> loyaltySettingsMap = gson.fromJson(plugins.get("loyalty").getSettings(), mapType);
+                pointToCurrency =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+            }
+            request.setAttribute("pointToCurrency", pointToCurrency);
      
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
@@ -598,6 +609,19 @@ public class LodgementController extends AppController {
             Long userId = user.getSystemUserId();
             Lodgement lodgement = prepareLodgement(getRequestParameters(request), userId);
             
+            HttpSession session = request.getSession();
+            Map<String, Plugin> plugins = (Map)session.getAttribute("availablePlugins");
+            double amountPerRewardPoint = 0;
+            
+            if(plugins.containsKey("loyalty")){
+                Gson gson = new Gson();
+                Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+                Map<String, String> loyaltySettingsMap = gson.fromJson(plugins.get("loyalty").getSettings(), mapType);
+                amountPerRewardPoint =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+            }
+            double lodgementAmount = 0;
+            double lodgementRewardAmount = 0;
+            
             List<LodgementItem> lodgementItemList = new ArrayList();
             
             for(MorgageList morgageItem : morgageList){
@@ -610,6 +634,18 @@ public class LodgementController extends AppController {
                 lodgementItem.setItem(orderItem);
                 lodgementItem.setAmount(morgageItem.getAmount());
                 
+                lodgementAmount += morgageItem.getAmount();
+                
+                if(plugins.containsKey("loyalty")){
+                    
+                    lodgementItem.setRewardAmount(morgageItem.getRewardPoint() * amountPerRewardPoint);
+                    lodgementRewardAmount += (morgageItem.getRewardPoint() * amountPerRewardPoint);
+                }
+                else{
+                    double d = 0;
+                    lodgementItem.setRewardAmount(d);
+                }
+                
                 lodgementItemList.add(lodgementItem);
                 
                 if(customer == null){
@@ -619,13 +655,21 @@ public class LodgementController extends AppController {
                 
             }
             
+            if(plugins.containsKey("loyalty")){
+                lodgement.setAmount(lodgementAmount);
+                lodgement.setRewardAmount(lodgementRewardAmount);
+            }
+            else{
+                lodgement.setRewardAmount(new Double(0));
+            }
+            
             lodgement.setCustomer(customer);
             LodgementManager lodgementManager = new LodgementManager(user);
             lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath(), order);
             
             Map map = prepareMorgageInvoice(lodgement, lodgementItemList);
             
-            HttpSession session = request.getSession(false);
+            //HttpSession session = request.getSession(false);
             session.setAttribute("invoice",map);
             
             em.close();

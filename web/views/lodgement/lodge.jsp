@@ -396,8 +396,9 @@
 <script>
     var customerLoyaltyPoint = 0;
     var isLoyaltyEnabled = "${plugins.containsKey('loyalty') ? 1 : 0}";
-    var pointToCurrency = 10000;
+    var pointToCurrency = "${pointToCurrency}";
     console.log("isLoyaltyEnabled : " + isLoyaltyEnabled);
+    console.log("pointToCurrency : " + pointToCurrency);
 </script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/neoforce.lodgement.js"></script>

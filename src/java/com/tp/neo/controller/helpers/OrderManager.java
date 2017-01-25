@@ -7,6 +7,7 @@ package com.tp.neo.controller.helpers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
@@ -15,14 +16,16 @@ import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
-import com.tp.neo.model.LoyaltyHistory;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,8 +55,15 @@ public class OrderManager {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em = emf.createEntityManager();
     
+    Map<String, Plugin> plugins = new HashMap();
+    
     public OrderManager(SystemUser sessionUser){
         this.sessionUser = sessionUser;
+    }
+    
+    public OrderManager(SystemUser sessionUser, Map map){
+        this.sessionUser = sessionUser;
+        this.plugins = map;
     }
     
     /**
@@ -164,7 +174,7 @@ public class OrderManager {
         lodgementItem.setItem(orderItem);
         lodgementItem.setLodgement(lodgement);
         lodgementItem.setApprovalStatus((short)0);
-        lodgement.setRewardAmount(orderItem.getRewardAmount());
+        lodgementItem.setRewardAmount(orderItem.getRewardAmount());
         
         new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
@@ -444,6 +454,19 @@ public class OrderManager {
         EntityManager em = emf.createEntityManager();
         
         List<OrderItemObject> salesItem = salesItemObject.sales;
+        
+        Gson gson = new Gson();
+        double amountPerRewardPoint = 0;
+        
+        if(plugins.containsKey("loyalty")){
+               
+               Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+               Map<String, String> loyaltySettingsMap = gson.fromJson(plugins.get("loyalty").getSettings(), mapType);
+               amountPerRewardPoint =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+               
+               
+        }
+        
         for(OrderItemObject saleItem : salesItem) {
             
             OrderItem orderItem = new OrderItem();
@@ -458,6 +481,16 @@ public class OrderManager {
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
             orderItem.setCreatedDate(getDateTime().getTime());
             orderItem.setMonthlyPayDay(saleItem.dayOfNotification);
+            
+            if(plugins.containsKey("loyalty")){
+               
+               orderItem.setRewardAmount(saleItem.rewardPoint * amountPerRewardPoint);
+               orderItem.setRewardPoint((int)saleItem.rewardPoint);
+            }
+            else{
+                orderItem.setRewardAmount(new Double(0));
+                orderItem.setRewardPoint(0);
+            }
             
             if(sessionUser.getSystemUserTypeId() == 1){
                 orderItem.setCommissionPercentage(saleItem.commp);
@@ -564,6 +597,23 @@ public class OrderManager {
     private Calendar getDateTime(){
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
         return calendar;
+    }
+    
+    public Lodgement setLodgementRewardPoint(Lodgement lodgement,List<OrderItem> items){
+        
+        double pointUsed = 0;
+        double amountPaid = 0;
+        
+        for(OrderItem item : items){
+            
+            pointUsed += item.getRewardAmount();
+            amountPaid += item.getInitialDep();
+        }
+        
+        lodgement.setAmount(amountPaid);
+        lodgement.setRewardAmount(pointUsed);
+        
+        return lodgement;
     }
     
     public static void main(String[] args){
