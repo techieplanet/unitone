@@ -731,6 +731,9 @@ public class OrderController extends AppController {
         EntityManager em = emf.createEntityManager();
         emf.getCache().evictAll();
         
+        HttpSession session = request.getSession();
+        HashMap<String,Plugin> plugins = (HashMap)session.getAttribute("availablePlugins");
+        
         try{
         
         em.getTransaction().begin();
@@ -786,6 +789,10 @@ public class OrderController extends AppController {
             Notification notification = (Notification)jpQl.getSingleResult();
             
             OrderManager orderManager = new OrderManager(sessionUser);
+            
+            if(plugins.containsKey("loyalty")){
+                orderManager = new OrderManager(sessionUser, plugins);
+            }
             orderManager.processOrderApproval(productOrder, orderItemList, customer, notification);
             System.out.println("Successful");
             

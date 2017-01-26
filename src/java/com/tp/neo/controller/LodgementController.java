@@ -546,6 +546,15 @@ public class LodgementController extends AppController {
             Notification notification = (Notification)jpQl.getSingleResult();
             
             LodgementManager manager = new LodgementManager(sessionUser);
+            
+            HttpSession session = request.getSession();
+            HashMap<String, Plugin> plugins = (HashMap)session.getAttribute("availablePlugins");
+            
+            if(plugins.containsKey("loyalty")){
+                
+                manager = new LodgementManager(sessionUser,plugins);
+            }
+            
             manager.approveLodgement(lodgement, notification, request.getContextPath());
             
             

@@ -226,6 +226,9 @@ public class OrderManager {
                 
                 approvedLodgementItems.add(lodgementItem);
                 
+                //add the credit points to the customer
+                customer.setRewardPoints(customer.getRewardPoints() + thisItem.getRewardPoints());
+                
                 //the lodgement has been approved before we can get here. 
                 //Now process the lodgment item, which is a part of the whole lodgement 
                 //double entry: debit customer, credit unit
@@ -265,9 +268,15 @@ public class OrderManager {
             
         }//end for
         
-        
-        //send the list of approved lodgmentitems to the LMngr's processApprovedLodgementItems method 
-        new LodgementManager(sessionUser).processApprovedLodgementItems(approvedLodgementItems, customer, order);
+        if(plugins.containsKey("loyalty")){
+            //send the list of approved lodgmentitems to the LMngr's processApprovedLodgementItems method 
+            new LodgementManager(sessionUser,(HashMap)plugins).processApprovedLodgementItems(approvedLodgementItems, customer, order);
+        }
+        else{
+            
+            //send the list of approved lodgmentitems to the LMngr's processApprovedLodgementItems method 
+            new LodgementManager(sessionUser).processApprovedLodgementItems(approvedLodgementItems, customer, order);
+        }
         /*******************************************************************************************************/
         System.out.println("Approved Items : " + approvedItems.size() + ", All Items : " + allItems.size());
         //set the resultant status of the order based on the statuses of the items in it
@@ -485,11 +494,11 @@ public class OrderManager {
             if(plugins.containsKey("loyalty")){
                
                orderItem.setRewardAmount(saleItem.rewardPoint * amountPerRewardPoint);
-               orderItem.setRewardPoint((int)saleItem.rewardPoint);
+               orderItem.setRewardPoints((int)saleItem.rewardPoint);
             }
             else{
                 orderItem.setRewardAmount(new Double(0));
-                orderItem.setRewardPoint(0);
+                orderItem.setRewardPoints(0);
             }
             
             if(sessionUser.getSystemUserTypeId() == 1){
