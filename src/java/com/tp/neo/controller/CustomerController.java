@@ -1435,7 +1435,7 @@ public class CustomerController extends AppController  {
         
         String html = "";
         
-        html += "<table width='100%'  border='0' cellspacing='0' cellpadding='0' style='padding-top:20px'>";
+        html += "<table width='100%'  border='0'>";
         
         html += "<tr><td align='center' style='background-color:#eee'>";
         
