@@ -1435,11 +1435,11 @@ public class CustomerController extends AppController  {
         
         String html = "";
         
-        html += "<table width='100%'  border='0'>";
+        html += "<table width='100%' height='100%'  border='0'>";
         
         html += "<tr><td align='center' style='background-color:#eee'>";
         
-        html += "<table width='80%' style='background-color:#fff; margin-top:20px;margin-bottom:20px'>";
+        html += "<table width='80%' style='background-color:#fff; margin-top:20px;margin-bottom:20px;padding:20px'>";
         html += "<tr>";
         html += "<td colspan='4' style='text-align:right;border-bottom: solid 2px #ccc;'>" + lodgement.getCreatedDate() + "</td>";
         html += "</tr>";
@@ -1468,9 +1468,9 @@ public class CustomerController extends AppController  {
         html += "<tr>";
         html += "<td colspan='4'>";
         
-        html +=     "<table width=100%>";
+        html +=     "<table width=100% style='margin-top:40px'>";
         html +=         "<tr>";
-        html +=             "<th>S/N</th>  <th>Description</th> <th>Qty</th>  <th>Subtotal</th>";
+        html +=             "<th style='border: solid 1px #ccc;background-color:#000;color:#fff'>S/N</th>  <th style='border: solid 1px #ccc;background-color:#000;color:#fff'>Description</th> <th style='border: solid 1px #ccc;background-color:#000;color:#fff'>Qty</th>  <th style='border: solid 1px #ccc;background-color:#000;color:#fff'>Subtotal</th>";
         html +=         "</tr>";
         
         int count =  1;
@@ -1480,16 +1480,16 @@ public class CustomerController extends AppController  {
             double amount = LI.getAmount() + reward;
             
             html +=         "<tr>";
-            html +=             "<td style='border: solid 1px #f4f4f4;'>";
+            html +=             "<td style='border: solid 1px #ccc;'>";
             html +=                count;
             html +=             "</td>";
-            html +=             "<td style='border: solid 1px #f4f4f4;'>";
+            html +=             "<td style='border: solid 1px #ccc;'>";
             html +=                LI.getItem().getUnit().getProject().getName() + " - " + LI.getItem().getUnit().getTitle();
             html +=             "</td>";
-            html +=             "<td style='border: solid 1px #f4f4f4;'>";
+            html +=             "<td style='border: solid 1px #ccc;'>";
             html +=                LI.getItem().getQuantity();
             html +=             "</td>";
-            html +=             "<td style='border: solid 1px #f4f4f4;'>";
+            html +=             "<td style='border: solid 1px #ccc;'>";
             html +=                String.format("%s %.2f", "N",amount);
             html +=             "</td>";
             
