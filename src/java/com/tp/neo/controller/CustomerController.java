@@ -1464,7 +1464,7 @@ public class CustomerController extends AppController  {
         html +=     "Email: " + customer.getEmail();
         html +=     "</td>";
         
-        html += "<td colspan='2' valign='top'><b>Invoice #</b>" + lodgement.getId() + "<br /> Transaction Date:" + lodgement.getCreatedDate() + "</td>";
+        html += "<td colspan='2' valign='top'><b>Invoice #</b>" + lodgement.getId() + "<br /> Transaction Date: " + lodgement.getCreatedDate() + "</td>";
         html += "</tr>";
         
         //Prepare the OrderItems Table
