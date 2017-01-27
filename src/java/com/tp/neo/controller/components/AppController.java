@@ -39,6 +39,10 @@ public class AppController extends HttpServlet{
     protected SystemUser sessionUser;
     protected String callbackUrRL = "";
     protected boolean isAjaxRequest;
+    protected String companyName = "TechiePlanet, Ltd.";
+    protected String companyAddress = "214 Allen Avenue, Ikeja, Lagos.";
+    protected String companyPhone = "(+234) 816-4334-657";
+    protected String companyEmail = "info@techieplanetltd.com ";
     
     public AppController(){
         System.out.println("Inside TPController");

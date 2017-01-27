@@ -68,14 +68,14 @@
                               
                                 <td style="width:130px">
                                     <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}">
-                                     <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
+                                     <a class="btn btn-success btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
                                      
                                     </c:if>
                                     
                                      <c:if test="${sessionScope.user.getSystemUserTypeId() <= 2}">
                                         <a class="btn btn-primary btn-xs" href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${customer.customerId}" role="button"><i class="fa fa-user"></i> </a>
-                                        <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button"><i class="fa fa-cart-plus"></i> </a>
-                                        <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
+                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button"><i class="fa fa-cart-plus"></i> </a>
+                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
                                      </c:if>
                                      
                                      <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}"> 

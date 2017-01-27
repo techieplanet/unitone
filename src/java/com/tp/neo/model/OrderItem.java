@@ -9,6 +9,7 @@ import com.tp.neo.model.plugins.LoyaltyHistory;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -350,7 +351,19 @@ public class OrderItem extends BaseModel {
     }
 
 
-    
+    public double getTotalAmountPaid(){
+        
+        double total = 0;
+        List<LodgementItem> LItems = (List)getLodgementItemCollection();
+        
+        for(LodgementItem LI : LItems){
+            
+            double rewardPoint = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            total += (LI.getAmount() + rewardPoint);
+        }
+        
+        return total;
+    }
     
     
 

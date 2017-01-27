@@ -9,7 +9,7 @@
 
 /* global data */
 var cartArray = []; // holds cart item objects
-
+var isLoyaltyEnabled = isLoyaltyEnabled || 0;
 /*TP: ondocument ready actions to be performed*/
  $( document ).ready(function() {
         $( "#pwBankdeposit").hide();
