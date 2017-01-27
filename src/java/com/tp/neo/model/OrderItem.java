@@ -9,6 +9,7 @@ import com.tp.neo.model.plugins.LoyaltyHistory;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -94,8 +95,8 @@ public class OrderItem extends BaseModel {
     @Column(name = "approval_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date approvalDate;
-    @OneToMany(mappedBy = "itemId")
-    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
+//    @OneToMany(mappedBy = "itemId")
+//    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "monthly_pay_day")
     private Integer monthlyPayDay;
     @Column(name = "commission_percentage")
@@ -315,14 +316,14 @@ public class OrderItem extends BaseModel {
         this.monthlyPayDay = monthlyPayDay;
     }
 
-    @XmlTransient
-    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
-        return loyaltyHistoryCollection;
-    }
-
-    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
-        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
-    }
+//    @XmlTransient
+//    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
+//        return loyaltyHistoryCollection;
+//    }
+//
+//    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
+//        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
+//    }
 
     public Date getApprovalDate() {
         return approvalDate;
@@ -348,5 +349,22 @@ public class OrderItem extends BaseModel {
     public void setRewardPoints(Integer rewardPoints) {
         this.rewardPoints = rewardPoints;
     }
+
+
+    public double getTotalAmountPaid(){
+        
+        double total = 0;
+        List<LodgementItem> LItems = (List)getLodgementItemCollection();
+        
+        for(LodgementItem LI : LItems){
+            
+            double rewardPoint = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            total += (LI.getAmount() + rewardPoint);
+        }
+        
+        return total;
+    }
+    
+    
 
 }

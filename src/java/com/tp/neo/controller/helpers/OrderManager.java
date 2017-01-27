@@ -7,6 +7,7 @@ package com.tp.neo.controller.helpers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
@@ -15,13 +16,16 @@ import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,8 +55,15 @@ public class OrderManager {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em = emf.createEntityManager();
     
+    Map<String, Plugin> plugins = new HashMap();
+    
     public OrderManager(SystemUser sessionUser){
         this.sessionUser = sessionUser;
+    }
+    
+    public OrderManager(SystemUser sessionUser, Map map){
+        this.sessionUser = sessionUser;
+        this.plugins = map;
     }
     
     /**
@@ -163,7 +174,7 @@ public class OrderManager {
         lodgementItem.setItem(orderItem);
         lodgementItem.setLodgement(lodgement);
         lodgementItem.setApprovalStatus((short)0);
-        lodgement.setRewardAmount(orderItem.getRewardAmount());
+        lodgementItem.setRewardAmount(orderItem.getRewardAmount());
         
         new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
@@ -257,11 +268,17 @@ public class OrderManager {
             
         }//end for
         
-        
-        //send the list of approved lodgmentitems to the LMngr's processApprovedLodgementItems method 
-        new LodgementManager(sessionUser).processApprovedLodgementItems(approvedLodgementItems, customer, order);
+        if(plugins.containsKey("loyalty")){
+            //send the list of approved lodgmentitems to the LMngr's processApprovedLodgementItems method 
+            new LodgementManager(sessionUser,(HashMap)plugins).processApprovedLodgementItems(approvedLodgementItems, customer, order);
+        }
+        else{
+            
+            //send the list of approved lodgmentitems to the LMngr's processApprovedLodgementItems method 
+            new LodgementManager(sessionUser).processApprovedLodgementItems(approvedLodgementItems, customer, order);
+        }
         /*******************************************************************************************************/
-        
+        System.out.println("Approved Items : " + approvedItems.size() + ", All Items : " + allItems.size());
         //set the resultant status of the order based on the statuses of the items in it
         if(approvedItems.size() + declinedItems.size()  == allItems.size()){ //each item has either approved or declined status
             setOrderStatus(order, (short)2); //complete the order
@@ -269,6 +286,7 @@ public class OrderManager {
             //set the notification status here
             notification.setStatus((short)2);
             em.merge(notification);
+            
         }
         else if(declinedItems.size() == allItems.size()){
             setOrderStatus(order, (short)3); //decline order
@@ -280,6 +298,7 @@ public class OrderManager {
             //no need to treat lodgement items
             
         }
+        em.flush();
         em.merge(order);
         em.getTransaction().commit();
     }
@@ -437,14 +456,27 @@ public class OrderManager {
         return resolvedString;
     }
     
-    public List<OrderItem> prepareOrderItem(SaleItemObjectsList salesItemObject, Agent agent){
+    public List<OrderItem> prepareOrderItem(OrderItemObjectsList salesItemObject, Agent agent){
         List<OrderItem> orderItemList = new ArrayList();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
-        List<SaleItemObject> salesItem = salesItemObject.sales;
-        for(SaleItemObject saleItem : salesItem) {
+        List<OrderItemObject> salesItem = salesItemObject.sales;
+        
+        Gson gson = new Gson();
+        double amountPerRewardPoint = 0;
+        
+        if(plugins.containsKey("loyalty")){
+               
+               Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+               Map<String, String> loyaltySettingsMap = gson.fromJson(plugins.get("loyalty").getSettings(), mapType);
+               amountPerRewardPoint =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+               
+               
+        }
+        
+        for(OrderItemObject saleItem : salesItem) {
             
             OrderItem orderItem = new OrderItem();
             
@@ -457,6 +489,17 @@ public class OrderManager {
             orderItem.setDiscountAmt(projectUnit.getDiscount());
             orderItem.setDiscountPercentage(projectUnit.getDiscount());
             orderItem.setCreatedDate(getDateTime().getTime());
+            orderItem.setMonthlyPayDay(saleItem.dayOfNotification);
+            
+            if(plugins.containsKey("loyalty")){
+               
+               orderItem.setRewardAmount(saleItem.rewardPoint * amountPerRewardPoint);
+               orderItem.setRewardPoints((int)saleItem.rewardPoint);
+            }
+            else{
+                orderItem.setRewardAmount(new Double(0));
+                orderItem.setRewardPoints(0);
+            }
             
             if(sessionUser.getSystemUserTypeId() == 1){
                 orderItem.setCommissionPercentage(saleItem.commp);
@@ -473,6 +516,19 @@ public class OrderManager {
         }
         
         return orderItemList;
+    }
+    
+    public List<LoyaltyHistory> prepareLoyaltyHistory(OrderItemObjectsList orderItemObject){
+        
+        List<LoyaltyHistory> loyaltyHistoryList = new ArrayList();
+        
+        for(OrderItemObject itemObj : orderItemObject.sales){
+            
+            LoyaltyHistory history = new LoyaltyHistory();
+            
+        }
+        
+        return loyaltyHistoryList;
     }
     
     public Lodgement prepareLodgement(Map request, Agent agent) {
@@ -522,21 +578,21 @@ public class OrderManager {
         return lodgement;
     }
     
-    public SaleItemObjectsList getCartData(String orderItemsJsonString) {
-        SaleItemObjectsList saleObj = this.processJsonData(orderItemsJsonString);
+    public OrderItemObjectsList getCartData(String orderItemsJsonString) {
+        OrderItemObjectsList saleObj = this.processJsonData(orderItemsJsonString);
         return saleObj;
     }
     
     //This method processes the new order items, sent as json data via request attribute from new order form
-    private SaleItemObjectsList processJsonData(String json) {
+    private OrderItemObjectsList processJsonData(String json) {
         Gson gson = new GsonBuilder().create();
         System.out.println(json);
         
-        SaleItemObjectsList salesObj = gson.fromJson(json,SaleItemObjectsList.class);
+        OrderItemObjectsList salesObj = gson.fromJson(json,OrderItemObjectsList.class);
         
-        ArrayList<SaleItemObject> sales = salesObj.sales;
+        ArrayList<OrderItemObject> sales = salesObj.sales;
         
-        for(SaleItemObject s : sales) {
+        for(OrderItemObject s : sales) {
             System.out.println("Product Name : " + s.productName);
             System.out.println("Product Qty : " + s.productQuantity);
             System.out.println("Product Amount Per Unit " + s.amountUnit);
@@ -550,6 +606,23 @@ public class OrderManager {
     private Calendar getDateTime(){
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
         return calendar;
+    }
+    
+    public Lodgement setLodgementRewardPoint(Lodgement lodgement,List<OrderItem> items){
+        
+        double pointUsed = 0;
+        double amountPaid = 0;
+        
+        for(OrderItem item : items){
+            
+            pointUsed += item.getRewardAmount();
+            amountPaid += item.getInitialDep();
+        }
+        
+        lodgement.setAmount(amountPaid);
+        lodgement.setRewardAmount(pointUsed);
+        
+        return lodgement;
     }
     
     public static void main(String[] args){

@@ -6,10 +6,16 @@
 package com.tp.neo.controller.helpers;
 
 /**
- *
+ * ------------------------------------------------------------
+ * Please Note:
+ * -------------------------------------------------------------
+ * This class is used to Deserialize gson string of OrderItems,
+ * from either a New Order Form, New Customer Form, and Make Lodgement form.
+ * It contains different properties of an order item. 
+ * 
  * @author Prestige
  */
-public class SaleItemObject {
+public class OrderItemObject {
     
     public String productName;
     public int productId;
@@ -31,10 +37,11 @@ public class SaleItemObject {
     public float productMinimumMonthlyPayment;
     public Double commp ;
     public int dayOfNotification;
+    public double rewardPoint;
 
     
 
-    public SaleItemObject()
+    public OrderItemObject()
     {
         
     }

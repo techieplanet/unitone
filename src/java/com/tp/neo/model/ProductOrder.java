@@ -238,8 +238,15 @@ public class ProductOrder extends BaseModel {
             return "view_order";
         else if(action.toUpperCase().equals("NEW_ORDER")) 
             return "create_order";
-        else if(action.toUpperCase().equals("CURRENT")) return "view_order";
-        else if(action.toUpperCase().equals("COMPLETED")) return "view_order";
+        else if(action.toUpperCase().equals("APPROVED")) 
+            return "view_approved_order";
+        else if(action.toUpperCase().equals("DECLINED")) 
+            return "view_declined_order";
+        else if(action.toUpperCase().equals("PROCESSING")) 
+            return "view_processing_order";
+        else if(action.toUpperCase().equals("CURRENT")) return "view_currently_paying_order";
+        else if(action.toUpperCase().equals("COMPLETED")) return "view_completed_payment_order";
+        else if(action.toUpperCase().equals("NOTIFICATION")) return "approve_order";
         else
             return "view_order";
     }

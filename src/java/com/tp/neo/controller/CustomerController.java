@@ -17,7 +17,7 @@ import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.CustomerAgent;
-import com.tp.neo.controller.helpers.SaleItemObjectsList;
+import com.tp.neo.controller.helpers.OrderItemObjectsList;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.CompanyAccount;
@@ -25,10 +25,14 @@ import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.AgentProspect;
+import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.utils.FileUploader;
+import com.tp.neo.model.utils.MailSender;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -360,7 +364,7 @@ public class CustomerController extends AppController  {
                 
                 OrderManager orderManager = new OrderManager(sessionUser);
 
-                SaleItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
+                OrderItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
                 Map requestParameters = getRequestParameters(request);
                 
                 List<OrderItem> orderItem =  orderManager.prepareOrderItem(saleItemObjectList, agent);
@@ -395,13 +399,15 @@ public class CustomerController extends AppController  {
                         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
                         String dateString = sdf.format(date);
                         
+                        List<LodgementItem> LItems = (List)lodgement.getLodgementItemCollection();
+                        
                         double vat = 0.00;
                         double gateWayCharge = 0.00;
-                        Map map = getInvoicData(orderItem, vat, gateWayCharge);
+                        Map map = getInvoicData(LItems, vat, gateWayCharge);
                         
                         viewFile = "/views/customer/gateway.jsp";
                         request.getSession().setAttribute("productOrderInvoice", productOrder);
-                        request.getSession().setAttribute("orderItemInvoice", orderItem);
+                        request.getSession().setAttribute("orderItemInvoice", LItems);
                         request.getSession().setAttribute("transactionDate", dateString);
                         request.getSession().setAttribute("customerInvoice", customer);
                         request.getSession().setAttribute("totalInvoice", (Double)map.get("total"));
@@ -713,6 +719,7 @@ public class CustomerController extends AppController  {
 //            
             request.setAttribute("customer", customerList.get(0));
             request.setAttribute("action","edit");
+            request.setAttribute("history",getRequestHistory(request));
             request.setAttribute("userType",sessionUser.getSystemUserTypeId());
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
@@ -739,6 +746,12 @@ public class CustomerController extends AppController  {
         else if(action.equalsIgnoreCase("lodgement_invoice")){
             action = "";
             getLodgmentInvoice(request, response);
+            return;
+        }
+        else if(action.equalsIgnoreCase("email_lodgement_invoice")){
+            action = "";
+            sendCustomerInvoiceEmail(request, response);
+            response.sendRedirect(request.getContextPath()+"/Customer");
             return;
         }
         else if(action.equalsIgnoreCase("customer_orders")){
@@ -1054,13 +1067,15 @@ public class CustomerController extends AppController  {
         return calendar;
     }
     
-    private Map getInvoicData(List<OrderItem> items, double vat, double gateWayCharge){
+    private Map getInvoicData(List<LodgementItem> LItems, double vat, double gateWayCharge){
         
         double total = 0.00;
         double grandTotal = 0.00;
         
-        for(OrderItem item : items){
-            total += item.getInitialDep();
+        for(LodgementItem LI : LItems){
+           
+            double rewardAmount = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            total += LI.getAmount() + rewardAmount;
         }
         
         grandTotal = total + vat + gateWayCharge;
@@ -1338,8 +1353,7 @@ public class CustomerController extends AppController  {
         
         Lodgement lodgement = em.find(Lodgement.class, lodgement_id);
         
-        TypedQuery<OrderItem> query = em.createQuery("SELECT LI.item FROM LodgementItem LI WHERE LI.lodgement.id = :id ",OrderItem.class);
-        List<OrderItem> orderItem = query.setParameter("id", lodgement.getId()).getResultList();
+        List<LodgementItem> LItems = (List)lodgement.getLodgementItemCollection();
         
         
         Date date = lodgement.getCreatedDate();
@@ -1348,19 +1362,175 @@ public class CustomerController extends AppController  {
 
         double vat = 0.00;
         double gateWayCharge = 0.00;
-        Map map = getInvoicData(orderItem, vat, gateWayCharge);
+        Map map = getInvoicData(LItems, vat, gateWayCharge);
 
         String viewFile = "/views/customer/invoice.jsp";
         request.getSession().setAttribute("print", 1);
-        request.getSession().setAttribute("orderItemInvoice", orderItem);
+        request.getSession().setAttribute("orderItemInvoice", LItems);
         request.getSession().setAttribute("transactionDate", dateString);
         request.getSession().setAttribute("customerInvoice", lodgement.getCustomer());
         request.getSession().setAttribute("totalInvoice", (Double)map.get("total"));
         request.getSession().setAttribute("grandTotalInvoice", (Double)map.get("grandTotal"));
         request.getSession().setAttribute("vatInvoice", vat);
         request.getSession().setAttribute("gatewayChargeInvoice", gateWayCharge);
+        request.getSession().setAttribute("companyName", super.companyName);
+        request.getSession().setAttribute("companyAddress", super.companyAddress);
+        request.getSession().setAttribute("companyPhone", super.companyPhone);
+        request.getSession().setAttribute("companyEmail", super.companyEmail);
         
         request.getRequestDispatcher(viewFile).forward(request, response);
+    }
+    
+    public void sendCustomerInvoiceEmail(HttpServletRequest request, HttpServletResponse response){
+        
+        EntityManagerFactory emf  = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long lodgement_id = Long.parseLong(request.getParameter("id"));
+        
+        Lodgement lodgement = em.find(Lodgement.class, lodgement_id);
+        Customer customer = lodgement.getCustomer();
+        List<LodgementItem> LItems = (List)lodgement.getLodgementItemCollection();
+        
+        Date date = lodgement.getCreatedDate();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
+        String dateString = sdf.format(date);
+
+        double vat = 0.00;
+        double gateWayCharge = 0.00;
+        
+        String htmlOutput = prepareInvoiceEmail(lodgement, customer, LItems, vat, gateWayCharge);
+        
+       // new MailSender().sendHtmlEmail("prestigegodson@gmail.com", "godson.ositadinma@techieplanetltd.com", "Lodgment", htmlOutput);
+        /**
+         * Copy HTML content into Text File
+         */
+        FileWriter writer = null;
+        try {
+            File file = new File("c:\\users\\hp\\desktop\\htmloutput.txt");
+        
+            //FileOutputStream fout = new FileOutputStream(file);
+            writer = new FileWriter(file);
+            writer.write(htmlOutput);
+            writer.close();
+        }
+        catch(FileNotFoundException fnfe){
+            System.out.println("Exception : " +  fnfe.getMessage());
+        }
+        catch(IOException ioe){
+            System.out.println("Exception : " + ioe.getMessage());
+        }
+        finally{
+            if(writer != null)
+                try {
+                    writer.close();
+            } catch (IOException ex) {
+                    System.out.println("Unable To Close File : " + ex.getMessage());
+            }
+        }
+        
+    }
+    
+    public String prepareInvoiceEmail(Lodgement lodgement, Customer customer, List<LodgementItem> LItems, double vat, double gateWayCharge){
+        
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        Date date = cal.getTime();
+        
+        String html = "";
+        
+        html += "<table width='100%' height='100%'  border='0'>";
+        
+        html += "<tr><td align='center' style='background-color:#eee'>";
+        
+        html += "<table width='80%' style='background-color:#fff; margin-top:20px;margin-bottom:20px;padding:20px'>";
+        html += "<tr>";
+        html += "<td colspan='4' style='text-align:right;border-bottom: solid 2px #ccc;'>Sent : " + date.toString() + "</td>";
+        html += "</tr>";
+        
+        html += "<tr>";
+        html +=     "<td>";
+        html +=     "<b>From</b> <br />";
+        html +=     super.companyName + " <br />";
+        html +=     super.companyAddress + " <br />";
+        html +=     "Phone: " + super.companyPhone + " <br />";
+        html +=     "Email: " + super.companyEmail;
+        html +=     "</td>";
+        
+        html +=     "<td>";
+        html +=     "<b>To</b> <br />";
+        html +=     customer.getFullName() + " <br />";
+        html +=     customer.getStreet() + ", " + customer.getState() + " <br />";
+        html +=     "Phone: " + customer.getPhone() + " <br />";
+        html +=     "Email: " + customer.getEmail();
+        html +=     "</td>";
+        
+        html += "<td colspan='2' valign='top'><b>Invoice #</b>" + lodgement.getId() + "<br /> Transaction Date: " + lodgement.getCreatedDate() + "</td>";
+        html += "</tr>";
+        
+        //Prepare the OrderItems Table
+        html += "<tr>";
+        html += "<td colspan='4'>";
+        
+        html +=     "<table width=100% style='margin-top:40px'>";
+        html +=         "<tr>";
+        html +=             "<th style='border: solid 1px #ccc;background-color:#000;color:#fff'>S/N</th>  <th style='border: solid 1px #ccc;background-color:#000;color:#fff'>Description</th> <th style='border: solid 1px #ccc;background-color:#000;color:#fff'>Qty</th>  <th style='border: solid 1px #ccc;background-color:#000;color:#fff'>Subtotal</th>";
+        html +=         "</tr>";
+        
+        int count =  1;
+        double total = 0;
+        for(LodgementItem LI : LItems){
+            double reward = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            double amount = LI.getAmount() + reward;
+            
+            html +=         "<tr>";
+            html +=             "<td style='border: solid 1px #ccc;'>";
+            html +=                count;
+            html +=             "</td>";
+            html +=             "<td style='border: solid 1px #ccc;'>";
+            html +=                LI.getItem().getUnit().getProject().getName() + " - " + LI.getItem().getUnit().getTitle();
+            html +=             "</td>";
+            html +=             "<td style='border: solid 1px #ccc;'>";
+            html +=                LI.getItem().getQuantity();
+            html +=             "</td>";
+            html +=             "<td style='border: solid 1px #ccc;'>";
+            html +=                String.format("%s %,.2f", "N",amount);
+            html +=             "</td>";
+            
+            html +=         "</tr>";    
+            
+            total += amount;
+            count++;
+        }
+            html +=         "<tfoot style='background-color:#F3F5F6;'>";
+            html +=         "<tr>";
+            html +=             "<td colspan='3' style='text-align:right;border: solid 1px #ccc;'>Total: </td>";
+            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %,.2f", "N", total) + "</td>";
+            html +=         "</tr>";
+            html +=         "<tr>";
+            html +=             "<td colspan='3' style='text-align:right;border: solid 1px #ccc;'>VAT: </td>";
+            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %,.2f", "N", vat) + "</td>";
+            html +=         "</tr>";
+            html +=         "<tr>";
+            html +=             "<td colspan='3' style='text-align:right;border: solid 1px #ccc;'>GateWay Charge: </td>";
+            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %,.2f", "N", gateWayCharge) + "</td>";
+            html +=         "</tr>";
+            html +=         "<tr>";
+            html +=             "<td colspan='3' style='text-align:right;border: solid 1px #ccc;'>Grand Total: </td>";
+            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %,.2f", "N", total + vat + gateWayCharge) + "</td>";
+            html +=         "</tr>";
+            html +=         "</tfoot>";
+            
+        html +=     "</table>";
+        html += "</td>";
+        html += "</tr>";
+        html += "</table>";
+        
+        html += "</td></tr>";
+        
+        html += "</table>";
+        
+        return html;
+        
     }
     
     public void getCustomerOrders(HttpServletRequest request, HttpServletResponse response) throws IOException{
@@ -1639,6 +1809,16 @@ public class CustomerController extends AppController  {
         return map;
     }
     
+    private String getRequestHistory(HttpServletRequest request) {
+        
+        
+        String url = request.getHeader("referer");
+        System.out.println("History : " + url);
+        return url;
+    }
+
+    
+    
     /*TP: Getting the customer Id for public use*/
     public Long getSystemUserId(){
     return customer.getCustomerId();
@@ -1654,6 +1834,7 @@ public class CustomerController extends AppController  {
         return "Short description";
     }// </editor-fold>
 
+    
     
 
     

@@ -86,11 +86,10 @@
             <div class="col-sm-4 invoice-col">
               From
               <address>
-                <strong>Techieplanet, Ltd.</strong><br>
-                795 Folsom Ave, Suite 600<br>
-                Ikeja, Lagos <br>
-                Phone: (+234) 816-4334-657<br>
-                Email: info@techieplanetltd.com
+                <strong>${companyName}</strong><br>
+                ${companyAddress}<br>
+                Phone: ${companyPhone}<br>
+                Email: ${companyEmail}
               </address>
             </div><!-- /.col -->
             <div class="col-sm-4 invoice-col">
@@ -125,13 +124,15 @@
                   </tr>
                 </thead>
                 <tbody>
-                  
-                    <c:forEach items="${orderItemInvoice}" var="item" varStatus="pointer">
+                    <c:set var="L_ID" value="0" />
+                    <c:forEach items="${orderItemInvoice}" var="LI" varStatus="pointer">
+                        <c:if test="${L_ID == 0}"><c:set var="L_ID" value="${LI.getLodgement().getId()}" /></c:if>
                         <tr>
                             <td style="text-align:center">${pointer.count}</td>
-                            <td>${item.getUnit().getProject().getName()} - ${item.getUnit().getTitle()}</td>
-                            <td style="text-align:center">${item.getQuantity()}</td>
-                            <td style="text-align:right"><fmt:formatNumber value="${item.getInitialDep()}" type="currency" currencySymbol="N" /></td>
+                            <td>${LI.getItem().getUnit().getProject().getName()} - ${LI.getItem().getUnit().getTitle()}</td>
+                            <td style="text-align:center">${LI.getItem().getQuantity()}</td>
+                            <c:set var="rewardAmount" value="${LI.getRewardAmount() !=null ? LI.getRewardAmount() : 0}" />
+                            <td style="text-align:right"><fmt:formatNumber value="${LI.getAmount() + rewardAmount}" type="currency" currencySymbol="N" /></td>
                         </tr>
                     </c:forEach>
                     
@@ -178,7 +179,7 @@
             </div>
             
             <div class="col-md-2 pull-right text-right no-print-area">
-                <a href="#"><i class="fa fa-envelope" style="color:#FFCD7E"></i></a> &nbsp;
+                <a href="${pageContext.request.contextPath}/Customer?action=email_lodgement_invoice&id=${L_ID}"><i class="fa fa-envelope" style="color:#FFCD7E"></i></a> &nbsp;
                 <a href="#"><i class="fa fa-file-pdf-o" style="color:#F64934"></i></a> &nbsp;
                 <a href="#"><i class="fa fa-download"></i></a> &nbsp;
                 <a href="#"><i class="fa fa-print" onclick="invoice.printInvoice(event)"></i></a> &nbsp;
