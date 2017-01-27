@@ -1433,6 +1433,9 @@ public class CustomerController extends AppController  {
     
     public String prepareInvoiceEmail(Lodgement lodgement, Customer customer, List<LodgementItem> LItems, double vat, double gateWayCharge){
         
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        Date date = cal.getTime();
+        
         String html = "";
         
         html += "<table width='100%' height='100%'  border='0'>";
@@ -1441,7 +1444,7 @@ public class CustomerController extends AppController  {
         
         html += "<table width='80%' style='background-color:#fff; margin-top:20px;margin-bottom:20px;padding:20px'>";
         html += "<tr>";
-        html += "<td colspan='4' style='text-align:right;border-bottom: solid 2px #ccc;'>" + lodgement.getCreatedDate() + "</td>";
+        html += "<td colspan='4' style='text-align:right;border-bottom: solid 2px #ccc;'>Sent : " + date.toString() + "</td>";
         html += "</tr>";
         
         html += "<tr>";
@@ -1461,7 +1464,7 @@ public class CustomerController extends AppController  {
         html +=     "Email: " + customer.getEmail();
         html +=     "</td>";
         
-        html += "<td colspan='2' valign='top'><b>Invoice #</b>" + lodgement.getId() + "</td>";
+        html += "<td colspan='2' valign='top'><b>Invoice #</b>" + lodgement.getId() + "<br /> Transaction Date:" + lodgement.getCreatedDate() + "</td>";
         html += "</tr>";
         
         //Prepare the OrderItems Table
@@ -1490,7 +1493,7 @@ public class CustomerController extends AppController  {
             html +=                LI.getItem().getQuantity();
             html +=             "</td>";
             html +=             "<td style='border: solid 1px #ccc;'>";
-            html +=                String.format("%s %.2f", "N",amount);
+            html +=                String.format("%s %,.2f", "N",amount);
             html +=             "</td>";
             
             html +=         "</tr>";    
@@ -1501,19 +1504,19 @@ public class CustomerController extends AppController  {
             html +=         "<tfoot style='background-color:#F3F5F6;'>";
             html +=         "<tr>";
             html +=             "<td colspan='3' style='text-align:right;border: solid 1px #ccc;'>Total: </td>";
-            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %.2f", "N", total) + "</td>";
+            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %,.2f", "N", total) + "</td>";
             html +=         "</tr>";
             html +=         "<tr>";
             html +=             "<td colspan='3' style='text-align:right;border: solid 1px #ccc;'>VAT: </td>";
-            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %.2f", "N", vat) + "</td>";
+            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %,.2f", "N", vat) + "</td>";
             html +=         "</tr>";
             html +=         "<tr>";
             html +=             "<td colspan='3' style='text-align:right;border: solid 1px #ccc;'>GateWay Charge: </td>";
-            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %.2f", "N", gateWayCharge) + "</td>";
+            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %,.2f", "N", gateWayCharge) + "</td>";
             html +=         "</tr>";
             html +=         "<tr>";
             html +=             "<td colspan='3' style='text-align:right;border: solid 1px #ccc;'>Grand Total: </td>";
-            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %.2f", "N", total + vat + gateWayCharge) + "</td>";
+            html +=             "<td style='border: solid 1px #ccc;'>" + String.format("%s %,.2f", "N", total + vat + gateWayCharge) + "</td>";
             html +=         "</tr>";
             html +=         "</tfoot>";
             
