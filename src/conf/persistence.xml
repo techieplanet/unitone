@@ -39,6 +39,8 @@
     <class>com.tp.neo.model.AgentProspect</class>
     <class>com.tp.neo.model.Plugin</class>
     <class>com.tp.neo.model.plugins.LoyaltyHistory</class>
+    <class>com.tp.neo.model.MessageToRecipient</class>
+    <class>com.tp.neo.model.Message</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <!--LOCALHOST-->
     <properties>
