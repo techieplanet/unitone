@@ -2,6 +2,12 @@
 
 
 <script>
+    
+    var customersLoyaltyList = [];
+    var customerPoints = 0;
+    var isLoyaltyEnabled = "${plugins.containsKey('loyalty') ? 1 : 0}";
+    var pointToCurrency = "${pointToCurrency}";
+    
     var app = angular.module("app",["ngwidgets"]);
        
        app.controller("customerDropDownController",function($scope){
@@ -10,7 +16,7 @@
            
            var dataArray = [];
            
-           dataArray.push({name:"--Select Customer",id : "",img : ""})
+           dataArray.push({name:"--Select Customer--",id : "",img : ""})
            
            <c:forEach items="${customers}" var="customer">
            
@@ -20,11 +26,32 @@
                 
                 dataArray.push({name:fullName,id : customer_id,img : imgPath});
                 
+                var point = "${customer.getRewardPoints()}";
+                customersLoyaltyList.push({"id":customer_id,"points":point});
+                
            </c:forEach>
            
            $scope.selectItem = function(event){
                //console.log(event.args.item);
                $scope.customerId = event.args.item.value;
+               $scope.updateCustomerPoint(event.args.item.value)
+           };
+           
+           $scope.updateCustomerPoint = function(id){
+               
+               if(id == ""){
+                   return;
+               }
+               
+               for(var k in customersLoyaltyList){
+                   if(customersLoyaltyList[k].id == id){
+                       console.log("c.id : " + customersLoyaltyList[k].id + ", id : " + id);
+                       customerPoints = customersLoyaltyList[k].points;
+                       break;
+                   } 
+               }
+               
+               console.log("Customer Point : " + customerPoints);
            };
            
            $scope.settings = {
@@ -32,6 +59,7 @@
                filterable: true, selectedIndex: 0, source: dataArray, itemHeight: 70, height: 30, width : "100%",
                displayMember: 'name',
                valueMember: 'id',
+               searchMode : 'containsignorecase',
                 renderer: function (index, label, value) {
                     
                     if(index == 0){
@@ -257,9 +285,18 @@
                                             <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()">
                                         </div> 
 <!--                                            /.form-group initial monthly amount -->
-                                    </div>
-                                              
-                                              <div class="col-md-2">
+                                        </div>
+                                      
+                                      <c:if test="${plugins.containsKey('loyalty')}">
+                                          <div class="col-md-2" >
+                                              <div class="form-group">
+                                                  <label for="productLoyaltyPoint">Loyalty Point</label>
+                                                  <span class="productSpan">Amount of loyalty point to use for Item</span>
+                                                  <input type="text" size="4" class="form-control" name="productLoyaltyPoint" id="productLoyaltyPoint" onkeyup="calculateAmountToPay()">
+                                              </div>
+                                          </div>         
+                                      </c:if>        
+                                      <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="amountLeft">Balance Payable(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
@@ -312,10 +349,7 @@
                                           </div>
                                     </c:if>  
                                                 
-                                </div>
-                                              
-                                  <div class="row">
-                                      
+                               
                                       <div class="col-md-2">
                                               <div class="form-group">
                                                   <label>
@@ -326,7 +360,7 @@
                                               </div>
                                       </div>
                                       
-                                  </div>           
+                                  </div>      
                                               
                                   <div class="row">
                                         <div class="col-md-12 box-footer">
@@ -622,6 +656,25 @@
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
       
+      
+      <!--MODAL-->
+      <div class="modal fade" id="rewardPointError" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">NEOFORCE</h4>
+            </div>
+            <div class="modal-body">
+              <p>You have exceeded your reward point</p>
+            </div>
+            <div class="modal-footer">
+              <button id="ok" type="button" data-dismiss="modal" class="btn btn-primary pull-right">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+      
    
       
 <script>
@@ -632,7 +685,7 @@
        $("#agentDetailContainer:visible").toggle();
        
        
-       
+       $("#checkOutToPay").attr("disabled",true);
     });
     
 </script>

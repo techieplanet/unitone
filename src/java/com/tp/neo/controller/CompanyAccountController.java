@@ -181,6 +181,7 @@ public class CompanyAccountController extends AppController {
             
             request.setAttribute("success", true);
             request.setAttribute("action", "new");
+            request.removeAttribute("errors");
             request.getRequestDispatcher(viewFile).forward(request, response);
         }
         catch(PropertyException pex){            
@@ -213,6 +214,7 @@ public class CompanyAccountController extends AppController {
         CompanyAccount account = new CompanyAccount();
         String viewFile = "/views/companyAccount/add.jsp";
         
+        
         try{
             
             emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -239,18 +241,23 @@ public class CompanyAccountController extends AppController {
             request.setAttribute("success", true);
             request.setAttribute("account", account);
             request.setAttribute("action", "edit");
+            request.removeAttribute("errors");
             request.setAttribute("id", accountId);
             request.getRequestDispatcher(viewFile).forward(request, response);
         }
         catch(PropertyException pex){
             
+            System.out.println("Error Raised");
+            
             request.setAttribute("account", account);
             request.setAttribute("action", "edit");
+            request.setAttribute("id", request.getAttribute("id"));
             request.setAttribute("errors", errorMessages);
             request.getRequestDispatcher(viewFile).forward(request, response);
         }
         catch(Exception ex){
-                        
+            System.out.println("Exception : " + ex.getMessage());  
+            ex.printStackTrace();
             request.setAttribute("account", account);
             request.setAttribute("action", "edit");
             request.setAttribute("errors", errorMessages);

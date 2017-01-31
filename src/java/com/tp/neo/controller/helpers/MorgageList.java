@@ -13,7 +13,8 @@ public class MorgageList {
     
     int orderItemId;
     double amount;
-
+    double rewardPoint;
+    
     public int getOrderItemId() {
         return orderItemId;
     }
@@ -28,6 +29,14 @@ public class MorgageList {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public double getRewardPoint() {
+        return rewardPoint;
+    }
+
+    public void setRewardPoint(double rewardPoint) {
+        this.rewardPoint = rewardPoint;
     }
     
     

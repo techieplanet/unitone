@@ -32,10 +32,19 @@
         <section class="content">
           
           
-            <div class="panel">
+            <div class="panel panel-default">
+                
+                
+                <div class="panel-heading" style="background-color: #ffffff">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <a href="${history}" class="btn btn-primary" /><i class="fa fa-chevron-left"></i> Back </a>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="panel-body">
-                    
+                  
                     <div class="row">
                         
                         <div class="col-md-2">

@@ -9,6 +9,7 @@ var cid = 1;
 var countId = 1;
 var cartData = {};
 
+
 function selectCustomer(contextPath,id) {
    $("#customerListContainer:visible").toggle();
    $("#customerDetailContainer:visible").toggle();
@@ -81,13 +82,21 @@ function prepareOrderListTable(jsonString){
             tr += "<td>" + accounting.formatMoney(amountPaid,"N",2,",",".") + "</td>";
             tr += "<td>" + accounting.formatMoney(amountPayable,"N",2,",",".") + "</td>";
             tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' value='' /></td>";
-            tr += "<td><button class='btn btn-success' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add to Cart</button></td>";
+            if(isLoyaltyEnabled == 1){
+                tr += "<td><input type='text'  class='points' name='' id='' value='0' onkeyup='checkLoyaltyPoint(" + rowId + ",this)' /></td>";
+            }
+            tr += "<td><button class='btn btn-success addToCart' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add to Cart</button></td>";
             rows += tr;
         }
         
         var table = "<table class='table table-bordered table-striped table-hover'>";
         table += "<thead><tr>";
-        table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th></th>";
+        if(isLoyaltyEnabled == 1){
+            table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th>Loyalty Point</th><th>Action</th>";
+        }
+        else{
+            table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th>Action</th>";
+        }
         table += "</tr></thead>";
         table += rows  + "</table>";
      
@@ -109,10 +118,15 @@ function populateCustomerDetails(id){
     var customerEmail = $(row+" .customerEmail").text();
     var customerState = $(row+" .customerState").text();
     var customerImgPath = $(row+" .customerImg").val();
+    var loyaltyPoint = $(row+" .customerLoyaltyPoint").text();
     
     var agentName = $(row+" .agentName").val();
     var agentPhone = $(row+" .agentPhone").val();
     var agentImgPath = $(row+" .agentImg").val();
+    
+    customerLoyaltyPoint = parseInt(loyaltyPoint);
+    
+    console.log("Loyalty Point : " + customerLoyaltyPoint);
     
     $("#customerImage").attr("src",customerImgPath);
     $("#customerName").text(customerName.trim());
@@ -189,6 +203,19 @@ function createOrderItemList(id, count, table, agentName) {
 }
 
 
+function getTotalLoyaltyPointUsed(){
+    
+    var points = 0;
+    
+    if(!cartData.lodgements)
+        cartData.lodgements = [];
+    
+    for(var k in cartData.lodgements){
+        points += parseInt(cartData.lodgements[k].rewardPoint);
+    }
+    
+    return points;
+}
 
 function addToCart(project,unitName,qty,orderItemId,rowId){
     
@@ -197,8 +224,9 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
     var amountFieldSelector = "#" + rowId + " .lodgement-amount";
     var amount = $(amountFieldSelector).val();
     var amountFormatted = accounting.formatMoney(amount,"N",2,",",".");
+    var itemPoint = 0;
     
-    var item = {"orderItemId":orderItemId,"amount":amount};
+    
     if(!cartData.lodgements)
         cartData.lodgements = [];
     
@@ -207,6 +235,18 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
         return;
     }
     
+    //Check if loyalty Plugin is enabled
+    if(isLoyaltyEnabled == 1){
+        itemPoint = parseInt($("#"+rowId+" .points").val()) || 0;
+        var points = getTotalLoyaltyPointUsed() + itemPoint;
+        
+        if(points > customerLoyaltyPoint){
+            $("#rewardPointError").modal();
+            return;
+        }
+    }
+    
+    var item = {"orderItemId":orderItemId,"amount":amount,"rewardPoint":itemPoint};
     cartData.lodgements.push(item);
     console.log("Cart : " + JSON.stringify(cartData));
     
@@ -247,7 +287,13 @@ function calculateLodgementCartTotal(){
     
     for(var k in cart){
         
-        total = total +  parseFloat(cart[k].amount);
+        if(isLoyaltyEnabled == 1){
+            total += parseFloat(cart[k].amount) + parseFloat(cart[k].rewardPoint * pointToCurrency);
+        }
+        else
+        {
+            total = total +  parseFloat(cart[k].amount);
+        }
     }
     
     console.log("Total = " + total);
@@ -317,7 +363,13 @@ function checkOut(){
     
     for(var k in cart){
         
-        total = total +  parseFloat(cart[k].amount);
+        if(isLoyaltyEnabled == 1){
+            total += parseFloat(cart[k].amount) + parseFloat(cart[k].rewardPoint * pointToCurrency);
+        }
+        else
+        {
+           total += parseFloat(cart[k].amount);
+        }
     }
     
     $("#checkout .amount-box").each(function(){
@@ -446,4 +498,46 @@ function stopLoading(elem){
 function startLoading(){
     
     $("#SpinnerContainer:hidden").toggle();
+}
+
+function checkLoyaltyPoint(rowId,elem){
+    
+    var pointsUsed = getTotalLoyaltyPointUsed();
+    var totalPoints = pointsUsed + parseInt($(elem).val()) || 0;
+    
+    console.log("Points used : " + pointsUsed + ", totalPoints : " + totalPoints );
+    
+    if(totalPoints > customerLoyaltyPoint){
+        
+        $("#accordion .addToCart").each(function(index,elem){
+            
+            $(elem).attr("disabled",true);
+        });   
+        
+        $("#rewardPointError").modal();
+    }
+    else{
+        
+        $("#accordion .addToCart").each(function(index,elem){
+            
+            $(elem).attr("disabled",false);
+        }); 
+        
+    }
+    
+}
+
+function getAllPoints(){
+    
+    var points = 0;
+    
+    $("#accordion .points").each(function(i,elem){
+        
+        points += parseInt($(elem).val() || 0);
+        
+    });
+    
+    console.log("Total Points : " + points);
+    
+    return points;
 }

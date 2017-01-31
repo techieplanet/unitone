@@ -39,6 +39,10 @@ public class AppController extends HttpServlet{
     protected SystemUser sessionUser;
     protected String callbackUrRL = "";
     protected boolean isAjaxRequest;
+    protected String companyName = "TechiePlanet, Ltd.";
+    protected String companyAddress = "214 Allen Avenue, Ikeja, Lagos.";
+    protected String companyPhone = "(+234) 816-4334-657";
+    protected String companyEmail = "info@techieplanetltd.com ";
     
     public AppController(){
         System.out.println("Inside TPController");
@@ -109,6 +113,7 @@ public class AppController extends HttpServlet{
     public boolean hasActionPermission(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{                
         System.out.println("Session User in HasPermission  : " + sessionUser);
         System.out.println("Session User Permissions : " + sessionUser.getPermissions() );
+        System.out.println("Action : " + action);
         String[] permissions = sessionUser.getPermissions().split(",");
         //log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
         
@@ -118,7 +123,7 @@ public class AppController extends HttpServlet{
             if(p.equalsIgnoreCase(action))
                 return true;
         }
-        return true; //false
+        return true;
     }
     
     
@@ -160,6 +165,8 @@ public class AppController extends HttpServlet{
     private List<Notification> getNotifications(){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
+        
+        emf.getCache().evictAll();
         
         short status = 0;
         
