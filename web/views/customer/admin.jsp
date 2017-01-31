@@ -68,14 +68,14 @@
                               
                                 <td style="width:130px">
                                     <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}">
-                                     <a class="btn btn-primary btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
+                                     <a class="btn btn-success btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
                                      
                                     </c:if>
                                     
                                      <c:if test="${sessionScope.user.getSystemUserTypeId() <= 2}">
                                         <a class="btn btn-primary btn-xs" href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${customer.customerId}" role="button"><i class="fa fa-user"></i> </a>
-                                        <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button"><i class="fa fa-cart-plus"></i> </a>
-                                        <a class="btn btn-primary btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
+                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button"><i class="fa fa-cart-plus"></i> </a>
+                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
                                      </c:if>
                                      
                                      <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}"> 
@@ -262,7 +262,7 @@
              prepareOrderItemTable : function(data){
              
                 var orders = data;
-                
+                var orderApprovalUrl = "${pageContext.request.contextPath}";
                 var counter = 1;
                 
                 $("#orders-accordion").html("");
@@ -349,6 +349,17 @@
                           
                           itemCount++;
                       }
+                      
+                        
+                            
+                            var approvalButton = "<a class='btn btn-primary' href='${pageContext.request.contextPath}/Order?action=approval'>Approval</a>";
+                            table += "<tfoot>"; 
+                            table += "<tr><td colspan=5 class='text-right'>" + approvalButton + "</td></tr>";
+                            table += "</tfoot>";
+                                
+                        
+                            
+                        table += "</table>";
                       
                       panelBody.innerHTML = table;
                       

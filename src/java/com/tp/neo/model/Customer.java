@@ -440,6 +440,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         this.customerBalance = customerBalance;
     }
 
+  
     @XmlTransient
     public Collection<Lodgement> getLodgementCollection() {
         return lodgementCollection;
@@ -458,6 +459,22 @@ public class Customer implements Serializable, ITrailable, SystemUser {
             return "delete_customer";
         else if(action.toUpperCase().equals("LISTCUSTOMERS")) 
             return "view_customer";
+        else if(action.toUpperCase().equals("NEW_PROSPECT")) 
+            return "new_prospect";
+        else if(action.toUpperCase().equals("LIST_PROSPECTS")) 
+            return "list_prospects";
+        else if(action.toUpperCase().equals("EDIT_PROSPECT")) 
+            return "edit_prospect";
+        else if(action.toUpperCase().equals("PROFILE")) 
+            return "customer_profile";
+        else if(action.toUpperCase().equals("CURRENT")) 
+            return "currently_paying_customer";
+        else if(action.toUpperCase().equals("COMPLETED")) 
+            return "completed_payment_customer";
+        else if(action.toUpperCase().equals("LODGEMENT_INVOICE")) 
+            return "view_customer";
+        else if(action.toUpperCase().equals("CUSTOMER_ORDERS")) 
+            return "view_customer_orders";
         else 
             return "view_customer";
     }
@@ -479,7 +496,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     }
 
     public Integer getRewardPoints() {
-        return rewardPoints;
+         return rewardPoints == null ? 0 : rewardPoints; 
     }
 
     public void setRewardPoints(Integer rewardPoints) {

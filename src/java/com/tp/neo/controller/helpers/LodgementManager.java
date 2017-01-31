@@ -223,6 +223,8 @@ public class LodgementManager {
     private void processLodgementApproval(Lodgement lodgement, Customer customer, Notification notification) throws PropertyException, RollbackException{
         em.getTransaction().begin();
         
+        System.out.println("Order Level Lodgement Approval");
+        
         //approve the lodgement
         lodgement.setApprovalStatus((short)1);
         new TrailableManager(lodgement).registerUpdateTrailInfo(sessionUser.getSystemUserId());
@@ -244,6 +246,8 @@ public class LodgementManager {
         new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount() + lodgement.getRewardAmount());
         
         em.getTransaction().commit();
+        
+        
     }
     
     
@@ -263,8 +267,8 @@ public class LodgementManager {
             LodgementItem thisItem = lodgementItems.get(i);
             
             //set the item as approved
-            thisItem.setApprovalStatus((short)1);
-            new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+            //thisItem.setApprovalStatus((short)1);
+            //new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
             
             //double entry - take the money out of the customer account and fund the project unit
             TransactionManager transactionManager = new TransactionManager(sessionUser);
@@ -291,9 +295,15 @@ public class LodgementManager {
         
         //make sure to process loyalty after order mortgage status has been set
         if(this.availablePlugins.containsKey("loyalty")){
+            em.getTransaction().begin();
             for(LodgementItem lodgementItem : lodgementItems){
+                System.out.println("Customers point : " + customer.getRewardPoints());
                 this.processLoyaltyDetails(lodgementItem, customer, order);
             }
+            em.merge(customer);
+            em.getTransaction().commit();
+            em.close();
+            emf.close();
         }
     }
     
@@ -338,7 +348,9 @@ public class LodgementManager {
         
         //Split reward cost - debit unit, credit loyalty  - double entry
         Account loyaltyAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "LOYALTY").getSingleResult();
+        System.out.println("Account : " + loyaltyAccount.getAccountCode() + ", LodgementItem RewardPoint : " + lodgementItem.getRewardAmount());
         new TransactionManager(sessionUser).doDoubleEntry(unitAccount, loyaltyAccount, lodgementItem.getRewardAmount());
+        
         
         //Split income amount - debit unit, credit property dev  - double entry
         Account incomeAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "INCOME").getSingleResult();
@@ -347,7 +359,9 @@ public class LodgementManager {
     
     
     private void processLoyaltyDetails(LodgementItem lodgementItem, Customer customer, ProductOrder order){
-        if(lodgementItem.getRewardAmount()==0) return;
+        System.out.println("Customer Reward Point : " + customer.getRewardPoints());
+        System.out.println("LodgementItem Reward Point : " + lodgementItem.getRewardAmount());
+        if(lodgementItem.getRewardAmount()== 0) return;
         
         EntityManager em = emf.createEntityManager();
         
@@ -366,12 +380,13 @@ public class LodgementManager {
                 int rewardPoints = (int)(lodgementItem.getRewardAmount() / amountPerRewardPoint);
                 loyaltyHistory.setRewardPoints(rewardPoints);
                 loyaltyHistory.setType((short)order.getMortgageStatus());
-                em.persist(em);
+                em.persist(loyaltyHistory);
                 
                 //customer point deductions
                 customer.setRewardPoints(customer.getRewardPoints() - rewardPoints);
-       
         
+        System.out.println("Customer Reward Point : " + customer.getRewardPoints());
+        //em.merge(customer);
         em.getTransaction().commit();
         
     }

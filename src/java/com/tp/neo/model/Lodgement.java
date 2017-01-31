@@ -214,6 +214,26 @@ public class Lodgement extends BaseModel {
     public void setCompanyAccountId(CompanyAccount companyAccountId) {
         this.companyAccountId = companyAccountId;
     }
+    
+    
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) 
+            return "new_lodgement";
+        else if(action.toUpperCase().equals("LIST_APPROVED"))
+            return "list_approved_lodgement";
+        else if(action.toUpperCase().equals("LIST_UNAPPROVED"))
+            return "list_unapproved_lodgement";
+        else if(action.toUpperCase().equals("LIST_PENDING") || action.equalsIgnoreCase("notification"))
+            return "list_pending_lodgement";
+        else if(action.toUpperCase().equals("APPROVAL"))
+            return "list_pending_lodgement";
+        else if(action.toUpperCase().equals("APPROVE"))
+            return "approve_lodgement";
+        else if(action.toUpperCase().equals("DECLINE"))
+            return "decline_lodgement";
+        else 
+            return "view_lodgement";
+    }
 
     @Override
     public int hashCode() {

@@ -489,11 +489,22 @@ public class Agent extends BaseModel implements SystemUser  {
 
     public String getPermissionName(String action){
         if(action.toUpperCase().equals("NEW")) return "create_agent";
+        else if(action.toUpperCase().equals("APPROVEWITHDRAWAL")) return "approve_withdrawal";
         else if(action.toUpperCase().equals("EDIT")) return "edit_agent";
         else if(action.toUpperCase().equals("DELETE")) return "delete_agent";
+        else if(action.toUpperCase().equals("REGISTRATION")) return "agent_registration";
+        else if(action.toUpperCase().equals("WAITING")) return "pending_agent";
+        else if(action.toUpperCase().equals("LISTAGENTS")) return "waiting_agents";
         else if(action.toUpperCase().equals("CREDIT_HISTORY")) return "credit_history";
         else if(action.toUpperCase().equals("DEBIT_HISTORY")) return "debit_history";
-        else if(action.toUpperCase().equals("WITHDRAWAL")) return "withdrawal";
+        else if(action.toUpperCase().equals("WITHDRAWAPPROVAL")) return "view_withdrawal_request";
+        else if(action.toUpperCase().equals("APPROVEDWITHDRAWAL")) return "view_approved_withdrawal";
+        else if(action.toUpperCase().equals("WITHDRAWAL")) return "withdrawal_request";
+        else if(action.toUpperCase().equals("APPROVEWITHDRAWAL")) return "approve_withdrawal";
+        else if(action.toUpperCase().equals("PROFILE")) return "agent_profile";
+        else if(action.toUpperCase().equals("APPROVAL")) return "agent_approval";
+        else if(action.toUpperCase().equals("ACCOUNT_STATEMENT")) return "account_statement";
+        else if(action.toUpperCase().equals("WALLET")) return "view_agent_wallet";
         else return "view_agent";
     }
     

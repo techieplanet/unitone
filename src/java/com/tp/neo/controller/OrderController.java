@@ -20,13 +20,14 @@ import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
-import com.tp.neo.controller.helpers.SaleItemObject;
-import com.tp.neo.controller.helpers.SaleItemObjectsList;
+import com.tp.neo.controller.helpers.OrderItemObject;
+import com.tp.neo.controller.helpers.OrderItemObjectsList;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
@@ -270,6 +271,21 @@ public class OrderController extends AppController {
         request.setAttribute("sideNav", "Order");
         request.setAttribute("sideNavAction",action);
         
+        //Get Available Plugins
+        HttpSession session = request.getSession();
+        Map<String, Plugin> plugins = (Map)session.getAttribute("availablePlugins");
+        request.setAttribute("plugins",plugins);
+        
+        double pointToCurrency = 0;
+        
+        if(plugins.containsKey("loyalty")){
+            Gson gson = new Gson();
+            Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+            Map<String, String> loyaltySettingsMap = gson.fromJson(plugins.get("loyalty").getSettings(), mapType);
+            pointToCurrency =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+        }
+        request.setAttribute("pointToCurrency", pointToCurrency);
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
             
@@ -301,7 +317,13 @@ public class OrderController extends AppController {
 
     
     
-    
+    /**
+     * This method processes New Orders
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException 
+     */
     public void initOrderProcess(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException  {
         try {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -336,15 +358,30 @@ public class OrderController extends AppController {
                 agent = customer.getAgent();
             }
             
+            //Get Available Plugins
+            HttpSession session = request.getSession();
+            Map<String, Plugin> plugins = (Map)session.getAttribute("availablePlugins");
             
             OrderManager orderManager = new OrderManager(sessionUser);
-            SaleItemObjectsList saleItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
+            
+            if(plugins.containsKey("loyalty")){
+                orderManager = new OrderManager(sessionUser,plugins);
+            }
+            
+            OrderItemObjectsList orderItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
            
             
             
-            List<OrderItem> orderItems = orderManager.prepareOrderItem(saleItemObject, agent);
+            List<OrderItem> orderItems = orderManager.prepareOrderItem(orderItemObject, agent);
             Lodgement lodgement = orderManager.prepareLodgement(getRequestParameters(request), agent);
-
+            
+            if(plugins.containsKey("loyalty")){
+                lodgement = orderManager.setLodgementRewardPoint(lodgement, orderItems);
+            }
+            else{
+                lodgement.setRewardAmount(new Double(0));
+            }
+            
             lodgement.setCustomer(customer);
             
             ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, request.getContextPath());
@@ -660,6 +697,10 @@ public class OrderController extends AppController {
         
          System.out.println("ObjectWrappper : " + orderWrapperList.size()); 
         
+         
+         em.close();
+         emf.close();
+         
        return orderWrapperList;
         
     }
@@ -688,6 +729,10 @@ public class OrderController extends AppController {
     private void approveOrder(HttpServletRequest request,HttpServletResponse response, String viewFile){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
+        emf.getCache().evictAll();
+        
+        HttpSession session = request.getSession();
+        HashMap<String,Plugin> plugins = (HashMap)session.getAttribute("availablePlugins");
         
         try{
         
@@ -726,9 +771,10 @@ public class OrderController extends AppController {
             }
         }
         
+        
+        
         em.getTransaction().commit();
-        em.close();
-        emf.close();
+        
         
         if(orderItemList.size() > 0){
             
@@ -736,17 +782,27 @@ public class OrderController extends AppController {
             customer = item.getOrder().getCustomer();
             productOrder = item.getOrder();
             
-            /***********************************************************************************************/
-            Notification notification = new Notification(); //this object is plain. Values should go into it
-            /***********************************************************************************************/
+            Query jpQl = em.createNamedQuery("Notification.findByRemoteId");
+            jpQl.setParameter("remoteId", productOrder.getId());
+            jpQl.setParameter("typeTitle","Order");
+
+            Notification notification = (Notification)jpQl.getSingleResult();
             
             OrderManager orderManager = new OrderManager(sessionUser);
+            
+            if(plugins.containsKey("loyalty")){
+                orderManager = new OrderManager(sessionUser, plugins);
+            }
             orderManager.processOrderApproval(productOrder, orderItemList, customer, notification);
             System.out.println("Successful");
             
         }
         
-            redirectToPendingOrder(request, response, viewFile);
+        
+        em.close();
+        emf.close();
+        
+        redirectToPendingOrder(request, response, viewFile);
     }
     catch(PropertyException pe){
         pe.printStackTrace();
@@ -761,6 +817,7 @@ public class OrderController extends AppController {
         try {
             EntityManagerFactory emf =  Persistence.createEntityManagerFactory("NeoForcePU");
             EntityManager em = emf.createEntityManager();
+            emf.getCache().evictAll();
             
             long productOrderId = Long.parseLong(request.getParameter("id"));
             ProductOrder productOrder = em.find(ProductOrder.class, productOrderId);
@@ -769,6 +826,8 @@ public class OrderController extends AppController {
             request.setAttribute("singleOrderId",productOrder.getId());
             
             
+            em.close();
+            emf.close();
             
         } catch (IOException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
@@ -780,13 +839,13 @@ public class OrderController extends AppController {
        
         try {
             
-            request.setAttribute("pendingOrders", listPendingOrders());
-            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-            dispatcher.forward(request, response);
+//            request.setAttribute("pendingOrders", listPendingOrders());
+//            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+//            dispatcher.forward(request, response);
+            
+            response.sendRedirect(request.getContextPath() + "/Order?action=approval");
             
         } catch (IOException ex) {
-            Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ServletException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
         }
    }
