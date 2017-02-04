@@ -108,6 +108,7 @@
                       <a href="#"><i class="fa fa-envelope"></i><span>Messages</span><i class="fa fa-angle-left pull-right"></i></a>
                       <ul class="treeview-menu">
                         <li><a href="${pageContext.request.contextPath}/Message?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Message'}"> <c:out value='style=color:#fff' /></c:if> >New</a></li>
+                        <li><a href="${pageContext.request.contextPath}/Message?action=mailbox" <c:if test="${sideNavAction eq 'mailbox' && sideNav eq 'Message'}"> <c:out value='style=color:#fff' /></c:if> >MailBox</a></li>
                       </ul>
                   </li>
                             

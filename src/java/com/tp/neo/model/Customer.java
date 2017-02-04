@@ -143,7 +143,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer")
     private CustomerBalance customerBalance;
-
+    
     @Transient
     private final Integer USERTYPEID = 3;
     
@@ -426,6 +426,12 @@ public class Customer implements Serializable, ITrailable, SystemUser {
 
     public Account getAccount() {
         return account;
+    }
+    
+    public String getAccountCode(){
+        Account acct = getAccount();
+        
+        return acct.getAccountCode();
     }
 
     public void setAccount(Account account) {

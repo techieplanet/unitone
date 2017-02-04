@@ -101,6 +101,10 @@
                                         <td class="field">State</td>
                                         <td>${customer.getState()}</td>
                                     </tr>
+                                    <tr>
+                                        <td class="field">Account Code</td>
+                                        <td>${customer.getAccountCode()}</td>
+                                    </tr>
                                     <tr class="highlight">
                                         <td class="field" colspan="2" style="text-align: left">
                                             <h4>Next of Kin Information</h4>
