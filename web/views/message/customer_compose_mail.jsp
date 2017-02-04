@@ -82,6 +82,14 @@
                   <form action="${pageContext.request.contextPath}/Message?action=customer_email" method="POST">
                       
                       <input type="hidden" name="agentId" class="ids" value="${agentId}" />
+                      <c:choose>
+                          <c:when test="${not empty reply}">
+                              <input type="hidden" name="reply_msg_id" value="${reply}" />
+                          </c:when>
+                          <c:when test="${empty reply}">
+                              <input type="hidden" name="reply_msg_id" value="0" />
+                          </c:when>
+                      </c:choose>
                       <div class="row">
                           <div class="col-md-6">
                               <div class="form-group">
@@ -126,14 +134,7 @@
                   <form action="${pageContext.request.contextPath}/Message?action=customer_sms" method="POST">
                       
                       <input type="hidden" name="customersId" class="ids" value="" />
-                      <c:choose>
-                          <c:when test="${not empty reply}">
-                              <input type="hidden" name="reply_msg_id" value="${reply}" />
-                          </c:when>
-                          <c:when test="${empty reply}">
-                              <input type="hidden" name="reply_msg_id" value="0" />
-                          </c:when>
-                      </c:choose>
+                      
                       <div class="row">
                           
                           <div class="col-md-4">    
