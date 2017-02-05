@@ -59,10 +59,11 @@
                  
                  var messageJson = fetchMessages.fetch(id)
                          .then(function(data){
-                             console.log(JSON.stringify(data));
-                            $scope.showMessageThread(data);
+                                if(data == "SESSION_EXPIRED"){
+                                    location.reload(true);
+                                }
+                                $scope.showMessageThread(data);
                           },function(error){
-                              console.log(error);
                           })
                           
              };
@@ -85,7 +86,7 @@
                      for(var j in replies){
                          
                          if(userId == replies[j].userId && replies[j].userType == 2){
-                             var subject = "<b><u>RE: </u>" + replies[j].subject +  "</b>";
+                             var subject = "<b><u>RE: </u>" + replies[j].subject +  "</b>&nbsp <i class='fa fa-arrow-right'></i>";
                          }
                          else{
                             var subject = "<b><u>RE: </u>" + replies[j].subject +  "</b> &nbsp<a href='${pageContext.request.contextPath}/Message?action=reply&id=" + replies[j].id + "'>Reply</a>";
@@ -97,7 +98,7 @@
                          singleThread += subject + body + date;
                      }
                          if(userId == message.userId && message.userType == 2){
-                            var subject = "<b>" + message.subject +  "</b>";
+                            var subject = "<b>" + message.subject +  "</b>&nbsp <i class='fa fa-arrow-right'></i>";
                          }
                          else{
                             var subject = "<b>" + message.subject +  "</b>&nbsp<a href='${pageContext.request.contextPath}/Message?action=reply&id=" + message.id + "'>Reply</a>";

@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.components.AppController;
+import static com.tp.neo.controller.components.AppController.defaultEmail;
 import com.tp.neo.controller.helpers.OrderItemHelper;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
@@ -16,6 +17,8 @@ import com.tp.neo.model.Message;
 import com.tp.neo.model.MessageToRecipient;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.FileUploader;
+import com.tp.neo.model.utils.MailSender;
+import com.tp.neo.model.utils.SMSSender;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
@@ -348,7 +351,9 @@ public class MessageController extends AppController {
             message.setCreatorUserType(Short.parseShort("2"));
             message.setCreatedDate(calendar.getTime());
             if(reply){
-                message.setParentId(parentId);
+                Message parentMessage = em.find(Message.class, parentId);
+                Long replyParentId = parentMessage.getParentId() != 0 ? parentMessage.getParentId() : parentMessage.getId();
+                message.setParentId(replyParentId); 
             }
             else{
                 message.setParentId(Long.parseLong("0"));
@@ -362,6 +367,8 @@ public class MessageController extends AppController {
                 short recipientType = m.getCreatorUserType();
                 Long recipientId = m.getCreatedBy();
                 
+                Customer cust = em.find(Customer.class, recipientId);
+                
                 MessageToRecipient recipient = new MessageToRecipient();
                 
                 recipient.setMessageId(message);
@@ -370,6 +377,7 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
+                new MailSender().sendHtmlEmail(cust.getEmail(), defaultEmail, subject, body);
             }
             
             for(Customer customer : customerList){
@@ -382,6 +390,8 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
+                
+                new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, subject, body);
             }
             
         }
@@ -390,7 +400,7 @@ public class MessageController extends AppController {
         
         em.close();
         
-        request.setAttribute("success", customerList.size() + " Email was sent successfully");
+        request.setAttribute("success", customerList.size() == 0 ? 1 : customerList.size() + " Email was sent successfully");
     }
 
     
@@ -417,7 +427,9 @@ public class MessageController extends AppController {
         message.setCreatorUserType(Short.parseShort("3"));
         message.setCreatedDate(calendar.getTime());
         if(reply){
-            message.setParentId(parentId);
+            Message parentMessage = em.find(Message.class, parentId);
+            Long replyParentId = parentMessage.getParentId() != 0 ? parentMessage.getParentId() : parentMessage.getId();
+            message.setParentId(replyParentId); 
         }
         else{
             message.setParentId((long)0);
@@ -429,6 +441,7 @@ public class MessageController extends AppController {
                 short recipientType = m.getCreatorUserType();
                 Long recipientId = m.getCreatedBy();
                 
+                
                 MessageToRecipient recipient = new MessageToRecipient();
                 
                 recipient.setMessageId(m);
@@ -437,6 +450,8 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
+                
+                new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, subject, body);
             }
         else{
             MessageToRecipient recipient = new MessageToRecipient();
@@ -446,11 +461,14 @@ public class MessageController extends AppController {
             recipient.setStatus(Short.parseShort("0"));
 
             em.persist(recipient);
+            new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, subject, body);
         }
         
         em.getTransaction().commit();
         
         em.close();
+        
+        request.setAttribute("success",  "1 Email was sent successfully");
     }
     
     private void sendEmailToAgentFromAdmin(HttpServletRequest request, boolean reply, Long parentId){
@@ -490,7 +508,9 @@ public class MessageController extends AppController {
             message.setCreatorUserType(Short.parseShort("1"));
             message.setCreatedDate(calendar.getTime());
             if(reply){
-                message.setParentId(parentId); 
+                Message parentMessage = em.find(Message.class, parentId);
+                Long replyParentId = parentMessage.getParentId() != 0 ? parentMessage.getParentId() : parentMessage.getId();
+                message.setParentId(replyParentId); 
             }
             else{
                 message.setParentId((long)0);
@@ -503,6 +523,8 @@ public class MessageController extends AppController {
                 short recipientType = m.getCreatorUserType();
                 Long recipientId = m.getCreatedBy();
                 
+                Agent agent = em.find(Agent.class, recipientId);
+                
                 MessageToRecipient recipient = new MessageToRecipient();
                 
                 recipient.setMessageId(m);
@@ -511,6 +533,8 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
+                
+                new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, subject, body);
             }
             
             for(Agent agent : agentList){
@@ -523,6 +547,8 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
+                
+                new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, subject, body);
             }
             
         }
@@ -531,7 +557,7 @@ public class MessageController extends AppController {
         
         em.close();
         
-        request.setAttribute("success", agentList.size() + " Email was sent successfully");
+        request.setAttribute("success", agentList.size() == 0 ? 1 : agentList.size() + " Email was sent successfully");
         
     }
     
@@ -553,6 +579,8 @@ public class MessageController extends AppController {
             
             Customer customer  = em.find(Customer.class, id);
             customerList.add(customer);
+            
+            //new SMSSender(customer.getPhone(),msg).start();
         }
         
         request.setAttribute("success", customerList.size() + " SMS was sent successfully");
@@ -576,6 +604,7 @@ public class MessageController extends AppController {
             
             Agent agent  = em.find(Agent.class, id);
             agentList.add(agent);
+            //new SMSSender(customer.getPhone(),msg).start();
         }
         
         request.setAttribute("success", agentList.size() + " SMS was sent successfully");
@@ -592,6 +621,8 @@ public class MessageController extends AppController {
         Agent agent = customer.getAgent();
         
         request.setAttribute("success", " SMS was sent successfully");
+        
+        //new SMSSender(customer.getPhone(),msg).start();
         
     }
     
@@ -1044,8 +1075,8 @@ public class MessageController extends AppController {
         
         calendar.setTime(date);
         
-        String dateString = calendar.get(Calendar.MONTH)+1 + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "-" + calendar.get(Calendar.YEAR); 
-        
+        String dateString = calendar.get(Calendar.MONTH)+1 + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR); 
+        dateString += " " + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + " " + ( calendar.get(Calendar.AM_PM) == 0 ? "AM" : "PM");
         return dateString;
     }
     

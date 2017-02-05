@@ -47,23 +47,23 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Message.findByTarget", query = "SELECT m FROM Message m WHERE m.target = :target"),
     @NamedQuery(name = "Message.findByParentId", query = "SELECT m FROM Message m WHERE m.parentId = :parentId"),
     @NamedQuery(name = "Message.findAllThreadByAgent", query = "SELECT m , msg "
-            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND msg.createdBy = :cust_id "
+            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :cust_id AND msg.creatorUserType = 3 OR msg.createdBy = :agent_id AND msg.creatorUserType = 2)  "
             + "WHERE ( "
             + "(m.creatorUserType = 2 AND m.createdBy = :agent_id)"
             + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :cust_id )))"
-            + "  AND m.parentId = 0 ORDER BY m.id DESC, msg.id DESC "),
+            + "  AND m.parentId = 0 AND :cust_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :cust_id AND recipient.recipientType = 3 AND m.createdBy = :agent_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
     @NamedQuery(name = "Message.findAllThreadByAdmin", query = "SELECT m , msg "
-            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND msg.createdBy = :agent_id "
+            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :agent_id AND msg.creatorUserType = 2  OR msg.createdBy = :admin_id AND msg.creatorUserType = 1 ) "
             + "WHERE ( "
             + " (m.creatorUserType = 1 AND m.createdBy = :admin_id) "
             + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :admin_id AND recipient.recipientType = 1 AND m.createdBy = :agent_id )))"
-            + "  AND m.parentId = 0 ORDER BY m.id DESC, msg.id DESC "),
+            + "  AND m.parentId = 0 AND :agent_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :admin_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
     @NamedQuery(name = "Message.findAllThreadByCustomer", query = "SELECT m , msg "
-            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND msg.createdBy = :agent_id "
+            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :agent_id AND msg.creatorUserType = 2 OR msg.createdBy = :cust_id AND msg.creatorUserType = 3) "
             + "WHERE ( "
             + "(m.creatorUserType = 3 AND m.createdBy = :cust_id)"
             + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :cust_id AND recipient.recipientType = 3 AND m.createdBy = :agent_id )))"
-            + "  AND m.parentId = 0 ORDER BY m.id DESC, msg.id DESC "),
+            + "  AND m.parentId = 0 AND :agent_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :cust_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
     
     @NamedQuery(name = "Message.findByCreatorUserType", query = "SELECT m FROM Message m WHERE m.creatorUserType = :creatorUserType")})
 public class Message implements Serializable {
