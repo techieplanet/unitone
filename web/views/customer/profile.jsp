@@ -45,6 +45,21 @@
                 
                 <div class="panel-body">
                   
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
+                                <li role="presentation"><a href="#Orders" aria-controls="orders" role="tab" data-toggle="tab">Customer Orders</a></li>
+                                <li role="presentation"><a href="#Lodgements" aria-controls="Lodgements" role="tab" data-toggle="tab">Customer Lodgements </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content">
+                    
+                    <div role="tabpanel" class="tab-pane active" id="profile">
+                    
                     <div class="row">
                         
                         <div class="col-md-2">
@@ -152,6 +167,70 @@
                         
                     </div>
                     
+                    </div> <!-- END OF PROFILE TAB -->
+                    
+                    <div role="tabpanel" class="tab-pane" id="Orders">
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                             
+                                <div class="panel-group" id="accordion1" role="tablist" aria-multiselectable="true">
+                                    <c:forEach items="${orders}" var="order" varStatus="pointer">
+                                      <div class="panel panel-primary">
+                                        <div class="panel-heading" role="tab" id="heading1${pointer.count}">
+                                          <h4 class="panel-title">
+                                            <a role="button" style="display:block" data-toggle="collapse" data-parent="#accordion1" href="#collapse1${pointer.count}" aria-expanded="true" aria-controls="collapse">
+                                              Order date : ${order.get('order_date')}
+                                            </a>
+                                          </h4>
+                                        </div>
+                                        <div id="collapse1${pointer.count}" class="panel-collapse collapse ${pointer.count == 1 ? 'in' : ''}" role="tabpanel" aria-labelledby="heading1${pointer.count}">
+                                          <div class="panel-body table-responsive">
+                                           
+                                              <table class="table table-hover table-striped table-bordered">
+                                                  <thead>
+                                                      <tr>
+                                                          <th>Project</th><th>Unit</th><th>Qty</th><th>Cost per Unit</th>
+                                                      </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                      <c:forEach items="${order.get('items')}" var="item">
+                                                          <tr>
+                                                              <td>${item.get("project_name")}</td>
+                                                              <td>${item.get("unit_name")}</td>
+                                                              <td>${item.get("qty")}</td>
+                                                              <td><fmt:formatNumber currencySymbol="N" type="currency" maxFractionDigits="2" value="${item.get('cpu')}" /></td>
+                                                          </tr>
+                                                      </c:forEach>
+                                                  </tbody>
+                                              </table>
+                                              
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </c:forEach>
+                                </div>
+                              
+                            </div>
+                        </div>
+                        
+                    </div> <!-- END OF ORDERS TAB -->
+                    
+                    
+                    <div role="tabpanel" class="tab-pane" id="Lodgements">
+                        
+                            <div class="row">
+                            <div class="col-md-12">
+                             
+                                <div id="lodgement-accordion" class="panel-group"  role="tablist" aria-multiselectable="true" style="max-height: 400px; overflow-y: auto"></div>
+                              
+                            </div>
+                        </div>
+                        
+                    </div> <!-- END OF LODGEMENTS TAB -->
+                    
+                                    
+                    </div> <!-- END OF TAB-CONTENT -->
                 </div>
             </div>
             
@@ -298,7 +377,182 @@
              $("#password_change_modal").modal({
                  backdrop : "static"
              });
-         }
+         } ,
+         
+         prepareLodgementTable : function(data){
+             
+                var lodgements = data.lodgements;
+                var customerName = data.customerName;
+                
+                $("#lodgement-accordion").html("");
+                
+                var counter = 1;
+                
+                //$("#customerName").text(customerName)
+                
+                for(var k in lodgements){
+                    
+                  
+                  var panel = document.createElement("div");
+                  panel.setAttribute("class","panel panel-primary");
+                  
+                  var panelHeader = document.createElement("div");
+                  panelHeader.setAttribute("class","panel-heading");
+                  panelHeader.setAttribute("role","tab");
+                  panelHeader.setAttribute("id","heading2"+counter);
+                  
+            
+                  var panelTitle = document.createElement("h4");
+                  panelTitle.setAttribute("class","panel-title");
+                  
+                  var titleAnchor = document.createElement("a");
+                  titleAnchor.setAttribute("role","button");
+                  titleAnchor.setAttribute("data-toggle","collapse");
+                  titleAnchor.setAttribute("data-parent","#lodgement-accordion");
+                  titleAnchor.setAttribute("href","#collapse2" + counter);
+                  titleAnchor.setAttribute("aria-expanded","true");
+                  titleAnchor.setAttribute("aria-controls","collapse");
+                  
+                  var anchorTextNode = document.createTextNode("Lodgement date : " + lodgements[k].date);
+                  var anchorTextNode2 = document.createTextNode("Amount : " + accounting.formatMoney(lodgements[k].amount,"N",2,",","."));
+                  
+                  var printLodgementBtn = document.createElement("a");
+                  printLodgementBtn.setAttribute("class","btn btn-success btn-sm");
+                  printLodgementBtn.setAttribute("href","${pageContext.request.contextPath}/Customer?action=lodgement_invoice&id="+lodgements[k].id);
+                  printLodgementBtn.innerText = "Print Invoice";
+                  printLodgementBtn.style.position = "relative";
+                  printLodgementBtn.style.zIndex = "10000";
+                  
+                  var anchorDiv = document.createElement("div");
+                  anchorDiv.setAttribute("class","row");
+                  
+                  var col_md1 = document.createElement("div");
+                  col_md1.setAttribute("class","col-md-6");
+                  
+                  var col_md2 = document.createElement("div");
+                  col_md2.setAttribute("class","col-md-6");
+                  
+                  //PanelTitle Wrapper
+                  var wrapper = document.createElement("div");
+                  wrapper.setAttribute("class","row");
+                  
+                  var head_col_md10 = document.createElement("div");
+                  head_col_md10.setAttribute("class","col-md-10");
+                  head_col_md10.appendChild(panelTitle);
+                  
+                  var head_col_md2 = document.createElement("div");
+                  head_col_md2.setAttribute("class","col-md-2 text-right");
+                  head_col_md2.appendChild(printLodgementBtn);
+                  
+                  
+                  col_md1.appendChild(anchorTextNode);
+                  col_md2.appendChild(anchorTextNode2);
+                  
+                  anchorDiv.appendChild(col_md1);
+                  anchorDiv.appendChild(col_md2);
+                  
+                  wrapper.appendChild(head_col_md10);
+                  wrapper.appendChild(head_col_md2);
+                  
+                  titleAnchor.appendChild(anchorDiv);
+                  panelTitle.appendChild(titleAnchor);
+                  panelHeader.appendChild(wrapper);
+                  
+                  
+                  //Panel Collapse
+                  var panelCollapse = document.createElement("div");
+                  panelCollapse.setAttribute("id","collapse2" + counter);
+                  if(counter == 1){
+                      panelCollapse.setAttribute("class","panel-collapse collapse in");
+                  }
+                  else{
+                      panelCollapse.setAttribute("class","panel-collapse collapse");
+                  }
+                  
+                  panelCollapse.setAttribute("role","tabpanel");
+                  panelCollapse.setAttribute("aria-labelledby","heading2"+counter);
+                  
+                  //Panel Body
+                  var panelBody = document.createElement("div");
+                  panelBody.setAttribute("class","panel-body");
+                  
+                  panelCollapse.appendChild(panelBody);
+                  panel.appendChild(panelHeader);
+                  panel.appendChild(panelCollapse);
+                  
+                  panelCollapse.appendChild(panelBody);
+                  
+                  var table = "<table class='lodgment-tt-table'>";
+                  
+                  table += "<thead><tr data-tt-parent-id='" + k + o + "' data-tt-id='header" + k + "'>";
+                  table += "<th> Project </th>";
+                  table += "<th> Title </th>";
+                  table += "<th> Qty </th>";
+                  table += "<th> Monthly </th>";
+                  table += "<th> Total paid </th>";
+                  table += "<th> Balance </th>";
+                  table += "<th> Advance </th>";
+                  table += "<th> Start date </th>";
+                  table += "<th> Payment Stage </th>";
+                  table += "<th> Completion Date </th>";
+                  table += "</tr></thead>";
+                  
+                  var orders = lodgements[k].Orders;
+                  
+                  var orderCount = 1;
+                  for(var o in orders){
+                      
+                      items = orders[o];
+                      
+                      var trParent = "<tr class='expanded' data-tt-id='" + k + o + "'>";
+                          trParent += "<td colspan=10> Order " + orderCount +   " -  Order value : " + accounting.formatMoney(items[0].orderValue,"N",2,",",".") + "</td>";
+                          trParent += "</tr>";
+                          
+                          
+                          
+                      for(var i in items){
+                          
+                          var trchild = "<tr data-tt-id='c" + k + o + + i + "' data-tt-parent-id='" + k + o + "'>";
+                          
+                          trchild += "<td style='text-align:left;padding-left:0px'>" + items[i].project_name + "</td>";
+                          trchild += "<td style='text-align:left'>" + items[i].title + "</td>";
+                          trchild += "<td>" + items[i].quantity + "</td>";
+                          trchild += "<td>" + accounting.formatMoney(items[i].monthly,"N",2,",",".") + "</td>";
+                          trchild += "<td>" + accounting.formatMoney(items[i].total_paid,"N",2,",",".") + "</td>";
+                          trchild += "<td>" + accounting.formatMoney(items[i].balance,"N",2,",",".") + "</td>";
+                          trchild += "<td>" + accounting.formatMoney(items[i].advance,"N",2,",",".") + "</td>";
+                          trchild += "<td>" + items[i].startDate + "</td>";
+                          trchild += "<td>" + items[i].paymentStage + "</td>";
+                          trchild += "<td>" + items[i].completionDate + "</td>";
+                          
+                          
+                          trchild += "</tr>";
+                          
+                          trParent += trchild;
+                          
+                          //console.log("Child says : " + items[i].completionDate);
+                      }
+                      
+                      table += trParent;
+                      
+                      orderCount++;
+                  }
+                  
+                  table += "</table>";
+                  
+                  panelBody.innerHTML = table;
+                  
+                  document.getElementById("lodgement-accordion").appendChild(panel);
+                  
+                  counter++;
+                }
+                
+                $(".lodgment-tt-table").treetable({ expandable: true,initialState: "expanded" },true);
+                
+             }
      }
-          
+     
+     var jsonData = JSON.parse('${lodgements}');
+     console.log(jsonData);
+     customerProfile.prepareLodgementTable(jsonData);
  </script>         

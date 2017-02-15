@@ -39,8 +39,9 @@ public class OrderItemHelper {
         for (LodgementItem item : lodgementItem) {
              if(item.getLodgement().getApprovalStatus() == 0)
                  continue;
-             
-            totalAmount += item.getAmount();
+            
+             double rewardPoint = item.getRewardAmount() != null ? item.getRewardAmount() : 0;
+            totalAmount += item.getAmount() + rewardPoint;
         }
 
         return totalAmount;

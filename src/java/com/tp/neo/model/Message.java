@@ -52,6 +52,12 @@ import javax.xml.bind.annotation.XmlTransient;
             + "(m.creatorUserType = 2 AND m.createdBy = :agent_id)"
             + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :cust_id )))"
             + "  AND m.parentId = 0 AND :cust_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :cust_id AND recipient.recipientType = 3 AND m.createdBy = :agent_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
+    @NamedQuery(name = "Message.findAllThreadByAgent2Admin", query = "SELECT m , msg "
+            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :agent_id AND msg.creatorUserType = 2  OR  msg.creatorUserType = 1 ) "
+            + "WHERE ( "
+            + " (m.creatorUserType = 1) "
+            + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 1 AND m.createdBy = :agent_id )))"
+            + "  AND m.parentId = 0 AND :agent_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :admin_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
     @NamedQuery(name = "Message.findAllThreadByAdmin", query = "SELECT m , msg "
             + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :agent_id AND msg.creatorUserType = 2  OR msg.createdBy = :admin_id AND msg.creatorUserType = 1 ) "
             + "WHERE ( "

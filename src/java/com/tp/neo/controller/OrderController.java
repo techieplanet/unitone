@@ -399,17 +399,18 @@ public class OrderController extends AppController {
             if(sessionUser.getSystemUserTypeId() == 3){
                     if(lodgement.getPaymentMode() == 2){
                         
+                        List<LodgementItem> LItems = (List)lodgement.getLodgementItemCollection();
                         Date date = lodgement.getCreatedDate();
                         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
                         String dateString = sdf.format(date);
                         
                         double vat = 0.00;
                         double gateWayCharge = 0.00;
-                        Map map = getInvoicData(orderItems, vat, gateWayCharge);
+                        Map map = getInvoicData(LItems, vat, gateWayCharge);
                         
                         viewFile = "/views/customer/gateway.jsp";
                         request.getSession().setAttribute("productOrderInvoice", productOrder);
-                        request.getSession().setAttribute("orderItemInvoice", orderItems);
+                        request.getSession().setAttribute("orderItemInvoice",   LItems);
                         request.getSession().setAttribute("transactionDate", dateString);
                         request.getSession().setAttribute("customerInvoice", customer);
                         request.getSession().setAttribute("totalInvoice", (Double)map.get("total"));
@@ -924,13 +925,14 @@ public class OrderController extends AppController {
     }
    
    
-   private Map getInvoicData(List<OrderItem> items, double vat, double gateWayCharge){
+   private Map getInvoicData(List<LodgementItem> items, double vat, double gateWayCharge){
         
         double total = 0.00;
         double grandTotal = 0.00;
         
-        for(OrderItem item : items){
-            total += item.getInitialDep();
+        for(LodgementItem LI : items){
+            double rewardAmount = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            total += LI.getAmount() + rewardAmount;
         }
         
         grandTotal = total + vat + gateWayCharge;
