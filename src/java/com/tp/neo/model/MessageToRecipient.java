@@ -20,10 +20,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- *
- * @author hp
- */
+
 @Entity
 @Table(name = "message_to_recipient")
 @XmlRootElement
@@ -37,6 +34,7 @@ public class MessageToRecipient implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Basic(optional = false)
     @Column(name = "id")
     private Long id;
@@ -121,5 +119,12 @@ public class MessageToRecipient implements Serializable {
     public String toString() {
         return "com.tp.neo.model.MessageToRecipient[ id=" + id + " ]";
     }
-    
+
+    public Short getStatus() {
+        return status;
+    }
+
+    public void setStatus(Short status) {
+        this.status = status;
+    }    
 }

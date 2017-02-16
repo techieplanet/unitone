@@ -60,11 +60,7 @@ public class UserController extends AppController {
     private String viewFile = "";
     
     String newEmailSubject = "Your NeoForce login details";
-    String newRegEmail = "Dear %s,<br/>" +
-                        "You have been registered as a new user on NeoForce Sales Force Solution. You may login with your email and password.<br/><br/>" +
-                        "Your newly created password is %s.<br/><br/>" +
-                        "To login, visit this <a href=\"%s\">link</a>. If the link does not work, copy the following URL and paste in directly in your address bar.<br/><br/>" +
-                        "<p style=\"text-align: center;\">%s</p>";
+    
             
     
     public void init(ServletConfig config) throws ServletException {
@@ -299,7 +295,7 @@ public class UserController extends AppController {
                 String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
                 String host = new URI(request.getHeader("host")).toString();
                 String rootUrl = scheme + "://" + host + context + "/";
-                String message = String.format(newRegEmail, user.getFirstname(), initPass, rootUrl, rootUrl);
+                String message = this.createRegEmail(user.getFirstname(), initPass, rootUrl);
                 new MailSender().sendHtmlEmail(user.getEmail(), defaultEmail, newEmailSubject, message);
                 System.out.println("user message: " + message);
                 
@@ -431,6 +427,17 @@ public class UserController extends AppController {
             //new URI(request.getHeader("referer")).getPath();
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
+    }
+    
+    
+    private String createRegEmail(String firstName, String initPass, String rootUrl){
+        String newRegEmail = "Dear " + firstName + ",<br/>" +
+                        "You have been registered as a new user on NeoForce Sales Force Solution. You may login with your email and password.<br/><br/>" +
+                        "Your newly created password is " + initPass + "<br/><br/>" +
+                        "To login, visit this <a href=\"" + rootUrl + "\">link</a>. If the link does not work, copy the following URL and paste in directly in your address bar.<br/><br/>" +
+                        "<p style=\"text-align: center;\">" + rootUrl + "</p>";
+        
+        return newRegEmail;
     }
     
     

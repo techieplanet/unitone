@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -26,10 +27,6 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author hp
- */
 @Entity
 @Table(name = "message")
 @XmlRootElement
@@ -89,13 +86,26 @@ public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NamedQuery(name = "Message.findByModifiedBy", query = "SELECT m FROM Message m WHERE m.modifiedBy = :modifiedBy")})
+public class Message implements Serializable {
+
+    @Column(name = "target")
+    private Short target;
+    @Column(name = "parent_id")
+    private BigInteger parentId;
+    @Column(name = "replied")
+    private Short replied;
+    @Column(name = "creator_user_type")
+    private BigInteger creatorUserType;
+
+    private static final long serialVersionUID = 1L;
+    @Id
     @Basic(optional = false)
     @Column(name = "id")
     private Long id;
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
-    @Size(max = 2147483647)
     @Column(name = "message")
     private String message;
     @Column(name = "channel")
@@ -114,6 +124,15 @@ public class Message implements Serializable {
     private Short creatorUserType;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "messageId")
     private List<MessageToRecipient> messageToRecipientList;
+    @Column(name = "created_by")
+    private Integer createdBy;
+    @Column(name = "modified_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modifiedDate;
+    @Column(name = "modified_by")
+    private Integer modifiedBy;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "messageId")
+    private Collection<MessageToRecipient> messageToRecipientCollection;
 
     public Message() {
     }
@@ -253,30 +272,30 @@ public class Message implements Serializable {
         return "com.tp.neo.model.Message[ id=" + id + " ]";
     }
 
-    public String getSubject() {
-        return subject;
+    public Short getTarget() {
+        return target;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setTarget(Short target) {
+        this.target = target;
     }
 
-   
+    
 
-    public Short getRecipientType() {
-        return recipientType;
+    public Short getReplied() {
+        return replied;
     }
 
-    public void setRecipientType(Short recipientType) {
-        this.recipientType = recipientType;
+    public void setReplied(Short replied) {
+        this.replied = replied;
     }
 
-    public Long getRecipientId() {
-        return recipientId;
+    public BigInteger getCreatorUserType() {
+        return creatorUserType;
     }
 
-    public void setRecipientId(Long recipientId) {
-        this.recipientId = recipientId;
+    public void setCreatorUserType(BigInteger creatorUserType) {
+        this.creatorUserType = creatorUserType;
     }
     
 }
