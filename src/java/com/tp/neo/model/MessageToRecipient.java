@@ -119,12 +119,4 @@ public class MessageToRecipient implements Serializable {
     public String toString() {
         return "com.tp.neo.model.MessageToRecipient[ id=" + id + " ]";
     }
-
-    public Short getStatus() {
-        return status;
-    }
-
-    public void setStatus(Short status) {
-        this.status = status;
-    }    
 }

@@ -23,7 +23,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -41,6 +40,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Message.findByCreatedBy", query = "SELECT m FROM Message m WHERE m.createdBy = :createdBy"),
     @NamedQuery(name = "Message.findByModifiedDate", query = "SELECT m FROM Message m WHERE m.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Message.findByModifiedBy", query = "SELECT m FROM Message m WHERE m.modifiedBy = :modifiedBy"),
+    //@NamedQuery(name = "Message.findByModifiedBy", query = "SELECT m FROM Message m WHERE m.modifiedBy = :modifiedBy"),
     @NamedQuery(name = "Message.findByTarget", query = "SELECT m FROM Message m WHERE m.target = :target"),
     @NamedQuery(name = "Message.findByParentId", query = "SELECT m FROM Message m WHERE m.parentId = :parentId"),
     @NamedQuery(name = "Message.findAllThreadByAgent", query = "SELECT m , msg "
@@ -69,35 +69,18 @@ import javax.xml.bind.annotation.XmlTransient;
             + "  AND m.parentId = 0 AND :agent_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :cust_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
     
     @NamedQuery(name = "Message.findByCreatorUserType", query = "SELECT m FROM Message m WHERE m.creatorUserType = :creatorUserType")})
-public class Message implements Serializable {
-    @Column(name = "created_by")
-    private Long createdBy;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
-    @Column(name = "parent_id")
-    private Long parentId;
-    @Column(name = "recipient_type")
-    private Short recipientType;
-    @Column(name = "recipient_id")
-    private Long recipientId;
-    @Size(max = 2147483647)
-    @Column(name = "subject")
-    private String subject;
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NamedQuery(name = "Message.findByModifiedBy", query = "SELECT m FROM Message m WHERE m.modifiedBy = :modifiedBy")})
+
+
 public class Message implements Serializable {
 
     @Column(name = "target")
     private Short target;
     @Column(name = "parent_id")
-    private BigInteger parentId;
+    private Long parentId;
     @Column(name = "replied")
     private Short replied;
     @Column(name = "creator_user_type")
-    private BigInteger creatorUserType;
-
+    private Short creatorUserType;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -118,22 +101,17 @@ public class Message implements Serializable {
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Column(name = "target")
-    private Short target;
-    @Column(name = "creator_user_type")
-    private Short creatorUserType;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "messageId")
     private List<MessageToRecipient> messageToRecipientList;
     @Column(name = "created_by")
-    private Integer createdBy;
-    @Column(name = "modified_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date modifiedDate;
+    private Long createdBy;
     @Column(name = "modified_by")
-    private Integer modifiedBy;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "messageId")
-    private Collection<MessageToRecipient> messageToRecipientCollection;
-
+    private Long modifiedBy;
+    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "messageId")
+    //private Collection<MessageToRecipient> messageToRecipientCollection;
+    @Column(name = "subject")
+    private String subject;
+    
     public Message() {
     }
 
@@ -272,14 +250,6 @@ public class Message implements Serializable {
         return "com.tp.neo.model.Message[ id=" + id + " ]";
     }
 
-    public Short getTarget() {
-        return target;
-    }
-
-    public void setTarget(Short target) {
-        this.target = target;
-    }
-
     
 
     public Short getReplied() {
@@ -289,13 +259,14 @@ public class Message implements Serializable {
     public void setReplied(Short replied) {
         this.replied = replied;
     }
-
-    public BigInteger getCreatorUserType() {
-        return creatorUserType;
+    
+    
+    public String getSubject() {
+        return subject;
     }
 
-    public void setCreatorUserType(BigInteger creatorUserType) {
-        this.creatorUserType = creatorUserType;
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
     
 }
