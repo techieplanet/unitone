@@ -144,7 +144,7 @@ public class CustomerController extends AppController  {
             }
             if(action.equalsIgnoreCase("customer_lodgements")){
                 
-                getCustomerLodgments(request, response);
+                getCustomerLodgments(request, response, true);
                 return;
             }
         
@@ -721,6 +721,8 @@ public class CustomerController extends AppController  {
             request.setAttribute("action","edit");
             request.setAttribute("history",getRequestHistory(request));
             request.setAttribute("userType",sessionUser.getSystemUserTypeId());
+            request.setAttribute("orders", getCustomerOrders(request, response, false));
+            request.setAttribute("lodgements", getCustomerLodgments(request, response,false));
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")){
             viewFile = CUSTOMER_ADMIN;
@@ -756,9 +758,10 @@ public class CustomerController extends AppController  {
         }
         else if(action.equalsIgnoreCase("customer_orders")){
             action = "";
-            getCustomerOrders(request, response);
+            getCustomerOrders(request, response, true);
             return;
         }
+        
         request.setAttribute("projects", project.listProjects());
         
         //Keep track of the sideBar
@@ -1179,12 +1182,17 @@ public class CustomerController extends AppController  {
         
     }
     
-    private void getCustomerLodgments(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    private String getCustomerLodgments(HttpServletRequest request, HttpServletResponse response, boolean isAjax) throws IOException{
         
        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
        EntityManager em = emf.createEntityManager();
        
-       long id = Long.parseLong(request.getParameter("id"));
+       long id;
+       
+       if(isAjax)
+            id = Long.parseLong(request.getParameter("id"));
+       else
+            id = Long.parseLong(request.getParameter("customerId"));
        
        Customer customer = em.find(Customer.class, id);
        
@@ -1204,8 +1212,11 @@ public class CustomerController extends AppController  {
            
            Map<String, Object> map = new HashMap();
            
+           double loyaltyAmt = l.getRewardAmount();
+           double amount = l.getAmount() + loyaltyAmt;
+           
            map.put("id", l.getId());
-           map.put("amount", String.format("%.2f", l.getAmount()));
+           map.put("amount", String.format("%.2f", amount));
            map.put("date", sdf.format(l.getLodgmentDate()));
            map.put("depositorName", l.getDepositorName() != null ? l.getDepositorName() : "");
            map.put("depositorAcctName", l.getOriginAccountName() != null ? l.getOriginAccountName() : "");
@@ -1257,12 +1268,19 @@ public class CustomerController extends AppController  {
        
        System.out.println("Lodgements Json = " + jsonResponse);
        
-       response.setContentType("text/plain");
-       response.setCharacterEncoding("UTF-8");
-       response.getWriter().write(jsonResponse);
-       response.getWriter().flush();
-       response.getWriter().close();
+       String payLoad = "";
+       if(isAjax){
+           response.setContentType("text/plain");
+           response.setCharacterEncoding("UTF-8");
+           response.getWriter().write(jsonResponse);
+           response.getWriter().flush();
+           response.getWriter().close();
+       }
+       else {
+           payLoad = jsonResponse;
+       }
        
+       return payLoad;
     }
     
     
@@ -1533,12 +1551,13 @@ public class CustomerController extends AppController  {
         
     }
     
-    public void getCustomerOrders(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    public List<Map> getCustomerOrders(HttpServletRequest request, HttpServletResponse response, boolean returnJson) throws IOException{
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em  = emf.createEntityManager();
         
-        Long customerId = Long.parseLong(request.getParameter("id"));
+        String id = request.getParameter("id") != null ? request.getParameter("id") : request.getParameter("customerId");
+        Long customerId = Long.parseLong(id);
         
         Customer customer = em.find(Customer.class, customerId);
         Query query = em.createNamedQuery("ProductOrder.findByCustomer");
@@ -1574,6 +1593,10 @@ public class CustomerController extends AppController  {
             ordersMapList.add(orderMap);
         }
         
+        if(!returnJson){
+            return ordersMapList;
+        }
+        
         Gson gson = new GsonBuilder().create();
         
         response.setContentType("text/plain");
@@ -1581,6 +1604,8 @@ public class CustomerController extends AppController  {
         response.getWriter().write(gson.toJson(ordersMapList));
         response.getWriter().flush();
         response.getWriter().close();
+        
+        return ordersMapList;
     }
     
     private void addNewProspect(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {

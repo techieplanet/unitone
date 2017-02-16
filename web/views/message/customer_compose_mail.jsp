@@ -52,76 +52,7 @@
         <!-- Main content -->
         <section class="content">
           <!-- Your Page Content Here -->
-          <div class="box">
-                <div class="box-header with-border">
-                  <div class="row">  
-                      
-                      <div class="col-md-8">
-                      <h3 class="box-title block">
-                          Select Customer(s) 
-                      </h3>
-                      </div>
-                      
-                      <div class="col-md-4 text-right">
-                          <label>Filter By </label>
-                          <select id="customerFilter" onchange="customerMessage.filter()">
-                              <option value="all">All</option>
-                              <option value="defaulter">Defaulters</option>
-                          </select>
-                      </div>
-                  </div>
-                </div><!-- /.box-header -->
-                
-                 <div class="box-body">
-                     
-                 <div class="table-responsive" style="height:400px; overflow-y: auto">   
-                  <table id="customerList" class="table table-bordered table-striped table-hover" >
-                    <thead>
-                      <tr>
-                        <th><input type="checkbox" class="toggle_chkbox" /></th> 
-                        <th>#</th>
-                        <th>Image</th>
-                        <th>First Name</th>
-                        <th>Middle Name</th>
-                        <th>Last Name</th>
-                        <th>Phone No</th>
-                        <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
-                        <th>State</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${customers}" var="customer" varStatus="pointer">
-                            <tr id="row<c:out value="${pointer.count}" />" class="${customer.get('defaulter')}">
-                                <td>
-                                    <input type="checkbox" class="customer_chkbox" value="${customer.get('id')}" />
-                                </td>
-                                <td><c:out value="${pointer.count}" /></td>
-                                <td><img src="/uploads/NeoForce/images/customer/${customer.get('photoPath')}" width='55' height='50'/></td>
-                                <td><c:out value="${customer.get('firstname')}" /></td>
-                                <td><c:out value="${customer.get('middlename')}" /></td>
-                                <td><c:out value="${customer.get('lastname')}" /></td>
-                                <td><c:out value="${customer.get('phone')}" /></td>
-                                <td><c:out value="${customer.get('email')}" /></td>
-                                <td><c:out value="${customer.get('street')}" /></td>
-                                <td><c:out value="${customer.get('city')}" /></td>
-                                <td><c:out value="${customer.get('state')}" /></td>
-                              
-                                
-                            </tr>
-                        </c:forEach>
-                  </tbody>
-                  </table>
-                 </div>
-                </div><!-- /.box-body -->
-                
-                <div class="box-footer text-right">
-                    <span class="text-success" id="contact-count" style="font-weight: bold;font-size:14px"></span>
-                </div>
-              </div><!-- /.box -->
-              
-              
+         
           <div class="row">
               
               <div class="col-md-12">
@@ -148,9 +79,25 @@
               
               <div class="box-body">
                   
-                  <form action="${pageContext.request.contextPath}/Message?action=email" method="POST">
+                  <form action="${pageContext.request.contextPath}/Message?action=customer_email" method="POST">
                       
-                      <input type="hidden" name="customersId" class="ids" value="" />
+                      <input type="hidden" name="agentId" class="ids" value="${agentId}" />
+                      <c:choose>
+                          <c:when test="${not empty reply}">
+                              <input type="hidden" name="reply_msg_id" value="${reply}" />
+                          </c:when>
+                          <c:when test="${empty reply}">
+                              <input type="hidden" name="reply_msg_id" value="0" />
+                          </c:when>
+                      </c:choose>
+                      <div class="row">
+                          <div class="col-md-6">
+                              <div class="form-group">
+                                  <label for="subject">Subject </label>
+                                  <input class="form-control" id="subject" name="email_subject" />
+                              </div>
+                          </div>
+                      </div>
                       <div class="row">
                           
                       <div class="col-md-10">    
@@ -184,9 +131,10 @@
               
               <div class="box-body">
                   
-                  <form action="${pageContext.request.contextPath}/Message?action=sms" method="POST">
+                  <form action="${pageContext.request.contextPath}/Message?action=customer_sms" method="POST">
                       
                       <input type="hidden" name="customersId" class="ids" value="" />
+                      
                       <div class="row">
                           
                           <div class="col-md-4">    

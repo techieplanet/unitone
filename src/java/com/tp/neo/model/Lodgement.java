@@ -294,7 +294,10 @@ public class Lodgement extends BaseModel {
     }
 
     public Double getRewardAmount() {
-        return rewardAmount;
+        if(rewardAmount == null)
+            return (double)0;
+        else
+            return rewardAmount;
     }
 
     public void setRewardAmount(Double rewardAmount) {

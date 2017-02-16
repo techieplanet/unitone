@@ -90,7 +90,16 @@ public class AppController extends HttpServlet{
             System.out.println("User not logged in");
             session.setAttribute("loginCallback", callbackURL);
             String loginPage = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/";
-            log("loginPage: " + loginPage);
+            
+            if(isAjaxRequest){
+                response.setCharacterEncoding("UTF-8");
+                response.setContentType("text/plain");
+                response.getWriter().write("SESSION_EXPIRED");
+                response.getWriter().flush();
+                response.getWriter().close();
+                return false;
+            }
+            
             response.sendRedirect(loginPage);
             return false;
         }

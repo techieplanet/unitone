@@ -39,6 +39,7 @@
                     <thead>
                       <tr>
                         <th>SN</th>
+                        <th>ID</th>
                         <th>Image</th>
                         <th>First Name</th>
                         <th>Middle Name</th>
@@ -56,6 +57,7 @@
                         <c:forEach items="${customers}" var="customer" varStatus="pointer">
                             <tr id="row<c:out value="${pointer.count}" />">
                                 <td><c:out value="${pointer.count}" /></td>
+                                <td>${customer.getAccountCode()}</td>
                                 <td><img src="/uploads/NeoForce/images/customer/${customer.photoPath}" width='55' height='50'/></td>
                                 <td><c:out value="${customer.firstname}" /></td>
                                 <td><c:out value="${customer.middlename}" /></td>
@@ -89,6 +91,7 @@
                     <tfoot>
                       <tr>
                         <th>SN</th>
+                        <th>ID</th>
                         <th>Image</th>
                         <th>First Name</th>
                         <th>Middle Name</th>

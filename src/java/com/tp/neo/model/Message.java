@@ -7,12 +7,15 @@ package com.tp.neo.model;
 
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -20,13 +23,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author swedge-mac
- */
 @Entity
 @Table(name = "message")
 @XmlRootElement
@@ -40,6 +40,52 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Message.findByCreatedDate", query = "SELECT m FROM Message m WHERE m.createdDate = :createdDate"),
     @NamedQuery(name = "Message.findByCreatedBy", query = "SELECT m FROM Message m WHERE m.createdBy = :createdBy"),
     @NamedQuery(name = "Message.findByModifiedDate", query = "SELECT m FROM Message m WHERE m.modifiedDate = :modifiedDate"),
+    @NamedQuery(name = "Message.findByModifiedBy", query = "SELECT m FROM Message m WHERE m.modifiedBy = :modifiedBy"),
+    @NamedQuery(name = "Message.findByTarget", query = "SELECT m FROM Message m WHERE m.target = :target"),
+    @NamedQuery(name = "Message.findByParentId", query = "SELECT m FROM Message m WHERE m.parentId = :parentId"),
+    @NamedQuery(name = "Message.findAllThreadByAgent", query = "SELECT m , msg "
+            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :cust_id AND msg.creatorUserType = 3 OR msg.createdBy = :agent_id AND msg.creatorUserType = 2)  "
+            + "WHERE ( "
+            + "(m.creatorUserType = 2 AND m.createdBy = :agent_id)"
+            + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :cust_id )))"
+            + "  AND m.parentId = 0 AND :cust_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :cust_id AND recipient.recipientType = 3 AND m.createdBy = :agent_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
+    @NamedQuery(name = "Message.findAllThreadByAgent2Admin", query = "SELECT m , msg "
+            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :agent_id AND msg.creatorUserType = 2  OR  msg.creatorUserType = 1 ) "
+            + "WHERE ( "
+            + " (m.creatorUserType = 1) "
+            + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 1 AND m.createdBy = :agent_id )))"
+            + "  AND m.parentId = 0 AND :agent_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :admin_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
+    @NamedQuery(name = "Message.findAllThreadByAdmin", query = "SELECT m , msg "
+            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :agent_id AND msg.creatorUserType = 2  OR msg.createdBy = :admin_id AND msg.creatorUserType = 1 ) "
+            + "WHERE ( "
+            + " (m.creatorUserType = 1 AND m.createdBy = :admin_id) "
+            + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :admin_id AND recipient.recipientType = 1 AND m.createdBy = :agent_id )))"
+            + "  AND m.parentId = 0 AND :agent_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :admin_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
+    @NamedQuery(name = "Message.findAllThreadByCustomer", query = "SELECT m , msg "
+            + "FROM Message m left join Message msg ON  msg.parentId = m.id AND (msg.createdBy = :agent_id AND msg.creatorUserType = 2 OR msg.createdBy = :cust_id AND msg.creatorUserType = 3) "
+            + "WHERE ( "
+            + "(m.creatorUserType = 3 AND m.createdBy = :cust_id)"
+            + " OR (m.id IN (select recipient.messageId.id FROM MessageToRecipient recipient where recipient.recipientId = :cust_id AND recipient.recipientType = 3 AND m.createdBy = :agent_id )))"
+            + "  AND m.parentId = 0 AND :agent_id IN (select recipient.recipientId FROM MessageToRecipient recipient where recipient.recipientId = :agent_id AND recipient.recipientType = 2 AND m.createdBy = :cust_id AND m.id = recipient.messageId.id) ORDER BY m.id DESC, msg.id DESC "),
+    
+    @NamedQuery(name = "Message.findByCreatorUserType", query = "SELECT m FROM Message m WHERE m.creatorUserType = :creatorUserType")})
+public class Message implements Serializable {
+    @Column(name = "created_by")
+    private Long createdBy;
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+    @Column(name = "parent_id")
+    private Long parentId;
+    @Column(name = "recipient_type")
+    private Short recipientType;
+    @Column(name = "recipient_id")
+    private Long recipientId;
+    @Size(max = 2147483647)
+    @Column(name = "subject")
+    private String subject;
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NamedQuery(name = "Message.findByModifiedBy", query = "SELECT m FROM Message m WHERE m.modifiedBy = :modifiedBy")})
 public class Message implements Serializable {
 
@@ -69,6 +115,15 @@ public class Message implements Serializable {
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
+    @Column(name = "modified_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modifiedDate;
+    @Column(name = "target")
+    private Short target;
+    @Column(name = "creator_user_type")
+    private Short creatorUserType;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "messageId")
+    private List<MessageToRecipient> messageToRecipientList;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name = "modified_date")
@@ -134,11 +189,11 @@ public class Message implements Serializable {
         this.createdDate = createdDate;
     }
 
-    public Integer getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Integer createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -150,21 +205,46 @@ public class Message implements Serializable {
         this.modifiedDate = modifiedDate;
     }
 
-    public Integer getModifiedBy() {
+    public Long getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(Integer modifiedBy) {
+    public void setModifiedBy(Long modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
-    @XmlTransient
-    public Collection<MessageToRecipient> getMessageToRecipientCollection() {
-        return messageToRecipientCollection;
+    public Short getTarget() {
+        return target;
     }
 
-    public void setMessageToRecipientCollection(Collection<MessageToRecipient> messageToRecipientCollection) {
-        this.messageToRecipientCollection = messageToRecipientCollection;
+    public void setTarget(Short target) {
+        this.target = target;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+
+    public Short getCreatorUserType() {
+        return creatorUserType;
+    }
+
+    public void setCreatorUserType(Short creatorUserType) {
+        this.creatorUserType = creatorUserType;
+    }
+
+    @XmlTransient
+    public List<MessageToRecipient> getMessageToRecipientList() {
+        return messageToRecipientList;
+    }
+
+    public void setMessageToRecipientList(List<MessageToRecipient> messageToRecipientList) {
+        this.messageToRecipientList = messageToRecipientList;
     }
 
     @Override
@@ -200,13 +280,7 @@ public class Message implements Serializable {
         this.target = target;
     }
 
-    public BigInteger getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(BigInteger parentId) {
-        this.parentId = parentId;
-    }
+    
 
     public Short getReplied() {
         return replied;
