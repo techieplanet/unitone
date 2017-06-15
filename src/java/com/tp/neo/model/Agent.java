@@ -100,6 +100,8 @@ import javax.xml.bind.annotation.XmlTransient;
                                                                     + "LEFT JOIN item.order o LEFT JOIN o.agent a "
                                                                     + "WHERE u.project.id = :projectId AND u.project.deleted = 0 AND a.agentId = :agentId "
                                                                     + "GROUP BY u.id ORDER  BY u.id"),
+    
+    @NamedQuery(name = "Agent.findNetwork", query = "SELECT a FROM Agent a WHERE a.referrerId = :agentId")
 
     
 })
@@ -110,6 +112,8 @@ public class Agent extends BaseModel implements SystemUser  {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "referrer_id")
+    private Long referrerId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
     private Collection<AgentProspect> agentProspectCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
@@ -565,6 +569,14 @@ public class Agent extends BaseModel implements SystemUser  {
 
     public void setAgentProspectCollection(Collection<AgentProspect> agentProspectCollection) {
         this.agentProspectCollection = agentProspectCollection;
+    }
+    
+    public Long getReferrerId() {
+        return referrerId;
+    }
+
+    public void setReferrerId(Long referrerId) {
+        this.referrerId = referrerId;
     }
 
     

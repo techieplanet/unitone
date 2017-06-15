@@ -501,9 +501,10 @@ public class OrderManager {
                 orderItem.setRewardPoints(0);
             }
             
-            if(sessionUser.getSystemUserTypeId() == 1){
+            //if(sessionUser.getSystemUserTypeId() == 1){
                 orderItem.setCommissionPercentage(saleItem.commp);
-            }
+                System.out.println("Sale Item Commp: " + saleItem.commp);
+            //}
             if(sessionUser != null){
                 orderItem.setCreatedBy(sessionUser.getSystemUserId()); 
             }
@@ -586,7 +587,7 @@ public class OrderManager {
     //This method processes the new order items, sent as json data via request attribute from new order form
     private OrderItemObjectsList processJsonData(String json) {
         Gson gson = new GsonBuilder().create();
-        System.out.println(json);
+        //System.out.println(json);
         
         OrderItemObjectsList salesObj = gson.fromJson(json,OrderItemObjectsList.class);
         

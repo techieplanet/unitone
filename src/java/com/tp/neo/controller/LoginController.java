@@ -134,9 +134,9 @@ public class LoginController extends HttpServlet {
             throws ServletException, IOException {
         String email = request.getParameter("email") != null ? request.getParameter("email") : "";
         String password = request.getParameter("password") != null ? request.getParameter("password") : "";//[B@3c9a818d
-        String userType = request.getParameter("usertype") != null ? request.getParameter("usertype") : "";
+        String userTypeString = request.getParameter("usertype") != null ? request.getParameter("usertype") : "";
         
-        if(userType.equals("0")){
+        if(userTypeString.equals("0")){
             
             redirectToLogin(request, response);
         }
@@ -146,7 +146,7 @@ public class LoginController extends HttpServlet {
         try{
             em = emf.createEntityManager();
             
-            SystemUser user = getUserTypeObject(userType, email);
+            SystemUser user = getUserTypeObject(userTypeString, email);
             if(user == null){
                 redirectToLogin(request, response);
                 return;
@@ -162,7 +162,7 @@ public class LoginController extends HttpServlet {
                 HttpSession session = request.getSession();
                 session.setMaxInactiveInterval(900); //15 minutes
                 session.setAttribute("user", user);
-                session.setAttribute("userType", userType);
+                session.setAttribute("userTypeString", userTypeString);
                 session.setAttribute("userTypes", userTypes);
                 session.setAttribute("availablePlugins", getAvailableplugins());
                 
@@ -185,7 +185,7 @@ public class LoginController extends HttpServlet {
                 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));             
                 
                 auditlog.setLogDate(calendar.getTime());
-                auditlog.setNote(String.format("User %s %s logged in as %s user at %s.",user.getFirstname(),user.getLastname(), userType, calendar.getTime()));
+                auditlog.setNote(String.format("User %s %s logged in as %s user at %s.",user.getFirstname(),user.getLastname(), userTypeString, calendar.getTime()));
                 auditlog.setUsertype(user.getSystemUserTypeId());
                 auditlog.setUserId(user.getSystemUserId());
                 
@@ -196,7 +196,7 @@ public class LoginController extends HttpServlet {
                 
                 if(session.getAttribute("loginCallback") == null){
                     //context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
-                    if(userType.equals(userTypesEnum.CUSTOMER.toString().trim())){
+                    if(userTypeString.equals(userTypesEnum.CUSTOMER.toString().trim())){
                        response.sendRedirect(context + "/Customer?action=profile&customerId="+user.getSystemUserId());
                        return;
                     }
@@ -294,7 +294,7 @@ public class LoginController extends HttpServlet {
             SystemUser user = (SystemUser)session.getAttribute("user");
             
             if(user != null){
-                String userType = session.getAttribute("userType").toString();
+                String userType = session.getAttribute("userTypeString").toString();
 
                 //do logging here
                 em.getTransaction().begin();

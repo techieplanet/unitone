@@ -24,20 +24,20 @@
 
 
               
-          <c:if test="${sessionScope.userType eq sessionScope.userTypes.ADMIN}">
+          <c:if test="${sessionScope.userTypeString eq sessionScope.userTypes.ADMIN}">
                 <!-- Admin Side Menu -->
                 <%@ include file="sidebar-admin.jsp" %>
                 
           </c:if>
           
                 
-          <c:if test="${sessionScope.userType eq sessionScope.userTypes.AGENT}">
+          <c:if test="${sessionScope.userTypeString eq sessionScope.userTypes.AGENT}">
               
               <%@ include file="sidebar-agent.jsp" %>
               
           </c:if>
           
-          <c:if test="${sessionScope.userType eq sessionScope.userTypes.CUSTOMER}">
+          <c:if test="${sessionScope.userTypeString eq sessionScope.userTypes.CUSTOMER}">
               <%@ include file="sidebar-customer.jsp" %>
           </c:if>
 

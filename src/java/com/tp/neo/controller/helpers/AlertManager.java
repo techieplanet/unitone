@@ -128,4 +128,17 @@ public class AlertManager {
         //sms
         new SMSHelper().sendReminderAlert(customerAndItemsList, dueDays);
     }
+    
+    
+    
+    /************************************  REFERRAL CODE SHARING ********************************/
+    public void sendReferralCodeEmail(String recipientEmail, Agent agent, String reflink){
+        new EmailHelper().sendReferralCodeEmail(recipientEmail, agent, reflink);
+    }
+    
+    public void sendReferralCodeSMS(String recipientEmail, Agent agent, String reflink){
+        new EmailHelper().sendReferralCodeEmail(recipientEmail, agent, reflink);
+    }
+    
+    
 }

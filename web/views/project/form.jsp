@@ -64,11 +64,9 @@
           <label>Project Manager *</label>
           <select name="pmanager" id="pmanager" class="form-control select2" style="width: 50%;">
             <option value="0">--Select--</option>
-            <option value="1" <c:if test="${project.projectManager == 1}"> <jsp:text>selected</jsp:text> </c:if> >Oladele Emmanuel</option>
-            <option value="2" <c:if test="${project.projectManager == 2}"> <jsp:text>selected</jsp:text> </c:if> >Alex Ighalo</option>
-            <option value="3" <c:if test="${project.projectManager == 3}"> <jsp:text>selected</jsp:text> </c:if> >Bada Johnson</option>
-            <option value="4" <c:if test="${project.projectManager == 4}"> <jsp:text>selected</jsp:text> </c:if> >Muyiwa Osas</option>
-            <option value="5" <c:if test="${project.projectManager == 5}"> <jsp:text>selected</jsp:text> </c:if> >Freghene Tajudeen</option>
+            <c:forEach items="${users}" var="user">
+                <option value="${user.userId}" <c:if test="${project.projectManager == user.userId}"> <jsp:text>selected</jsp:text> </c:if> >${user.firstname} ${user.lastname}</option>
+            </c:forEach>
           </select>
         </div>
           

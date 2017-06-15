@@ -52,7 +52,7 @@ public class SMSSender extends Thread{
     public void run() {
         try
         {
-            //testHttp();
+            testHttp();
         }
         catch(Exception e)
         {

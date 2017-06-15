@@ -9,6 +9,7 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.utils.MailSender;
 import static com.tp.neo.controller.components.AppController.defaultEmail;
 import static com.tp.neo.controller.components.AppController.APP_NAME;
+import static com.tp.neo.controller.components.AppController.companyName;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
@@ -358,4 +359,27 @@ public class EmailHelper {
             
         }
     }
+   
+    
+    
+    
+    /************************************  REFERRAL CODE SHARING ********************************/
+    protected void sendReferralCodeEmail(String recipientEmail, Agent agent, String refLink){
+        String messageBody =   "Good day,"  
+                            + "<br/>" + "Please join me as an agent with " + companyName + "."
+                            + "<br/>" + "You stand a chance to make a lot of money selling properties."
+                            + "<br/><br/>" + "Simply follow the link below to register with my referral code."
+                            + "<br/>"  
+                            + "<br/>"  
+                            + "<a href=" + refLink + ">" + "Go to registration" + "</a>" 
+                            + "<br/>"
+                            + "<br/>" 
+                            + "Thank you";
+
+            String emailSubject = "Agent Referral Code - " + agent.getAccount().getAccountCode();
+            System.out.println("recipientEmail: " + recipientEmail);
+            new MailSender().sendHtmlEmail(recipientEmail, agent.getEmail(), emailSubject, messageBody);
+    }
+    
+    
 }

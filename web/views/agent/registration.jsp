@@ -104,13 +104,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
           
           <div class="jumbotron" style="background-color: #fff">
               
-              <form role="form" name="agentRegistration" method="POST" action="AgentRegistration?from=agent_registration" enctype="multipart/form-data" id="agentForm">
+              <form role="form" name="agentRegistration" method="POST" action="AgentRegistration?" enctype="multipart/form-data" id="agentForm">
               
-                <c:if test="${fn:length(errors) > 0 }">
+                <c:if test="${fn:length(sessionScope.errors) > 0 }">
                 <div class="row">
                     <div class="col-md-12 ">
                         <p class="bg-danger padding10" style="width:100%; margin:0 auto !important">
-                          <c:forEach items="${errors}" var="error">
+                          <c:forEach items="${sessionScope.errors}" var="error">
                               <c:out value="${error.value}" /><br/>
                           </c:forEach>
                         </p>
@@ -145,8 +145,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                   <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentFirstname">First Name</label>
                                       <input type="text"  name="agentFirstname" class="form-control" id="agentFirstname" 
-                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentFirstname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.firstname}"</c:if>  
-                                      placeholder="First Name" >
+                                             value="${sessionScope.agent.firstname}"  
+                                      placeholder="First Name" />
                                     </div>
                               </div>
                           
@@ -155,7 +155,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentMiddlename">Middle Name</label>
                                       <input type="text" class="form-control" id="agentMiddlename" name="agentMiddlename" placeholder="Middle Name" 
-                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentMiddlename}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.middlename}"</c:if> ">
+                                             value="${sessionScope.agent.middlename}" />
                                     </div>
                            </div>
                             
@@ -164,7 +164,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentLastname">Last Name</label>
                                       <input type="text" class="form-control" name="agentLastname" id="agentLastname" placeholder="Last Name" 
-                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentLastname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.lastname}"</c:if> ">
+                                             value="${sessionScope.agent.lastname}" />
                                     </div>
                               </div>
                               
@@ -181,6 +181,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                       </div>
                                     </div>
                               </div>
+                              
+                              
+                              <div class="col-md-5">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="ref_code">Referral Code (If Any)</label>
+                                      <input type="text" class="form-control bold" name="ref_code" id="ref_code" placeholder="Refferal Code" style="height: 50px; font-size: 25px; text-transform: uppercase;"
+                                             value="${refAgent.account.accountCode}" 
+                                             <c:if test='${referralMode == true}'>readonly</c:if> >
+                                    </div>
+                                    <h4 class="paddingleft10">
+                                        <c:if test='${referralMode == true}'>
+                                            <img src="${agentImageAccessDir}/${refAgent.photoPath}" class="img img-responsive img-thumbnail" width="50px" />
+                                            ${refAgent.firstname} ${refAgent.middlename} ${refAgent.lastname}
+                                        </c:if>
+                                    </h4>
+                              </div>
+                              
                             
                         </fieldset>
                 </div>
@@ -194,9 +211,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                   <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
                                       <label for="agentEmail">Email</label>
                                       <input type="email" class="form-control" id="agentEmail" name="agentEmail" placeholder="Email"  
-                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentEmail}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.email}"</c:if>" 
-                                      <c:if test="${agent.agentId !='' && agent.agentId != null }">readonly="true"</c:if>
-                                      /> 
+                                             value="${agent.email}" /> 
                                     </div>
                                 </div>
                                       
@@ -232,19 +247,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <div class="col-md-5">
                             <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
                             <label for="agentStreet">Street</label>
-                                <input type="text" class="form-control" id="agentStreet" name="agentStreet" placeholder="Street" value=""/>
+                                <input type="text" class="form-control" id="agentStreet" name="agentStreet" placeholder="Street" value="${sessionScope.agent.street}"/>
                             </div>
                         </div>
                         
                         <div class="col-md-4">
                             <div class="form-group" style="padding-left:10px !important;">
                             <label for="agentCity">City</label>
-                                <input type="text" class="form-control" id="agentCity" name="agentCity" placeholder="City" /> 
+                                <input type="text" class="form-control" id="agentCity" name="agentCity" placeholder="City" value="${sessionScope.agent.city}" /> 
                             </div>
                         </div>
                                        
-                        <c:if test="${fn:length(errors) > 0 }"><c:set var="state" value="${param.agentState}" scope="session" /></c:if>
-                        <c:if test="${fn:length(errors) <= 0 }"><c:set var="state" value="${agent.state}" scope="session" /></c:if>
+                        <c:if test="${fn:length(errors) > 0 }"><c:set var="state" value="${sessionScope.agent.state}" scope="session" /></c:if>
+                        <c:if test="${fn:length(errors) <= 0 }"><c:set var="state" value="${sessionScope.agent.state}" scope="session" /></c:if>
                       
                         <div class="col-md-5">
                             <div class="form-group" style="margin-right:24px !important;padding-left:20px !important;"  >
@@ -297,7 +312,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <div class="col-md-5">
                             <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
                             <label for="agentPhone">Phone Number</label>
-                                <input type="tel" class="form-control" id="agentPhone" name="agentPhone" placeholder="Phone Number"  minlength="8" maxlength="11" value=""/>
+                                <input type="tel" class="form-control" id="agentPhone" name="agentPhone" placeholder="Phone Number"  minlength="8" maxlength="11" value="${sessionScope.agent.phone}"/>
                                     
                             </div>
                         </div>
@@ -314,7 +329,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <div class="form-group" style="padding-left:10px !important;">
                                   <label for="agentBankName">Bank Name</label>
                                   <input type="text" class="form-control" id="agentBankName" name="agentBankName" placeholder="Enter Bank Name"  
-                                    value="" />
+                                    value="${sessionScope.agent.bankName}" />
                                 </div>
                           </div>
                                 
@@ -323,7 +338,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 <label for="agentBankAccountName">Bank Account Name</label>
                                    
                                     <input type="text" class="form-control" id="agentBankAccountName" name="agentBankAccountName" placeholder="Enter Bank Account Name"  
-                                           value="" />
+                                           value="${sessionScope.agent.bankAcctName}" />
                                        
                                 </div>
                           </div>
@@ -332,7 +347,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <div class="form-group" style="padding-left:10px !important;padding-right:25px !important;">
                           <label for="agentBankAccountNumber">Bank Account Number</label>
                            <input type="text" class="form-control"  id="agentBankAccountNumber"  name="agentBankAccountNumber" placeholder="Enter Bank Account Number" 
-                                  value=""/>
+                                  value="${sessionScope.agent.bankAcctNumber}"/>
                         </div>
                         </div>
                         
@@ -348,7 +363,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentKinNames">Next of Kin - Name</label>
                                       <input type="text" class="form-control" id="agentKinNames" name="agentKinName" placeholder="Enter Kin Name"  
-                                             value=""/>
+                                             value="${sessionScope.agent.kinName}"/>
                                     </div>
                                 </div>
                                     
@@ -357,7 +372,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                     <label for="agentKinPhone">Next of Kin - Phone Number</label>
                                        
                                         <input type="tel" class="form-control" id="agentKinPhone" name="agentKinPhone" placeholder="Enter Kin Phone Number"  
-                                               value=""/>
+                                               value="${sessionScope.agent.kinPhone}"/>
                                             
                                     </div>
                                 </div>
@@ -366,7 +381,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                              <div class="col-md-6 " >
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentKinAddress" style="">Next of Kin - Address</label>
-                                       <input type="text" class="form-control" id="agentKinAddress" name="agentKinAddress" placeholder="Enter Kin Address" style="  width:100%;" value=""/>
+                                      <input type="text" class="form-control" id="agentKinAddress" name="agentKinAddress" placeholder="Enter Kin Address" style="  width:100%;" value="${sessionScope.agent.kinAddress}"/>
+                                       <!-- HIIDEN FIELD -->
+                                       <input type="hidden" class="form-control" name="redirect" value="${redirectString}" id="ii">
                                     </div>
                             </div>
                             
@@ -398,12 +415,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             </div>
                         </div>
                   
+                        
+                        
+                        
+                                    
                   
                   <div class="col-md-12" style="margin-left:10px !important;margin-right:10px !important;margin-top:-20px !important; background-color:transparent;">
-                      <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate" />
+                      <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate" disabled="true"  />
                   </div>
              </form>    
           </div>
+                            
+                          
                             
           
                             <footer class="main-footer" style="margin-left:0;">
@@ -418,6 +441,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
          
       </div>     
                
+                            
+                            
+                            
+      <div class="modal fade" id="agreementStatusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <%@ include file="_agreement.jsp" %>  
+      </div><!-- /.modal -->
          
           
       

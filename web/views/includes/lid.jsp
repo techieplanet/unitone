@@ -20,7 +20,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css" type="text/css" />
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">-->
+    <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css">-->
 
     
     <!-- Ionicons -->
@@ -69,6 +70,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.treetable.js"></script>
     <!-- JQUERY PrintArea -->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.PrintArea.js"></script>
+
+    <!--Font Awesome-->
+    <script src="https://use.fontawesome.com/a92f0d42d7.js"></script>
     
     <!-- CKEditor plugin -->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/ckeditor/ckeditor.js"></script>
@@ -90,6 +94,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxdata.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxinput.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxdropdownlist.js"></script>
+    
+    
+    <!--**********************************************
+    Variables to set application wide for the views
+    ***********************************************-->    
+    <c:set value="&#8358;" var="nairaSymbol" />
+    <c:set value="${pageContext.request.contextPath}" var="appContext" />
+    
   </head>
   <!--
   BODY TAG OPTIONS:

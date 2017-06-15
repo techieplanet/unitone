@@ -29,7 +29,7 @@ import javax.servlet.http.HttpSession;
 @WebServlet(name = "IndexController", urlPatterns = {"","/home"})
 public class IndexController extends HttpServlet {
     
-    private static final String Index = "/views/index/index.jsp";
+    private static final String INDEX_FILE = "/views/index/index.jsp";
 
     
 
@@ -171,7 +171,7 @@ public class IndexController extends HttpServlet {
         
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
-        String viewFile = Index;
+        String viewFile = INDEX_FILE;
         
         if(action.equals("")){
             
