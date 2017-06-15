@@ -12,6 +12,7 @@ import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Auditlog;
 import com.tp.neo.model.Customer;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.Role;
 import com.tp.neo.model.User;
 import com.tp.neo.model.utils.AuthManager;
@@ -23,9 +24,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.servlet.ServletException;
@@ -131,27 +136,41 @@ public class LoginController extends HttpServlet {
         String password = request.getParameter("password") != null ? request.getParameter("password") : "";//[B@3c9a818d
         String userType = request.getParameter("usertype") != null ? request.getParameter("usertype") : "";
         
+        if(userType.equals("0")){
+            
+            redirectToLogin(request, response);
+        }
+        
         System.out.println("Password: " + password);
         
         try{
-            em = emf.createEntityManager();           
+            em = emf.createEntityManager();
             
             SystemUser user = getUserTypeObject(userType, email);
+            if(user == null){
+                redirectToLogin(request, response);
+                return;
+            }
             String storedPassword = user.getPassword();
             System.out.println("storedPassword: " + storedPassword);
             
             if(AuthManager.check(password, storedPassword)){
                 log("logged in");
                 System.out.println("This is the stored password "+ storedPassword);
+                System.out.println("UserType : " + user.getSystemUserTypeId());
                 //start the session
                 HttpSession session = request.getSession();
                 session.setMaxInactiveInterval(900); //15 minutes
                 session.setAttribute("user", user);
                 session.setAttribute("userType", userType);
                 session.setAttribute("userTypes", userTypes);
-                                
-                if(user.getSystemUserTypeId() > 1){//agent or customer so go get the permissions from db
-                    user.setPermissions(this.getUserTypePermissions(user));
+                session.setAttribute("availablePlugins", getAvailableplugins());
+                
+                if(user.getSystemUserTypeId() == 2){//agent or customer so go get the permissions from db
+                    user.setPermissions(this.getUserTypePermissions(user,"Agent"));
+                }
+                else if(user.getSystemUserTypeId() == 3){//agent or customer so go get the permissions from db
+                    user.setPermissions(this.getUserTypePermissions(user,"Customer"));
                 }
                     
                 String referrerURI = new URI(request.getHeader("referer")).toString();
@@ -172,25 +191,39 @@ public class LoginController extends HttpServlet {
                 
                 em.persist(auditlog);
                 em.getTransaction().commit();
-               
+                String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
+                System.out.println("RequestUrl resolve contextPath : " + context);
+                
                 if(session.getAttribute("loginCallback") == null){
-                     System.out.println("THis is the login call back of the session before redirect null"+ referrerURI );
-                    response.sendRedirect(referrerURI + "Dashboard");
+                    //context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
+                    if(userType.equals(userTypesEnum.CUSTOMER.toString().trim())){
+                       response.sendRedirect(context + "/Customer?action=profile&customerId="+user.getSystemUserId());
+                       return;
+                    }
+                    response.sendRedirect(context + "/Dashboard");
                     ////AuthManager.ucfirst(userType
                     return;
                 }
                 else{ 
                      System.out.println("THis is the login call back of the session before redirect not null"+ referrerURI );
+                     
                     response.sendRedirect(session.getAttribute("loginCallback").toString());
                     return;
                 }
                 
             }else{
                 System.out.println("Failed!");
+                redirectToLogin(request, response);
             }
                 
             
-        } catch(Exception e){
+        }
+        catch(NoResultException nre){
+         
+            redirectToLogin(request, response);
+            return;
+        }
+        catch(Exception e){
             e.printStackTrace();
             System.out.println(e.getMessage());
         } finally{
@@ -198,7 +231,7 @@ public class LoginController extends HttpServlet {
         }
     }
 
-    private SystemUser getUserTypeObject(String userType, String email){        
+    private SystemUser getUserTypeObject(String userType, String email) throws NoResultException{        
         String queryArg = "";
         SystemUser systemUser = new User();
         Agent agentUser = new Agent();
@@ -234,9 +267,9 @@ public class LoginController extends HttpServlet {
      * @param user 
      * @return 
      */
-    private String getUserTypePermissions(SystemUser user){
+    private String getUserTypePermissions(SystemUser user, String title){
         em = emf.createEntityManager();
-        Role role = (Role)em.createNamedQuery("Role.findByTitle").setParameter("title", "Agent").getSingleResult();
+        Role role = (Role)em.createNamedQuery("Role.findByTitle").setParameter("title", title).getSingleResult();
         Gson gson = new GsonBuilder().create();
 
         Type stringTypeToken = new TypeToken<ArrayList<String>>(){}.getType();
@@ -261,27 +294,29 @@ public class LoginController extends HttpServlet {
             SystemUser user = (SystemUser)session.getAttribute("user");
             
             if(user != null){
-            String userType = session.getAttribute("userType").toString();
-                                
-            //do logging here
-            em.getTransaction().begin();
-            Auditlog auditlog = new Auditlog();
-            auditlog.setActionName("User Logout");
-                
-            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));                
+                String userType = session.getAttribute("userType").toString();
 
-            auditlog.setLogDate(calendar.getTime());
-            auditlog.setNote(String.format("User %s %s logged out as %s user at %s.",user.getFirstname(),user.getLastname(), userType, calendar.getTime()));
-            auditlog.setUsertype(user.getSystemUserTypeId());
-            auditlog.setUserId(user.getSystemUserId());
+                //do logging here
+                em.getTransaction().begin();
+                Auditlog auditlog = new Auditlog();
+                auditlog.setActionName("User Logout");
 
-            em.persist(auditlog);
-            em.getTransaction().commit();
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));                
+
+                auditlog.setLogDate(calendar.getTime());
+                auditlog.setNote(String.format("User %s %s logged out as %s user at %s.",user.getFirstname(),user.getLastname(), userType, calendar.getTime()));
+                auditlog.setUsertype(user.getSystemUserTypeId());
+                auditlog.setUserId(user.getSystemUserId());
+
+                em.persist(auditlog);
+                em.getTransaction().commit();
             }    
             String scheme = request.isSecure() ? "https" : "http";
             String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
             String host = new URI(request.getHeader("host")).toString();
             rootUrl = scheme + "://" + host + context + "/";
+            
+            System.out.println(scheme + "://|" + host + "|" + context + "|/");
             
             session.invalidate();
             response.sendRedirect(rootUrl);
@@ -296,6 +331,46 @@ public class LoginController extends HttpServlet {
         finally {
             em.close();
         }
+    }
+    
+    private void redirectToLogin(HttpServletRequest request, HttpServletResponse response) {
+        
+        try {
+            Map<String,String> map = new HashMap();
+            
+            map.put("userType", request.getParameter("usertype"));
+            map.put("email", request.getParameter("email"));
+            
+            
+            request.setAttribute("loginDetails", map); 
+            request.setAttribute("errors", true);
+            
+            request.getRequestDispatcher("home").forward(request, response);
+        } catch (ServletException ex) {
+            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(LoginController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    
+    private HashMap<String, Plugin> getAvailableplugins(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<Plugin> pluginslist = em.createNamedQuery("Plugin.findAvailable")
+                                    .setParameter("installationStatus", 1)
+                                    .setParameter("active",1)
+                                    .setParameter("deleted", 0)
+                                    .getResultList();
+        
+        HashMap<String, Plugin> pluginsMap = new HashMap<String, Plugin>();
+        for(Plugin plugin : pluginslist){
+            pluginsMap.put(plugin.getPluginName().toLowerCase(), plugin);
+        }
+        
+        return pluginsMap;
     }
     
     /**

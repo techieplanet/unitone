@@ -12,6 +12,7 @@ import com.tp.neo.model.Role;
 import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.User;
 import com.tp.neo.controller.components.AppController;
+import com.tp.neo.controller.helpers.PermissionHelper;
 import com.tp.neo.model.utils.AuthManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,8 +30,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.PropertyException;
 import com.tp.neo.model.utils.MailSender;
-import com.tp.neo.model.Permission;
-import java.util.ArrayList;
+import java.net.URI;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.RollbackException;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -44,22 +47,20 @@ public class UserController extends AppController {
     private static String INSERT_OR_EDIT = "/user.jsp";
     private static final String ENTITY_LIST = "/views/user/admin.jsp"; 
     private static final String NEW_ENTITY = "/views/user/add.jsp";
+    private static final String USER_PROFILE = "/views/user/profile.jsp";
     
     private HashMap<String, String> errorMessages = new HashMap<String, String>();
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em;
     Gson gson = new GsonBuilder().create();
+    PermissionHelper permissionHelper = new PermissionHelper();
     
     List<Role> rolesList;
     private String action = "";
     private String viewFile = "";
     
     String newEmailSubject = "Your NeoForce login details";
-    String newRegEmail = "Dear %s,<br/>" +
-                        "You have been registered as a new user on NeoForce Sales Force Solution. You may login with your email and password.<br/>" +
-                        "Your newly created password is %s.<br/><br/>" +
-                        "To login, visit this <a href=\"localhost:8080/NeoForce\">link</a>. If the link does not work, copy the following URL and paste in directly in your address bar.<br/><br/>" +
-                        "<p style=\"text-align: center;\">localhost:8080/NeoForce</p>";
+    
             
     
     public void init(ServletConfig config) throws ServletException {
@@ -153,6 +154,7 @@ public class UserController extends AppController {
                request.setAttribute("userId", "");
                request.setAttribute("rolesList", rolesList);
                request.setAttribute("action", "new");
+               request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
         }
         else if(action.equalsIgnoreCase("delete")){
             this.delete(Integer.parseInt(request.getParameter("id")));
@@ -168,7 +170,17 @@ public class UserController extends AppController {
             request.setAttribute("reqUser", user); //different from session user
             request.setAttribute("action", "edit");
             request.setAttribute("rolesList", rolesList);
+            request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+            request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
             if(addstat == 1) request.setAttribute("success", true);
+        }
+        else if(action.equalsIgnoreCase("profile")){
+            
+            viewFile = USER_PROFILE;
+            
+            request.setAttribute("user", getUser(request));
+            request.setAttribute("sideNav", "Profile");
+            
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listusers")){
             viewFile = ENTITY_LIST;
@@ -178,6 +190,10 @@ public class UserController extends AppController {
             viewFile = ENTITY_LIST;
             request.setAttribute("users", listUsers());
         }
+        
+        //Keep track of the sideBar
+        if(request.getAttribute("sideNav") == null)
+            request.setAttribute("sideNav", "User");
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -197,6 +213,18 @@ public class UserController extends AppController {
         
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
         User user = new User();
+        
+        if(action.equalsIgnoreCase("edit_profile")){
+            
+            editProfile(request, response);
+            return;
+        }
+        
+        if(action.equalsIgnoreCase("password_change")){
+            
+            changeUserPassword(request, response);
+            return;
+        }
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(user.getPermissionName(action), request, response)){
@@ -234,9 +262,9 @@ public class UserController extends AppController {
                 user.setEmail(request.getParameter("email"));
                 user.setPhone(request.getParameter("phone"));
                 user.setRole(em.find(Role.class, Integer.parseInt(request.getParameter("role_id"))));
-                user.setPermissions("");
                 user.setDeleted((short)0);   
                 user.setActive((short)1);   
+                user.setPermissions(gson.toJson(request.getParameterValues("permissions")));
                 
                 validate(user);
                 
@@ -257,16 +285,20 @@ public class UserController extends AppController {
                 
                 em.refresh(user);
                 
-                //request.setAttribute("rolesList", rolesList);
-                //request.setAttribute("reqUser", user);
-                //request.setAttribute("action", "edit");
-                //request.setAttribute("success", true);
+                request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+                request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
                
                 em.close();
                
                 //send email to user on new registration 
-                String message = String.format(newRegEmail, user.getFirstname(), initPass);
+                String scheme = request.isSecure() ? "https" : "http";
+                String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
+                String host = new URI(request.getHeader("host")).toString();
+                String rootUrl = scheme + "://" + host + context + "/";
+                String message = this.createRegEmail(user.getFirstname(), initPass, rootUrl);
                 new MailSender().sendHtmlEmail(user.getEmail(), defaultEmail, newEmailSubject, message);
+                System.out.println("user message: " + message);
+                
             }
             catch(PropertyException e){
                 e.printStackTrace();
@@ -276,6 +308,8 @@ public class UserController extends AppController {
                 request.setAttribute("action", action);
                 request.setAttribute("rolesList", rolesList);
                 request.setAttribute("errors", errorMessages);
+                request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+                request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
             }
             catch(RollbackException e){
                 e.printStackTrace();
@@ -286,18 +320,21 @@ public class UserController extends AppController {
                 request.setAttribute("rolesList", rolesList);
                 errorMessages.put("mysqlviolation", e.getMessage());
                 request.setAttribute("errors", errorMessages);
+                request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+                request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
             }
             catch(Exception e){
                 e.printStackTrace();
                 String message = e.getMessage();
                 if(message == null) message = "An error occured";
                 setExceptionAttribbutes(user);
+                request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+                request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
                 SystemLogger.logSystemIssue("User", gson.toJson(errorMessages), message);
             }
             
             if(insertStatus){
                 String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/User?action=edit&id=" + user.getUserId() + "&addstat=1";
-                log("redirect page: " + page);
                 response.sendRedirect(page);
             }
             else{
@@ -329,28 +366,15 @@ public class UserController extends AppController {
                 user.setRole(em.find(Role.class, Integer.parseInt(request.getParameter("role_id"))));
                 user.setDeleted((short)0);   
                 user.setActive((short)1);
-                
-                /*************************************************************
-                 * This will be hooked into both insert and update later.
-                 * UI will also be developed to go with.
-                 */
-                Query jpqlQuery  = em.createNamedQuery("Permission.findAll");
-                List<Permission> pList = jpqlQuery.getResultList();
-                String uPermissions = "";
-                for(Permission p : pList){
-                    uPermissions += p.getAlias() + ",";
-                }
-                uPermissions = uPermissions.substring(0, uPermissions.length()-1);
-                System.out.println("Permissions: " + uPermissions);
-                user.setPermissions(uPermissions);
-                /**************************************************************/
+                user.setPermissions(gson.toJson(request.getParameterValues("permissions")));
                 
                 validate(user);
                 
                 new TrailableManager(user).registerUpdateTrailInfo(sessionUser.getSystemUserId());   
                 
                 em.getTransaction().commit();
-            
+    
+                
                 //if the updated user is the same as logged in, i.e. user updating their own records
                 //replace the session user object with the new updated user object
                 if((long)sessionUser.getSystemUserId() == (long)user.getUserId()) 
@@ -360,7 +384,10 @@ public class UserController extends AppController {
                 request.setAttribute("reqUser", user);
                 request.setAttribute("action", "edit");
                 request.setAttribute("success", true);
+                request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+                request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
                
+                log("User Permissions; " + user.getPermissions());
                 em.close();
                 
             }
@@ -372,6 +399,8 @@ public class UserController extends AppController {
                 request.setAttribute("action", action);
                 request.setAttribute("rolesList", rolesList);
                 request.setAttribute("errors", errorMessages);
+                request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+                request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
             }
             catch(RollbackException e){
                     e.printStackTrace();
@@ -381,6 +410,8 @@ public class UserController extends AppController {
                     request.setAttribute("action", action);
                     request.setAttribute("rolesList", rolesList);
                     errorMessages.put("mysqlviiolation", e.getMessage());
+                    request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+                    request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
                     request.setAttribute("errors", errorMessages);
             }
             catch(Exception e){
@@ -389,11 +420,24 @@ public class UserController extends AppController {
                 if(message == null) message = "An error occured";
                 setExceptionAttribbutes(user);
                 SystemLogger.logSystemIssue("User", gson.toJson(errorMessages), message);
+                request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+                request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
             }
             
             //new URI(request.getHeader("referer")).getPath();
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
+    }
+    
+    
+    private String createRegEmail(String firstName, String initPass, String rootUrl){
+        String newRegEmail = "Dear " + firstName + ",<br/>" +
+                        "You have been registered as a new user on NeoForce Sales Force Solution. You may login with your email and password.<br/><br/>" +
+                        "Your newly created password is " + initPass + "<br/><br/>" +
+                        "To login, visit this <a href=\"" + rootUrl + "\">link</a>. If the link does not work, copy the following URL and paste in directly in your address bar.<br/><br/>" +
+                        "<p style=\"text-align: center;\">" + rootUrl + "</p>";
+        
+        return newRegEmail;
     }
     
     
@@ -444,7 +488,7 @@ public class UserController extends AppController {
         }
         
         //if(!(Integer.parseInt(request.getParameter("role_id")) > 0)){
-        if(!(user.getRole().getRoleId() > 0)){
+        if(user.getRole() == null || (user.getRole().getRoleId() <= 0)){
             errorMessages.put("role", "You must select a role");
         }
         
@@ -463,6 +507,150 @@ public class UserController extends AppController {
         return userList;
     }
      
+     private User getUser(HttpServletRequest request) {
+         
+         em = emf.createEntityManager();
+         User user = em.find(User.class, Long.parseLong(request.getParameter("id")));
+         
+         em.close();
+         return user;
+    }
+    
+    private void editProfile(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        
+        em = emf.createEntityManager();
+        
+        long userId = Long.parseLong(request.getParameter("id"));
+        
+        em.getTransaction().begin();
+        User user = em.find(User.class, userId);
+        
+        Map<String,String> resMap = new HashMap();
+        
+        String fname = request.getParameter("fname");
+        String lname = request.getParameter("lname");
+        String mname = request.getParameter("mname");
+        String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
+        
+        if(fname.equalsIgnoreCase(""))
+            resMap.put("fname_error", "firstname is required");
+        if(lname.equalsIgnoreCase(""))
+            resMap.put("lname_error", "lastname is required");
+        if(phone.equalsIgnoreCase(""))
+            resMap.put("phone_error", "mobile no is required");
+        if(email.equalsIgnoreCase(""))
+            resMap.put("email_error", "email is required");
+        
+        if(!user.getEmail().equals(email) && !email.equals("") && resMap.size() < 1){
+            
+          //Check if the email is unique 
+          Query query = em.createNamedQuery("User.findByEmail");
+          query.setParameter("email", email);
+          List<User> userList = query.getResultList();
+          
+          if(userList.size() > 0){
+              resMap.put("email_error", "Email already exist");
+          }
+          else{
+              
+              user.setFirstname(fname);
+              user.setLastname(lname);
+              user.setMiddlename(mname);
+              user.setEmail(email);
+              user.setPhone(phone);
+              user.setUsername(email);
+              
+              resMap.put("success", "Profile changed successfully");
+          }
+          
+        }
+        else if(resMap.size() < 1){
+            
+              user.setFirstname(fname);
+              user.setLastname(lname);
+              user.setMiddlename(mname);
+              user.setEmail(email);
+              user.setPhone(phone);
+              user.setUsername(email);
+              
+              resMap.put("success", "Profile changed successfully");
+        }
+        
+        em.merge(user);
+        em.getTransaction().commit();
+        
+        Gson gson = new GsonBuilder().create();
+        
+        String json = gson.toJson(resMap);
+        
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(json);
+        response.getWriter().flush();
+        response.getWriter().close();
+        
+    }
+    
+    private void changeUserPassword(HttpServletRequest request, HttpServletResponse response) {
+        
+        try {
+            em = emf.createEntityManager();
+            
+            
+            
+            Map<String, String> resMap = new HashMap();
+            
+            long id = Long.parseLong(request.getParameter("id"));
+            
+            String oldPassword = request.getParameter("old_password");
+            String pwd1 = request.getParameter("pwd1");
+            String pwd2 = request.getParameter("pwd2");
+            
+            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            em.getTransaction().begin();
+            
+            User user = em.find(User.class, id);
+            
+            
+            
+            if(AuthManager.check(oldPassword, user.getPassword())){
+                
+                if(pwd1.equals(pwd2) && !pwd1.equals("")){
+                    user.setPassword(AuthManager.getSaltedHash(pwd1));
+                    resMap.put("success", "Password changed successfully");
+                }else{
+                    resMap.put("error", "Password and Re-enter password do not match");
+                }
+                 
+            }else{
+                resMap.put("error", "Invalid old password");
+            }
+            
+            if(user != null){
+                em.merge(user);
+                
+            }
+            
+            em.getTransaction().commit();
+            em.close();
+            
+            Gson gson = new GsonBuilder().create();
+            
+            String json = gson.toJson(resMap);
+            
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(json);
+            response.getWriter().flush();
+            response.getWriter().close();
+            
+            
+        } catch (Exception ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
      
      private void setExceptionAttribbutes(User user){
         errorMessages.clear();
@@ -484,5 +672,7 @@ public class UserController extends AppController {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    
 
 }

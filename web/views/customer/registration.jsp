@@ -118,7 +118,7 @@
     </div>
 </div>
 
-<form role="form" name="customerRegistration" method="POST" action="CustomerRegistration" enctype="multipart/form-data">
+<form role="form" name="customerRegistration" method="POST" action="CustomerRegistration" enctype="multipart/form-data" onsubmit="return submitForm()">
   
     <input type="hidden" name="customer_id" value="" />
     <input type="hidden" name="agent_id" id="agent_id" value="21" />
@@ -190,10 +190,10 @@
                         </fieldset>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-4" style="padding-top:50px">
                        
-                            <fieldset>
-                                <legend style="padding-right:10px !important;">System Information</legend>
+                          <fieldset>
+                                
                           <div class="row">
                              <div class="col-md-12">
                             <div class="form-group" style="padding-left:10px !important;padding-right:10px !important">
@@ -228,10 +228,9 @@
                         </div>
                          
                     
-                         </div>
-                          <div class="row">
-                              
-                              <div class="col-md-4">
+                    </div>
+                    <div class="row">
+                      <div class="col-md-4">
                                  <fieldset>
                                     <div class="col-md-6" style="padding-top:0px">
 
@@ -251,7 +250,7 @@
                              
                             </div>
 
-                          </div>
+                    </div>
                     </div>
                     
                    
@@ -261,31 +260,31 @@
                     <div class="col-md-12" >
                         <fieldset>
                             <legend style="padding-left:10px !important;">Contact Information</legend>
-                   <div class="row">
+                        <div class="row">
                         
                         <div class="col-md-12">
-                    <div class="row">
-                        <div class="col-md-4">
+                        <div class="row">
+                            <div class="col-md-4">
                             
-                            <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
-                            <label for="customerStreet">Street</label>
-                                <input type="text" class="form-control" id="customerStreet" name="customerStreet" placeholder="Street"  
+                                <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                                    <label for="customerStreet">Street</label>
+                                    <input type="text" class="form-control" id="customerStreet" name="customerStreet" placeholder="Street"  
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.street}"</c:if> "
                                        />
+                                </div>
                             </div>
-                        </div>
                         
-                        <div class="col-md-4">
-                            <div class="form-group" style="padding-left:10px !important;">
-                            <label for="customerCity">City</label>
-                              
-                                <input type="text" class="form-control" id="customerCity" name="customerCity" placeholder="City"  
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.city}"</c:if> "
-                                       />
-                                  
-                                
+                            <div class="col-md-4">
+                                <div class="form-group" style="padding-left:10px !important;">
+                                <label for="customerCity">City</label>
+
+                                    <input type="text" class="form-control" id="customerCity" name="customerCity" placeholder="City"  
+                                           value=<c:if test="${fn:length(errors) > 0 }">"${param.customerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.city}"</c:if> "
+                                           />
+
+
+                                </div>
                             </div>
-                        </div>
                         <c:if test="${fn:length(errors) > 0 }"><c:set var="state" value="${param.customerState}" scope="session" /></c:if>
                         <c:if test="${fn:length(errors) <= 0 }"><c:set var="state" value="${customer.state}" scope="session" /></c:if>
                       
@@ -295,51 +294,50 @@
                               <select class="form-control" id="customerState" name="customerState"  >
                                     <option value="">--choose--</option>
                                     
-                                    <option value="ABUJA FCT" <c:if test="${state == "ABUJA FCT"}"> <jsp:text>selected</jsp:text> </c:if>>ABUJA FCT</option>
-                                    <option value="Abia" <c:if test="${state == "Abia"}"> <jsp:text>selected</jsp:text> </c:if>>ABIA</option>
-                                    <option value="Adamawa" <c:if test="${state == "Adamawa"}"> <jsp:text>selected</jsp:text> </c:if>>ADAMAWA</option>
-                                    <option value="Akwa Ibom" <c:if test="${state == "Akwa Ibom"}"> <jsp:text>selected</jsp:text> </c:if>>AKWA IBOM</option>
-                                    <option value="Anambra" <c:if test="${state == "Anambra"}"> <jsp:text>selected</jsp:text> </c:if>>ANAMBRA</option>
-                                    <option value="Bauchi" <c:if test="${state == "Bauchi"}"> <jsp:text>selected</jsp:text> </c:if>>BAUCHI</option>
-                                    <option value="Bayelsa" <c:if test="${state == "Bayelsa"}"> <jsp:text>selected</jsp:text> </c:if>>BAYELSA</option>
-                                    <option value="Benue" <c:if test="${state == "Benue"}"> <jsp:text>selected</jsp:text> </c:if>>BENUE</option>
-                                    <option value="Borno" <c:if test="${state == "Borno"}"> <jsp:text>selected</jsp:text> </c:if>>BORNO</option>
-                                    <option value="Cross River" <c:if test="${state == "Cross River"}"> <jsp:text>selected</jsp:text> </c:if>>CROSS RIVER</option>
-                                    <option value="Delta" <c:if test="${state == "Delta"}"> <jsp:text>selected</jsp:text> </c:if>>DELTA</option>
-                                    <option value="Ebonyi" <c:if test="${state == "Ebonyi"}"> <jsp:text>selected</jsp:text> </c:if>>EBONYI</option>
-                                    <option value="Edo" <c:if test="${state == "Edo"}"> <jsp:text>selected</jsp:text> </c:if>>EDO</option>
-                                    <option value="Ekiti" <c:if test="${state == "Ekiti"}"> <jsp:text>selected</jsp:text> </c:if>>EKITI</option>
-                                    <option value="Enugu" <c:if test="${state == "Enugu"}"> <jsp:text>selected</jsp:text> </c:if>>ENUGU</option>
-                                    <option value="Gombe" <c:if test="${state == "Gombe"}"> <jsp:text>selected</jsp:text> </c:if>>GOMBE</option>
-                                    <option value="Imo" <c:if test="${state == "Imo"}"> <jsp:text>selected</jsp:text> </c:if>>IMO</option>
-                                    <option value="Jigawa" <c:if test="${state == "Jigawa"}"> <jsp:text>selected</jsp:text> </c:if>>JIGAWA</option>
-                                    <option value="Kaduna" <c:if test="${state == "Kaduna"}"> <jsp:text>selected</jsp:text> </c:if>>KADUNA</option>
-                                    <option value="Kano" <c:if test="${state == "Kano"}"> <jsp:text>selected</jsp:text> </c:if>>KANO</option>
-                                    <option value="Katsina" <c:if test="${state == "Katsina"}"> <jsp:text>selected</jsp:text> </c:if>>KATSINA</option>
-                                    <option value="Kebbi" <c:if test="${state == "Kebbi"}"> <jsp:text>selected</jsp:text> </c:if>>KEBBI</option>
-                                    <option value="Kogi" <c:if test="${state == "Kogi"}"> <jsp:text>selected</jsp:text> </c:if>>KOGI</option>
-                                    <option value="Kwara" <c:if test="${state == "Kwara"}"> <jsp:text>selected</jsp:text> </c:if>>KWARA</option>
-                                    <option value="Lagos" <c:if test="${state == "Lagos"}"> <jsp:text>selected</jsp:text> </c:if>>LAGOS</option>
-                                    <option value="Nassarawa" <c:if test="${state == "Nassarawa"}"> <jsp:text>selected</jsp:text> </c:if>>NASSARAWA</option>
-                                    <option value="Niger" <c:if test="${state == "Niger"}"> <jsp:text>selected</jsp:text> </c:if>>NIGER</option>
-                                    <option value="Ogun" <c:if test="${state == "Ogun"}"> <jsp:text>selected</jsp:text> </c:if>>OGUN</option>
-                                    <option value="Ondo" <c:if test="${state == "Ondo"}"> <jsp:text>selected</jsp:text> </c:if>>ONDO</option>
-                                    <option value="Osun" <c:if test="${state == "Osun"}"> <jsp:text>selected</jsp:text> </c:if>>OSUN</option>
-                                    <option value="Oyo" <c:if test="${state == "Oyo"}"> <jsp:text>selected</jsp:text> </c:if>>OYO</option>
-                                    <option value="Plateau" <c:if test="${state == "Plateau"}"> <jsp:text>selected</jsp:text> </c:if>>PLATEAU</option>
-                                    <option value="Rivers" <c:if test="${state == "Rivers"}"> <jsp:text>selected</jsp:text> </c:if>>RIVERS</option>
-                                    <option value="Sokoto" <c:if test="${state == "Sokoto"}"> <jsp:text>selected</jsp:text> </c:if>>SOKOTO</option>
-                                    <option value="Taraba" <c:if test="${state == "Taraba"}"> <jsp:text>selected</jsp:text> </c:if>>TARABA</option>
-                                    <option value="Yobe" <c:if test="${state == "Yobe"}"> <jsp:text>selected</jsp:text> </c:if>>YOBE</option>
-                                    <option value="Zamfara" <c:if test="${state == "Zamfara"}"> <jsp:text>selected</jsp:text> </c:if>>ZAMFARA</option>
+                                    <option value="ABUJA FCT" <c:if test='${state == "ABUJA FCT"}'> <jsp:text>selected</jsp:text> </c:if>>ABUJA FCT</option>
+                                    <option value="Abia" <c:if test='${state == "Abia"}'> <jsp:text>selected</jsp:text> </c:if>>ABIA</option>
+                                    <option value="Adamawa" <c:if test='${state == "Adamawa"}'> <jsp:text>selected</jsp:text> </c:if>>ADAMAWA</option>
+                                    <option value="Akwa Ibom" <c:if test='${state == "Akwa Ibom"}'> <jsp:text>selected</jsp:text> </c:if>>AKWA IBOM</option>
+                                    <option value="Anambra" <c:if test='${state == "Anambra"}'> <jsp:text>selected</jsp:text> </c:if>>ANAMBRA</option>
+                                    <option value="Bauchi" <c:if test='${state == "Bauchi"}'> <jsp:text>selected</jsp:text> </c:if>>BAUCHI</option>
+                                    <option value="Bayelsa" <c:if test='${state == "Bayelsa"}'> <jsp:text>selected</jsp:text> </c:if>>BAYELSA</option>
+                                    <option value="Benue" <c:if test='${state == "Benue"}'> <jsp:text>selected</jsp:text> </c:if>>BENUE</option>
+                                    <option value="Borno" <c:if test='${state == "Borno"}'> <jsp:text>selected</jsp:text> </c:if>>BORNO</option>
+                                    <option value="Cross River" <c:if test='${state == "Cross River"}'> <jsp:text>selected</jsp:text> </c:if>>CROSS RIVER</option>
+                                    <option value="Delta" <c:if test='${state == "Delta"}'> <jsp:text>selected</jsp:text> </c:if>>DELTA</option>
+                                    <option value="Ebonyi" <c:if test='${state == "Ebonyi"}'> <jsp:text>selected</jsp:text> </c:if>>EBONYI</option>
+                                    <option value="Edo" <c:if test='${state == "Edo"}'> <jsp:text>selected</jsp:text> </c:if>>EDO</option>
+                                    <option value="Ekiti" <c:if test='${state == "Ekiti"}'> <jsp:text>selected</jsp:text> </c:if>>EKITI</option>
+                                    <option value="Enugu" <c:if test='${state == "Enugu"}'> <jsp:text>selected</jsp:text> </c:if>>ENUGU</option>
+                                    <option value="Gombe" <c:if test='${state == "Gombe"}'> <jsp:text>selected</jsp:text> </c:if>>GOMBE</option>
+                                    <option value="Imo" <c:if test='${state == "Imo"}'> <jsp:text>selected</jsp:text> </c:if>>IMO</option>
+                                    <option value="Jigawa" <c:if test='${state == "Jigawa"}'> <jsp:text>selected</jsp:text> </c:if>>JIGAWA</option>
+                                    <option value="Kaduna" <c:if test='${state == "Kaduna"}'> <jsp:text>selected</jsp:text> </c:if>>KADUNA</option>
+                                    <option value="Kano" <c:if test='${state == "Kano"}'> <jsp:text>selected</jsp:text> </c:if>>KANO</option>
+                                    <option value="Katsina" <c:if test='${state == "Katsina"}'> <jsp:text>selected</jsp:text> </c:if>>KATSINA</option>
+                                    <option value="Kebbi" <c:if test='${state == "Kebbi"}'> <jsp:text>selected</jsp:text> </c:if>>KEBBI</option>
+                                    <option value="Kogi" <c:if test='${state == "Kogi"}'> <jsp:text>selected</jsp:text> </c:if>>KOGI</option>
+                                    <option value="Kwara" <c:if test='${state == "Kwara"}'> <jsp:text>selected</jsp:text> </c:if>>KWARA</option>
+                                    <option value="Lagos" <c:if test='${state == "Lagos"}'> <jsp:text>selected</jsp:text> </c:if>>LAGOS</option>
+                                    <option value="Nassarawa" <c:if test='${state == "Nassarawa"}'> <jsp:text>selected</jsp:text> </c:if>>NASSARAWA</option>
+                                    <option value="Niger" <c:if test='${state == "Niger"}'> <jsp:text>selected</jsp:text> </c:if>>NIGER</option>
+                                    <option value="Ogun" <c:if test='${state == "Ogun"}'> <jsp:text>selected</jsp:text> </c:if>>OGUN</option>
+                                    <option value="Ondo" <c:if test='${state == "Ondo"}'> <jsp:text>selected</jsp:text> </c:if>>ONDO</option>
+                                    <option value="Osun" <c:if test='${state == "Osun"}'> <jsp:text>selected</jsp:text> </c:if>>OSUN</option>
+                                    <option value="Oyo" <c:if test='${state == "Oyo"}'> <jsp:text>selected</jsp:text> </c:if>>OYO</option>
+                                    <option value="Plateau" <c:if test='${state == "Plateau"}'> <jsp:text>selected</jsp:text> </c:if>>PLATEAU</option>
+                                    <option value="Rivers" <c:if test='${state == "Rivers"}'> <jsp:text>selected</jsp:text> </c:if>>RIVERS</option>
+                                    <option value="Sokoto" <c:if test='${state == "Sokoto"}'> <jsp:text>selected</jsp:text> </c:if>>SOKOTO</option>
+                                    <option value="Taraba" <c:if test='${state == "Taraba"}'> <jsp:text>selected</jsp:text> </c:if>>TARABA</option>
+                                    <option value="Yobe" <c:if test='${state == "Yobe"}'> <jsp:text>selected</jsp:text> </c:if>>YOBE</option>
+                                    <option value="Zamfara" <c:if test='${state == "Zamfara"}'> <jsp:text>selected</jsp:text> </c:if>>ZAMFARA</option>
                               </select>
                             </div>
                         </div>
                         
-                        
-                        
-                    </div>
-                  </div>
+                        </div>
+                        </div>
+                              
                         <div class="col-md-12">
                             <div class="col-md-6">
                             <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
@@ -349,7 +347,7 @@
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.phone}"</c:if> "/>
                                     
                             </div>
-                        </div>
+                            </div>
                             
                         </div>
                     </div>
@@ -422,17 +420,11 @@
                     </div>
                                                   
                     <div class="col-md-12">
-                        <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Process to Order <i class="fa fa-long-arrow-right"></i></a>
+                        <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Proceed to Order <i class="fa fa-long-arrow-right"></i></a>
                     </div>
         </div>
                  
-                         
-      
-      
-      
-      
-                    
-                    
+          
  <div class="row" id="step2" style="display:none">
 
    <div class="col-md-12">
@@ -568,7 +560,7 @@
                                 <div class="col-md-2 pull-right">
                                    <div id="addToCartLabel"  style="margin: 0 auto !important;" >
                                     	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
                                         </div> 
                                    </div>
                                </div>
@@ -783,14 +775,14 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="accountNo">Depositor's Account No</label>
-                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
+                            <input type="text" class="form-control" id="transfer_accountNo" name="transfer_accountNo" style="width: 100%;">
                         </div> 
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="accountNo">Depositor's Account Name</label>
-                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
+                            <input type="text" class="form-control" id="transfer_accountName" name="transfer_accountName" style="width: 100%;">
                         </div> 
                     </div>
 
@@ -942,6 +934,58 @@
               radioClass: 'iradio_flat-green'
             });
         });
+        
+        function submitForm(){
+           
+           var submitOk = true;
+           
+           var payment_mode = $('input:radio[name=paymentMethod]:checked').val();
+           
+           var companyAccount = $("#companyAccount").val();
+           
+           if(companyAccount == ""){
+               
+               alert("Please select company account");
+               submitOk = false;
+           } 
+           else if(payment_mode == 1){
+               
+               var depositorsName = $("#depositorsName").val();
+               var tellerNumber = $("#tellerNumber").val();
+                       
+               if( $.trim(depositorsName) == ""){
+                   alert("Please Enter depositors name");
+                   submitOk = false;
+               }
+               else if($.trim(tellerNumber) == ""){
+                   alert("Please enter teller number");
+                   submitOk = false;
+               }
+           }
+           else if(payment_mode == 4){
+               
+               var transfer_bankName = $("#transfer_bankName").val();
+               var transfer_accountNo = $("#transfer_accountNo").val();
+               var transfer_accountName = $("#transfer_accountName").val();
+               
+               if($.trim(transfer_bankName) == ""){
+                   alert("Please enter Bank Name");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountNo) == ""){
+                   alert("Please enter account number");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountName) == ""){
+                   alert("Please enter account Name");
+                   submitOk = false;
+               }
+               
+           }
+           
+           return submitOk;
+       }
+       
       </script>
                                       
    

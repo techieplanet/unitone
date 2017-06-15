@@ -95,6 +95,17 @@ public class AlertManager {
         new SMSHelper().sendLodgementApprovalSMSToCustomer(customer, unit, amount);
         new SMSHelper().sendLodgementApprovalSMSToAgent(customer, unit, amount);
     }
+    
+    
+    public void sendLodgementDeclineAlerts(Customer customer, Lodgement lodgement, double amount){
+        //emails
+        new EmailHelper().sendLodgementDeclineEmailToCustomer(customer, lodgement, amount);
+        new EmailHelper().sendLodgementDeclineEmailToAgent(customer, lodgement, amount);
+        
+        //sms
+        new SMSHelper().sendLodgementDeclineSMSToCustomer(customer, lodgement, amount);
+        new SMSHelper().sendLodgementDeclineSMSToAgent(customer, lodgement, amount);
+    }
        
     
     /************************************  WITHDRAWAL ********************************/
@@ -106,5 +117,15 @@ public class AlertManager {
         new EmailHelper().sendWithdrawalRequestEmailToAgent(w);
         
         new SMSHelper().sendWithdrawalRequestEmailToAgent(w);
+    }
+    
+    
+    /************************************  WITHDRAWAL ********************************/
+    public void sendRemiderAlerts(List customerAndItemsList, int dueDays){
+        //email
+        new EmailHelper().sendReminderAlert(customerAndItemsList, dueDays);
+        
+        //sms
+        new SMSHelper().sendReminderAlert(customerAndItemsList, dueDays);
     }
 }

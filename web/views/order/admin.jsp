@@ -61,7 +61,7 @@
                                     
                                         
                                     <c:if test="${status == 0}">
-                                        <span class="label label-warning">UnAttended</span>
+                                        <span class="label label-warning">Unattended</span>
                                     </c:if>
                                     
                                     <c:if test="${status == 1}">
@@ -83,6 +83,10 @@
                                 </td>
                                 <td>
                                     <a class="btn btn-primary" onclick="getOrder(event,${order.id})" href="#" role="button">View <i class="fa fa-eye"></i> </a>
+                                    <c:if test="${userType == 1}">
+                                     &nbsp;
+                                     <a href="${pageContext.request.contextPath}/Order?action=approval" class="btn btn-success" role="button">Approval</a>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -188,7 +192,7 @@
                 "columnDefs": [
                     { "sortable": false, "width":"50px", "targets": 4 }
                 ],
-                "order": [[ 0, "desc" ]]
+                "order": [[ 0, "asc" ]]
         });
     
       

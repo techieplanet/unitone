@@ -6,7 +6,6 @@
 package com.tp.neo.model;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -35,6 +34,10 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Lodgement.findAll", query = "SELECT l FROM Lodgement l"),
+    @NamedQuery(name = "Lodgement.findByAgent", query = "SELECT l FROM Lodgement l WHERE l.customer.agent = :agent"),
+    @NamedQuery(name = "Lodgement.findByCustomer", query = "SELECT l FROM Lodgement l WHERE l.customer = :customer ORDER BY l.id desc"),
+    @NamedQuery(name = "Lodgement.findByAgentApproval", query = "SELECT l FROM Lodgement l WHERE l.customer.agent = :agent AND l.approvalStatus = :approvalStatus"),
+    @NamedQuery(name = "Lodgement.findByCustomerApproval", query = "SELECT l FROM Lodgement l WHERE l.customer = :customer AND l.approvalStatus = :approvalStatus"),
     @NamedQuery(name = "Lodgement.findById", query = "SELECT l FROM Lodgement l WHERE l.id = :id"),
     @NamedQuery(name = "Lodgement.findByTransactionId", query = "SELECT l FROM Lodgement l WHERE l.transactionId = :transactionId"),
     @NamedQuery(name = "Lodgement.findByAmount", query = "SELECT l FROM Lodgement l WHERE l.amount = :amount"),
@@ -54,6 +57,8 @@ public class Lodgement extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "reward_amount")
+    private Double rewardAmount;
     @Column(name = "created_by_user_type")
     private Short createdByUserType;
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
@@ -209,6 +214,26 @@ public class Lodgement extends BaseModel {
     public void setCompanyAccountId(CompanyAccount companyAccountId) {
         this.companyAccountId = companyAccountId;
     }
+    
+    
+    public String getPermissionName(String action){
+        if(action.toUpperCase().equals("NEW")) 
+            return "new_lodgement";
+        else if(action.toUpperCase().equals("LIST_APPROVED"))
+            return "list_approved_lodgement";
+        else if(action.toUpperCase().equals("LIST_UNAPPROVED"))
+            return "list_unapproved_lodgement";
+        else if(action.toUpperCase().equals("LIST_PENDING") || action.equalsIgnoreCase("notification"))
+            return "list_pending_lodgement";
+        else if(action.toUpperCase().equals("APPROVAL"))
+            return "list_pending_lodgement";
+        else if(action.toUpperCase().equals("APPROVE"))
+            return "approve_lodgement";
+        else if(action.toUpperCase().equals("DECLINE"))
+            return "decline_lodgement";
+        else 
+            return "view_lodgement";
+    }
 
     @Override
     public int hashCode() {
@@ -268,6 +293,15 @@ public class Lodgement extends BaseModel {
         this.createdByUserType = createdByUserType;
     }
 
- 
-    
+    public Double getRewardAmount() {
+        if(rewardAmount == null)
+            return (double)0;
+        else
+            return rewardAmount;
+    }
+
+    public void setRewardAmount(Double rewardAmount) {
+        this.rewardAmount = rewardAmount;
+    }
+
 }

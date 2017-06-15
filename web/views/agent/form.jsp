@@ -50,13 +50,13 @@
                            <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate"/>
                                
                            <div class="col-md-6 pull-right">
-                            <c:if test="${agent.agentId !='' && agent.agentId!=null}">
-                                <span id="row${agent.agentId}" style="margin: 0 auto !important;">
+                            <%--<c:if test="${agent.agentId !='' && agent.agentId!=null}">--%>
+<!--                                <span id="row${agent.agentId}" style="margin: 0 auto !important;">
                                  <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
                              
-                                </span>
-                               </c:if> 
-                                 </div>
+                                </span>-->
+                               <%--</c:if>--%> 
+                            </div>
                   </div>
                     
             
@@ -114,22 +114,31 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                              <div class="col-md-12">
-                                    <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
-                                      <label for="agentPassword">Password</label>
-                                      <input type="password" class="form-control" id="agentPassword" name="agentPassword" placeholder="Password"  />
+                            
+                            <c:if test="${agent.agentId =='' || agent.agentId==null}">
+                                <div class="row">
+                                  <div class="col-md-12">
+                                        <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
+                                          <label for="agentPassword">Password</label>
+                                          <input type="password" class="form-control" id="agentPassword" name="agentPassword" placeholder="Password"  />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
-                                    <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
-                                      <label for="agentConfirmPassword">Confirm Password</label>
-                                      <input type="password" class="form-control" id="agentConfirmPassword" name="agentConfirmPassword" placeholder="Confirm Password"  />
+                            </c:if>
+                                      
+                            
+                            <c:if test="${agent.agentId == '' || agent.agentId==null}">
+                                <div class="row">
+                                  <div class="col-md-12">
+                                        <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
+                                          <label for="agentConfirmPassword">Confirm Password</label>
+                                          <input type="password" class="form-control" id="agentConfirmPassword" name="agentConfirmPassword" placeholder="Confirm Password"  />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </c:if>
+                                      
+                                      
                             </fieldset>
                         </div>
                          <div class="col-md-4">
@@ -383,6 +392,7 @@
                             </div>
                                 </fieldset>
                     </div>
+                    <c:if test="${sessionScope.user.getSystemUserTypeId() == 2}">
                             <c:if test="${agent.agentId==null || agent.agentId==''}">
                             <div class="col-md-12" style="text-align:center !important;">
                                 Do you agree to the terms of the <a href="#" onclick="$('#agreementStatusModal').modal();">agreement document?</a>
@@ -390,6 +400,7 @@
                             <input type="radio" name="agreement_document" id="decline"  onclick="agreementStatusChecked(this)" value="decline"/>I disagree
                             <br/><br/><br/>
                             </c:if>
+                    </c:if>
                             <!--
 </div>-->
                          </div>
@@ -408,6 +419,7 @@
            
           </div>   <!-- /.row -->
           
+          <input type="hidden" value="${sessionScope.user.getSystemUserTypeId()}" id="agent_reg_usertypeId" />
           
              <div class="modal fade" id="agreementStatusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
          <div class="vertical-alignment-helper">

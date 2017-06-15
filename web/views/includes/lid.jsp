@@ -27,16 +27,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     
     <!-- iCheck for checkboxes and radio inputs -->
-    <link rel="stylesheet" href="plugins/iCheck/all.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/plugins/iCheck/all.css">
 
     <!--JQUERY UI CSS-->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery-ui-1.12.1.css" type="text/css" />
     
     <!-- DataTables -->
-    <link rel="stylesheet" href="plugins/datatables/dataTables.bootstrap.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/plugins/datatables/dataTables.bootstrap.css">
     
     <!-- bootstrap wysihtml5 - text editor -->
-    <link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
     
     <!-- Theme style -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminLTE.min.css" type="text/css" />
@@ -47,9 +47,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
           apply the skin class to the body tag so the changes take effect.
     -->
     <!--<link rel="stylesheet" href="${pageContext.request.contextPath}/css/skin-blue.min.css" type="text/css" />-->
-    <link rel="stylesheet" href="css/skins/skin-blue.min.css" type="text/css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/skins/skin-blue.min.css" type="text/css" />
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/custom.css" type="text/css" />
+    
+    <!-- ICheck fronteed skin css-->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/line.css" type="text/css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/green.css" type="text/css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/blue.css" type="text/css" />
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery.treetable.css" type="text/css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery.treetable.theme.default.css" type="text/css" />
+    
     <!-- jQuery 2.1.4 -->
     <!--<script src="plugins/jQuery/jQuery-2.1.4.min.js"></script>-->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-2.1.4.min.js"></script>
@@ -57,14 +66,30 @@ scratch. This page gets rid of all links and provides the needed markup only.
     
     <!--JQUERY UI JS-->
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.12.1.js"></script>
-
-
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.treetable.js"></script>
+    <!-- JQUERY PrintArea -->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.PrintArea.js"></script>
+    
+    <!-- CKEditor plugin -->
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ckeditor/ckeditor.js"></script>
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    
+    <!-- ngwidgets -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/js/ngwidgets/styles/ngx.base.css" type="text/css" />
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/angular.min.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxcore.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxbuttons.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxscrollbar.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxlistbox.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxdata.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxinput.js"></script>
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ngwidgets/ngxdropdownlist.js"></script>
   </head>
   <!--
   BODY TAG OPTIONS:

@@ -7,6 +7,7 @@ package com.tp.neo.model;
 
 import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -26,6 +27,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -38,8 +40,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Customer.findAll", query = "SELECT c FROM Customer c"),
-    @NamedQuery(name = "Customer.findByAgent", query = "SELECT c FROM Customer c WHERE c.agent = :agent AND c.deleted = :deleted"),
-    @NamedQuery(name = "Customer.findByCustomerId", query = "SELECT c FROM Customer c WHERE c.customerId = :customerId"),
+    @NamedQuery(name = "Customer.findByAgent", query = "SELECT c FROM Customer c WHERE c.agent = :agent AND c.deleted = :deleted ORDER BY c.firstname"),
+    @NamedQuery(name = "Customer.findByCustomerId", query = "SELECT c FROM Customer c WHERE c.customerId = :customerId AND c.deleted = :deleted ORDER BY c.firstname"),
     @NamedQuery(name = "Customer.findByFirstname", query = "SELECT c FROM Customer c WHERE c.firstname = :firstname"),
     @NamedQuery(name = "Customer.findByMiddlename", query = "SELECT c FROM Customer c WHERE c.middlename = :middlename"),
     @NamedQuery(name = "Customer.findByLastname", query = "SELECT c FROM Customer c WHERE c.lastname = :lastname"),
@@ -50,11 +52,12 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customer.findByState", query = "SELECT c FROM Customer c WHERE c.state = :state"),
     @NamedQuery(name = "Customer.findByPhotoPath", query = "SELECT c FROM Customer c WHERE c.photoPath = :photoPath"),
     @NamedQuery(name = "Customer.findByPassword", query = "SELECT c FROM Customer c WHERE c.password = :password"),
+    @NamedQuery(name = "Customer.findByIdAndPassword", query = "SELECT c FROM Customer c WHERE c.password = :password AND c.customerId = :id"),
     @NamedQuery(name = "Customer.findByKinName", query = "SELECT c FROM Customer c WHERE c.kinName = :kinName"),
     @NamedQuery(name = "Customer.findByKinPhone", query = "SELECT c FROM Customer c WHERE c.kinPhone = :kinPhone"),
     @NamedQuery(name = "Customer.findByKinAddress", query = "SELECT c FROM Customer c WHERE c.kinAddress = :kinAddress"),
     @NamedQuery(name = "Customer.findByKinPhotoPath", query = "SELECT c FROM Customer c WHERE c.kinPhotoPath = :kinPhotoPath"),
-    @NamedQuery(name = "Customer.findByDeleted", query = "SELECT c FROM Customer c WHERE c.deleted = :deleted"),
+    @NamedQuery(name = "Customer.findByDeleted", query = "SELECT c FROM Customer c WHERE c.deleted = :deleted ORDER BY c.firstname"),
     @NamedQuery(name = "Customer.findByActive", query = "SELECT c FROM Customer c WHERE c.active = :active"),
     @NamedQuery(name = "Customer.findByVerificationStatus", query = "SELECT c FROM Customer c WHERE c.verificationStatus = :verificationStatus"),
     @NamedQuery(name = "Customer.findByCreatedDate", query = "SELECT c FROM Customer c WHERE c.createdDate = :createdDate"),
@@ -68,6 +71,10 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @OneToMany(mappedBy = "customerId")
+    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
+    @Column(name = "reward_points")
+    private Integer rewardPoints;
     @OneToMany(mappedBy = "customer")
     private Collection<Lodgement> lodgementCollection;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
@@ -136,9 +143,12 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer")
     private CustomerBalance customerBalance;
-
-    //Extra
-    transient final Integer USERTYPEID = 3;
+    
+    @Transient
+    private final Integer USERTYPEID = 3;
+    
+    @Transient
+    private String permissions = "";
     
     public Customer() {
     }
@@ -346,12 +356,14 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         return hash;
     }
 
+    @Override
     public Long getSystemUserId(){
        return getCustomerId();
     }
     
+    @Override
     public Integer getSystemUserTypeId(){
-        return USERTYPEID;
+        return 3;
     }
      
     @Override
@@ -384,12 +396,12 @@ public class Customer implements Serializable, ITrailable, SystemUser {
 
     @Override
     public String getPermissions() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return permissions;
     }
 
     @Override
     public void setPermissions(String permissions) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.permissions = permissions;
     }
 
   
@@ -415,6 +427,12 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public Account getAccount() {
         return account;
     }
+    
+    public String getAccountCode(){
+        Account acct = getAccount();
+        
+        return acct.getAccountCode();
+    }
 
     public void setAccount(Account account) {
         this.account = account;
@@ -428,6 +446,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         this.customerBalance = customerBalance;
     }
 
+  
     @XmlTransient
     public Collection<Lodgement> getLodgementCollection() {
         return lodgementCollection;
@@ -446,6 +465,22 @@ public class Customer implements Serializable, ITrailable, SystemUser {
             return "delete_customer";
         else if(action.toUpperCase().equals("LISTCUSTOMERS")) 
             return "view_customer";
+        else if(action.toUpperCase().equals("NEW_PROSPECT")) 
+            return "new_prospect";
+        else if(action.toUpperCase().equals("LIST_PROSPECTS")) 
+            return "list_prospects";
+        else if(action.toUpperCase().equals("EDIT_PROSPECT")) 
+            return "edit_prospect";
+        else if(action.toUpperCase().equals("PROFILE")) 
+            return "customer_profile";
+        else if(action.toUpperCase().equals("CURRENT")) 
+            return "currently_paying_customer";
+        else if(action.toUpperCase().equals("COMPLETED")) 
+            return "completed_payment_customer";
+        else if(action.toUpperCase().equals("LODGEMENT_INVOICE")) 
+            return "view_customer";
+        else if(action.toUpperCase().equals("CUSTOMER_ORDERS")) 
+            return "view_customer_orders";
         else 
             return "view_customer";
     }
@@ -453,9 +488,26 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     public String getFullName(){
         String mName = middlename!=null?middlename:"";
         String fullname = lastname + " " + mName + " " + firstname;
-        System.out.println("Customer FullName : " + fullname);
         
         return fullname;
     }
+
+    @XmlTransient
+    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
+        return loyaltyHistoryCollection;
+    }
+
+    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
+        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
+    }
+
+    public Integer getRewardPoints() {
+         return rewardPoints == null ? 0 : rewardPoints; 
+    }
+
+    public void setRewardPoints(Integer rewardPoints) {
+        this.rewardPoints = rewardPoints;
+    }
+
 
 }

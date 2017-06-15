@@ -8,6 +8,21 @@
             
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
+              <div class="small-box bg-blue">
+                <div class="inner">
+                  <h3><c:out value="${totalOutstanding}" /></h3>
+                  <p class="bold">TOTAL OUTSTANDING PAYMENTS</p>
+                </div>
+                <div class="icon">
+                  <i class="fa fa-cart-plus"></i>
+                </div>
+                <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
+                <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
+              </div>
+            </div><!-- ./col -->
+    
+            <div class="col-lg-3 col-xs-6">
+              <!-- small box -->
               <div class="small-box bg-green">
                 <div class="inner">
                     <h3><c:out value="${totalDue}" /></h3>
@@ -21,15 +36,16 @@
               </div>
             </div><!-- ./col -->
             
+            
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
-              <div class="small-box bg-blue">
+              <div class="small-box bg-red">
                 <div class="inner">
-                  <h3><c:out value="${totalOutstanding}" /></h3>
-                  <p class="bold">TOTAL OUTSTANDING PAYMENTS</p>
+                    <h3><c:out value="${totalStockValue}" /></h3>
+                  <p class="bold">TOTAL STOCK VALUE</p>
                 </div>
                 <div class="icon">
-                  <i class="fa fa-cart-plus"></i>
+                  <i class="ion ion-pie-graph"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
                 <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
@@ -45,21 +61,6 @@
                 </div>
                 <div class="icon">
                   <i class="fa fa-location-arrow"></i>
-                </div>
-                <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
-              </div>
-            </div><!-- ./col -->
-          
-            <div class="col-lg-3 col-xs-6">
-              <!-- small box -->
-              <div class="small-box bg-red">
-                <div class="inner">
-                    <h3><c:out value="${totalStockValue}" /></h3>
-                  <p class="bold">TOTAL STOCK VALUE</p>
-                </div>
-                <div class="icon">
-                  <i class="ion ion-pie-graph"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
                 <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
@@ -416,6 +417,10 @@
         var seriesArray = new Array();
         var countsObject = {name: 'Payments Count', type: 'column', data: new Array()};
         var valuesObject = {name: 'Payments Value', type: 'spline', yAxis: 1, color: '#00a65a', data: new Array()};
+        <c:if test="${sessionScope.availablePlugins.loyalty != null}">
+            var loyaltyObject = {name: 'Loyalty Value', type: 'column', data: new Array()};
+        </c:if>
+            
         var categoriesArray = new Array();
         
         console.log("lodgementSummaryJSON " + JSON.stringify(lodgementSummaryJSON))
@@ -441,11 +446,19 @@
                 console.log("loop");
                 var summary = lodgementSummaryList[i];
                 countsObject.data.push(summary.count); 
+                
+                <c:if test="${sessionScope.availablePlugins.loyalty != null}">
+                    loyaltyObject.data.push(summary.reward_value); 
+                </c:if>
+                    
                 valuesObject.data.push(summary.value);
                 categoriesArray.push(summary.date)
         }
             
             seriesArray.push(countsObject);
+            <c:if test="${sessionScope.availablePlugins.loyalty != null}">
+                seriesArray.push(loyaltyObject);
+            </c:if>
             seriesArray.push(valuesObject);
             
             
@@ -525,10 +538,10 @@
         var projectDataArray = new Array();
         var drillObjectsArray = new Array();
         
-        <c:forEach items="${projectPerformance}" var="project">
+        <c:forEach items="${projectPerformanceBySalesQuota}" var="project">
                 projectObject = {};
                 projectObject.name = '${project.projectName}';
-                projectObject.y = ${project.projectPercentage};
+                projectObject.y = ${project.valuePercentage};
                 projectObject.drilldown = '${project.projectName}';
                 projectDataArray.push(projectObject);
                 
@@ -538,7 +551,7 @@
                 drillObject.id = '${project.projectName}';
                 drillObjectDataArray = new Array();
                 <c:forEach items="${project.units}" var="unit">
-                    drillObjectDataArray.push(new Array('${unit.name}',${unit.percentage})); //push a unit into the drill down object
+                    drillObjectDataArray.push(new Array('${unit.unitName}',${unit.valuePercentage})); //push a unit into the drill down object
                 </c:forEach>
                     
                 drillObject.data = drillObjectDataArray;
@@ -562,15 +575,20 @@
                 text: 'Click the slices to view units under each project.'
             },
             plotOptions: {
-
+                series: {
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.name}: {point.y:.1f}%'
+                    }
+                }
             },
             tooltip: {
                 //headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-                //pointFormat: '<span>{point.name}</span>: <b>{point.y:.1f}%</b> of total<br/>',
+                //pointFormat: '<span>{point.name}</span>: <b>{point.y:.1f}%</b> of total<br/>'
+//                pointFormat: '<span>{point.name}</span>: <b>{point.y:.1f}%</b> of total<br/>'
                 useHtml: true,
                 formatter: function (){
-                    return '<b>'+ this.key +'</b><br>' + 
-                           '<b>' + this.series.name + ': </b>' + this.y;
+                    return this.series.name + '<br/><b>'+ this.key +'</b>: '  + this.y.toFixed(1);
                 }
 
             },
@@ -601,24 +619,11 @@
         var criteriaArray = new Array("Stock", "Sold"); //Mind the order
         var seriesArray = new Array();
         
-//        {
-//            name: 'Things',
-//            color: '#3150b4',
-//            data: [{
-//                name: 'Animals',
-//                y: 5,
-//                drilldown: true
-//            }, {
-//                name: 'Fruits',
-//                y: 5,
-//                drilldown: true
-//            }]
-//        }
         
         //stock: unsold
         var seriesObject = {};
         seriesObject.name = "In Stock";
-        <c:forEach items="${projectPerformance}" var="project">
+        <c:forEach items="${projectPerformanceByStockSold}" var="project">
                 projectObject = {};
                 projectObject.name = '${project.projectName}';
                 projectObject.y = (${project.setupStock} - ${project.sold});
@@ -632,7 +637,7 @@
         projectDataArray = new Array();
         seriesObject = {};
         seriesObject.name = "Sold";
-        <c:forEach items="${projectPerformance}" var="project">
+        <c:forEach items="${projectPerformanceByStockSold}" var="project">
                 projectObject = {};
                 projectObject.name = '${project.projectName}';
                 projectObject.y = ${project.sold};
@@ -739,7 +744,7 @@
 //            },
 
         //stock: unsold
-        <c:forEach items="${projectPerformance}" var="project">
+        <c:forEach items="${projectPerformanceByStockSold}" var="project">
                 projectObject = {};
                 projectUnitsArray = new Array();
                 projectObject.name = '${project.projectName}';
@@ -754,7 +759,7 @@
         </c:forEach>
             console.log("drillDownSeriiObject1: " + JSON.stringify(drillDownSeriiObject1));
         //sold
-        <c:forEach items="${projectPerformance}" var="project">
+        <c:forEach items="${projectPerformanceByStockSold}" var="project">
                 projectObject = {};
                 projectUnitsArray = new Array();
                 projectObject.name = '${project.projectName}';

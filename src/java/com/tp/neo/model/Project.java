@@ -50,13 +50,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findByModifiedDate", query = "SELECT p FROM Project p WHERE p.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "Project.findByModifiedBy", query = "SELECT p FROM Project p WHERE p.modifiedBy = :modifiedBy"),
 
-//    @NamedQuery(name = "Project.findWithPerformance", query = "SELECT p, pno.unit, pno.sold FROM Project p LEFT JOIN "
-//                                                              + "(SELECT unit, unit.project_id AS project_id, SUM(o.quantity) AS sold FROM ProjectUnit unit LEFT JOIN unit.orderItemCollection o ON o.approvalStatus = :approvalStatus GROUP BY unit.id)"
-//                                                              + "AS pno ON p.id = pno.project_id")
-                                                            
-//    @NamedQuery(name = "Project.findAllWithUnitStocks", query = "SELECT p, "
-//                                                                + "(SELECT SUM(quantity) FROM OrderItem o JOIN o.unit u WHERE u.project_id = p.id GROUP BY u.id ) as sold "
-//                                                                + "FROM Project p")
+
+
         
     })// end NamedQuery
 
@@ -66,6 +61,7 @@ public class Project extends BaseModel{
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
 
     
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "project")
@@ -86,7 +82,7 @@ public class Project extends BaseModel{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
     @Basic(optional = false)
     @Column(name = "name")
     private String name;
@@ -110,20 +106,20 @@ public class Project extends BaseModel{
     public Project() {
     }
 
-    public Project(Integer id) {
+    public Project(Long id) {
         this.id = id;
     }
 
-    public Project(Integer id, String name) {
+    public Project(Long id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -261,5 +257,5 @@ public class Project extends BaseModel{
     public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
         this.projectUnitCollection = projectUnitCollection;
     }
-    
+
 }

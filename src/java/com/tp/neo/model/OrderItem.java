@@ -5,9 +5,11 @@
  */
 package com.tp.neo.model;
 
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -47,15 +49,36 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name="OrderItem.findByOrderAndUattendedItem", query = "SELECT o FROM OrderItem o WHERE o.order = :orderId AND o.approvalStatus = :approvalStatus ORDER BY o.id DESC"),
     @NamedQuery(name="OrderItem.findByOrder", query = "SELECT o FROM OrderItem o WHERE o.order = :order"),
     @NamedQuery(name="OrderItem.findByUnit", query = "SELECT o FROM OrderItem o WHERE o.unit = :unit"),
+    @NamedQuery(name="OrderItem.findByCustomer", query = "SELECT o FROM OrderItem o WHERE o.order.id in (select p.id from ProductOrder p where p.customer = :customer )"),
     @NamedQuery(name = "OrderItem.findByModifiedBy", query = "SELECT o FROM OrderItem o WHERE o.modifiedBy = :modifiedBy"),
     
     @NamedQuery(name = "OrderItem.findByUncompletedOrder", query = "SELECT o FROM OrderItem o JOIN FETCH o.order po WHERE po.approvalStatus < :approvalStatus"),
+    @NamedQuery(name = "OrderItem.findByUncompletedMortgage", query = "SELECT o FROM OrderItem o JOIN FETCH o.order po WHERE po.mortgageStatus < :mortgageStatus"),
     @NamedQuery(name = "OrderItem.findTotalApprovedSum", query = "SELECT COALESCE(SUM(o.quantity * p.cpu),0)  FROM OrderItem o JOIN o.unit p WHERE o.approvalStatus = :approvalStatus"),
     @NamedQuery(name = "OrderItem.findByUncompletedOrderAndLodgementSum", query = "SELECT item, COALESCE(SUM(l.amount),0) FROM ProductOrder p JOIN p.orderItemCollection item JOIN item.lodgementItemCollection l " 
                                                                                     + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps GROUP BY item.id ORDER  BY item.id"),
+    @NamedQuery(name = "OrderItem.findByApprovedLodgementItemsSum", query = "SELECT item, COALESCE(SUM(l.amount),0) FROM OrderItem item JOIN item.lodgementItemCollection l " 
+                                                                                    + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps GROUP BY item.id ORDER  BY item.id"),
 
+    @NamedQuery(name = "OrderItem.findMyTotalOutstandingAmountPerOrderItem", query = "SELECT item, COALESCE(SUM(item.quantity * u.cpu),0) - COALESCE(SUM(l.amount),0)" 
+                                                                                        + "FROM OrderItem item JOIN item.unit u JOIN item.lodgementItemCollection l "
+                                                                                        + "WHERE item.approvalStatus = :aps AND l.approvalStatus = :aps "
+                                                                                        + "GROUP BY item.id ORDER  BY item.id"),
     
-
+        @NamedQuery(name = "OrderItem.findSalesSumByProject", query = "SELECT p, COALESCE(SUM(item.quantity),0), COALESCE(SUM(l.amount),0)  " 
+                                                                    + "FROM Project p LEFT JOIN p.projectUnitCollection u LEFT JOIN u.orderItemCollection item ON item.approvalStatus = :item_aps "
+                                                                    + "LEFT JOIN item.lodgementItemCollection l On l.approvalStatus = :aps "
+                                                                    + "WHERE p.deleted =0 "
+                                                                    + "GROUP BY p.id ORDER  BY p.id"),
+        
+        @NamedQuery(name = "OrderItem.findSalesSumByProjectUnit", query = "SELECT u, COALESCE(SUM(item.quantity),0), COALESCE(SUM(l.amount),0)  " 
+                                                                    + "FROM ProjectUnit u LEFT JOIN u.orderItemCollection item ON item.approvalStatus = :item_aps "
+                                                                    + "LEFT JOIN item.lodgementItemCollection l ON l.approvalStatus = :aps "
+                                                                    + "WHERE u.project.id = :projectId AND u.project.deleted = 0 "
+                                                                    + "GROUP BY u.id ORDER  BY u.id"),
+       @NamedQuery(name = "OrderItem.findByDayOfReminder", query = "SELECT OI, PO.customer FROM OrderItem OI "
+               + "                                                  JOIN ProductOrder PO ON OI.order.customer.customerId = PO.customer.customerId  WHERE OI.monthlyPayDay = :notificationDay ORDER BY PO.customer.customerId "),
+        
     })
 
 
@@ -65,6 +88,19 @@ public class OrderItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+
+    transient Double rewardAmount = 0.0;
+    transient Integer rewardPoints = 0;
+    
+    @Column(name = "approval_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date approvalDate;
+//    @OneToMany(mappedBy = "itemId")
+//    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
+    @Column(name = "monthly_pay_day")
+    private Integer monthlyPayDay;
+    @Column(name = "commission_percentage")
+    private Double commissionPercentage;
     @JoinColumn(name = "unit_id", referencedColumnName = "id")
     @ManyToOne
     private ProjectUnit unit;
@@ -85,9 +121,9 @@ public class OrderItem extends BaseModel {
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "initial_dep")
     private Double initialDep;
-    @Column(name = "discount_amt")
-    private Double discountAmt;
     @Column(name = "discount_percentage")
+    private Double discountAmt;
+    @Column(name = "discount_amt")
     private Double discountPercentage;
     @Column(name = "deleted")
     private Short deleted;
@@ -244,14 +280,91 @@ public class OrderItem extends BaseModel {
 
     public void setUnit(ProjectUnit unit) {
         this.unit = unit;
+    } 
+
+    public Double getCommissionPercentage() {
+        return commissionPercentage;
+    }
+
+    public void setCommissionPercentage(Double commissionPercentage) {
+        this.commissionPercentage = commissionPercentage;
     }
     
     /****************** UTIL ********************/
+    /**
+     * Old Implementation
     public double getCommissionAmount(){
         DecimalFormat df = new DecimalFormat(".##");
         double amount = this.getUnit().getCpu() * this.getUnit().getCommissionPercentage() / 100;
         String amountString = df.format(amount); //rounded to two decimal places
         return Double.parseDouble(amountString); //change back to double and return
-    } 
+    }
+    */
     
+    public double getCommissionAmount(double lodgementAmount){
+        DecimalFormat df = new DecimalFormat(".##");
+        double amount = lodgementAmount * this.getCommissionPercentage() / 100;
+        String amountString = df.format(amount); //rounded to two decimal places
+        return Double.parseDouble(amountString); //change back to double and return
+    }
+
+    public Integer getMonthlyPayDay() {
+        return monthlyPayDay;
+    }
+
+    public void setMonthlyPayDay(Integer monthlyPayDay) {
+        this.monthlyPayDay = monthlyPayDay;
+    }
+
+//    @XmlTransient
+//    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
+//        return loyaltyHistoryCollection;
+//    }
+//
+//    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
+//        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
+//    }
+
+    public Date getApprovalDate() {
+        return approvalDate;
+    }
+
+    public void setApprovalDate(Date approvalDate) {
+        this.approvalDate = approvalDate;
+    }
+
+    
+    public Double getRewardAmount() {
+        return rewardAmount;
+    }
+    
+    public void setRewardAmount(Double rewardAmount) {
+        this.rewardAmount = rewardAmount;
+    }
+    
+    public Integer getRewardPoints() {
+        return rewardPoints;
+    }
+    
+    public void setRewardPoints(Integer rewardPoints) {
+        this.rewardPoints = rewardPoints;
+    }
+
+
+    public double getTotalAmountPaid(){
+        
+        double total = 0;
+        List<LodgementItem> LItems = (List)getLodgementItemCollection();
+        
+        for(LodgementItem LI : LItems){
+            
+            double rewardPoint = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            total += (LI.getAmount() + rewardPoint);
+        }
+        
+        return total;
+    }
+    
+    
+
 }

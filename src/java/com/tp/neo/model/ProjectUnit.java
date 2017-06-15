@@ -52,6 +52,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProjectUnit.findByModifiedBy", query = "SELECT p FROM ProjectUnit p WHERE p.modifiedBy = :modifiedBy"),
     //@NamedQuery(name = "ProjectUnit.findProject", query = "SELECT p.project FROM ProjectUnit p WHERE p.project = :project"),
     @NamedQuery(name = "ProjectUnit.findByProject", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project"),
+    @NamedQuery(name = "ProjectUnit.findByProjectAndQty", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project AND p.quantity > 0"),
     @NamedQuery(name = "ProjectUnit.findByProjectAndActive", query = "SELECT p FROM ProjectUnit p WHERE p.project = :project AND p.deleted = :deleted"),
     @NamedQuery(name = "ProjectUnit.findLastInserted", query = "SELECT p FROM ProjectUnit p ORDER BY p.createdDate DESC"),
     
@@ -73,6 +74,19 @@ public class ProjectUnit extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "vat_percentage")
+    private Double vatPercentage;
+    @Column(name = "reward_points")
+    private Integer rewardPoints;
+    @Column(name = "building_cost")
+    private Double buildingCost;
+    @Column(name = "service_value")
+    private Double serviceValue;
+    @Column(name = "income")
+    private Double income;
+    @JoinColumn(name = "unit_type", referencedColumnName = "id")
+    @ManyToOne
+    private ProjectUnitType unitType;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Account account;
@@ -313,6 +327,53 @@ public class ProjectUnit extends BaseModel {
         this.account = account;
     }
 
-    
+    public Double getBuildingCost() {
+        return buildingCost;
+    }
+
+    public void setBuildingCost(Double buildingCost) {
+        this.buildingCost = buildingCost;
+    }
+
+    public Double getServiceValue() {
+        return serviceValue;
+    }
+
+    public void setServiceValue(Double serviceValue) {
+        this.serviceValue = serviceValue;
+    }
+
+    public Double getIncome() {
+        return income;
+    }
+
+    public void setIncome(Double income) {
+        this.income = income;
+    }
+
+    public ProjectUnitType getUnitType() {
+        return unitType;
+    }
+
+    public void setUnitType(ProjectUnitType unitType) {
+        this.unitType = unitType;
+    }
+
+    public Integer getRewardPoints() {
+        return rewardPoints;
+    }
+
+    public void setRewardPoints(Integer rewardPoints) {
+        this.rewardPoints = rewardPoints;
+    }
+
+    public Double getVatPercentage() {
+        return vatPercentage;
+    }
+
+    public void setVatPercentage(Double vatPercentage) {
+        this.vatPercentage = vatPercentage;
+    }
+
     
 }

@@ -1,64 +1,89 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<c:if test="${userType != null && userType == 1 }">
- <div class="row margin-bottom" id="agentListContainer">
-     
-     <section class="content-header">
-         
-         
-         <div class="box">
-                <div class="box-header">
-                  <h3 class="box-title block">
-                      Select an agent
-                  </h3>
-                </div><!-- /.box-header -->
+
+<script>
+    
+    var customersLoyaltyList = [];
+    var customerPoints = 0;
+    var isLoyaltyEnabled = "${plugins.containsKey('loyalty') ? 1 : 0}";
+    var pointToCurrency = "${pointToCurrency}";
+    
+    var app = angular.module("app",["ngwidgets"]);
+       
+       app.controller("customerDropDownController",function($scope){
+           
+           $scope.customerId = "";
+           
+           var dataArray = [];
+           
+           dataArray.push({name:"--Select Customer--",id : "",img : ""})
+           
+           <c:forEach items="${customers}" var="customer">
+           
+                var fullName = "${customer.getFullName()}";
+                var imgPath = "${customerImageAccessDir}" + "/" + "${customer.getPhotoPath()}";
+                var customer_id = "${customer.getCustomerId()}";
                 
-                 <div class="box-body">
-                  <table id="agentList" class="table table-bordered table-striped table-hover">
-                    <thead>
-                      <tr>
-                        <th>Photo</th>
-                        <th>ID</th>
-                        <th>First Name</th>
-                        <th>Middle Name</th>
-                        <th>Last Name</th>
-                        <th>Phone No</th>
-                        <th>Email</th>
-                        <th>State</th>
-                        <th>Action</th>
-                        
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach items="${agents}" var="agent">
-                            <tr id='row<c:out value="${agent.agentId}" />'>
-                                <td><img alt="No Image" class="img-responsive img-thumbnail" src="<c:out value='${agent.photoPath}'></c:out>" /></td>
-                                <td class="agentId"><c:out value="${agent.agentId}" /></td>
-                                <td class="agentFname"><c:out value="${agent.firstname}" /></td>
-                                <td class="agentMname"><c:out value="${agent.middlename}" /></td>
-                                <td class="agentLname"><c:out value="${agent.lastname}" /></td>
-                                <td class="agentPhone"><c:out value="${agent.phone}" /></td>
-                                <td class="agentEmail"><c:out value="${agent.email}" /></td>
-                                <td class="agentState"><c:out value="${agent.state}" /></td>
-                              
-                                <td>
-                                    <input type="hidden" class="agentImg" value='<c:out value="${agent.photoPath}"></c:out>' />
-                                    <a class="btn btn-primary" href="#" onclick="selectAgent('${agent.agentId}')" role="button">Select</a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                  </tbody>
-                    <tfoot>
+                dataArray.push({name:fullName,id : customer_id,img : imgPath});
+                
+                var point = "${customer.getRewardPoints()}";
+                customersLoyaltyList.push({"id":customer_id,"points":point});
+                
+           </c:forEach>
+           
+           $scope.selectItem = function(event){
+               //console.log(event.args.item);
+               $scope.customerId = event.args.item.value;
+               $scope.updateCustomerPoint(event.args.item.value)
+           };
+           
+           $scope.updateCustomerPoint = function(id){
+               
+               if(id == ""){
+                   return;
+               }
+               
+               for(var k in customersLoyaltyList){
+                   if(customersLoyaltyList[k].id == id){
+                       console.log("c.id : " + customersLoyaltyList[k].id + ", id : " + id);
+                       customerPoints = customersLoyaltyList[k].points;
+                       break;
+                   } 
+               }
+               
+               console.log("Customer Point : " + customerPoints);
+           };
+           
+           $scope.settings = {
+               
+               filterable: true, selectedIndex: 0, source: dataArray, itemHeight: 70, height: 30, width : "100%",
+               displayMember: 'name',
+               valueMember: 'id',
+               searchMode : 'containsignorecase',
+                renderer: function (index, label, value) {
                     
-                    </tfoot>
-                  </table>
-                  <div><span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span></div>
-                </div><!-- /.box-body -->
-        </div><!-- /.box -->
-         
-     </section>
-     
- </div>
+                    if(index == 0){
+                        return "<p style='padding:10px 20px 10px 20px'>" + label + "</p>";
+                    }
+                    
+                    var img = '<img height="50" width="50" src="' + dataArray[index].img + '"/>';
+                    var table = '<table style="min-width: 130px;"><tr><td style="width: 80px;">' + img + '</td><td>' + label + '</td></tr></table>';
+                    return table;
+                },
+                selectionRenderer: function (element, index, label, value) {
+                    var text = label.replace(/<br>/g, " ");
+                    return "<span style='left: 4px; top: 6px; position: relative;'>" + text + "</span>";
+                }
+               
+           };
+           
+       });
+       
+</script>
+
+
+<c:if test="${userType != null && userType == 1 }">
+  
                                 
  <div class="row" id="agentSpinnerContainer" style='display:none'>
      <div class="spinner" >
@@ -81,7 +106,7 @@
                  <div class="row">
                      
                      <div class="col-md-3">
-                         <img src="" alt="No image" />
+                         <img src="" class="agent_img img img-responsive img-thumbnail" width="100px" height="100px" alt="No image" />
                      </div>
                      
                      <div class="col-md-9">
@@ -104,15 +129,24 @@
      
  </div>
                                 
-</c:if>                                   
- <div class="row">
+</c:if>  
+     
+     
+ <!--
+
+ Product Order Cart Form / Customer Registration starts
+ 
+ -->
+ 
+     
+ <div class="row" ng-app="app">
     
-           <div class="col-md-12">
+           <div class="col-md-12" ng-controller="customerDropDownController">
               <!-- general form elements -->
                
                 <!-- form start -->
                <div class="box box-primary">
-                   <form role="form" name="customerRegistration" method="POST" action="${pageContext.request.contextPath}/Order?action=new_order" enctype="multipart/form-data">
+                   <form role="form" name="customerRegistration" method="POST" action="${pageContext.request.contextPath}/Order?action=new_order" enctype="multipart/form-data" onsubmit="return submitForm()">
                 
                 <input type="hidden" name="agent_id" id="agent_id" value="" />
                    
@@ -162,18 +196,27 @@
                         	<legend style="padding-left:20px !important;">Product Details</legend>
                             <div class="col-md-12">
                             	<div class="row">
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                     	<div class="form-group">
                                             <label for="selectProdcut">Select Customer</label>
                                             
+                                            <input type="hidden" value="{{customerId}}" name="customer_id" />
+                                            
+                                            <ngx-drop-down-list ngx-on-select="selectItem(event)" ngx-settings="settings">
+                                            </ngx-drop-down-list>
+                                            
+                                            <!--
                                             <select class="form-control select2" id="selectCustomer" name="customer_id" style="width: 100%;" onchange="" <c:if test="${customer.customerId != null && customer.customerId!=''}">disabled</c:if>>
+                                              
+                                              <c:if test="${userType != 3}">  
                                                 <option value="" selected="selected">-- choose --</option>
-                                                
+                                              </c:if>  
                                               <c:forEach items="${customers}" var="customer" >  
                                               
                                               <option  value="${customer.customerId}"  <c:if test="${customerId == customer.customerId}"> <jsp:text>selected</jsp:text> </c:if> >${customer.firstname} ${customer.lastname}</option>
                                               </c:forEach>
                                             </select>
+                                            -->
                                         </div>
 <!--                                              /.form-group select product -->
                                     </div>
@@ -192,7 +235,7 @@
 <!--                                              /.form-group select product -->
                                     </div>
                                
-                                	<div class="col-md-3">
+                                   <div class="col-md-3">
                                     	<div class="form-group">
                                           <input type="hidden" id="pUnitId" />
                                             <label for="selectUnit">Select Unit</label>
@@ -205,7 +248,7 @@
 <!--                                              /.form-group  select unit-->
                                     </div>
                                 
-                                	<div class="col-md-3">
+                                <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="selectQuantity">Select Quantity</label>
                                             
@@ -236,15 +279,24 @@
                                     	<div class="form-group">
                                             <label for="productMinimumInitialAmount">Initial Amount(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
-                                                min initial amt /unit: <span id="initialAmountPerUnit"></span><br/>
+                                                Min initial amt /unit: <span id="initialAmountPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="minInitialAmountSpan"></span><br/>
                                             </span>
                                             <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()">
                                         </div> 
 <!--                                            /.form-group initial monthly amount -->
-                                    </div>
-                                              
-                                              <div class="col-md-2">
+                                        </div>
+                                      
+                                      <c:if test="${plugins.containsKey('loyalty')}">
+                                          <div class="col-md-2" >
+                                              <div class="form-group">
+                                                  <label for="productLoyaltyPoint">Loyalty Point</label>
+                                                  <span class="productSpan">Amount of loyalty point to use for Item</span>
+                                                  <input type="text" size="4" class="form-control" name="productLoyaltyPoint" id="productLoyaltyPoint" onkeyup="calculateAmountToPay()">
+                                              </div>
+                                          </div>         
+                                      </c:if>        
+                                      <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="amountLeft">Balance Payable(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
@@ -259,7 +311,7 @@
                                     	<div class="form-group">
                                             <label for="productMaximumDuration">Payment Duration</label>
                                             <span id="amountPerUnit" class="productSpan">
-                                                max payment duration /unit: <span id="payDurationPerUnit"></span><br/>
+                                                Max payment duration /unit: <span id="payDurationPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="payDurationPerQuantity"></span>
                                             </span>
                                             <div class="row">
@@ -273,35 +325,59 @@
                                         </div> <!-- /.form-group Duration -->
                                     </div>
                                
-                                	<div class="col-md-2">
+                                    <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMinimumMonthlyPayment">Monthly Payment(N)</label>
                                             <span id="amountPerUnit" class="productSpan">
-                                                min monthly pay / unit: <span id="monthlyPayPerUnit"></span><br/>
+                                                Min monthly pay / unit: <span id="monthlyPayPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="monthlyPayPerQuantity"></span>
                                             </span>
                                             <input type="text" class="form-control" id="productMinimumMonthlyPayment" name="productMinimumMonthlyPayment" style="width: 100%;" onKeyup="calculateDurationFromMonthlyPay()">
                                             <span id="finalAmount" style="display:block"></span>
                                         </div> <!--/.form-group amount -->
                                     </div>
-                                                
-                                </div>
-                                              <div class="row">
-                                                    <div class="col-md-12 box-footer">
-                                                        <div class="row">
-                                                            <div class="col-md-4">
-                                                            <div id="errorText" style="color:#722F37 !important; font-weight:bold !important;"></div>
-                                                            </div>
-                                                            <div class="col-md-2 pull-right">
-                                                   <div id="addToCartLabel"  style="margin: 0 auto !important;" >
-                                    	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
-                                        </div> 
-                                                   </div>
-                                                   </div>
-                                                   </div>
-                            </div>
+                               
+                                    <c:if test="${userType != null && userType == 1 }">     
+                                          <div class="col-md-2">
+                                              <div class="form-group">
+                                                  <label>
+                                                      Commission(%)
+                                                  </label>
+                                                  <span class="productSpan">This is the commission payable to an agent</span>
+                                                  <input type="text" class="form-control" value="0" name="commp" id="commp"/>
                                               </div>
+                                          </div>
+                                    </c:if>  
+                                                
+                               
+                                      <div class="col-md-2">
+                                              <div class="form-group">
+                                                  <label>
+                                                      Notification Day
+                                                  </label>
+                                                  <span class="productSpan">Select the day of the month to receive monthly notification</span>
+                                                  <input type="number" class="form-control" min="1" max="31" name="day_of_notification" value="1" id="day_of_notification"/>
+                                              </div>
+                                      </div>
+                                      
+                                  </div>      
+                                              
+                                  <div class="row">
+                                        <div class="col-md-12 box-footer">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div id="errorText" style="color:#722F37 !important; font-weight:bold !important;"></div>
+                                            </div>
+                                            <div class="col-md-2 pull-right">
+                                               <div id="addToCartLabel"  style="margin: 0 auto !important;" >
+                                                    <div class="form-group">
+                                                        <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                                    </div> 
+                                               </div>
+                                           </div>
+                                           </div>
+                                    </div>
+                                </div>
                             </div> <!--/.col-md-12 -->
                     	</fieldset>
                   	</div> <!--/.col-md-12 -->
@@ -416,7 +492,7 @@
                                             <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
                                                 <option value="">--Select Account--</option>
                                                 <c:forEach items="${companyAccount}" var="CA">
-                                                    <option value="${CA.getId()}">${CA.getAccountName()}</option>
+                                                    <option value="${CA.getId()}">${CA.getAccountDetails()}</option>
                                                 </c:forEach>
                                             </select>
                                         </div> 
@@ -503,14 +579,14 @@
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="accountNo">Depositor's Account No</label>
-                                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
+                                            <input type="text" class="form-control" id="transfer_accountNo" name="transfer_accountNo" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
                                     <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="accountNo">Depositor's Account Name</label>
-                                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
+                                            <input type="text" class="form-control" id="transfer_accountName" name="transfer_accountName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
@@ -549,7 +625,7 @@
 
       </div><!-- /.row -->
               
-      <input type="hidden" name="customer_id" id="id" value="${customerId}">
+      
       <input type="hidden" name="id" id="id" value="${customerId}">
       <input type="hidden" name="cartDataJson" id="cartDataJson" />
       
@@ -580,14 +656,36 @@
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
       
+      
+      <!--MODAL-->
+      <div class="modal fade" id="rewardPointError" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">NEOFORCE</h4>
+            </div>
+            <div class="modal-body">
+              <p>You have exceeded your reward point</p>
+            </div>
+            <div class="modal-footer">
+              <button id="ok" type="button" data-dismiss="modal" class="btn btn-primary pull-right">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
+      
    
       
 <script>
     
-    $(function(){
+    $(document).ready(function(){
        
        $("#agentSpinnerContainer:visible").toggle();
        $("#agentDetailContainer:visible").toggle();
+       
+       
+       $("#checkOutToPay").attr("disabled",true);
     });
     
 </script>

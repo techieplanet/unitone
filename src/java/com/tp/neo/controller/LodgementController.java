@@ -46,6 +46,7 @@ import com.tp.neo.model.Agent;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.NotificationType;
+import com.tp.neo.model.Plugin;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -110,8 +111,25 @@ public class LodgementController extends AppController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //processRequest(request, response);
-        processGetRequest(request, response);
+        
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        //AjaxRequests
+        if(action.equalsIgnoreCase("lodgmentItems")){
+            
+            getLodgmentItemCollection(request, response);
+            return;
+        }
+        
+        if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new Lodgement().getPermissionName(action), request, response)){
+                processGetRequest(request, response);
+            }else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+            
+        }
+        
     }
 
       protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
@@ -119,6 +137,7 @@ public class LodgementController extends AppController {
         response.setContentType("text/html;charset=UTF-8");
     
         SystemUser user = sessionUser;
+        System.out.println("SessionUser in Lodgment Get method : " + sessionUser);
         
         String action = request.getParameter("action") != null?request.getParameter("action"):"";
         
@@ -137,15 +156,44 @@ public class LodgementController extends AppController {
              if(userTypeId == 1)
                  request.setAttribute("customers", listCustomers());
              else if(userTypeId == 2){
-                 
                  request.setAttribute("customers", listAgentCustomers(user.getSystemUserId()));
-             
+             }
+             else if(userTypeId == 3){
+                 
+                 //Sending Customer List containing single customer, so as not to break the View flow;
+                 List<Customer> customerList = new ArrayList();
+                 Customer cust = (Customer)user;
+                 customerList.add(cust);
+                 request.setAttribute("customers",customerList);
+                         
              }
             
          }
          else if(action.equals("getOrders")) {
              
              listCustomerOrders(request, response);
+             action = "";
+         }
+         else if(action.equalsIgnoreCase("lodgmentItems")){
+             
+             getLodgmentItemCollection(request, response);
+             return;
+         }
+         else if(action.equalsIgnoreCase("list_approved")){
+             
+             getApprovedLodgement(request,sessionUser.getSystemUserTypeId());
+             request.setAttribute("table_title", "Approved Lodgments");
+             
+         }
+         else if(action.equalsIgnoreCase("list_unapproved")){
+             
+             getUnapprovedLodgement(request,sessionUser.getSystemUserTypeId());
+             request.setAttribute("table_title", "Declined Lodgments");
+         }
+         else if(action.equalsIgnoreCase("list_pending")){
+             
+             getPendingLodgement(request,sessionUser.getSystemUserTypeId());
+             request.setAttribute("table_title", "Pending Lodgments");
          }
          else if(action.equalsIgnoreCase("approval")){
              
@@ -159,12 +207,13 @@ public class LodgementController extends AppController {
              approveLodgement(request);
              response.sendRedirect(request.getContextPath() + "/Lodgement?action=approval");
              isRedirect = true;
+             return;
          }
          else if(action.equalsIgnoreCase("decline")){
              
              declineLodgement(request);
              response.sendRedirect(request.getContextPath() + "/Lodgement?action=approval");
-             isRedirect = true;
+             return;
          }
          else if(action.equalsIgnoreCase("notification")){
              viewFile = LODGEMENT_APPROVAL;
@@ -176,14 +225,33 @@ public class LodgementController extends AppController {
          }
          else{
             viewFile = LODGEMENT_ADMIN;
-            request.setAttribute("lodgements",listLodgements());;
+            
+            request.setAttribute("lodgements",listLodgements(user.getSystemUserTypeId()));
+            request.setAttribute("table_title", "All Lodgments");
          }
         
-         if(!isRedirect){
-             System.out.println("Action : " + action + "/");
+            //Keep track of the sideBar
+            request.setAttribute("sideNav", "Lodgement"); 
+            request.setAttribute("sideNavAction",action);
+            
+            //Get Available Plugins
+            HttpSession session = request.getSession();
+            Map<String, Plugin> plugins = (Map)session.getAttribute("availablePlugins");
+            request.setAttribute("plugins",plugins);
+            
+            double pointToCurrency = 0;
+        
+            if(plugins.containsKey("loyalty")){
+                Gson gson = new Gson();
+                Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+                Map<String, String> loyaltySettingsMap = gson.fromJson(plugins.get("loyalty").getSettings(), mapType);
+                pointToCurrency =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+            }
+            request.setAttribute("pointToCurrency", pointToCurrency);
+     
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
-         }
+       
             
     }
     
@@ -202,7 +270,7 @@ public class LodgementController extends AppController {
         
         String action = request.getParameter("action");
         
-        if(action.equalsIgnoreCase("morgage")){
+        if(action.equalsIgnoreCase("mortgage")){
              
              String viewFile = LODGEMENT_NEW;
              payMorgage(request);
@@ -262,19 +330,25 @@ public class LodgementController extends AppController {
      }
     
     /*TP: Listing of customers that exists in the database and are not deleted*/
-    public List<Lodgement> listLodgements(){
+    public List<Lodgement> listLodgements(int userType){
         
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        int i = 1;
-        Long id = new Long(i);
-        //find by ID
-        Query jpqlQuery  = em.createNamedQuery("Lodgement.findAll");
-       
+      
+        Query jpqlQuery = em.createNamedQuery("Lodgement.findAll");
+        
+        if(userType == 2){
+            jpqlQuery = em.createNamedQuery("Lodgement.findByAgent");
+            jpqlQuery.setParameter("agent", (Agent)sessionUser);
+        }
+        else if(userType == 3) {
+            jpqlQuery = em.createNamedQuery("Lodgement.findByCustomer");
+            jpqlQuery.setParameter("customer", (Customer)sessionUser);
+        }
+        
         List<Lodgement> lodgementList = jpqlQuery.getResultList();
         
-        System.out.println("This is the new lodgement details "+lodgementList);
         return lodgementList;
     }
     
@@ -472,8 +546,20 @@ public class LodgementController extends AppController {
             Notification notification = (Notification)jpQl.getSingleResult();
             
             LodgementManager manager = new LodgementManager(sessionUser);
+            
+            HttpSession session = request.getSession();
+            HashMap<String, Plugin> plugins = (HashMap)session.getAttribute("availablePlugins");
+            
+            if(plugins.containsKey("loyalty")){
+                
+                manager = new LodgementManager(sessionUser,plugins);
+            }
+            
             manager.approveLodgement(lodgement, notification, request.getContextPath());
             
+            
+            
+            request.getSession().setAttribute("success", true);
             
         } catch (PropertyException ex) {
             Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
@@ -489,20 +575,29 @@ public class LodgementController extends AppController {
     
     private void declineLodgement(HttpServletRequest request){
        
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-            EntityManager em = emf.createEntityManager();
-            
-            Long id = Long.parseLong(request.getParameter("id"));
-            Lodgement lodgement = em.find(Lodgement.class,id);
-            
-            Long notificationId = Long.parseLong(request.getParameter("nof_id"));
-            Notification notification = em.find(Notification.class, notificationId);
-            
-            LodgementManager manager = new LodgementManager(sessionUser);
-            //manager.declineLodgementApproval(lodgement, request.getContextPath());
-            
-            em.close();
-            emf.close();
+//        try {
+//            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+//            EntityManager em = emf.createEntityManager();
+//            
+//            Long id = Long.parseLong(request.getParameter("id"));
+//            Lodgement lodgement = em.find(Lodgement.class,id);
+//            
+//            Query jpQl = em.createNamedQuery("Notification.findByRemoteId");
+//            jpQl.setParameter("remoteId", lodgement.getId());
+//            jpQl.setParameter("typeTitle","Lodgement");
+//            
+//            Notification notification = (Notification)jpQl.getSingleResult();
+//            
+//            LodgementManager manager = new LodgementManager(sessionUser);
+//            manager.approveLodgement(lodgement, notification, request.getContextPath());
+//            
+//            em.close();
+//            emf.close();
+//        } catch (PropertyException ex) {
+//            Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (RollbackException ex) {
+//            Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
     
     private void payMorgage(HttpServletRequest request) {
@@ -523,6 +618,19 @@ public class LodgementController extends AppController {
             Long userId = user.getSystemUserId();
             Lodgement lodgement = prepareLodgement(getRequestParameters(request), userId);
             
+            HttpSession session = request.getSession();
+            Map<String, Plugin> plugins = (Map)session.getAttribute("availablePlugins");
+            double amountPerRewardPoint = 0;
+            
+            if(plugins.containsKey("loyalty")){
+                Gson gson = new Gson();
+                Type mapType = new TypeToken<Map<String, String>>(){}.getType();
+                Map<String, String> loyaltySettingsMap = gson.fromJson(plugins.get("loyalty").getSettings(), mapType);
+                amountPerRewardPoint =  Double.parseDouble(loyaltySettingsMap.get("reward_value"));
+            }
+            double lodgementAmount = 0;
+            double lodgementRewardAmount = 0;
+            
             List<LodgementItem> lodgementItemList = new ArrayList();
             
             for(MorgageList morgageItem : morgageList){
@@ -535,6 +643,18 @@ public class LodgementController extends AppController {
                 lodgementItem.setItem(orderItem);
                 lodgementItem.setAmount(morgageItem.getAmount());
                 
+                lodgementAmount += morgageItem.getAmount();
+                
+                if(plugins.containsKey("loyalty")){
+                    
+                    lodgementItem.setRewardAmount(morgageItem.getRewardPoint() * amountPerRewardPoint);
+                    lodgementRewardAmount += (morgageItem.getRewardPoint() * amountPerRewardPoint);
+                }
+                else{
+                    double d = 0;
+                    lodgementItem.setRewardAmount(d);
+                }
+                
                 lodgementItemList.add(lodgementItem);
                 
                 if(customer == null){
@@ -544,13 +664,21 @@ public class LodgementController extends AppController {
                 
             }
             
+            if(plugins.containsKey("loyalty")){
+                lodgement.setAmount(lodgementAmount);
+                lodgement.setRewardAmount(lodgementRewardAmount);
+            }
+            else{
+                lodgement.setRewardAmount(new Double(0));
+            }
+            
             lodgement.setCustomer(customer);
             LodgementManager lodgementManager = new LodgementManager(user);
             lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath(), order);
             
             Map map = prepareMorgageInvoice(lodgement, lodgementItemList);
             
-            HttpSession session = request.getSession(false);
+            //HttpSession session = request.getSession(false);
             session.setAttribute("invoice",map);
             
             em.close();
@@ -655,6 +783,123 @@ public class LodgementController extends AppController {
         return lodgement;
     }
     
+    private void getLodgmentItemCollection(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long lodgment_id = Long.parseLong(request.getParameter("lodgement_id"));
+        
+        Lodgement lodgement = em.find(Lodgement.class, lodgment_id);
+        
+        Query query = em.createNamedQuery("LodgementItem.findByLodgment");
+        query.setParameter("lodgement", lodgement);
+        
+        List<LodgementItem> lodgementItems = query.getResultList();
+        
+        List<Map> mapList = new ArrayList();
+        
+        for(LodgementItem item : lodgementItems){
+            
+            Map<String,String> map = new HashMap();
+            
+            map.put("project", item.getItem().getUnit().getProject().getName());
+            map.put("unit", item.getItem().getUnit().getTitle());
+            map.put("amount", String.format("%.2f",item.getAmount()));
+            
+            mapList.add(map);
+        }
+        
+        Gson gson = new GsonBuilder().create();
+        
+        String jsonString = gson.toJson(mapList);
+        
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonString);
+        response.getWriter().flush();
+        response.getWriter().close();
+    }
+    
+    private void getUnapprovedLodgement(HttpServletRequest request, Integer userType) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Lodgement.findByApprovalStatus");
+        
+        if(userType == 2){
+            jplQuery = em.createNamedQuery("Lodgement.findByAgentApproval");
+            jplQuery.setParameter("agent", (Agent)sessionUser);
+        }
+        else if(userType == 3){
+            jplQuery = em.createNamedQuery("Lodgement.findByCustomerApproval");
+            jplQuery.setParameter("customer", (Customer)sessionUser);
+        }
+        
+        jplQuery.setParameter("approvalStatus", (short)2);
+        List<Lodgement> lodgementList = jplQuery.getResultList();
+        
+        emf.getCache().evictAll();
+        em.close();
+        
+        request.setAttribute("lodgements", lodgementList);
+        
+    }
+
+    private void getApprovedLodgement(HttpServletRequest request, Integer userType) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Lodgement.findByApprovalStatus");
+        
+        if(userType == 2){
+            jplQuery = em.createNamedQuery("Lodgement.findByAgentApproval");
+            jplQuery.setParameter("agent", (Agent)sessionUser);
+        }
+        else if(userType == 3){
+            jplQuery = em.createNamedQuery("Lodgement.findByCustomerApproval");
+            jplQuery.setParameter("customer", (Customer)sessionUser);
+        }
+        
+        jplQuery.setParameter("approvalStatus", (short)1);
+        List<Lodgement> lodgementList = jplQuery.getResultList();
+        
+        emf.getCache().evictAll();
+        em.close();
+        
+        request.setAttribute("lodgements", lodgementList);
+        
+    }
+    
+    private void getPendingLodgement(HttpServletRequest request, Integer userType) {
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jplQuery = em.createNamedQuery("Lodgement.findByApprovalStatus");
+        
+        if(userType == 2){
+            jplQuery = em.createNamedQuery("Lodgement.findByAgentApproval");
+            jplQuery.setParameter("agent", (Agent)sessionUser);
+        }
+        else if(userType == 3){
+            jplQuery = em.createNamedQuery("Lodgement.findByCustomerApproval");
+            jplQuery.setParameter("customer", (Customer)sessionUser);
+        }
+        
+        jplQuery.setParameter("approvalStatus", (short)0);
+        List<Lodgement> lodgementList = jplQuery.getResultList();
+        
+        emf.getCache().evictAll();
+        em.close();
+        
+        request.setAttribute("lodgements", lodgementList);
+        
+    }
+    
+    
     private Calendar getDateTime(){
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
         return calendar;
@@ -668,6 +913,8 @@ public class LodgementController extends AppController {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    
     
     
 }

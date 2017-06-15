@@ -22,9 +22,10 @@
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/app.min.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/accounting.min.js"></script>
     <script type="text/javascript" src="${pageContext.request.contextPath}/js/functions.js"></script>
-
+     
     
     <script src="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+    
     
     <script>
       $(function () {

@@ -13,6 +13,7 @@ import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.ProjectUnit;
+import com.tp.neo.model.ProjectUnitType;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -108,12 +109,12 @@ public class ProjectUnitController extends AppController {
 //               viewFile = PROJECTS_NEW;
 //        }
         if(action.equalsIgnoreCase("delete")){
-            delete(Integer.parseInt(request.getParameter("id")));
+            delete(Long.parseLong(request.getParameter("id")));
         }
 
 
         else if(action.equalsIgnoreCase("edit")){            
-            int id = (Integer.parseInt(request.getParameter("id")));
+            long id = (Long.parseLong(request.getParameter("id")));
             Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
             ProjectUnit projectUnit = (ProjectUnit)query.getSingleResult();
             em.close(); emf.close();
@@ -121,15 +122,20 @@ public class ProjectUnitController extends AppController {
             Map<String, String> map = new HashMap<String, String>();
             map.put("title", projectUnit.getTitle());
             map.put("cpu", projectUnit.getCpu().toString());
+            map.put("building_cost", projectUnit.getBuildingCost().toString());
+            map.put("service_value", projectUnit.getServiceValue().toString());
+            map.put("income", projectUnit.getIncome().toString());
             map.put("lid", projectUnit.getLeastInitDep().toString());
             map.put("discount", projectUnit.getDiscount().toString());
             map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
             map.put("commp", projectUnit.getCommissionPercentage().toString());
+            map.put("vatp", projectUnit.getVatPercentage().toString());
+            map.put("reward_points", projectUnit.getRewardPoints().toString());
             map.put("quantity", projectUnit.getQuantity() + "");
 
             map.put("amt_payable", projectUnit.getAmountPayable()+ "");
             map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
-            
+            map.put("unit_type_id", projectUnit.getUnitType() != null ? projectUnit.getUnitType().getId().toString() : "0");
 
             
             Gson gson = new GsonBuilder().create();
@@ -189,15 +195,21 @@ public class ProjectUnitController extends AppController {
                 
                 validate(request);
                 
-                Project project = em.find(Project.class, Integer.parseInt(request.getParameter("projectid")));
+                Project project = em.find(Project.class, Long.parseLong(request.getParameter("projectid")));
                 
                 projectUnit.setTitle(request.getParameter("title"));
                 projectUnit.setCpu(Double.parseDouble(request.getParameter("cpu")));
+                projectUnit.setBuildingCost(Double.parseDouble(request.getParameter("building_cost")));
+                projectUnit.setServiceValue(Double.parseDouble(request.getParameter("service_value")));
                 projectUnit.setLeastInitDep(Double.parseDouble(request.getParameter("lid")));
                 projectUnit.setDiscount(Double.parseDouble(request.getParameter("discount")));
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
+                projectUnit.setVatPercentage(Double.parseDouble(request.getParameter("vatp")));
+                projectUnit.setRewardPoints(Integer.parseInt(request.getParameter("reward_points")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
+                projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
+                projectUnit.setUnitType(em.find(ProjectUnitType.class, Integer.parseInt(request.getParameter("unittype"))));
 
                 projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
@@ -270,8 +282,14 @@ public class ProjectUnitController extends AppController {
                 map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
                 map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
                 map.put("commp", projectUnit.getCommissionPercentage().toString());
+                map.put("vatp", projectUnit.getVatPercentage().toString());
+                map.put("reward_points", projectUnit.getRewardPoints().toString());
+                map.put("building_cost", projectUnit.getBuildingCost().toString());
+                map.put("income", projectUnit.getIncome().toString());
+                map.put("service_value", projectUnit.getServiceValue().toString());
 
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
+                
             }
         
            //boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
@@ -298,20 +316,26 @@ public class ProjectUnitController extends AppController {
                 
                 validate(request);
                
-                int id = (Integer.parseInt(request.getParameter("id")));
+                long id = (Long.parseLong(request.getParameter("id")));
                 Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
                 projectUnit = (ProjectUnit)query.getSingleResult();
                 
                 projectUnit.setTitle(request.getParameter("title"));
                 projectUnit.setCpu(Double.parseDouble(request.getParameter("cpu")));
+                projectUnit.setBuildingCost(Double.parseDouble(request.getParameter("building_cost")));
+                projectUnit.setServiceValue(Double.parseDouble(request.getParameter("service_value")));
                 projectUnit.setLeastInitDep(Double.parseDouble(request.getParameter("lid")));
                 projectUnit.setDiscount(Double.parseDouble(request.getParameter("discount")));
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
+                projectUnit.setVatPercentage(Double.parseDouble(request.getParameter("vatp")));
+                projectUnit.setRewardPoints(Integer.parseInt(request.getParameter("reward_points")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
+                projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
 
                 projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
+                projectUnit.setUnitType(em.find(ProjectUnitType.class, Integer.parseInt(request.getParameter("unittype"))));
                 
                 new TrailableManager(projectUnit).registerUpdateTrailInfo(sessionUser.getSystemUserId());
                 
@@ -355,7 +379,13 @@ public class ProjectUnitController extends AppController {
                 map.put("amt_payable", projectUnit.getAmountPayable()+ "");
                 map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
                 map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
+                map.put("buidling_cost", projectUnit.getBuildingCost().toString());
+                map.put("service_value", projectUnit.getServiceValue().toString());
+                map.put("income", projectUnit.getIncome().toString());
                 map.put("commp", projectUnit.getCommissionPercentage().toString());
+                map.put("vatp", projectUnit.getVatPercentage().toString());
+                map.put("reward_points", projectUnit.getRewardPoints().toString());
+                
 
                 SystemLogger.logSystemIssue("ProjectUnit", gson.toJson(map), e.getMessage());
             }
@@ -368,7 +398,7 @@ public class ProjectUnitController extends AppController {
     }
     
     
-    public void delete(int id){
+    public void delete(long id){
         log("starting to delete: " + id);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
@@ -439,9 +469,26 @@ public class ProjectUnitController extends AppController {
             errorMessages.put("commp", "Please enter Commission Percentage");
         }    
         
-        if(!request.getParameter("quantity").matches("^\\d+(\\.?\\d+$)?")){
+        if(!request.getParameter("vatp").matches("^\\d+(\\.?\\d+$)?")){
+            errorMessages.put("vatp", "Please enter VAT Percentage");
+        }    
+        
+        if(!request.getParameter("reward_points").matches("^\\d+$")){
+            errorMessages.put("reward_points", "Please enter a valid Reward Point value");
+        }
+        
+        if(!request.getParameter("quantity").matches("^\\d+$")){
             errorMessages.put("quantity", "Please enter a valid Quantity");
         }
+        
+        if(!request.getParameter("building_cost").matches("^\\d+(\\.?\\d+$)?")){
+            errorMessages.put("building_cost", "Please enter valid money value");
+        }
+        
+        if(!request.getParameter("service_value").matches("^\\d+(\\.?\\d+$)?")){
+            errorMessages.put("service_value", "Please enter valid money value");
+        }
+        
         
         if(!(errorMessages.isEmpty())) throw new PropertyException("");
         

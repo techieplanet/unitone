@@ -12,7 +12,7 @@
           
    <section class="content-header">
       <h1>
-        Lodgement
+          <a href="${pageContext.request.contextPath}/Lodgement">Lodgement</a>
       </h1>
     </section>
        
@@ -37,6 +37,7 @@
             <th>Phone No</th>
             <th>Email</th>
             <th>State</th>
+            <th>Reward Point</th>
             <th>Action</th>
 
           </tr>
@@ -52,7 +53,7 @@
                     <td class="customerPhone"><c:out value="${customer.phone}" /></td>
                     <td class="customerEmail"><c:out value="${customer.email}" /></td>
                     <td class="customerState"><c:out value="${customer.state}" /></td>
-
+                    <td class="customerLoyaltyPoint" style="text-align:right">${customer.getRewardPoints()}</td>
                     <td>
                         <input type="hidden" class="customerImg" value='<c:out value="/uploads/NeoForce/images/customer/${customer.photoPath}"></c:out>' />
                         <input type="hidden" class="agentImg" value='<c:out value="/uploads/NeoForce/images/agent/${customer.agent.photoPath}"></c:out>' />
@@ -63,9 +64,6 @@
                 </tr>
             </c:forEach>
       </tbody>
-        <tfoot>
-
-        </tfoot>
       </table>
       <div><span><a href="#" onclick="showSelectedCustomer()">View selected customer <i class="fa fa-chevron-right"></i></a> </span></div>
     </div><!-- /.box-body -->
@@ -87,11 +85,8 @@
          <div class="box box-solid">
              
              <div class="box-header with-border">
-                 <div class='col-md-6'>
+                 <div class='col-md-12'>
                     <h4>Customer Details</h4>
-                 </div>
-                 <div class='col-md-6'>
-                    <h4>Agent Details</h4>
                  </div>
              </div>
              
@@ -114,16 +109,6 @@
                          
                      </div>
                      
-                     <!-- Agents Details Box -->
-                     <div class="col-md-6">
-                         <div class="row">
-                             <div class="col-md-3"><img src="" id="agentImage" alt="No Image" class="img-thumbnail img-responsive"></div>
-                             <div class="col-md-9">
-                                 <span id="agentName"></span> <br />
-                                 <span id="agentPhone"></span> <br />
-                             </div>
-                         </div>
-                     </div>
                      
                  </div>
                  
@@ -200,7 +185,7 @@
                       <div class="box box-default">
                     	<fieldset>
                         <legend style="padding-left:20px !important;">Check Out</legend>
-                        <form name="lodgementCart" method="post" action="${pageContext.request.contextPath}/Lodgement?action=morgage" >    
+                        <form name="lodgementCart" method="post" action="${pageContext.request.contextPath}/Lodgement?action=mortgage" >    
                             <div class="col-md-11" >
                             	
                                 <!-- Start of Payment Method Container -->
@@ -377,6 +362,25 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
+      
+      
+      <!--MODAL-->
+      <div class="modal fade" id="rewardPointError" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">NEOFORCE</h4>
+            </div>
+            <div class="modal-body">
+              <p>You have exceeded your reward point</p>
+            </div>
+            <div class="modal-footer">
+              <button id="ok" type="button" data-dismiss="modal" class="btn btn-primary pull-right">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
 
       
 <!-- Include the footer -->
@@ -389,6 +393,14 @@
 <!-- Include the bottom -->
 <%@ include file="../includes/bottom.jsp" %>
 
+<script>
+    var customerLoyaltyPoint = 0;
+    var isLoyaltyEnabled = "${plugins.containsKey('loyalty') ? 1 : 0}";
+    var pointToCurrency = "${pointToCurrency}";
+    console.log("isLoyaltyEnabled : " + isLoyaltyEnabled);
+    console.log("pointToCurrency : " + pointToCurrency);
+</script>
+
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/neoforce.lodgement.js"></script>
 <script>
         
@@ -400,13 +412,13 @@
                 ]
             });
     
-        $("#lodgementCartTable").DataTable({
-                "autoWidth": false,
-                "columnDefs": [
-                    { "sortable": false}
-                ]
-        });
+            $("#lodgementCartTable").DataTable({
+                    "autoWidth": false,
+                    "columnDefs": [
+                        { "sortable": false}
+                    ]
+            });
       
           });
-          
+  </script>        
  

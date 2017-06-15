@@ -19,20 +19,17 @@
 </div>
 </c:if>
 
- <c:if test='${userTypeId != null && userTypeId == "1" }'>
+ <c:if test='${userTypeId != null && action.equals("new") && userTypeId == "1" }'>
  <div class="row margin-bottom" id="agentListContainer">
-     
-     <section class="content-header">
-         
-         
-         <div class="box">
-                <div class="box-header">
-                  <h3 class="box-title block">
-                      Select an agent
-                  </h3>
+    <div class="col-md-12">   
+         <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h2 class="panel-title">
+                      <b>Select an agent</b>
+                  </h2>
                 </div><!-- /.box-header -->
                 
-                 <div class="box-body">
+                 <div class="panel-body" id="agentListPanelBody ">
                   <table id="agentList" class="table table-bordered table-striped table-hover">
                     <thead>
                       <tr>
@@ -51,7 +48,7 @@
                     <tbody>
                         <c:forEach items="${agents}" var="agent">
                             <tr id='row<c:out value="${agent.agentId}" />'>
-                                <td><img alt="No Image" class="img-responsive img-thumbnail" src="<c:out value='${agent.photoPath}'></c:out>" /></td>
+                                <td><img alt="No Image" class="img-responsive img-thumbnail" width="55" height="55" src="/uploads/NeoForce/images/agents/<c:out value='${agent.photoPath}'></c:out>" /></td>
                                 <td class="agentId"><c:out value="${agent.agentId}" /></td>
                                 <td class="agentFname"><c:out value="${agent.firstname}" /></td>
                                 <td class="agentMname"><c:out value="${agent.middlename}" /></td>
@@ -61,7 +58,7 @@
                                 <td class="agentState"><c:out value="${agent.state}" /></td>
                               
                                 <td>
-                                    <input type="hidden" class="agentImg" value='<c:out value="${agent.photoPath}"></c:out>' />
+                                    <input type="hidden" class="agentImg" value='/uploads/NeoForce/images/agents/<c:out value="${agent.photoPath}"></c:out>' />
                                     <a class="btn btn-primary" href="#" onclick="selectAgent('${agent.agentId}')" role="button">Choose</a>
                                 </td>
                             </tr>
@@ -71,12 +68,15 @@
                     
                     </tfoot>
                   </table>
-                  <div><span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span></div>
-                </div><!-- /.box-body -->
-              </div><!-- /.box -->
-         
-     </section>
-     
+                </div><!-- /.panel-body -->
+                
+                <div class="panel-footer">
+                    <span><a href="#" onclick="showSelectedAgent()">View selected agent</a></span>
+                </div>
+                
+          </div>
+  
+    </div>
  </div>
                                 
  <div class="row" id="agentSpinnerContainer" style='display:none'>
@@ -100,7 +100,7 @@
                  <div class="row">
                      
                      <div class="col-md-3">
-                         <img src="" alt="No image" />
+                         <img src="" alt="No image" class="agent_img img-responsive img-thumbnail" width="80" height="80" />
                      </div>
                      
                      <div class="col-md-9">
@@ -124,7 +124,7 @@
  </div>
                                 
 </c:if>  
-<form role="form" name="customerRegistration" method="POST" action="Customer?action=new" enctype="multipart/form-data">
+<form role="form" name="customerRegistration" method="POST" action="Customer?action=new" enctype="multipart/form-data" onsubmit="return submitForm()">
   
     <input type="hidden" name="customer_id" value="" />
     <input type="hidden" name="agent_id" id="agent_id" value="" />
@@ -134,7 +134,7 @@
               <!-- general form elements -->
                
                 <!-- form start -->
-               <div class="box box-primary">
+               <div class="box box-primary" id="step1_box">
                 <div class="box-header with-border">
                   <h3 class="box-title">Customer Registration Form 
                       
@@ -170,7 +170,7 @@
                     </div>
                 </div>
           </c:if>   
-                              <c:if test="${action != 'new'}">
+                              <c:if test='${action != "new" && userType != 3}' >
                                   <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Order?action=new&customer=${customer.customerId}">Buy Product</a>
                                   &nbsp;&nbsp;&nbsp;
                                   <a class="btn btn-primary" href="Customer?action=new" role="button"><i class="fa fa-plus"></i>&nbsp;&nbsp;&nbsp;&nbsp;Add New Customer</a>
@@ -255,38 +255,25 @@
                             </div>
                             </fieldset>
                         </div>
-                         <div class="col-md-4">
-                             <div class="row">
-                             <div class="row text-center" id="imgholder">
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group text-center">
-                            
-                              <img <c:if test="${customer.photoPath != null && customer.photoPath != "default"}"> src="/uploads/NeoForce/images/customer/${customer.photoPath}" </c:if>
-                               <c:if test="${customer.photoPath == "default"  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"</c:if>
-                                class=" img-responsive text-center" style="max-height:220px !important;"/>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
+                         <div class="col-md-4" style="padding-top: 50px">
+                         
                             <div class="form-group">
                               <div class="btn-group btn-group-xs">
-                                  <div class="btn btn-primary btn-file">
-                      Change <span title="Change Profile Picture" class="glyphicon glyphicon-edit"></span> 
-                      <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
-                      <input type="hidden" name="customerPhotoHidden" 
-                           <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value=""
-                    </c:if><c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"
-                    </c:if> <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"
-                    </c:if> />
-                    </div>
+                                  <label for="customerPhoto" style="display:block">Customer Photo</label>
+                                  <div class="btn btn-primary">
+                                  <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
+                                  <input type="hidden" name="customerPhotoHidden" 
+                                      <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                      <c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"</c:if> 
+                                      <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"</c:if> 
+                                  />
+                                 </div>
+                                </div>
                                   
-                              </div>
-                                
-                            </div>
+                           </div>   
+                       </div>
+                                  
                         </div>
-                    </div>
-                    
-                  </div>
-                         </div>
                     </div>
                     </div>
                    
@@ -332,43 +319,43 @@
                               <select class="form-control" id="customerState" name="customerState" <c:if test='${action == "edit" && userType > 1}'>disabled="disabled"</c:if>  >
                                     <option value="">--choose--</option>
                                     
-                                    <option value="ABUJA FCT" <c:if test="${state == "ABUJA FCT"}"> <jsp:text>selected</jsp:text> </c:if>>ABUJA FCT</option>
-                                    <option value="Abia" <c:if test="${state == "Abia"}"> <jsp:text>selected</jsp:text> </c:if>>ABIA</option>
-                                    <option value="Adamawa" <c:if test="${state == "Adamawa"}"> <jsp:text>selected</jsp:text> </c:if>>ADAMAWA</option>
-                                    <option value="Akwa Ibom" <c:if test="${state == "Akwa Ibom"}"> <jsp:text>selected</jsp:text> </c:if>>AKWA IBOM</option>
-                                    <option value="Anambra" <c:if test="${state == "Anambra"}"> <jsp:text>selected</jsp:text> </c:if>>ANAMBRA</option>
-                                    <option value="Bauchi" <c:if test="${state == "Bauchi"}"> <jsp:text>selected</jsp:text> </c:if>>BAUCHI</option>
-                                    <option value="Bayelsa" <c:if test="${state == "Bayelsa"}"> <jsp:text>selected</jsp:text> </c:if>>BAYELSA</option>
-                                    <option value="Benue" <c:if test="${state == "Benue"}"> <jsp:text>selected</jsp:text> </c:if>>BENUE</option>
-                                    <option value="Borno" <c:if test="${state == "Borno"}"> <jsp:text>selected</jsp:text> </c:if>>BORNO</option>
-                                    <option value="Cross River" <c:if test="${state == "Cross River"}"> <jsp:text>selected</jsp:text> </c:if>>CROSS RIVER</option>
-                                    <option value="Delta" <c:if test="${state == "Delta"}"> <jsp:text>selected</jsp:text> </c:if>>DELTA</option>
-                                    <option value="Ebonyi" <c:if test="${state == "Ebonyi"}"> <jsp:text>selected</jsp:text> </c:if>>EBONYI</option>
-                                    <option value="Edo" <c:if test="${state == "Edo"}"> <jsp:text>selected</jsp:text> </c:if>>EDO</option>
-                                    <option value="Ekiti" <c:if test="${state == "Ekiti"}"> <jsp:text>selected</jsp:text> </c:if>>EKITI</option>
-                                    <option value="Enugu" <c:if test="${state == "Enugu"}"> <jsp:text>selected</jsp:text> </c:if>>ENUGU</option>
-                                    <option value="Gombe" <c:if test="${state == "Gombe"}"> <jsp:text>selected</jsp:text> </c:if>>GOMBE</option>
-                                    <option value="Imo" <c:if test="${state == "Imo"}"> <jsp:text>selected</jsp:text> </c:if>>IMO</option>
-                                    <option value="Jigawa" <c:if test="${state == "Jigawa"}"> <jsp:text>selected</jsp:text> </c:if>>JIGAWA</option>
-                                    <option value="Kaduna" <c:if test="${state == "Kaduna"}"> <jsp:text>selected</jsp:text> </c:if>>KADUNA</option>
-                                    <option value="Kano" <c:if test="${state == "Kano"}"> <jsp:text>selected</jsp:text> </c:if>>KANO</option>
-                                    <option value="Katsina" <c:if test="${state == "Katsina"}"> <jsp:text>selected</jsp:text> </c:if>>KATSINA</option>
-                                    <option value="Kebbi" <c:if test="${state == "Kebbi"}"> <jsp:text>selected</jsp:text> </c:if>>KEBBI</option>
-                                    <option value="Kogi" <c:if test="${state == "Kogi"}"> <jsp:text>selected</jsp:text> </c:if>>KOGI</option>
-                                    <option value="Kwara" <c:if test="${state == "Kwara"}"> <jsp:text>selected</jsp:text> </c:if>>KWARA</option>
-                                    <option value="Lagos" <c:if test="${state == "Lagos"}"> <jsp:text>selected</jsp:text> </c:if>>LAGOS</option>
-                                    <option value="Nassarawa" <c:if test="${state == "Nassarawa"}"> <jsp:text>selected</jsp:text> </c:if>>NASSARAWA</option>
-                                    <option value="Niger" <c:if test="${state == "Niger"}"> <jsp:text>selected</jsp:text> </c:if>>NIGER</option>
-                                    <option value="Ogun" <c:if test="${state == "Ogun"}"> <jsp:text>selected</jsp:text> </c:if>>OGUN</option>
-                                    <option value="Ondo" <c:if test="${state == "Ondo"}"> <jsp:text>selected</jsp:text> </c:if>>ONDO</option>
-                                    <option value="Osun" <c:if test="${state == "Osun"}"> <jsp:text>selected</jsp:text> </c:if>>OSUN</option>
-                                    <option value="Oyo" <c:if test="${state == "Oyo"}"> <jsp:text>selected</jsp:text> </c:if>>OYO</option>
-                                    <option value="Plateau" <c:if test="${state == "Plateau"}"> <jsp:text>selected</jsp:text> </c:if>>PLATEAU</option>
-                                    <option value="Rivers" <c:if test="${state == "Rivers"}"> <jsp:text>selected</jsp:text> </c:if>>RIVERS</option>
-                                    <option value="Sokoto" <c:if test="${state == "Sokoto"}"> <jsp:text>selected</jsp:text> </c:if>>SOKOTO</option>
-                                    <option value="Taraba" <c:if test="${state == "Taraba"}"> <jsp:text>selected</jsp:text> </c:if>>TARABA</option>
-                                    <option value="Yobe" <c:if test="${state == "Yobe"}"> <jsp:text>selected</jsp:text> </c:if>>YOBE</option>
-                                    <option value="Zamfara" <c:if test="${state == "Zamfara"}"> <jsp:text>selected</jsp:text> </c:if>>ZAMFARA</option>
+                                    <option value="ABUJA FCT" <c:if test="${state == 'ABUJA FCT'}"> <jsp:text>selected</jsp:text> </c:if>>ABUJA FCT</option>
+                                    <option value="Abia" <c:if test="${state == 'Abia'}"> <jsp:text>selected</jsp:text> </c:if>>ABIA</option>
+                                    <option value="Adamawa" <c:if test="${state == 'Adamawa'}"> <jsp:text>selected</jsp:text> </c:if>>ADAMAWA</option>
+                                    <option value="Akwa Ibom" <c:if test="${state == 'Akwa Ibom'}"> <jsp:text>selected</jsp:text> </c:if>>AKWA IBOM</option>
+                                    <option value="Anambra" <c:if test="${state == 'Anambra'}"> <jsp:text>selected</jsp:text> </c:if>>ANAMBRA</option>
+                                    <option value="Bauchi" <c:if test="${state == 'Bauchi'}"> <jsp:text>selected</jsp:text> </c:if>>BAUCHI</option>
+                                    <option value="Bayelsa" <c:if test="${state == 'Bayelsa'}"> <jsp:text>selected</jsp:text> </c:if>>BAYELSA</option>
+                                    <option value="Benue" <c:if test="${state == 'Benue'}"> <jsp:text>selected</jsp:text> </c:if>>BENUE</option>
+                                    <option value="Borno" <c:if test="${state == 'Borno'}"> <jsp:text>selected</jsp:text> </c:if>>BORNO</option>
+                                    <option value="Cross River" <c:if test="${state == 'Cross River'}"> <jsp:text>selected</jsp:text> </c:if>>CROSS RIVER</option>
+                                    <option value="Delta" <c:if test="${state == 'Delta'}"> <jsp:text>selected</jsp:text> </c:if>>DELTA</option>
+                                    <option value="Ebonyi" <c:if test="${state == 'Ebonyi'}"> <jsp:text>selected</jsp:text> </c:if>>EBONYI</option>
+                                    <option value="Edo" <c:if test="${state == 'Edo'}"> <jsp:text>selected</jsp:text> </c:if>>EDO</option>
+                                    <option value="Ekiti" <c:if test="${state == 'Ekiti'}"> <jsp:text>selected</jsp:text> </c:if>>EKITI</option>
+                                    <option value="Enugu" <c:if test="${state == 'Enugu'}"> <jsp:text>selected</jsp:text> </c:if>>ENUGU</option>
+                                    <option value="Gombe" <c:if test="${state == 'Gombe'}"> <jsp:text>selected</jsp:text> </c:if>>GOMBE</option>
+                                    <option value="Imo" <c:if test="${state == 'Imo'}"> <jsp:text>selected</jsp:text> </c:if>>IMO</option>
+                                    <option value="Jigawa" <c:if test="${state == 'Jigawa'}"> <jsp:text>selected</jsp:text> </c:if>>JIGAWA</option>
+                                    <option value="Kaduna" <c:if test="${state == 'Kaduna'}"> <jsp:text>selected</jsp:text> </c:if>>KADUNA</option>
+                                    <option value="Kano" <c:if test="${state == 'Kano'}"> <jsp:text>selected</jsp:text> </c:if>>KANO</option>
+                                    <option value="Katsina" <c:if test="${state == 'Katsina'}"> <jsp:text>selected</jsp:text> </c:if>>KATSINA</option>
+                                    <option value="Kebbi" <c:if test="${state == 'Kebbi'}"> <jsp:text>selected</jsp:text> </c:if>>KEBBI</option>
+                                    <option value="Kogi" <c:if test="${state == 'Kogi'}"> <jsp:text>selected</jsp:text> </c:if>>KOGI</option>
+                                    <option value="Kwara" <c:if test="${state == 'Kwara'}"> <jsp:text>selected</jsp:text> </c:if>>KWARA</option>
+                                    <option value="Lagos" <c:if test="${state == 'Lagos'}"> <jsp:text>selected</jsp:text> </c:if>>LAGOS</option>
+                                    <option value="Nassarawa" <c:if test="${state == 'Nassarawa'}"> <jsp:text>selected</jsp:text> </c:if>>NASSARAWA</option>
+                                    <option value="Niger" <c:if test="${state == 'Niger'}"> <jsp:text>selected</jsp:text> </c:if>>NIGER</option>
+                                    <option value="Ogun" <c:if test="${state == 'Ogun'}"> <jsp:text>selected</jsp:text> </c:if>>OGUN</option>
+                                    <option value="Ondo" <c:if test="${state == 'Ondo'}"> <jsp:text>selected</jsp:text> </c:if>>ONDO</option>
+                                    <option value="Osun" <c:if test="${state == 'Osun'}"> <jsp:text>selected</jsp:text> </c:if>>OSUN</option>
+                                    <option value="Oyo" <c:if test="${state == 'Oyo'}"> <jsp:text>selected</jsp:text> </c:if>>OYO</option>
+                                    <option value="Plateau" <c:if test="${state == 'Plateau'}"> <jsp:text>selected</jsp:text> </c:if>>PLATEAU</option>
+                                    <option value="Rivers" <c:if test="${state == 'Rivers'}"> <jsp:text>selected</jsp:text> </c:if>>RIVERS</option>
+                                    <option value="Sokoto" <c:if test="${state == 'Sokoto'}"> <jsp:text>selected</jsp:text> </c:if>>SOKOTO</option>
+                                    <option value="Taraba" <c:if test="${state == 'Taraba'}"> <jsp:text>selected</jsp:text> </c:if>>TARABA</option>
+                                    <option value="Yobe" <c:if test="${state == 'Yobe'}"> <jsp:text>selected</jsp:text> </c:if>>YOBE</option>
+                                    <option value="Zamfara" <c:if test="${state == 'Zamfara'}"> <jsp:text>selected</jsp:text> </c:if>>ZAMFARA</option>
                               </select>
                             </div>
                         </div>
@@ -428,26 +415,28 @@
                             </div>
                             </div>
                             <div class="col-md-12">
-                                <div  class="row">
-                             <div class="col-md-4" >
+                            <div  class="row">
+                                 <div class="col-md-4" >
                                     <div class="row" >
-                            <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
-                              <label for="customerKinPhoto" style="">Next of Kin Picture</label>
-                              <c:if test="${customer.customerId != ""}"> 
-                               <img <c:if test="${customer.kinPhotoPath != null && customer.kinPhotoPath != "default"}"> src="/uploads/NeoForce/images/customerKin/${customer.kinPhotoPath}" </c:if>
-                               <c:if test="${customer.photoPath == "default"  || customer.photoPath  == null }"> src="${pageContext.request.contextPath}/images/img/avatar.png"
-                                </c:if>
-                                class="img-responsive text-center" width="50.33333333%"/>
-                                </c:if>
-                               <input type="file" class="form-control" id="customerKinPhoto" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" />
-                               <input type="hidden" name="customerKinPhotoHidden" 
-                           <c:if test="${customerKinPhotoHidden == null && customer.kinPhotoPath==null}"> value=""
-                    </c:if><c:if test="${customerKinPhotoHidden != null}"> value="${customerKinPhotoHidden}"
-                    </c:if> <c:if test="${customer.kinPhotoPath != null}"> value="${customer.kinPhotoPath}"
-                    </c:if> />
-                            </div>
-                                </div>
-                            </div>
+                                        <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
+
+                                          <div class="btn-group btn-group-xs">
+                                              <label for="customerKinPhoto" style="display:block">Customer Kin Photo</label>
+                                              <div class="btn btn-primary">
+                                                  <input type="file" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" id="customerKinPhoto" >
+                                                  <input type="hidden" name="customerKinPhotoHidden" 
+                                                      <c:if test="${customerKinPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                                      <c:if test="${customerKinPhotoHidden != null}"> value="${customerKinPhotoHidden}"</c:if> 
+                                                      <c:if test="${customer.kinPhotoPath != null}"> value="${customer.kinPhotoPath}"</c:if> 
+                                                  />
+                                              </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                 </div>
+                                  
+                                  
                                     <div class="col-md-2" style="padding-right:50% !important;"></div>
                                 <div class="col-md-6 " >
                                     <div class="row" >
@@ -470,22 +459,24 @@
                  </div><!-- /.col-md-4 -->
                 </div><!-- /.row -->
                 </div> 
-                         
-      </div><!-- /.box -->
-      
+                   
+              
       <c:if test="${action == 'edit'}">
-          <div class="col-md-12">
-              <c:if test="${userType == 1}">
-              <button class="btn btn-success btn-lg" type="submit">Update</button>
-              </c:if>
-          </div>
+      <div class="col-md-12">
+          <c:if test="${userType == 1}">
+          <button class="btn btn-success btn-lg" type="submit">Update</button>
+          </c:if>
+      </div>
       </c:if>
       <c:if test="${action == 'new'}">
       <div class="col-md-12">
-          <a class="btn btn-primary" href="#" onclick="return showOrderProduct()" role="button">Process to Order <i class="fa fa-long-arrow-right"></i></a>
+          <a class="btn btn-primary" href="#" onclick="return validateCustomerRegForm()" role="button">Proceed to Order <i class="fa fa-long-arrow-right"></i></a>
       </div>
       </c:if>
- </div><!-- /.box -->
+              
+      </div><!-- /.box -->
+      
+      
       
 <c:if test="${customer.customerId=='' || customer.customerId== null}">
                     
@@ -497,7 +488,7 @@
                <div class="box box-primary" id="productCartBox">
                
                 <div class="box-header with-border">
-                  <h3 class="box-title">Product Order Form</h3>
+                  <h3 class="box-title">Product Order Cart</h3>
                 </div><!-- /.box-header -->
                 <!-- form start -->
                 <div style="background:#ecf0f5 !important;">
@@ -621,8 +612,37 @@
                                             <span id="finalAmount" style="display:block"></span>
                                         </div> <!--/.form-group amount -->
                                     </div>
+                               
+                                    <c:if test="${userTypeId != null && userTypeId == 1 }">     
+                                          <div class="col-md-2">
+                                              <div class="form-group">
+                                                  <label>
+                                                      Commission(%)
+                                                  </label>
+                                                  <span class="productSpan">This is the commission payable to an agent</span>
+                                                  <input type="text" class="form-control" value="0" name="commp" id="commp"/>
+                                              </div>
+                                          </div>
+                                    </c:if>
                                                 
                                 </div>
+                                              
+                                
+                                <div class="row">
+                                      
+                                      <div class="col-md-2">
+                                              <div class="form-group">
+                                                  <label>
+                                                      Notification Day
+                                                  </label>
+                                                  <span class="productSpan">Select the day of the month to receive monthly notification</span>
+                                                  <input type="number" class="form-control" min="1" max="31" value="1" name="day_of_notification" id="day_of_notification"/>
+                                              </div>
+                                      </div>
+                                      
+                                  </div>               
+                                              
+                                              
                   <div class="row">
                         <div class="col-md-12 box-footer">
                             <div class="row">
@@ -632,7 +652,7 @@
                                 <div class="col-md-2 pull-right">
                                    <div id="addToCartLabel"  style="margin: 0 auto !important;" >
                                     	<div class="form-group">
-                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(event)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
                                         </div> 
                                    </div>
                                </div>
@@ -669,6 +689,9 @@
                                 
               <div class="col-md-12" >
                 <div class="row" >
+                  
+                 <div class="col-md-12">   
+                    
                  <table id="productCart" class="table table-bordered table-striped table-hover" style="text-align:right !important;">
                     <thead>
                       <tr>
@@ -682,7 +705,7 @@
                         <th>Monthly Pay</th>
                         <th>Transaction Deduction</th>
                         
-                        <th>Action</th>
+                        <th style="width: 80px">Action</th>
                         
                       </tr>
                     </thead>
@@ -703,22 +726,9 @@
                     </tfoot>
                    
                   </table>
-                                    
-                                    
-                 <!-- 
-                   ***************************
-                   Checkout Button starts Here
-                   ***************************
-                 -->
-                 
-                 
-                 <!--
-                  ****************************
-                    Checkout Button ends Here
-                  ****************************
-                 -->
-                     </div>
-                   </div>  
+                 </div>
+                </div>
+               </div>  
                    <div class="col-md-2 pull-right">
                      <div class="form-group">
                         <a href="#" class="btn" name="checkOutToPay" id="checkOutToPay" onClick="return checkOutOfCart();"><i class="fa fa-cart-plus"></i>Checkout</a>
@@ -757,7 +767,7 @@
                                             <select name="companyAccount" id="companyAccount" class="form-control select2" style="width: 100%;">
                                                 <option value="">--Select Account--</option>
                                                 <c:forEach items="${companyAccount}" var="CA">
-                                                    <option value="${CA.getId()}">${CA.getAccountName()}</option>
+                                                    <option value="${CA.getId()}">${CA.getAccountDetails()}</option>
                                                 </c:forEach>
                                             </select>
                                         </div> 
@@ -912,4 +922,5 @@
           
       </div>
       -->
+          <input type="hidden" id="pageContext" value="${pageContext.request.contextPath}" />
 </form>

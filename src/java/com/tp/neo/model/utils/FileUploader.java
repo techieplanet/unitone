@@ -27,6 +27,7 @@ public class FileUploader {
     final String macAccessDir = "mac.file.access.path";
     
     final String linuxUploadDir = "linux.upload.directory";
+    final String linuxAccessDir = "mac.file.access.path";
     
     private String fileTypeUploadDirectory = "";
     private String fileTypeAccessDirectory = "";
@@ -129,9 +130,14 @@ public class FileUploader {
         
         File file = new File(fileTypeUploadDirectory, fileSaveName);
 
+        System.out.println("fileSaveName: " + fileSaveName);
         try (InputStream input = fileContent) {
             Files.copy(input, file.toPath());
-        }        
+        } catch(Exception e){
+            e.getMessage();
+            e.printStackTrace();
+        }
+        
     }
      
      
@@ -156,6 +162,11 @@ public class FileUploader {
             fileSeparator = "/";
         }
         
+        if(checker.isUnix()){
+            dir = properties.getProperty(this.linuxUploadDir);
+            fileSeparator = "/";
+        }
+        
         if(fileType.equalsIgnoreCase(fileTypesEnum.IMAGE.toString())){
                 return dir + fileSeparator + "images";
         }
@@ -173,6 +184,10 @@ public class FileUploader {
         
         if(checker.isMac()){
             dir = properties.getProperty(this.macAccessDir);
+        }
+        
+        if(checker.isUnix()){
+            dir = properties.getProperty(this.linuxAccessDir);
         }
         
         if(fileType.equalsIgnoreCase(fileTypesEnum.IMAGE.toString())){

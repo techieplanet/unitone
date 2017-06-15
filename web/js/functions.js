@@ -9,7 +9,7 @@
 
 /* global data */
 var cartArray = []; // holds cart item objects
-
+var isLoyaltyEnabled = isLoyaltyEnabled || 0;
 /*TP: ondocument ready actions to be performed*/
  $( document ).ready(function() {
         $( "#pwBankdeposit").hide();
@@ -17,11 +17,16 @@ var cartArray = []; // holds cart item objects
         $("#pwCash").hide();
         $("#paymentCheckout").hide();
         $("#pwBankTransfer").hide();
-        setTimeout(function(){
-   agreementStatusChecked();
-}, 450);
+        
+        var userType = $("#agent_reg_usertypeId").val();
+        
+        if(userType != null && userType == 2){
+            setTimeout(function(){
+               agreementStatusChecked();
+            }, 450);
+        }
        
-        calculateSum();
+        //calculateSum();
     });
 
 /**
@@ -41,12 +46,14 @@ function selectAgent(id)
    var email = $(row).find(".agentEmail").text();
    var state = $(row).find(".agentState").text();
    var photo = $(row).find(".agentImg").val();
+   var img = $(row).find(".agentImg").val();
    
    
    var fullname = lName + " " + fname + " " + mName;
    $("#agentDetailContainer .agent_name").text(fullname.trim());
    $("#agentDetailContainer .agent_moible").text(phoneNo);
    $("#agentDetailContainer .agent_state").text(state);
+   $("#agentDetailContainer .agent_img").attr("src",img);
    
    $("#agentListContainer").toggle();
    $("#agentSpinnerContainer").toggle();
@@ -97,9 +104,9 @@ function showSelectedAgent()
         return false;
     }
     
-    function showOrderProduct()
+    function showOrderProduct(proceed)
     {
-        var proceed = validateCustomerRegForm();
+        
         
         if(proceed == false)
         {
@@ -291,16 +298,32 @@ function lodgePaymentCheck(){
 
 /*TP: calculate the sum of the total amount of items in the cart*/
 function calculateSum(){
+    
     var sum = 0;
-// iterate through each td based on class and add the values
-$(".payOut").each(function() {
+  //If loyaltyPlugin is enabled
+    if(isLoyaltyEnabled == 1){
+        
+        
+        
+        for(var k in cartArray){
+            
+            sum = sum +  parseFloat(cartArray[k].productMinimumInitialAmount) + (parseFloat(cartArray[k].rewardPoint) * parseFloat(pointToCurrency));
+            console.log("productMinimumInitialAmount : " + cartArray[k].productMinimumInitialAmount);
+            
+        }
+        
+    }  
+    else{
+        // iterate through each td based on class and add the values
+        $(".payOut").each(function() {
 
-    var value = $(this).val();
-    // add only if the value is number
-    if(!isNaN(value) && value.length != 0) {
-        sum += parseFloat(value);
+            var value = $(this).val();
+            if(!isNaN(value) && value.length != 0) {
+                sum += parseFloat(value);
+            }
+        });
     }
-});
+    
     if(sum==0){
        $("#checkOutToPay").attr("disabled",true);
     }else{
@@ -313,6 +336,9 @@ $(".payOut").each(function() {
 
 /*TP: add item to the cart*/
 function addToCart(event){
+  
+   event.preventDefault();  
+    
    $("#shoppingCart:hidden").toggle();
    $("#paymentCheckout:visible").toggle();
   var productName = $("#selectProduct :selected").text();
@@ -333,17 +359,23 @@ function addToCart(event){
   var monthlyPayPerUnit = accounting.unformat($("#monthlyPayPerUnit").text());
   var monthlyPayPerQuantity = accounting.unformat($("#monthlyPayPerQuantity").text());
   var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val(); // Monthly Pay Per Unit
+  var commission = $('#commp').val();
+  var dayOfNotification = $("#day_of_notification").val();
+  var loyaltyPoint = 0;
   
-  //alert(productName+" "+productId+" "+productUnitName+" "+productUnitId+" "+productQuantity);
+  //If loyaltyPlugin is enabled
+    if(isLoyaltyEnabled == 1){
+        var point = parseInt($("#productLoyaltyPoint").val()) || 0;
+        //productMinimumInitialAmount += pointToCurrency * point;
+        loyaltyPoint = point;
+        console.log(point);
+    }
+    
+    
   
-//  var dataArray = [];
-//  dataArray.push(productName,productId,productUnitName,productUnitId,productQuantity,productAmount,amountUnit,amountTotalUnit,
-//  initialAmountPerUnit,minInitialAmountSpan,productMinimumInitialAmount,amountLeft,payDurationPerUnit,payDurationPerQuantity,productMaximumDuration,monthlyPayPerUnit,monthlyPayPerQuantity,productMinimumMonthlyPayment);
-//  
-  
-  var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuanity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
+  var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuantity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
-  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment}
+  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment,commp : commission, dayOfNotification : dayOfNotification, rewardPoint : loyaltyPoint};
   
   /**
    * 
@@ -355,7 +387,7 @@ function addToCart(event){
   var cartItemObject = dataArray;
   var jsonData = JSON.stringify(dataArray);
   
-  var id = $('#productCart tr:last').attr('id'); // Get the id of the last row in the cart table
+  var id = $('#productCart tbody tr:last').attr('id'); // Get the id of the last row in the cart table
   
   if(id == null){
       id = 0;
@@ -372,17 +404,14 @@ function addToCart(event){
   
   if($("#editMode").val()=="" || $("#editMode").val()== null){
           var newId = parseInt(id) + 1;
-      }else{
+    }else{
           var newId = $("#editMode").val();
-      }
- // alert(id);
- 
-  //alert(newId);
+    }
   var buttonsData = '<a class="btn btn-success btn-xs" href="#" role="button" onclick="return editDataFromCart('+newId+')" title="Edit product details"><i class="fa fa-pencil"></i></a>\n\
 <a class="btn btn-danger btn-xs" href="#" title="Remove product from cart"  onclick="return showDeleteCartModal('+newId+')" role="button"><i class="fa fa-remove"></i></a>';
 
   var payOutField = "<input type='hidden' class='payOut' value='" + productMinimumInitialAmount + "' />";
-  //var newId = id + 1;
+  
   var dataTr = "<tr id='"+newId+"' align='left'>";
       dataTr += "<td>"+productName+"</td>";
       dataTr += "<td>"+productUnitName+"</td>";
@@ -397,8 +426,7 @@ function addToCart(event){
       var rowId ="tr"+newId;
       
       dataTr +="<td class='cart-td'><input type='hidden' id='"+rowId+"' value='"+jsonData+"'/>"+buttonsData+"</td>";
-      //alert($("#editMode").val());
-    //$("#" + id).html();
+      
       $("#productCart tbody").focus();
       
       if($("#editMode").val() == "")
@@ -426,7 +454,6 @@ function addToCart(event){
       
       $("#editMode").val("");
      resetForm();
-    // $("#editMode").val("");
      $("#selectProduct").val("");
      $("#productCart tbody").focus();
      $("#addToCart").text("");
@@ -475,11 +502,11 @@ function editDataFromCart(id){
     //alert(datajson);
     var dataArray = JSON.parse(datajson);
     
-    var productName =  dataArray.productName;
+  var productName =  dataArray.productName;
   var productId = dataArray.productId;
   var productUnitName = dataArray.productUnitName;
   var productUnitId = dataArray.productUnitId;
-  var productQuantity = dataArray.productQuanity;
+  var productQuantity = dataArray.productQuantity;
   var productAmount = dataArray.productAmount;
   var amountUnit = dataArray.amountUnit;
   var amountTotalUnit = dataArray.amountTotalUnit;
@@ -494,6 +521,12 @@ function editDataFromCart(id){
   var monthlyPayPerUnit = dataArray.monthlyPayPerUnit;
   var monthlyPayPerQuantity = dataArray.monthlyPayPerQuantity;
   var productMinimumMonthlyPayment = dataArray.productMinimumMonthlyPayment;
+  
+  var commission = dataArray.commp;
+  var dayOfNotification = dataArray.dayOfNotification;
+  
+  
+  
  // alert(dataArray[14]);
     
     var baseUrl = getBaseUrl().toString();
@@ -525,14 +558,18 @@ function editDataFromCart(id){
     $("#addToCart").val("Update Cart");
     document.getElementById("selectUnit").value = productUnitId;
     $("#pUnitId").val(productUnitId);
+    $('#commp').val(commission);
+    $("#day_of_notification").val(dayOfNotification);
+    
+    if(isLoyaltyEnabled == 1){
+      var point = dataArray.rewardPoint;
+      $("#productLoyaltyPoint").val(point);
+    }
+    
+    console.log("commission : " + commission);
+    console.log("day_of_notification : " + dayOfNotification);
     
     getProjectUnits(baseUrl, 'Project');
-    
-    
-    //alert(productUnitId);
-//    $("#selectUnit").val(productUnitId);
-//    $("#selectUnit").val(productUnitId);
-//    alert(productUnitId);
     getProjectQuantity(baseUrl, 'ProjectUnit');
     
     
@@ -556,8 +593,9 @@ function updateUnit(id){
      var datajson = $("#tr"+id).val();
     //alert(datajson);
     var dataArray = JSON.parse(datajson);
+    
     var productUnitId = dataArray.productUnitId;
-    var productQuantity = dataArray.productQuanity;
+    var productQuantity = dataArray.productQuantity;
     var productMinimumInitialAmount = dataArray.productMinimumInitialAmount;
     var productAmount = dataArray.productAmount;
     var productMaximumDuration = dataArray.productMaximumDuration;
@@ -685,13 +723,19 @@ $("#amountUnit").text("");
  $('span[id="qty"]').text("");
 $("#finalAmount").text("");
 $("#amountLeft").val("");
+$("#commp").val("0");
 $("#addToCart").attr("disabled",false);
 $('#selectUnit').empty(); //select 
+$("#commp").val("0");
+$("#day_of_notification").val("1")
+    if(isLoyaltyEnabled == 1){
+        $("#productLoyaltyPoint").val("0");
+    }
     
       $('#selectUnit').append($('<option>', {
-    value: "",
-    text: "-- choose --"
-}));
+        value: "",
+        text: "-- choose --"
+        }));
 
 $('#productMaximumDuration').append($('<option>', {
     value: "",
@@ -884,7 +928,7 @@ function getProjectUnits(appName, entityName){
            var resp = JSON.parse(data);
            $('#selectUnit').empty();
            $('#selectUnit').append($('<option>', {value: "",text: "-- choose --"}));
-
+           $('#commp').val('0');
            $.each( resp, function( key, value ) {
 
                    $('#selectUnit').append($('<option>', {
@@ -966,48 +1010,80 @@ function getProjectQuantity(appName, entityName){
 function monthlyPayCalculator(){
     $("#addToCart").attr("disabled",false);
     var productAmount = $("#productAmount").val();
-    //alert(productAmount);
     var quantity = $("#selectQuantity").val();
     var productMinimumInitialAmount = $("#productMinimumInitialAmount").val();
-    //alert(productMinimumInitialAmount);
     var productMaximumDuration = $("#productMaximumDuration").val();
-    //alert(productMaximumDuration);
+    
+    if(isLoyaltyEnabled == 1){
+        var point = $("#productLoyaltyPoint").val() || 0;
+        productMinimumInitialAmount = parseInt(productMinimumInitialAmount) + parseInt((parseInt(point) * parseInt(pointToCurrency)));
+        console.log("Initial Amount : " + productMinimumInitialAmount);
+    }
+    
     var payLeft = productAmount - productMinimumInitialAmount;
     $("#amountLeft").val(payLeft);
     var monthlyPay = payLeft / productMaximumDuration;
-    $("#productMinimumMonthlyPayment").val(monthlyPay);
-    $("#monthlyPayPerUnit").text(monthlyPay * 1);
+    $("#productMinimumMonthlyPayment").val(monthlyPay.toFixed(2));
+    $("#monthlyPayPerUnit").text((monthlyPay * 1).toFixed(2));
     $("#monthlyPayPerQuantity").text(monthlyPay * quantity);
     calculateAmountToPay();
 }
 
+
+function getTotalUsedPoints(){
+    
+    var points = 0;
+    
+    for(var k in cartArray){
+        points += cartArray[k].rewardPoint;
+    }
+    
+    return points;
+}
+
 /*TP: calculate the amount to pay*/
 function calculateAmountToPay(){
-   // alert("we are working here");
    
     $("#addToCart").attr("disabled",false);
-    var userInitialAmount = $("#productMinimumInitialAmount").val();
-     var data = $("#dataHidden").val();
-    //alert(data);
+    var userInitialAmount = parseInt($("#productMinimumInitialAmount").val());
+    
+    //If loyaltyPlugin is enabled
+    if(isLoyaltyEnabled == 1){
+        
+        var point = parseInt($("#productLoyaltyPoint").val()) || 0;
+        
+        var usedPoints = getTotalUsedPoints();
+        console.log("Used Points : " + usedPoints + ", customer points : " + customerPoints);
+        
+        var totalUsedPoints = usedPoints + point;
+        if( totalUsedPoints > customerPoints){
+            $("#addToCart").attr("disabled",true);
+            $("#productLoyaltyPoint").focus();
+            $("#rewardPointError").modal();
+            
+            return;
+        }
+        else{
+            userInitialAmount += pointToCurrency * point;
+        }
+    }
+    
+    var data = $("#dataHidden").val();
     var resp = JSON.parse(data);
     var quantity = $("#selectQuantity").val();
-//    alert(quantity);
-//    alert(userInitialAmount);
     var lid = resp.lid;  
     var leastInitialDeposit = lid * quantity;
-    //alert(leastInitialDeposit);
     
     var productAmount = $("#productAmount").val();
+    
     if(userInitialAmount<leastInitialDeposit){
-        //alert("The Initial Deposit must not be less than the default minimum initial amount specified by the system i.e ( N"+leastInitialDeposit+")");
-        //jQuery.data( $("#errorText"), "errorDInitDep", "The Initial Deposit must not be less than the default minimum initial amount specified by the system i.e ( N"+leastInitialDeposit+")" );
+        
         if($("#errorInitDep").length <= 0){
         var htmlMessage = $('<p id="errorInitDep">The Initial Deposit must not be less than the default minimum initial amount specified by the system i.e ( N'+leastInitialDeposit+')</p>')
         $("#errorText").append(htmlMessage);
     }
-        //$("#errorText").text("<p id='errorInitDep'>The Initial Deposit must not be less than the default minimum initial amount specified by the system i.e ( N"+leastInitialDeposit+")</p>");
-    
-            $("#addToCart").attr("disabled",true);
+        
+        $("#addToCart").attr("disabled",true);
         $("#productMinimumInitialAmount").focus();
     }else{
         $("#errorInitDep").remove();
@@ -1064,23 +1140,17 @@ function calculateDurationFromMonthlyPay(){
 /*TP: calculate the product amount from the quantity*/
 function calculateProductAmount(){
     var data = $("#dataHidden").val();
-    //alert(data);
     var resp = JSON.parse(data);
     
     var cpu = resp.cpu;
-    //alert(cpu);
     var quantity = $("#selectQuantity").val();
     var duration = resp.mpd;
-    //$( quantity ).prependTo( "#qty" );
-    //alert("The quantity is "+quantity);
     $('span[id="qty"]').text( quantity);
     var discount = resp.discount;
     var totalDiscount = 0;
     if(discount>0){
         totalDiscount = discount * quantity;
     }
-    //var totalDiscount = discount * quantity;
-    //alert(quantity);
     var amount = quantity * cpu;
     var mpd = resp.mpd;
     var defaultDiscount = 0;
@@ -1118,7 +1188,7 @@ function calculateProductAmount(){
     
     $("#productMinimumInitialAmount").val( resp.lid * quantity);
   
-    
+    $("#commp").val(resp.commp);
     
     //alert(totalDuration);
      var message = "month";
@@ -1130,21 +1200,20 @@ function calculateProductAmount(){
     text: "-- choose --"
 }));
           
-          var message = "month";
-          for(var i=1;i<=totalDuration;i++){
-              // $('#selectUnit').empty();
-              if(i>1){
-                  message = "months";
-              }
-              
-               $('#productMaximumDuration').append($('<option>', {
-    value: i,
-    text: i+" "+message,
-    selected: true
-}));
-$(this).attr("selected","selected");
+  var message = "month";
+  for(var i=1;i<=totalDuration;i++){
+      if(i>1){
+          message = "months";
+      }
 
-          }
+       $('#productMaximumDuration').append($('<option>', {
+            value: i,
+            text: i+" "+message,
+            selected: true
+        }));
+    $(this).attr("selected","selected");
+
+  }
           
    
     
@@ -1279,16 +1348,18 @@ function submitPostForm(url, formData){
 
 function validateCustomerRegForm()
 {
+    appendLoadingState("#step1_box");
+    
     var errors = [];
     
     if($("#customerFirstname").val().trim() == '')
     {
         errors.push("Please enter first name");
     }
-    if($("#customerMiddlename").val().trim() == '')
-    {
-        errors.push("Please enter middle name");
-    }
+//    if($("#customerMiddlename").val().trim() == '')
+//    {
+//        errors.push("Please enter middle name");
+//    }
     if($("#customerLastname").val().trim() == '')
     {
         errors.push("Please enter last name");
@@ -1339,23 +1410,52 @@ function validateCustomerRegForm()
     
     $("#customerErrorModal .modal-body").html("");
     
-
-//    if(errors.length > 0)
-//    {
-//        var errorText = '';
-//        
-//        for(var key in errors){
-//            var errorText = '' + errors[key] + '<br />';
-//            $("#customerErrorModal .modal-body").append(errorText);
-//        }
-//        $("#customerErrorModal").modal();
-//        return false;
-//    }
-//    else{
-//        return true
-//    }
+    var url = $("#pageContext").val();
     
-    return true;
+    
+    $.ajax({
+        url : url + "/Customer?action=email_validation",
+        method : 'GET',
+        data : {email : $("#customerEmail").val(), type : 'xmlhttp'},
+        success : function(data){
+            
+             removeLoadingState();
+            
+            console.log(data);
+            
+            var res = JSON.parse(data);
+            if(res.code === "-1" || res.code === -1){
+                errors.push("Email already exist");
+            }
+            
+            if(errors.length > 0)
+            {
+                var errorText = '';
+
+                for(var key in errors){
+                    var errorText = '' + errors[key] + '<br />';
+                    $("#customerErrorModal .modal-body").append(errorText);
+                }
+                $("#customerErrorModal").modal();
+                
+                showOrderProduct(false);
+            }
+            else{
+                showOrderProduct(true);
+            }
+            
+        },
+        error : function(xhr,status_code,status_text){
+            
+            console.log(status_code + " : " + status_text);
+            
+            removeLoadingState();
+        }
+    });
+
+    
+    
+    
 }
 
 function appendLoadingState(selector){
@@ -1375,17 +1475,6 @@ function removeLoadingState(){
     
     $(".overlay").remove();
 }
-
-   
-
-
-
-
-
-
-
-
-
 
 /*****************************************************
  * Use this as a generic ajax call method
@@ -1430,3 +1519,54 @@ function thousandSeparator(number){
     
     return value;
 }
+
+function submitForm(){
+           
+           var submitOk = true;
+           
+           var payment_mode = $('input:radio[name=paymentMethod]:checked').val();
+           
+           var companyAccount = $("#companyAccount").val();
+           
+           if(companyAccount == ""){
+               
+               alert("Please select company account");
+               submitOk = false;
+           } 
+           else if(payment_mode == 1){
+               
+               var depositorsName = $("#depositorsName").val();
+               var tellerNumber = $("#tellerNumber").val();
+                       
+               if( $.trim(depositorsName) == ""){
+                   alert("Please Enter depositors name");
+                   submitOk = false;
+               }
+               else if($.trim(tellerNumber) == ""){
+                   alert("Please enter teller number");
+                   submitOk = false;
+               }
+           }
+           else if(payment_mode == 4){
+               
+               var transfer_bankName = $("#transfer_bankName").val();
+               var transfer_accountNo = $("#transfer_accountNo").val();
+               var transfer_accountName = $("#transfer_accountName").val();
+               
+               if($.trim(transfer_bankName) == ""){
+                   alert("Please enter Bank Name");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountNo) == ""){
+                   alert("Please enter account number");
+                   submitOk = false;
+               }
+               else if($.trim(transfer_accountName) == ""){
+                   alert("Please enter account Name");
+                   submitOk = false;
+               }
+               
+           }
+           
+           return submitOk;
+       }

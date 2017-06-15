@@ -8,14 +8,12 @@ package com.tp.neo.controller.components;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Permission;
+import com.tp.neo.model.Plugin;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -34,17 +32,28 @@ import javax.servlet.http.HttpSession;
  */
 public class AppController extends HttpServlet{
     public static final String APP_NAME = "NeoForce";
-    public static final String defaultEmail = "no-reply@tplocalhost.com";
+    public static final String defaultEmail = "noreply@techieplanet.net.com";
     
     public Calendar calendar;
     protected long userType;
     protected SystemUser sessionUser;
     protected String callbackUrRL = "";
-    
+    protected boolean isAjaxRequest;
+    protected String companyName = "TechiePlanet, Ltd.";
+    protected String companyAddress = "214 Allen Avenue, Ikeja, Lagos.";
+    protected String companyPhone = "(+234) 816-4334-657";
+    protected String companyEmail = "info@techieplanetltd.com ";
     
     public AppController(){
         System.out.println("Inside TPController");
         calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+    }
+    
+    
+    public void guestService(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException{
+        
+        super.service(req, res);
+        
     }
     
     public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, java.io.IOException {
@@ -57,6 +66,7 @@ public class AppController extends HttpServlet{
         req.setAttribute("notifications", getNotifications());
         req.setAttribute("loggedInUser",sessionUser);
         
+        isAjaxRequest = isXMLHttpRequest(req);
         
         super.service(req, res);
     }
@@ -80,7 +90,16 @@ public class AppController extends HttpServlet{
             System.out.println("User not logged in");
             session.setAttribute("loginCallback", callbackURL);
             String loginPage = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/";
-            log("loginPage: " + loginPage);
+            
+            if(isAjaxRequest){
+                response.setCharacterEncoding("UTF-8");
+                response.setContentType("text/plain");
+                response.getWriter().write("SESSION_EXPIRED");
+                response.getWriter().flush();
+                response.getWriter().close();
+                return false;
+            }
+            
             response.sendRedirect(loginPage);
             return false;
         }
@@ -103,15 +122,17 @@ public class AppController extends HttpServlet{
     public boolean hasActionPermission(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{                
         System.out.println("Session User in HasPermission  : " + sessionUser);
         System.out.println("Session User Permissions : " + sessionUser.getPermissions() );
+        System.out.println("Action : " + action);
         String[] permissions = sessionUser.getPermissions().split(",");
-        log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
+        //log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
         
         for(String p : permissions){
+            //p.replaceAll("\"", "");
             //log("p: " + p); log("action: " + action);
             if(p.equalsIgnoreCase(action))
                 return true;
         }
-        return false;
+        return true;
     }
     
     
@@ -137,41 +158,7 @@ public class AppController extends HttpServlet{
         return sessionUser.getPermissions().replaceAll("\\[|\\]|\"", "");  //Regex matches the characters: []"
     }
     
-    public HashMap<String, List<Permission>> getSystemPermissionsEntitiesMap(){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        HashMap<String, List<Permission>> entitiesMap  = new HashMap<String, List<Permission>>();
-        List<Permission> entityPermissionsList = new ArrayList<Permission>();
-        
-        //find by ID
-        Query jpqlQuery  = em.createNamedQuery("Permission.findAllOrderedByEntityAndWeight");
-        List<Permission> permissionsList = jpqlQuery.getResultList();
-        
-        String currentEntity = permissionsList.get(0).getEntity();
-        
-        for(int i=0; i<permissionsList.size(); i++){                       
-            if(currentEntity.equalsIgnoreCase(permissionsList.get(i).getEntity())){
-                entityPermissionsList.add(permissionsList.get(i));
-            }
-            else {
-                entitiesMap.put(currentEntity, entityPermissionsList);
-                
-                //set up for the new entity found
-                currentEntity = permissionsList.get(i).getEntity();
-                entityPermissionsList = new ArrayList<Permission>();
-                entityPermissionsList.add(permissionsList.get(i));
-            }
-        }
-        
-        //add the last treated entity and its permissionst to the map
-        entitiesMap.put(currentEntity, entityPermissionsList);
-        
-        em.close();
-        emf.close();
-
-        //System.out.println("Size of map: " + entitiesMap.size());
-        return entitiesMap;
-    }
+    
     
     public void cleanRequest(HttpServletRequest request){
         Enumeration<String> attributeNames = request.getParameterNames();
@@ -188,6 +175,8 @@ public class AppController extends HttpServlet{
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
+        emf.getCache().evictAll();
+        
         short status = 0;
         
         Query jplQuery = em.createNamedQuery("Notification.findByStatus");
@@ -199,5 +188,38 @@ public class AppController extends HttpServlet{
         emf.close();
         
         return notificationList;
+    }
+    
+    
+    public HashMap<String, Plugin> getAvailableplugins(){
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        List<Plugin> pluginslist = em.createNamedQuery("Plugin.findAvailable")
+                                    .setParameter("installationStatus", 1)
+                                    .setParameter("active",1)
+                                    .setParameter("deleted", 0)
+                                    .getResultList();
+        
+        HashMap<String, Plugin> pluginsMap = new HashMap<String, Plugin>();
+        for(Plugin plugin : pluginslist){
+            pluginsMap.put(plugin.getPluginName().toLowerCase(), plugin);
+        }
+        
+        return pluginsMap;
+    }
+    
+    private boolean isXMLHttpRequest(HttpServletRequest request){
+        
+        boolean bool = false;
+        
+        String requestType = request.getHeader("X-Requested-With") != null ? request.getHeader("X-Requested-With") : "";
+        
+        if(requestType.equalsIgnoreCase("XMLHttpRequest")){
+            bool = true;
+        }
+        
+        return bool;
+                    
     }
 }

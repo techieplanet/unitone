@@ -43,6 +43,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByFirstname", query = "SELECT a FROM Agent a WHERE a.firstname = :firstname"),
     @NamedQuery(name = "Agent.findByMiddlename", query = "SELECT a FROM Agent a WHERE a.middlename = :middlename"),
     @NamedQuery(name = "Agent.findByLastname", query = "SELECT a FROM Agent a WHERE a.lastname = :lastname"),
+    @NamedQuery(name = "Agent.findByFullname", query = "SELECT a FROM Agent a WHERE a.lastname = :lastname AND a.firstname = :firstname"),
     @NamedQuery(name = "Agent.findByPassword", query = "SELECT a FROM Agent a WHERE a.password = :password"),
     @NamedQuery(name = "Agent.findByPhone", query = "SELECT a FROM Agent a WHERE a.phone = :phone"),
     @NamedQuery(name = "Agent.findByEmail", query = "SELECT a FROM Agent a WHERE a.email = :email"),
@@ -68,7 +69,38 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByModifiedBy", query = "SELECT a FROM Agent a WHERE a.modifiedBy = :modifiedBy"),
 
     
-    @NamedQuery(name = "Agent.findByTopSellingLocations", query = "SELECT COUNT(a.agentId) acount, a.state FROM Agent a JOIN a.customerCollection c ON a = c.agent AND a.approvalStatus = 1 GROUP BY a.state ORDER By acount")
+    @NamedQuery(name = "Agent.findByTopSellingLocations", query = "SELECT COUNT(a.agentId)  acount, a.state FROM Agent a JOIN a.customerCollection c ON a = c.agent AND a.approvalStatus = 1 GROUP BY a.state ORDER By acount"),
+    
+    //this query selects each order item, total amount paid on the order item for every customer owned by this agent. This can be used to get the order and customer details from the order item object
+    @NamedQuery(name = "Agent.findMyTotalLodgementsSumPerOrderItem", query = "SELECT item, COALESCE(SUM(l.amount),0) FROM OrderItem item JOIN item.lodgementItemCollection l " 
+                                                                                    + "JOIN item.order po JOIN po.customer c "
+                                                                                    + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps AND c.agent.agentId = :agentId " 
+                                                                                    + "GROUP BY item.id ORDER  BY item.id"),
+    
+    @NamedQuery(name = "Agent.findMyTotalLodgements", query = "SELECT COALESCE(SUM(l.amount),0) FROM OrderItem item JOIN item.lodgementItemCollection l " 
+                                                                                    + "JOIN item.order po JOIN po.agent a "
+                                                                                    + "WHERE l.approvalStatus = :aps AND item.approvalStatus = :item_aps AND po.agent.agentId = :agentId "),
+    
+    //this query will get all the remaining payments (less due mortgage debts) and group by order items so we can use that to get order details and subsequently customer details 
+    @NamedQuery(name = "Agent.findMyTotalOutstandingAmountPerOrderItem", query = "SELECT item, (COALESCE(SUM(item.quantity * u.cpu),0) - COALESCE(SUM(l.amount),0)) " 
+                                                                                        + "FROM OrderItem item JOIN item.unit u JOIN item.lodgementItemCollection l JOIN item.order po JOIN po.customer c "
+                                                                                        + "WHERE item.approvalStatus = :item_aps AND l.approvalStatus = :aps AND c.agent.agentId = :agentId "
+                                                                                        + "GROUP BY item.id ORDER  BY item.id"),
+    
+    @NamedQuery(name = "Agent.findMySalesSumByProject", query = "SELECT p, COALESCE(SUM(item.quantity),0), COALESCE(SUM(l.amount),0)  " 
+                                                                    + "FROM Project p LEFT JOIN p.projectUnitCollection u LEFT JOIN u.orderItemCollection item ON item.approvalStatus = :item_aps "
+                                                                    + "LEFT JOIN item.lodgementItemCollection l On l.approvalStatus = :aps "
+                                                                    + "LEFT JOIN item.order o LEFT JOIN o.agent a On a.agentId = :agentId "
+                                                                    + "WHERE p.deleted =0 "
+                                                                    + "GROUP BY p.id ORDER  BY p.id"),
+    
+    @NamedQuery(name = "Agent.findMySalesSumByProjectUnit", query = "SELECT u, COALESCE(SUM(item.quantity),0), COALESCE(SUM(l.amount),0)  " 
+                                                                    + "FROM ProjectUnit u LEFT JOIN u.orderItemCollection item ON item.approvalStatus = :item_aps "
+                                                                    + "LEFT JOIN item.lodgementItemCollection l ON l.approvalStatus = :aps "
+                                                                    + "LEFT JOIN item.order o LEFT JOIN o.agent a "
+                                                                    + "WHERE u.project.id = :projectId AND u.project.deleted = 0 AND a.agentId = :agentId "
+                                                                    + "GROUP BY u.id ORDER  BY u.id"),
+
     
 })
 
@@ -78,6 +110,8 @@ public class Agent extends BaseModel implements SystemUser  {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
+    private Collection<AgentProspect> agentProspectCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
     private Collection<Withdrawal> withdrawalCollection;
 
@@ -435,7 +469,7 @@ public class Agent extends BaseModel implements SystemUser  {
 
     @Override
     public String getPermissions() {
-        return "view_customer,create_customer,view_order,view_project,credit_history,debit_history,withdrawal,create_order";
+        return "view_agent,view_customer,create_customer,view_order,view_project,credit_history,debit_history,withdrawal,create_order";
     }
 
     @Override
@@ -455,11 +489,22 @@ public class Agent extends BaseModel implements SystemUser  {
 
     public String getPermissionName(String action){
         if(action.toUpperCase().equals("NEW")) return "create_agent";
+        else if(action.toUpperCase().equals("APPROVEWITHDRAWAL")) return "approve_withdrawal";
         else if(action.toUpperCase().equals("EDIT")) return "edit_agent";
         else if(action.toUpperCase().equals("DELETE")) return "delete_agent";
+        else if(action.toUpperCase().equals("REGISTRATION")) return "agent_registration";
+        else if(action.toUpperCase().equals("WAITING")) return "pending_agent";
+        else if(action.toUpperCase().equals("LISTAGENTS")) return "waiting_agents";
         else if(action.toUpperCase().equals("CREDIT_HISTORY")) return "credit_history";
         else if(action.toUpperCase().equals("DEBIT_HISTORY")) return "debit_history";
-        else if(action.toUpperCase().equals("WITHDRAWAL")) return "withdrawal";
+        else if(action.toUpperCase().equals("WITHDRAWAPPROVAL")) return "view_withdrawal_request";
+        else if(action.toUpperCase().equals("APPROVEDWITHDRAWAL")) return "view_approved_withdrawal";
+        else if(action.toUpperCase().equals("WITHDRAWAL")) return "withdrawal_request";
+        else if(action.toUpperCase().equals("APPROVEWITHDRAWAL")) return "approve_withdrawal";
+        else if(action.toUpperCase().equals("PROFILE")) return "agent_profile";
+        else if(action.toUpperCase().equals("APPROVAL")) return "agent_approval";
+        else if(action.toUpperCase().equals("ACCOUNT_STATEMENT")) return "account_statement";
+        else if(action.toUpperCase().equals("WALLET")) return "view_agent_wallet";
         else return "view_agent";
     }
     
@@ -513,4 +558,14 @@ public class Agent extends BaseModel implements SystemUser  {
     }
 
 
+    @XmlTransient
+    public Collection<AgentProspect> getAgentProspectCollection() {
+        return agentProspectCollection;
+    }
+
+    public void setAgentProspectCollection(Collection<AgentProspect> agentProspectCollection) {
+        this.agentProspectCollection = agentProspectCollection;
+    }
+
+    
 }

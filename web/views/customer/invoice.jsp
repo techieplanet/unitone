@@ -66,31 +66,12 @@
         }
     </style>
   </head>
-  <!--
-  BODY TAG OPTIONS:
-  =================
-  Apply one or more of the following classes to get the
-  desired effect
-  |---------------------------------------------------------|
-  | SKINS         | skin-blue                               |
-  |               | skin-black                              |
-  |               | skin-purple                             |
-  |               | skin-yellow                             |
-  |               | skin-red                                |
-  |               | skin-green                              |
-  |---------------------------------------------------------|
-  |LAYOUT OPTIONS | fixed                                   |
-  |               | layout-boxed                            |
-  |               | layout-top-nav                          |
-  |               | sidebar-collapse                        |
-  |               | sidebar-mini                            |
-  |---------------------------------------------------------|
-  -->
+ 
   <body style="background-color: #eee">
    
       <div class="container">
           
-          <section class="invoice" style="min-height: 600px">
+          <section class="invoice" style="min-height: 600px" id="printArea">
           <!-- title row -->
           <div class="row">
             <div class="col-xs-12">
@@ -105,11 +86,10 @@
             <div class="col-sm-4 invoice-col">
               From
               <address>
-                <strong>Techieplanet, Ltd.</strong><br>
-                795 Folsom Ave, Suite 600<br>
-                Ikeja, Lagos <br>
-                Phone: (+234) 816-4334-657<br>
-                Email: info@techieplanetltd.com
+                <strong>${companyName}</strong><br>
+                ${companyAddress}<br>
+                Phone: ${companyPhone}<br>
+                Email: ${companyEmail}
               </address>
             </div><!-- /.col -->
             <div class="col-sm-4 invoice-col">
@@ -125,52 +105,54 @@
             <div class="col-sm-4 invoice-col">
               <b>Invoice #</b><br>
               <br>
-              <b>Order ID:</b> ${productOrderInvoice.getId()}<br>
+              <c:if test="${empty print}">
+                <b>Order ID:</b> ${productOrderInvoice.getId()}<br>
+              </c:if>
             </div><!-- /.col -->
           </div><!-- /.row -->
 
           <!-- Table row -->
-          <div class="row">
+          <div class="row" >
             <div class="col-xs-12 table-responsive">
-              <table class="table table-bordered">
+              <table class="table table-bordered" >
                 <thead>
                   <tr>
-                      <th>S/N</th>
-                    <th>Qty</th>
-                    <th>Product</th>
+                    <th style="text-align:center">S/N</th>
                     <th>Description</th>
-                    <th>Subtotal</th>
+                    <th style="text-align:center">Qty</th>
+                    <th style="text-align:center">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
-                  
-                    <c:forEach items="${orderItemInvoice}" var="item" varStatus="pointer">
+                    <c:set var="L_ID" value="0" />
+                    <c:forEach items="${orderItemInvoice}" var="LI" varStatus="pointer">
+                        <c:if test="${L_ID == 0}"><c:set var="L_ID" value="${LI.getLodgement().getId()}" /></c:if>
                         <tr>
-                            <td>${pointer.count}</td>
-                            <td>${item.getQuantity()}</td>
-                            <td>${item.getUnit().getProject().getName()} - ${item.getUnit().getTitle()}</td>
-                            <td>${item.getUnit().getProject().getDescription()}</td>
-                            <td>${item.getInitialDep()}</td>
+                            <td style="text-align:center">${pointer.count}</td>
+                            <td>${LI.getItem().getUnit().getProject().getName()} - ${LI.getItem().getUnit().getTitle()}</td>
+                            <td style="text-align:center">${LI.getItem().getQuantity()}</td>
+                            <c:set var="rewardAmount" value="${LI.getRewardAmount() !=null ? LI.getRewardAmount() : 0}" />
+                            <td style="text-align:right"><fmt:formatNumber value="${LI.getAmount() + rewardAmount}" type="currency" currencySymbol="N" /></td>
                         </tr>
                     </c:forEach>
                     
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="4" style="text-align: right">Total : </td>
-                        <td>${totalInvoice}</td>
+                        <td colspan="3" style="text-align: right">Total : </td>
+                        <td><fmt:formatNumber value="${totalInvoice}" type="currency" currencySymbol="N" /></td>
+                    </tr>
+                    <tr>                        <td colspan="3" style="text-align: right">VAT : </td>
+
+                        <td><fmt:formatNumber value="${vatInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">VAT : </td>
-                        <td>${vatInvoice}</td>
+                        <td colspan="3" style="text-align: right">Gateway charge : </td>
+                        <td><fmt:formatNumber value="${gatewayChargeInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right">Gateway charge : </td>
-                        <td>${gatewayChargeInvoice}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="text-align: right">Grand Total : </td>
-                        <td>${grandTotalInvoice}</td>
+                        <td colspan="3" style="text-align: right">Grand Total : </td>
+                        <td><fmt:formatNumber value="${grandTotalInvoice}" type="currency" currencySymbol="N" /></td>
                     </tr>
                 </tfoot>
               </table>
@@ -184,16 +166,54 @@
                     <c:remove var="grandTotalInvoice" scope="session" />
             </div><!-- /.col -->
             
-            <div class="col-md-12">
-                <a href="${pageContext.request.contextPath}" class="btn btn-primary">Login to Dashboard</a>
-            </div>
+            
           </div><!-- /.row -->
 
-          
-
-          
         </section>
-          
+        
+            
+        <div class="row" style="padding:20px">
+            
+            <div class="col-md-2 no-print-area">
+                <a href="${pageContext.request.contextPath}/Dashboard" class="btn btn-primary"><i class="fa fa-chevron-left"></i> Back</a>
+            </div>
+            
+            <div class="col-md-2 pull-right text-right no-print-area">
+                <a href="${pageContext.request.contextPath}/Customer?action=email_lodgement_invoice&id=${L_ID}"><i class="fa fa-envelope" style="color:#FFCD7E"></i></a> &nbsp;
+                <a href="#"><i class="fa fa-file-pdf-o" style="color:#F64934"></i></a> &nbsp;
+                <a href="#"><i class="fa fa-download"></i></a> &nbsp;
+                <a href="#"><i class="fa fa-print" onclick="invoice.printInvoice(event)"></i></a> &nbsp;
+            </div>
+            
+        </div>   
+            
+            
       </div>
+       
+    
+    <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.PrintArea.js"></script>
+       
+    <script>
+        
+        var invoice = {
+            
+            printInvoice : function(evt){
+              
+              evt.preventDefault();
+              
+              var options = {
+                  mode:"iframe",
+                  popClose: true
+              };
+              
+              $("#printArea").printArea(options);
+          }
+            
+        };
+
+    </script>     
+    
 
   </body>
+  
+</html>
