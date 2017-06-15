@@ -437,6 +437,8 @@ public class UserController extends AppController {
                         "To login, visit this <a href=\"" + rootUrl + "\">link</a>. If the link does not work, copy the following URL and paste in directly in your address bar.<br/><br/>" +
                         "<p style=\"text-align: center;\">" + rootUrl + "</p>";
         
+        log("newRegEmail: " + newRegEmail);
+        
         return newRegEmail;
     }
     

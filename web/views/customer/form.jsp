@@ -235,6 +235,10 @@
                             </div>
                         </div>
                             </div>
+                        
+                              
+                        <!-- Password show decision area --> 
+                        <c:if test="${userTypeId == null}"> <!-- show only when new customer is registering himself -->
                             <div class="row">
                               <div class="col-md-12">
                                     <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
@@ -253,6 +257,9 @@
                                     </div>
                                 </div>
                             </div>
+                        </c:if>
+                        
+                        
                             </fieldset>
                         </div>
                          <div class="col-md-4" style="padding-top: 50px">
@@ -613,14 +620,21 @@
                                         </div> <!--/.form-group amount -->
                                     </div>
                                
-                                    <c:if test="${userTypeId != null && userTypeId == 1 }">     
+                                    <c:if test="${userTypeId != null && userTypeId < 3 }">     
                                           <div class="col-md-2">
                                               <div class="form-group">
                                                   <label>
                                                       Commission(%)
                                                   </label>
                                                   <span class="productSpan">This is the commission payable to an agent</span>
-                                                  <input type="text" class="form-control" value="0" name="commp" id="commp"/>
+                                                  <input 
+                                                      type="text" 
+                                                      class="form-control" 
+                                                      value="0" 
+                                                      name="commp" 
+                                                      id="commp" 
+                                                      <c:if test="${userTypeId == 2}">readonly="readonly"</c:if> 
+                                                  />
                                               </div>
                                           </div>
                                     </c:if>

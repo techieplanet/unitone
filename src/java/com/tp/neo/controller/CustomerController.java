@@ -194,7 +194,7 @@ public class CustomerController extends AppController  {
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Customer().getPermissionName(action), request, response)){
-        processPostRequest(request, response);
+                processPostRequest(request, response);
             }else{
                 super.errorPageHandler("forbidden", request, response);
             }
@@ -273,7 +273,7 @@ public class CustomerController extends AppController  {
                     query.setParameter("lastname", "company");
                     agent = (Agent)query.getSingleResult();
                 }
-                else if(user.getSystemUserTypeId() == 2){
+                else if(user.getSystemUserTypeId() == 2){ //agent
                     agent = em.find(Agent.class, user.getSystemUserId());
                 }
                 else{
@@ -285,7 +285,12 @@ public class CustomerController extends AppController  {
                 customer.setLastname(request.getParameter("customerLastname"));               
                 customer.setEmail(request.getParameter("customerEmail"));
                 customer.setMiddlename(request.getParameter("customerMiddlename"));
-                customer.setPassword(AuthManager.getSaltedHash(request.getParameter("customerPassword")));
+                
+                //customer.setPassword(AuthManager.getSaltedHash(request.getParameter("customerPassword")));
+                //password handling: Assumes only agents and admins will create customers for now.
+                String initPass = AuthManager.generateInitialPassword();  //randomly generated password
+                customer.setPassword(AuthManager.getSaltedHash(initPass));  //hash the inital password
+                
                 customer.setStreet(request.getParameter("customerStreet"));
                 customer.setCity(request.getParameter("customerCity"));
                 customer.setState(request.getParameter("customerState"));
@@ -341,7 +346,7 @@ public class CustomerController extends AppController  {
                 
                //persist only on save mode
                 em.getTransaction().begin();
-                
+                log("Will now persistr the customewr");
                 em.persist(customer);
                 em.flush();  
                 
@@ -356,6 +361,7 @@ public class CustomerController extends AppController  {
                 customerAgent.setAgentId(agent);
                 customerAgent.setCustomer(customer);
                                 
+                log("Will now persistr the customerAgent");
                 em.persist(customerAgent);
                 
                 em.getTransaction().commit(); 
@@ -942,7 +948,7 @@ public class CustomerController extends AppController  {
         }
         
         if((request.getParameter("customer_id").equals(""))) { //insert mode
-               if(request.getParameter("customerPassword").isEmpty()){
+               if(request.getParameter("customerPassword") != null && request.getParameter("customerPassword").isEmpty()){
                     errorMessages.put("errors4", "Please enter Password");
                 }  
                if(!customerDetails.isEmpty()){

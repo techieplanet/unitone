@@ -56,6 +56,7 @@
                         <th>Middle Name</th>
                         <th>Last Name</th>
                         <th>Phone No</th>
+                        <th>Email</th>
                         <th>State</th>
                         <!--<th>Active</th>-->
                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
@@ -72,6 +73,7 @@
                                 <td><c:out value="${agent.middlename}" /></td>
                                 <td><c:out value="${agent.lastname}" /></td>
                                 <td><c:out value="${agent.phone}" /></td>
+                                <td><c:out value="${agent.email}" /></td>
                                 <td><c:out value="${agent.state}" /></td>
                                 <!--                                
                                 <td style="text-align:center;">
@@ -85,6 +87,9 @@
                                         </c:if>   
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
                                         <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="#" onclick="agentHistory.getAgentHistory('${agent.agentId}',event)" role="button"><i class="fa fa-dollar"></i></a>
+                                        </c:if>
+                                        <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
+                                        <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="Agent?action=profile&id=${agent.agentId}" role="button"><i class="fa fa-user"></i></a>
                                         </c:if>
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_agent')}">
                                             <a class="btn btn-success btn-xs anti-rcswitchwer-buttons" href="Agent?action=edit&agentId=${agent.agentId}" role="button"><i class="fa fa-pencil"></i></a> 
@@ -106,6 +111,7 @@
                         <th>Middle Name</th>
                         <th>Last Name</th>
                         <th>Phone No</th>
+                        <th>Email</th>
                         <th>State</th>
                         <!--<th>Active</th>-->
                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
@@ -243,7 +249,7 @@
                     { "width":"100px", "targets": 3 },
                     {"sort":"asc","targets":0},
                     <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
-                        { "sortable": false, "width":"80px", "targets":7 }
+                        { "sortable": false, "width":"80px", "targets":8 }
                     </c:if>
                 ]
         });

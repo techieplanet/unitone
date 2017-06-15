@@ -39,6 +39,8 @@ public class DashboardHelper {
     Gson gson = new GsonBuilder().create();
     HashMap<String, Plugin> availablePlugins;
     
+    private final int TRACKBACK_DAYS = 150;
+    
     public DashboardHelper(){
         emf.getCache().evictAll();
     }
@@ -61,7 +63,7 @@ public class DashboardHelper {
         List<Object[]> itemAndAmountList = query.getResultList();
         
         for(Object[] itemAndAmount : itemAndAmountList){
-            System.out.println("Inside getduepayemnts");
+            //System.out.println("Inside getduepayemnts");
             OrderItem orderItem = (OrderItem)itemAndAmount[0];
             double paidSum = (Double)itemAndAmount[1];
             
@@ -189,9 +191,9 @@ public class DashboardHelper {
                                                           ).getResultList();
         
         
-        for(Object[] perf : performance){
-            System.out.println("ID: " + perf[0] + ", Project: " + perf[1] + ", Unit ID: " + perf[2] + ", Unit: " +  perf[3] + ", Quantity: " + perf[4] + ", Stock: " + perf[5]);
-        }
+        //for(Object[] perf : performance){
+          //  System.out.println("ID: " + perf[0] + ", Project: " + perf[1] + ", Unit ID: " + perf[2] + ", Unit: " +  perf[3] + ", Quantity: " + perf[4] + ", Stock: " + perf[5]);
+        //}
         
         
         int i = 0;
@@ -339,7 +341,7 @@ public class DashboardHelper {
     
     
     public String getOrderSummary() throws Exception{
-        Date startDate = DateFunctions.getDateAfterSubtractDays(40);
+        Date startDate = DateFunctions.getDateAfterSubtractDays(TRACKBACK_DAYS);
         Date endDate = new Date();
         return this.getOrderSummary("day", "DD-Mon-YYYY", startDate, endDate);
     }
@@ -363,7 +365,7 @@ public class DashboardHelper {
                                                                            "FROM order_item o JOIN project_unit u ON o.unit_id = u.id " +
                                                                            "WHERE o.approval_status = 1 AND (date(o.modified_date) >= '" + startDate.toString() + "' AND date(o.modified_date) <= '" + endDate.toString() + "') " +
                                                                            "GROUP BY orderer, grouper ORDER BY orderer";
-        System.out.println("Order query: " + query);
+        //System.out.println("Order query: " + query);
         List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
         
         List<HashMap> summaryMapsList = new ArrayList<HashMap>();
@@ -383,7 +385,7 @@ public class DashboardHelper {
     
     
     public String getLodgementSummary() throws Exception{
-        Date startDate = DateFunctions.getDateAfterSubtractDays(40);
+        Date startDate = DateFunctions.getDateAfterSubtractDays(TRACKBACK_DAYS);
         Date endDate = new Date();
         return this.getLodgementSummary("day", "DD-Mon-YYYY", startDate, endDate);
     }

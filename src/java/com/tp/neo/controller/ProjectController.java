@@ -11,14 +11,13 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Project;
 
 import com.tp.neo.controller.components.AppController;
-import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.ProjectUnitType;
+import com.tp.neo.model.User;
 
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -149,12 +148,14 @@ public class ProjectController extends AppController {
 
         String stringId = request.getParameter("id") != null ? request.getParameter("id") : "";
         int addstat = request.getParameter("addstat") != null   ? Integer.parseInt(request.getParameter("addstat")) : 0;
+        List<User> usersList = em.createNamedQuery("User.findAll").getResultList();
         
         if (action.equalsIgnoreCase("new")){
                viewFile = PROJECTS_NEW;
                //request.setAttribute("action", "edit");
 
                request.setAttribute("id", "");
+               request.setAttribute("users", usersList);
         }
         else if(action.equalsIgnoreCase("delete")){
             this.delete(Long.parseLong(request.getParameter("id")));
@@ -192,6 +193,7 @@ public class ProjectController extends AppController {
             request.setAttribute("project", project);
             request.setAttribute("action", "edit");
             request.setAttribute("id", id);
+            request.setAttribute("users", usersList);
             if(addstat == 1) request.setAttribute("success", true);
         }
         else if(action.equalsIgnoreCase("listunits") && loggedIn.equalsIgnoreCase("no")){

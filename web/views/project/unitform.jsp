@@ -72,7 +72,7 @@
           </div>
           
           <div class="form-group marginbottom10">
-            <label for="cpu" class="col-sm-4 control-label">Project Cost Per Unit*</label>
+            <label for="cpu" class="col-sm-4 control-label">Selling Price*</label>
             <div class="col-sm-7">
                 <input type="text" name="cpu" id="cpu" class="form-control text-right medium" value="">
             </div>

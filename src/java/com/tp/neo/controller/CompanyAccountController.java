@@ -125,6 +125,7 @@ public class CompanyAccountController extends AppController {
         }
         
         request.getRequestDispatcher(viewFile).forward(request, response);
+        request.setAttribute("sideNav","companyAccount");
         
     }
 

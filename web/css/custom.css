@@ -48,7 +48,7 @@ and open the template in the editor.
 .paddingbottom10{padding-bottom: 10px !important;}
 .paddingbottom20{padding-bottom: 20px !important;}
 .paddingbottom30{padding-bottom: 30px !important;}
-
+.paddingleft10{ padding-left: 10px !important;}
 
 .width10{width: 10px !important;}
 .width70{width: 70px !important;}
@@ -78,6 +78,7 @@ and open the template in the editor.
 .box-title {display: block !important;}
 .header-stee-blue {background: lightsteelblue;}
 
+.text-conspicuous{font-size: 30px !important;}
 /*.innersidebarli{margin-bottom: 5px; }*/
 
 @media (min-width: 768px){
@@ -225,7 +226,7 @@ body .modal .modal-lg {
 }
 
 .table.table-profile>thead>tr>th {
-    border-bottom: none!important
+    border-bottom: none !important;
 }
 
 .table.table-profile>thead>tr>th h4 {
@@ -245,7 +246,7 @@ body .modal .modal-lg {
     border: none;
     padding-top: 7px;
     padding-bottom: 7px;
-    color: #242a30
+    color: #242a30;
 }
 
 .table.table-profile>tbody>tr>td.field {

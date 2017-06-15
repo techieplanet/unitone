@@ -6,7 +6,7 @@
                   <li class="header"></li>
                   <!-- Optionally, you can add icons to the links -->
                   
-                  <li class="<c:out  value='${sideNav eq "Dashboard" ? "active":""}' />"><a href="${pageContext.request.contextPath}/Dashboard"><i class="fa fa-tachometer"></i> <span>Dashboard</span></a></li>
+                  <li class="<c:out  value='${sideNav eq "Dashboard" ? "active":""}' />"><a href="${pageContext.request.contextPath}/Dashboard"><i class="fa fa-bar-chart-o"></i> <span>Dashboard</span></a></li>
                   
                   <!--PROJECT-->
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_project')}">
@@ -44,7 +44,7 @@
                   <!--AGENT-->
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
                         <li class="treeview <c:out value='${sideNav eq "Agent" ? "active":""}' />" >
-                          <a href="#"><i class="fa fa-users"></i><span>Agents</span><i class="fa fa-angle-left pull-right"></i></a>
+                          <a href="#"><i class="fa fa-user-circle"></i><span>Agents</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Agent" <c:if test="${sideNavAction eq '' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if>>Approved Agents</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'create_agent')}">
@@ -64,7 +64,7 @@
                   <!--ORDERS-->
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
                         <li class="treeview <c:out value='${sideNav eq "Order" ? "active":""}' />" >
-                          <a href="#"><i class="fa fa-users"></i><span>Orders</span><i class="fa fa-angle-left pull-right"></i></a>
+                          <a href="#"><i class="fa fa-cart-plus"></i><span>Orders</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Order" <c:if test="${sideNavAction eq '' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if> >All Orders</a></li>
                             <li><a href="${pageContext.request.contextPath}/Order?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Order'}"> <c:out value='style=color:#fff' /></c:if>>New Order</a></li>
@@ -94,7 +94,7 @@
                   <!--Lodgement-->
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
                         <li class="treeview <c:out value='${sideNav eq "Lodgement" ? "active":""}' />" >
-                          <a href="#"><i class="fa fa-users"></i><span>Lodgement</span><i class="fa fa-angle-left pull-right"></i></a>
+                          <a href="#"><i class="fa fa-money"></i><span>Lodgement</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Lodgement" <c:if test="${sideNavAction eq '' && sideNav eq 'Lodgement'}"> <c:out value='style=color:#fff' /></c:if> >All</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_order')}">
@@ -125,7 +125,7 @@
                 
                   
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_role')}">
-                    <li class="<c:out value='${sideNav eq "Role" ? "active":""}' />" ><a href="${pageContext.request.contextPath}/Role"><i class="fa fa-user"></i> <span>Roles</span></a></li>
+                    <li class="<c:out value='${sideNav eq "Role" ? "active":""}' />" ><a href="${pageContext.request.contextPath}/Role"><i class="fa fa-address-card-o"></i> <span>Roles</span></a></li>
                   </c:if>
                     
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_user')}">
@@ -135,20 +135,20 @@
                   
                   
                   <!--Settings-->
-<!--                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_settings')}">
+                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_settings')}">
                         <li class="treeview <c:out value='${sideNav eq "Settings" ? "active":""}' />" >
-                          <a href="#"><i class="fa fa-users"></i><span>Settings</span><i class="fa fa-angle-left pull-right"></i></a>
+                          <a href="#"><i class="fa fa-gears"></i><span>Settings</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">                            
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_company_account')}">
-                                <li><a href="${pageContext.request.contextPath}/CompanyAccount" <c:if test="${sideNavAction eq 'approval' && sideNav eq 'Lodgement'}"> <c:out value='style=color:#fff' /></c:if> >Company Accounts</a></li>
+                                <li><a href="${pageContext.request.contextPath}/CompanyAccount" <c:if test="${sideNav eq 'companyAccount'}"> <c:out value='style=color:#fff' /></c:if> >Company Accounts</a></li>
                             </c:if>
                           </ul>
                         </li>
-                  </c:if>-->
+                  </c:if>
                             
                     
                   <!--<c:if test="${fn:contains(sessionScope.user.permissions, 'view_user')}">-->
-                      <li class="<c:out value='${sideNav eq "Profile" ? "active":""}' />"><a href="${pageContext.request.contextPath}/User?action=profile&id=${sessionScope.user.getSystemUserId()}"><i class="fa fa-users"></i> <span>My Profile</span></a></li>
+                      <li class="<c:out value='${sideNav eq "Profile" ? "active":""}' />"><a href="${pageContext.request.contextPath}/User?action=profile&id=${sessionScope.user.getSystemUserId()}"><i class="fa fa-user"></i> <span>My Profile</span></a></li>
                   <!--</c:if>-->
                   
                     

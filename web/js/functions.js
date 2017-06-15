@@ -6,6 +6,7 @@
  * and open the template in the editor.
  */
 
+var nairaSymbol = "&#8358";
 
 /* global data */
 var cartArray = []; // holds cart item objects
@@ -1223,9 +1224,11 @@ function calculateProductAmount(){
 
 /*TP: Modal for the agreement status of the agent*/
 function modal_agree(){
+    //$("#agree").attr("checked");
     $("#agree").attr("checked",true);
     $('input[id="agentCreate"]').attr( "disabled",false);
     $('#agreementStatusModal').modal('hide');
+    $("#decline").removeAttr("checked", false);
     $("#agree").attr("checked",true);
     
 }
@@ -1233,21 +1236,13 @@ function modal_agree(){
 /*TP: check the agreement status*/
 function agreementStatusChecked(element){
     //alert(status);
-    var button = $(element).val();
-   
-//    $("#agentForm input[name=agreement_document]").val();
-//    alert("This is the agent id "+$("#agent_id").val());
-//     alert("This is the agent id "+$("#id").val());
+   var button = $(element).val();
    if(element==null){
-       if(($("#agent_id").val())!="" && ($("#agent_id").val())!=null){
-//           alert("in the false place");
-//           alert($("#agent_id").val());
-      $('input[id="agentCreate"]').attr( "disabled",false);
-  }else{
-//      alert($("#agent_id").val());
-//      alert("This is the operable thingy");
-      $('input[id="agentCreate"]').attr( "disabled",true);
-  }
+        if(($("#agent_id").val())!="" && ($("#agent_id").val())!=null){
+            $('input[id="agentCreate"]').attr( "disabled",false);
+        }else{
+            $('input[id="agentCreate"]').attr( "disabled",true);
+        }
     }
     else if(button=="agree"){
         $('input[id="agentCreate"]').attr( "disabled",false);
@@ -1368,17 +1363,22 @@ function validateCustomerRegForm()
     {
         errors.push("Please enter email");
     }
-    if($("#customerPassword").val().trim() == '')
-    {
-        errors.push("Please enter password");
-    }
-    else
-    {
-        if($("#customerPassword").val().trim() != $("#customerConfirmPassword").val().trim())
+    
+    //only when the password fields are visible
+    if($("#customerPassword").length){
+        if($("#customerPassword").val().trim() == '')
         {
-            errors.push("Password mismatch");
+            errors.push("Please enter password");
+        }
+        else
+        {
+            if($("#customerPassword").val().trim() != $("#customerConfirmPassword").val().trim())
+            {
+                errors.push("Password mismatch");
+            }
         }
     }
+    
     if($("#customerStreet").val().trim() == '')
     {
         errors.push("Please enter street");
@@ -1479,9 +1479,9 @@ function removeLoadingState(){
 /*****************************************************
  * Use this as a generic ajax call method
  *****************************************************/
-function genericAjax(appName, route, method, formData, callback){
+function genericAjax(appContext, route, method, formData, callback){
 
-    var url = appName + '/' + route;
+    var url = appContext + '/' + route;
     console.log("URL: " + url);
     
     $.ajax({
@@ -1495,8 +1495,7 @@ function genericAjax(appName, route, method, formData, callback){
        error: function(){
            console.log("Ajax Error");
        }
-    });
-    
+    });   
 }
 
 function thousandSeparator(number){
@@ -1570,3 +1569,15 @@ function submitForm(){
            
            return submitOk;
        }
+       
+       
+       
+function validateEmail(x) {
+    var atpos = x.indexOf("@");
+    var dotpos = x.lastIndexOf(".");
+    if (atpos<1 || dotpos<atpos+2 || dotpos+2>=x.length) {
+        //alert("Not a valid e-mail address");
+        return false;
+    }
+    return true;
+}

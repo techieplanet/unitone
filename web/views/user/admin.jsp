@@ -146,8 +146,6 @@
                     { "sortable": false, "width":"100px", "targets": 5 }
                     </c:if>
                 ]
+            });
         });
-    
-      
-          });
     </script>

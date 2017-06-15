@@ -1,4 +1,3 @@
-    
 <%@ include file="../includes/lid.jsp" %>      
  
 <!-- Include the header -->
@@ -14,11 +13,11 @@
           <h1>
               <a href="">
                   <c:choose>
-                      <c:when test="${sessionScope.userType == 'ADMIN'}">
+                      <c:when test="${sessionScope.userTypeString == 'ADMIN'}">
                         Admin Dashboard
                       </c:when>
                         
-                      <c:when test="${sessionScope.userType == 'AGENT'}">
+                      <c:when test="${sessionScope.userTypeString == 'AGENT'}">
                         Agent Dashboard
                       </c:when>
                   </c:choose>
@@ -30,11 +29,11 @@
         <section class="content">
         
             <c:choose>
-                  <c:when test="${sessionScope.userType == 'ADMIN'}">
+                  <c:when test="${sessionScope.userTypeString == 'ADMIN'}">
                         <%@ include file="dashcontent.jsp" %>
                   </c:when>
 
-                  <c:when test="${sessionScope.userType == 'AGENT'}">
+                  <c:when test="${sessionScope.userTypeString == 'AGENT'}">
                         <%@ include file="agentdashcontent.jsp" %>
                   </c:when>
             </c:choose>

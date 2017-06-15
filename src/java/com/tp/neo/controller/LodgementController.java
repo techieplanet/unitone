@@ -195,7 +195,7 @@ public class LodgementController extends AppController {
              getPendingLodgement(request,sessionUser.getSystemUserTypeId());
              request.setAttribute("table_title", "Pending Lodgments");
          }
-         else if(action.equalsIgnoreCase("approval")){
+         else if(action.equalsIgnoreCase("approval")){//shows the list of Lodgements pending approval
              
              viewFile = LODGEMENT_APPROVAL;
              request.setAttribute("notificationLodgementId", 0);
@@ -511,7 +511,7 @@ public class LodgementController extends AppController {
         return map;
     }
     
-    private void getUnapprovedLodgement(HttpServletRequest request){
+    private void getUnapprovedLodgement1(HttpServletRequest request){
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
@@ -528,6 +528,40 @@ public class LodgementController extends AppController {
     }
     
     
+    /**
+     * The list of unapproved lodgements by the customers of an agent
+     * @param request 
+     */
+    private void getUnapprovedLodgement(HttpServletRequest request){
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        List<Lodgement> lodgementList = new ArrayList<Lodgement>();
+        
+        switch(sessionUser.getSystemUserTypeId()){
+            case 1:
+                lodgementList = em.createNamedQuery("Lodgement.findByApprovalStatus")
+                                    .setParameter("approvalStatus", 0)
+                                    .getResultList();
+                break;
+            case 2:
+                lodgementList = em.createNamedQuery("Lodgement.findByApprovalStatusForAgent")
+                                    .setParameter("approvalStatus", 0)
+                                    .setParameter("agentId", sessionUser.getSystemUserId())
+                                    .getResultList();
+                break;
+        }
+        
+                                                
+        
+        emf.getCache().evictAll();
+        em.close();
+        
+        request.setAttribute("notificationLodgementId",0);
+        request.setAttribute("lodgements", lodgementList);
+    }
+            
+            
     private void approveLodgement(HttpServletRequest request){
         EntityManagerFactory emf = null;
         EntityManager em = null;

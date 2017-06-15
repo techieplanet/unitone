@@ -18,7 +18,6 @@ import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.AgentBalance;
-import com.tp.neo.model.Customer;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Transaction;
@@ -26,18 +25,14 @@ import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.User;
 import com.tp.neo.model.Withdrawal;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -61,7 +56,6 @@ import javax.servlet.http.Part;
 //import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import javax.xml.bind.PropertyException;
 import javax.persistence.RollbackException;
-
 
 
 /**
@@ -255,6 +249,15 @@ public class AgentController extends AppController {
             request.setAttribute("sideNav", "profile");
             request.setAttribute("agent", agent);
             
+            
+            //transaction history 
+            Map<String, Object> historymap = getAgentAccountHistory(request, response);
+            request.setAttribute("agentDetails", historymap.get("agentDetails"));
+            request.setAttribute("transactionMapsList", historymap.get("transactionMapsList"));
+            request.setAttribute("history", request.getHeader("referer"));
+            request.setAttribute("networkList", this.getNetwork(agent));
+            request.setAttribute("refAgent", em.find(Agent.class, agent.getReferrerId()));
+            
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listagents")){
             viewFile = AGENTS_ADMIN;
@@ -266,10 +269,10 @@ public class AgentController extends AppController {
             this.processApprovalRequest(Long.parseLong(agent_id), Integer.parseInt(status), request);
         }
         else if(action.equalsIgnoreCase("wallet")){
-            
-            getAgentAccountHistory(request, response);
-            return;
-            
+            Map<String, Object> historymap = getAgentAccountHistory(request, response);
+            System.out.println("Maps List: " + historymap.get("transactionMapsList"));
+            request.setAttribute("agentDetails", historymap.get("agentDetails"));
+            request.setAttribute("transactionMapsList", historymap.get("transactionMapsList"));
         }
         else if(action.equalsIgnoreCase("account_statement")){
             
@@ -278,6 +281,7 @@ public class AgentController extends AppController {
             getAgentAccountHistory(request);
             
         }
+        
         if(request.getAttribute("sideNav") == null){
             //Keep track of the sideBar
             request.setAttribute("sideNav", "Agent");
@@ -331,8 +335,12 @@ public class AgentController extends AppController {
             String amount = request.getParameter("amount") != null ? request.getParameter("amount") : "";
             String withdrawal_id = request.getParameter("withdrawal_id") != null ? request.getParameter("withdrawal_id") : "";
             String agent_id = request.getParameter("agent_id") != null ? request.getParameter("agent_id") : "";
+            String referralMode = request.getParameter("referralMode") != null ? request.getParameter("referralMode") : "";
+            System.out.println("referralMode: " + request.getParameter("referralMode"));
+            
+            
             try{
-                     if(!withdrawal_id.equalsIgnoreCase("")){
+                    if(!withdrawal_id.equalsIgnoreCase("")){
 
                           if(request.getParameter("action").equalsIgnoreCase("approveWithdrawal")){
                               approveWithdrawal(withdrawal_id,request,response);
@@ -341,8 +349,7 @@ public class AgentController extends AppController {
 
                               declineWithdrawal(withdrawal_id,request,response);
                           }
-                    }
-                      else if(!agent_id.equalsIgnoreCase("")) { //edit mode'
+                    }else if(!agent_id.equalsIgnoreCase("")) { //edit mode'
                           
                         if(!(updateStatus.isEmpty())){
                         this.processAgentAccountStatus(request,response);
@@ -357,7 +364,36 @@ public class AgentController extends AppController {
                             this.processUpdateRequest(request,response);
                         }
 
+                    }else if(referralMode.equalsIgnoreCase("email")){
+                        String recipientEmail = request.getParameter("recipientEmail") != null ? request.getParameter("recipientEmail") : "";
+                        String refAgentId = request.getParameter("refAgentId") != null ? request.getParameter("refAgentId") : "";
+                        String returnValue = "";
+                        em = emf.createEntityManager();
+                        
+                        if(referralMode.equalsIgnoreCase("email")){
+                            Class<Agent> agentClass = Agent.class;
+                            Agent agent = em.find(Agent.class, Long.parseLong(refAgentId));
+                            String refLink = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/AgentRegistration?action=ref&refCode=%s&refId=%s&target=%s";
+                            //refLink = String.format(refLink, agent.getAccount().getAccountCode(), agent.getAgentId());
+                            //System.out.println("Initial reflink: " + refLink);
+                            
+                            //String encodeMe = "&refcode=" + agent.getAccount().getAccountCode() + "&refid=" + agent.getAccount().getAccountCode();
+                            refLink = String.format(refLink, 
+                                                    Base64.getEncoder().encodeToString(agent.getAccount().getAccountCode().getBytes("utf-8")),
+                                                    Base64.getEncoder().encodeToString(agent.getAgentId().toString().getBytes("utf-8")),
+                                                    Base64.getEncoder().encodeToString(recipientEmail.getBytes("utf-8")));
+                            System.out.println("reflink: " + refLink);
+                            //byte[] decodedBytes = Base64.getUrlDecoder().decode(refLink);
+                            //System.out.println("Original String: " + new String(decodedBytes));
+                            new AlertManager().sendReferralCodeEmail(recipientEmail, agent, refLink);
+                            returnValue = "OK";
+                        }
+                        
+                        response.setContentType("text/plain");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write(returnValue);
                     }
+                    
                    else{
                         this.processInsertRequest(request, response);
                     }
@@ -436,7 +472,9 @@ public class AgentController extends AppController {
                 agent.setApprovalStatus((short)-1);
                 agent.setAgreementStatus((short)1);
                 agent.setDeleted((short)0);
+                agent.setReferrerId(0L); //set to ) when Admin is entering the data so it does not return null
                 
+
                 //handle the pictures now
                 agentFileName = FileUploader.getSubmittedFileName(request.getPart("agentPhoto"));
                 agentKinFileName = FileUploader.getSubmittedFileName(request.getPart("agentKinPhoto"));
@@ -1275,7 +1313,7 @@ public class AgentController extends AppController {
      * @param response
      * @throws IOException 
      */
-    private void getAgentAccountHistory(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private Map<String, Object> getAgentAccountHistory(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
         em = emf.createEntityManager();
         
@@ -1315,26 +1353,16 @@ public class AgentController extends AppController {
         }
         
         
-        Map<String, String> agentDetails = new HashMap();
-        agentDetails.put("balance", String.format("%.2f",agentBalance - minimumBalance));
+        HashMap<String, String> agentDetails = new HashMap();
+        agentDetails.put("balance", String.format("%.2f",agentBalance >= minimumBalance ? (agentBalance - minimumBalance) : 0.0));
         agentDetails.put("ledgerBalance", String.format("%.2f",agentBalance));
         agentDetails.put("accountCode", acctCode);
         
-        Map<String, Object> jsonMap = new HashMap();
-        jsonMap.put("transactions", transactionMapList);
-        jsonMap.put("agentDetail", agentDetails);
+        Map historyMap = new HashMap<String, Object>();
+        historyMap.put("transactionMapsList", transactionMapList);
+        historyMap.put("agentDetails", agentDetails);
         
-        Gson gson = new GsonBuilder().create();
-        
-        String transactions = gson.toJson(jsonMap);
-        System.out.println("Transaction JSON : " + transactions);
-        
-        response.setContentType("text/plain");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(transactions);
-        response.getWriter().flush();
-        response.getWriter().close();
-        
+        return historyMap;
     }
 
     private void getAgentAccountHistory(HttpServletRequest request) {
@@ -1378,6 +1406,16 @@ public class AgentController extends AppController {
         request.setAttribute("ledgerBalance", agentBalance);
         request.setAttribute("accountCode", acctCode);
         
+    }
+    
+    /**
+     * 
+     * @param agent the agent whose network is to be gotten
+     * @return 
+     */
+    private List<Agent> getNetwork(Agent agent){
+        List networkList = (List)em.createNamedQuery("Agent.findNetwork").setParameter("agentId", agent.getAgentId()).getResultList();
+        return networkList;
     }
 
 }

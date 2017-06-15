@@ -34,92 +34,52 @@
           
             <div class="panel">
                 
-                <div class="panel-body">
-                    
+                <div class="panel-heading" style="background-color: #fafafa">
                     <div class="row">
-                        
+                        <div class="col-md-2 margintop40">
+                            <a href="${history}" class="btn btn-primary" /><i class="fa fa-chevron-left"></i> Back </a>
+                        </div>
+                        <div class="col-md-8 margintop20">
+                            <h1>${agent.getFullName()} - ${agent.account.accountCode}</h1>
+                        </div>
                         <div class="col-md-2">
-                            
-                            <h4>Agent Picture</h4>
                             <img src="${agentImageAccessDir}/${agent.photoPath}" class="img img-responsive img-thumbnail" />
-                            
-                            
-                            
                         </div>
-                        
-                        <div class="col-md-10">
-                            
-                            <table class="table table-profile">
-                                
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>
-                                            <div class="col-md-9">
-                                                <h4>${agent.getFullName()}</h4>
-                                            </div>
-                                            
-                                            <c:if test="${sessionScope.user.getSystemUserTypeId() == 2}">
-                                                <div class="col-md-3">
-                                                    <a href="#" class="pull-right" onclick="agentProfile.showPasswordModal(event)" style="text-decoration: none; border-bottom: 1px dotted blue;">Change password</a>
-                                                </div>
-                                            </c:if>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="highlight">
-                                        <td class="field">Email</td>
-                                        <td><i class="fa fa-envelope-o"></i> ${agent.getEmail()} </td>
-                                        
-                                    </tr>
-                                    <tr class="divider">
-                                        <td colspan="2"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">Mobile</td>
-                                        <td><i class="fa fa-mobile-phone"></i> ${agent.getPhone()}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">Street</td>
-                                        <td>${agent.getStreet()}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">City</td>
-                                        <td>${agent.getCity()}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">State</td>
-                                        <td>${agent.getState()}</td>
-                                    </tr>
-                                    <tr class="highlight">
-                                        <td class="field" colspan="2" style="text-align: left">
-                                            <h4>Next of Kin Information</h4>
-                                        </td>
-                                    </tr>
-                                    <tr class="divider">
-                                        <td colspan="2"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">Name</td>
-                                        <td>${agent.getKinName()}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">Mobile</td>
-                                        <td><i class="fa fa-mobile-phone"></i> ${agent.getKinPhone()}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="field">State</td>
-                                        <td>${agent.getKinAddress()}</td>
-                                    </tr>
-                                    
-                                </tbody>
-                            </table>
-                            
+                    </div>
+                </div>
+                
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
+                                <li role="presentation"><a href="#commissions" aria-controls="commissions" role="tab" data-toggle="tab">Earnings</a></li>
+                                <li role="presentation" class=""><a href="#network" aria-controls="network" role="tab" data-toggle="tab">Network</a></li>
+                            </ul>
                         </div>
-                        
                     </div>
                     
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade in active" id="profile">
+                            <%@ include file="_profile_tab_contents.jsp" %>   
+                        </div><!-- profile ends -->
+                        
+                        <div role="tabpanel" class="tab-pane fade" id="commissions">
+                            <div class="row">
+                                <div class="col-md-7 text-center col-xs-offset-2">
+                                    <%@ include file="_earnings_tab_contents.jsp" %>   
+                                </div>
+                            </div>
+                        </div>
+                                
+                        <div role="tabpanel" class="tab-pane fade " id="network">
+                            <div class="row">
+                                <div class="col-md-7 text-center col-xs-offset-2">
+                                    <%@ include file="_network_tab_contents.jsp" %>   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -178,6 +138,10 @@
 
 
 <script>
+    
+    //$(document).ready(function(){
+        //$().tab('show')
+    //})
       
      var agentProfile = {
          

@@ -151,7 +151,7 @@ public class DashboardController extends AppController {
                 request.setAttribute("projectPerformanceByStockSold", helper.getProjectsPerformanceByStockSold());  //the srock sold for each project and its units
                 request.setAttribute("orderSummary", helper.getOrderSummary());  //the default version to get orders in the last 7 days
                 request.setAttribute("lodgementSummary", helper.getLodgementSummary());  //the default version to get lodgements in the last 7 days
-
+                        
                 request.setAttribute("agentCount", agentCount);  
                 request.setAttribute("customerCount", customerCount);  
                 request.setAttribute("completedOrders", em.createNamedQuery("ProductOrder.findByApprovalStatus").setParameter("approvalStatus", 2).getResultList().size());  
