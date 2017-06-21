@@ -238,7 +238,6 @@ public class AgentController extends AppController {
         else if(action.equalsIgnoreCase("profile")){
             
             viewFile = AGENT_PROFILE;
-            
             long id = Long.parseLong(request.getParameter("id"));
             Agent agent = em.find(Agent.class, id);
             

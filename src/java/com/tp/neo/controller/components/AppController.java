@@ -9,6 +9,9 @@ import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Permission;
 import com.tp.neo.model.Plugin;
+import com.tp.neo.model.User;
+import com.tp.neo.model.Agent;
+import com.tp.neo.model.Customer;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -126,13 +129,142 @@ public class AppController extends HttpServlet{
         String[] permissions = sessionUser.getPermissions().split(",");
         //log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
         
-        for(String p : permissions){
-            //p.replaceAll("\"", "");
+        //First get The System user 
+        SystemUser user = (SystemUser) request.getSession().getAttribute("user");
+        
+        //If the user has not Log into the sysytem
+        if(user == null)
+        {
+            return false;
+        }
+        
+        //Get all ID related parameters 
+        Long id  = request.getParameter("id") != null ? Long.parseLong(request.getParameter("id")) : 0;
+        Long customerId  = request.getParameter("customerId") != null ? Long.parseLong(request.getParameter("customerId")) : 0;
+        Long agentId  = request.getParameter("agent_id") != null ? Long.parseLong(request.getParameter("agent_id")) :
+                (request.getParameter("agentId") != null ? Long.parseLong(request.getParameter("agentId")) : 0);
+        
+        //Check is the system user is an Instance of User Class
+        if(user instanceof User)
+        {
+            //Then we known that it is Either an Admin user or whatever
+            //We proceed to check if the Admin has permission 
+            
+             for(String p : permissions)
+             {
+                 p =  p.replaceAll("\"", "");
             //log("p: " + p); log("action: " + action);
             if(p.equalsIgnoreCase(action))
                 return true;
+            }
+        //No permission so we return false
+        return false;    
         }
-        return true;
+        
+        //Check is system user is an instance of the Agent Class
+        if(user instanceof Agent)
+        {
+            //Now we can cast the SystemUser Object to an Agent   reference 
+            
+            Agent agent = (Agent)user;
+            
+            //lets first check if the agent Id belong to the Agent
+            if(agentId != 0)
+            {
+                if(agentId.equals(agent.getAgentId())) return true ;
+            }
+            
+            //Now lets check the Id parameter may be it belong to the agent 
+            if(id != 0)
+            {
+                if(id.equals(agent.getAgentId())) return true ; 
+                
+            /** Now we known the id doesn't belong to the agent 
+            *May be it belong to it customer but the Id may still belong 
+            *to another agent . The only way out is to check if the agent is trying
+            *to make any agent related calls
+            */
+                if(action.contains("agent") 
+                        || action.contains("history")
+                        || action.contains("withdrawal")
+                        || action.contains("statement"))
+                {
+                    //Then we now know that it is an agent trying to beat the system 
+                    return false;
+                }
+            }
+            
+            /**
+            *Now we Know that the Agent is trying to view it Customer Profile
+            *Let proceed to get the Customer with that Id; 
+            *and check if the customer belong to that agent
+            */
+            
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+            Customer customer = null;
+             
+            if(id != 0) 
+            {
+            Query jpqlQuery  = em.createNamedQuery("Customer.findByCustomerId");
+            jpqlQuery.setParameter("customerId", id);
+            jpqlQuery.setParameter("deleted", (short)0);
+            
+            customer = (Customer) jpqlQuery.getSingleResult();
+            if(customer != null)
+            {
+                //The customer exit and lets check if the customer belong to the agent
+                return agent.getAgentId().equals(customer.getAgent().getAgentId());
+            }
+            else
+            {
+                //The customer with that Id doesn't exit
+                return false ;
+            }
+            }
+            
+            if(customerId != 0) 
+            {
+            Query jpqlQuery  = em.createNamedQuery("Customer.findByCustomerId");
+            jpqlQuery.setParameter("customerId", customerId);
+            jpqlQuery.setParameter("deleted", (short)0);
+            
+            customer = (Customer) jpqlQuery.getSingleResult();
+            
+            if(customer != null)
+            {
+                //The customer exit and lets check if the customer belong to the agent
+                return agent.getAgentId().equals(customer.getAgent().getAgentId());
+            }
+            else
+            {
+                //The customer with that Id doesn't exit
+                return false ;
+            }
+            
+            }
+            
+        }
+        
+        //check if system User is an instance of the Customer Class
+        if(user instanceof Customer)
+        {
+            //Now we can cast the SystemUser Object to a customer reference
+            
+            Customer customer = (Customer)user;
+           
+            //Check if any of the Id Parameter belong to the customer itself
+           if(id != 0 )
+           {
+               return id.equals(customer.getCustomerId());
+           }
+           else if (customerId != 0)
+           {
+               return customerId.equals(customer.getCustomerId());
+           }
+        }
+        
+      return false;
     }
     
     

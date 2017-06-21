@@ -82,12 +82,12 @@
                                 
                                 <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent') || fn:contains(sessionScope.user.permissions, 'edit_agent') || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
                                     <td class="text-center">
-                                        <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
+                                        <% /** <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
                                             <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="Agent?action=view&route=approved&agentId=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
                                         </c:if>   
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
                                         <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="#" onclick="agentHistory.getAgentHistory('${agent.agentId}',event)" role="button"><i class="fa fa-dollar"></i></a>
-                                        </c:if>
+                                        </c:if>*/ %>
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
                                         <a class="btn btn-primary btn-xs anti-rcswitchwer-buttons" href="Agent?action=profile&id=${agent.agentId}" role="button"><i class="fa fa-user"></i></a>
                                         </c:if>
