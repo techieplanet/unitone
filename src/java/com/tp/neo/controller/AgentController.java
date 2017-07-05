@@ -4,28 +4,32 @@
  * and open the template in the editor.
  */
 package com.tp.neo.controller;
-import com.tp.neo.controller.components.AppController;
-import com.tp.neo.model.Agent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.components.AuditLogger;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.AlertManager;
 import com.tp.neo.controller.helpers.TransactionManager;
 import com.tp.neo.controller.helpers.WithdrawalManager;
-import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
+import com.tp.neo.model.Agent;
 import com.tp.neo.model.AgentBalance;
+import com.tp.neo.model.Document;
+import com.tp.neo.model.DocumentType;
 import com.tp.neo.model.GenericUser;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Transaction;
-import com.tp.neo.model.utils.TrailableManager;
-import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.User;
 import com.tp.neo.model.Withdrawal;
+import com.tp.neo.model.utils.AuthManager;
+import com.tp.neo.model.utils.FileUploader;
+import com.tp.neo.model.utils.TrailableManager;
+import com.tp.neo.service.DocumentService;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -41,6 +45,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -48,14 +53,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-
-//import org.apache.tomcat.util.http.fileupload.FileItem;
-//import org.apache.tomcat.util.http.fileupload.FileItemFactory;
-//import org.apache.tomcat.util.http.fileupload.RequestContext;
-//import org.apache.tomcat.util.http.fileupload.disk.DiskFileItemFactory;
-//import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import javax.xml.bind.PropertyException;
-import javax.persistence.RollbackException;
 
 
 /**
@@ -80,7 +78,7 @@ public class AgentController extends AppController {
     private static String AGENTS_ACCOUNT_STATEMENT = "/views/agent/account_statement.jsp";
     private final String UPLOAD_DIRECTORY = "C:/Users/John/Documents/uploads";
     private final String APPROVED_WITHDRAWAL_REQUEST = "/views/agent/approved_withdrawal_request.jsp";
-    private Agent agent = new Agent();
+    private  Agent agent = new Agent();
    
     private final static Logger LOGGER = Logger.getLogger(Agent.class.getCanonicalName());
     
@@ -152,6 +150,7 @@ public class AgentController extends AppController {
         String status = request.getParameter("status") != null ? request.getParameter("status") : "";
         
         if (action.equalsIgnoreCase("new")){
+                request.setAttribute("action","new");
                viewFile = AGENTS_NEW;
         }
         else if(action.equalsIgnoreCase("registration")){
@@ -209,10 +208,12 @@ public class AgentController extends AppController {
             request.setAttribute("agent", agentList.get(0));
             String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
             request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
-            request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agentkins");
+            request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agents/agentkins");
             
             request.setAttribute("waitingroute", request.getParameter("route").equalsIgnoreCase("waiting") ? true : false);
             //request.setAttribute("waitingroute", true);
+            request.setAttribute("documents", DocumentService.getAgentDocuments(id));
+            request.setAttribute("documentDir", imageAccessDirPath+"/");
         }
         else if(action.equalsIgnoreCase("edit")){
             viewFile = AGENTS_NEW;
@@ -231,7 +232,7 @@ public class AgentController extends AppController {
             String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
             
             request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
-            request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agentkins");
+            request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agents/agentkins");
             
             log("imageAccessDirPath: " + imageAccessDirPath);
         }
@@ -244,7 +245,7 @@ public class AgentController extends AppController {
             String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
             
             request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
-            request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agentkins");
+            request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agents/agentkins");
             request.setAttribute("sideNav", "profile");
             request.setAttribute("agent", agent);
             
@@ -256,6 +257,8 @@ public class AgentController extends AppController {
             request.setAttribute("history", request.getHeader("referer"));
             request.setAttribute("networkList", this.getNetwork(agent));
             request.setAttribute("refAgent", em.find(Agent.class, agent.getReferrerId()));
+            request.setAttribute("documents", DocumentService.getAgentDocuments(id));
+            request.setAttribute("documentDir", imageAccessDirPath+"/");
             
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listagents")){
@@ -414,7 +417,7 @@ public class AgentController extends AppController {
         errorMessages.clear();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
+        final EntityManager em = emf.createEntityManager();
         
         String agentFileName = "";
         String agentKinFileName = "";
@@ -472,8 +475,9 @@ public class AgentController extends AppController {
                 agent.setAgreementStatus((short)1);
                 agent.setDeleted((short)0);
                 agent.setReferrerId(0L); //set to ) when Admin is entering the data so it does not return null
-                
-
+                agent.setPhotoPath("default");
+                agent.setKinPhotoPath("default");
+                /*
                 //handle the pictures now
                 agentFileName = FileUploader.getSubmittedFileName(request.getPart("agentPhoto"));
                 agentKinFileName = FileUploader.getSubmittedFileName(request.getPart("agentKinPhoto"));
@@ -503,13 +507,82 @@ public class AgentController extends AppController {
                     //throw new PropertyException("Please upload next of kin picture");
                 }
                 
-                
+                */
                 
                //persist only on save mode
                 em.persist(agent);   
                 
                 em.flush(); //flush so you can have agent id
                 
+                 //New Update Handles The Images As Documents
+            
+            //We are going to put all the image into an Hash map specifying the title of the Image also
+            Map<String, Part>  documents = new HashMap<>();
+            documents.put("agent_", request.getPart("agentPhoto"));
+            documents.put("agentkin_", request.getPart("agentKinPhoto"));
+            documents.put("agent_ID_Card_", request.getPart("agentPhotoID"));
+            documents.put("agent_utility_bill_", request.getPart("utilityBill"));
+            
+            em.refresh(agent);
+           FileUploader fUpload  = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+           final Agent temp_agent = agent;
+           documents.forEach((String typeAlias , Part path) -> {
+                DocumentType doctype = (DocumentType)em
+                        .createNamedQuery("DocumentType.findByTypeAlias")
+                        .setParameter("typeAlias", typeAlias)
+                        .getSingleResult();
+                Document doc = new Document();
+               
+                String saveName = typeAlias + unixTime + temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(path);
+                String subdir = "agents";
+                String  dir = "";
+                
+                switch(typeAlias)
+                {
+                    case "agent_":
+                        temp_agent.setPhotoPath(saveName); 
+                        break;
+                        
+                    case "agentkin_":
+                        temp_agent.setKinPhotoPath(saveName); 
+                        subdir = subdir + fUpload.getFileSeparator() + "agentkins" ;
+                        dir = "/agentkins";
+                        break;
+                       
+                    case "agent_ID_Card_":
+                        subdir = subdir + fUpload.getFileSeparator() + "ids" ;
+                         dir = "/ids";
+                        break;
+                        
+                    case "agent_utility_bill_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "utilitybills" ;
+                         dir = "/utilitybills";
+                        break;
+                }
+                
+                
+                doc.setDocTypeId(doctype);
+                doc.setOwnerId(BigInteger.valueOf(temp_agent.getAgentId()));
+                doc.setOwnerTypeId(temp_agent.getSystemUserTypeId());
+                doc.setPath("agents" + dir + "/"+saveName);
+                doc.setCreatedDate(CustomerController.getDateTime().getTime());
+                
+                em.persist(doctype);
+                em.persist(doc);
+                
+                try 
+                {
+                    fUpload.uploadFile(path, subdir, saveName, true);
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+            });
+                
+                agentFileName = agent.getPhotoPath();
+                agentKinFileName = agent.getKinPhotoPath();
+                em.persist(agent); 
+                em.flush();
+                 
                 //set up the account for this unit
                 Account account = new AccountManager().createAgentAccount(agent);
                 

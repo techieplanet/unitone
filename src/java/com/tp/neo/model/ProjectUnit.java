@@ -5,7 +5,6 @@
  */
 package com.tp.neo.model;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -76,6 +75,8 @@ public class ProjectUnit extends BaseModel {
     private Long modifiedBy;
     @Column(name = "vat_percentage")
     private Double vatPercentage;
+    @Column(name = "annual_maintenance_percentage")
+    private Double annualMaintenancePercentage;
     @Column(name = "reward_points")
     private Integer rewardPoints;
     @Column(name = "building_cost")
@@ -375,5 +376,25 @@ public class ProjectUnit extends BaseModel {
         this.vatPercentage = vatPercentage;
     }
 
+    public double calculateVatAmount(double amount){
+        return (amount * vatPercentage)/100;
+    }
     
+    public double calculateAnnualMaintenanceAmount(double amount){
+        return (amount * getAnnualMaintenancePercentage() )/100;
+    }
+
+    /**
+     * @return the annualMaintenancePercentage
+     */
+    public Double getAnnualMaintenancePercentage() {
+        return annualMaintenancePercentage;
+    }
+
+    /**
+     * @param annualMaintenancePercentage the annualMaintenancePercentage to set
+     */
+    public void setAnnualMaintenancePercentage(Double annualMaintenancePercentage) {
+        this.annualMaintenancePercentage = annualMaintenancePercentage;
+    }
 }

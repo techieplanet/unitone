@@ -7,11 +7,11 @@ package com.tp.neo.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.tp.neo.exception.SystemLogger;
-import com.tp.neo.model.Project;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.AccountManager;
+import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Account;
+import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.ProjectUnitType;
 import com.tp.neo.model.utils.TrailableManager;
@@ -89,11 +89,17 @@ public class ProjectUnitController extends AppController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
-        log("inside get");
-            processGetRequest(request, response);
-
+        
+            if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new ProjectUnit().getPermissionName(action), request, response)){
+                processGetRequest(request, response);
+            }else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+            
+        }
     }
 
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response)
@@ -130,6 +136,7 @@ public class ProjectUnitController extends AppController {
             map.put("mpd", projectUnit.getMaxPaymentDuration().toString());
             map.put("commp", projectUnit.getCommissionPercentage().toString());
             map.put("vatp", projectUnit.getVatPercentage().toString());
+            map.put("amp", projectUnit.getAnnualMaintenancePercentage().toString());
             map.put("reward_points", projectUnit.getRewardPoints().toString());
             map.put("quantity", projectUnit.getQuantity() + "");
 
@@ -168,12 +175,19 @@ public class ProjectUnitController extends AppController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        if(super.hasActiveUserSession(request, response)){
-            if(request.getParameter("id").equals(""))  //save mode
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        
+            if(super.hasActiveUserSession(request, response)){
+            if(super.hasActionPermission(new ProjectUnit().getPermissionName(action), request, response)){
+                if(request.getParameter("id").equals(""))  //save mode
                 processInsertRequest(request, response);
             else
                 processUpdateRequest(request, response);
+            }else{
+                super.errorPageHandler("forbidden", request, response);
+            }
+            
         }
 
     }
@@ -206,6 +220,7 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
                 projectUnit.setVatPercentage(Double.parseDouble(request.getParameter("vatp")));
+                projectUnit.setAnnualMaintenancePercentage(Double.parseDouble(request.getParameter("amp")));
                 projectUnit.setRewardPoints(Integer.parseInt(request.getParameter("reward_points")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
                 projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
@@ -283,6 +298,7 @@ public class ProjectUnitController extends AppController {
                 map.put("monthly_pay", projectUnit.getMonthlyPay()+ "");
                 map.put("commp", projectUnit.getCommissionPercentage().toString());
                 map.put("vatp", projectUnit.getVatPercentage().toString());
+                map.put("amp", projectUnit.getAnnualMaintenancePercentage().toString());
                 map.put("reward_points", projectUnit.getRewardPoints().toString());
                 map.put("building_cost", projectUnit.getBuildingCost().toString());
                 map.put("income", projectUnit.getIncome().toString());
@@ -329,6 +345,7 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setMaxPaymentDuration(Integer.parseInt(request.getParameter("mpd")));
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
                 projectUnit.setVatPercentage(Double.parseDouble(request.getParameter("vatp")));
+                projectUnit.setAnnualMaintenancePercentage(Double.parseDouble(request.getParameter("amp")));
                 projectUnit.setRewardPoints(Integer.parseInt(request.getParameter("reward_points")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
                 projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
@@ -384,6 +401,7 @@ public class ProjectUnitController extends AppController {
                 map.put("income", projectUnit.getIncome().toString());
                 map.put("commp", projectUnit.getCommissionPercentage().toString());
                 map.put("vatp", projectUnit.getVatPercentage().toString());
+                map.put("amp", projectUnit.getAnnualMaintenancePercentage().toString());
                 map.put("reward_points", projectUnit.getRewardPoints().toString());
                 
 
@@ -472,6 +490,10 @@ public class ProjectUnitController extends AppController {
         if(!request.getParameter("vatp").matches("^\\d+(\\.?\\d+$)?")){
             errorMessages.put("vatp", "Please enter VAT Percentage");
         }    
+        
+        if(!request.getParameter("amp").matches("^\\d+(\\.?\\d+$)?")){
+            errorMessages.put("amp", "Please enter Annual Maintenance Percentage");
+        }
         
         if(!request.getParameter("reward_points").matches("^\\d+$")){
             errorMessages.put("reward_points", "Please enter a valid Reward Point value");

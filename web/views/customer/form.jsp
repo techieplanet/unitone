@@ -11,8 +11,12 @@
             <button type="button" id="process-step-1" class="btn btn-primary btn-circle" onclick="return showCustomerReg()">1</button>
             <p>Register Customer</p>
         </div>
+         <div class="stepwizard-step">
+            <button type="button" id="process-step-2" class="btn btn-default btn-circle" onclick="proceed()">2</button>
+            <p>Customer Document</p>
+        </div>
         <div class="stepwizard-step">
-            <button type="button" id="process-step-2" class="btn btn-default btn-circle" disabled="disabled" onclick="return showOrderProduct()">2</button>
+            <button type="button" id="process-step-3" class="btn btn-default btn-circle" disabled="disabled" onclick="return showOrderProduct()">3</button>
             <p>Order/Checkout</p>
         </div>
     </div>
@@ -129,6 +133,7 @@
     <input type="hidden" name="customer_id" value="" />
     <input type="hidden" name="agent_id" id="agent_id" value="" />
  
+    <!-- Step One Customer Details -->
  <div class="row" id="step1">
            <div class="col-md-12">
               <!-- general form elements -->
@@ -178,12 +183,23 @@
                
                     
                     <div class="box box-default">
-                    <div class="row" style="padding-top:10px;">
-                        <div class="col-md-4">
+                    <div class="row" style="padding-top:10px;margin: 10px">
+                        <div class="col-md-12">
                       <fieldset>
                         <legend style="padding-left:10px !important;">Personal Information</legend>
-                          <div class="row">
-                              <div class="col-md-12">
+                        
+                              <div class="col-md-3">
+                                  <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerTitle">Title</label>
+                                     
+                                      <input type="text"  name="customerTitle" class="form-control" id="customerTitle" placeholder="Title" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if>    
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerTitle}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.title}"</c:if> "/>
+                                             
+                                    </div>
+                                </div>
+                          
+                              <div class="col-md-3">
                                   <div class="form-group" style="padding-left:10px !important;">
                                       <label for="customerFirstname">First Name</label>
                                       <input type="text"  name="customerFirstname" class="form-control" id="customerFirstname" placeholder="First Name" 
@@ -192,9 +208,9 @@
                                              
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
+                         
+                           
+                              <div class="col-md-3">
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="customerMiddlename">Middle Name</label>
                                       <input type="text" class="form-control" id="customerMiddlename" name="customerMiddlename" placeholder="Middle Name"
@@ -203,9 +219,8 @@
                                              
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
+                           
+                            <div class="col-md-3">
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="customerLastname">Last Name</label>
                                       <input type="text" class="form-control" name="customerLastname" id="customerLastname" placeholder="Last Name" 
@@ -214,28 +229,181 @@
                                              
                                     </div>
                                 </div>
-                            </div>
-                        </fieldset>
-                        </div>
-                        
-                        <div class="col-md-4">
-                       
-                            <fieldset>
-                                <legend style="padding-right:10px !important;">System Information</legend>
-                          <div class="row">
-                             <div class="col-md-12">
+                                  
+                             
+                              <div class="col-md-3">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerGender" >Gender</label><br/>
+                                      <% //Work has to be done here also %>
+                                      <select  name="customerGender" id="customerGender" class=" form-control"
+                                               <c:if test='${action == "edit" && userType > 1}'>readonly</c:if>  >
+                                          <option value="male" <jsp:text>selected</jsp:text> >Male</Option> 
+                                          <option value="female">Female</Option> 
+                                      </select>
+                                    </div>
+                                </div>
+                            
+                           
+                              <div class="col-md-3">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerMaritalStatus" >Marital Status</label><br/>
+                                      <% //Work has to be done here also %>
+                                      <select  name="customerMaritalStatus" id="customerMaritalStatus" class=" form-control"
+                                               <c:if test='${action == "edit" && userType > 1}'>readonly</c:if>  >
+                                          <option value="Married" <jsp:text>selected</jsp:text> >Married</Option> 
+                                          <option value="Single">Single</Option> 
+                                          <option value="Divorced">Divorced</Option> 
+                                      </select>
+                                    </div>
+                                </div>
+                          
+                             
+                              <div class="col-md-3">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerDateOfBirth" >Date Of Birth</label>
+                                      
+                                       <input type="text" name="customerDateOfBirth" id="customerDateOfBirth" placeholder="dd/mm/yy" class="text-black form-control" 
+                                               <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                               value=<c:if test="${fn:length(errors) > 0 }">"${param.customerDateOfBirth}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.dateOfBirth}"</c:if> "
+                              />
+                                       
+                                       </div>
+                                </div>
+                              
+                             <div class="col-md-3">
                             <div class="form-group" style="padding-left:10px !important;padding-right:10px !important">
                               <label for="customerEmail">Email address</label>
                               <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="your@email.com" 
                                      <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
                                      value=<c:if test="${fn:length(errors) > 0 }">"${param.customerEmail}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.email}"</c:if> "
-                              <c:if test="${customer.customerId !='' && customer.customerId != null }">readonly="true"</c:if>
-                              />
-                                     
+                              <c:if test="${customer.customerId !='' && customer.customerId != null }">readonly="true"</c:if> />        
                             </div>
                         </div>
-                            </div>
+                          
+                           
+                        </fieldset>
+                        </div>
+                         
+                          <div class="col-md-12">
+                       
+                            <fieldset>
+                                <legend style="padding-left:10px !important;">Work Information</legend>
+                        <div class="col-md-4">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerOccupation">Occupation</label>
+                                     
+                                      <input type="text" class="form-control" name="customerOccupation" id="customerOccupation" placeholder="Occupation" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerOccupation}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.occupation}"</c:if> "/>
+                                             
+                                    </div>
+                                </div>
+                              <div class="col-md-4">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerEmployer">Employer</label>
+                                      
+                                      <input type="text" class="form-control" name="customerEmployer" id="customerEmployer" placeholder="Employer" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerEmployer}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.employer}"</c:if> "/>
+                                             
+                                    </div>
+                                </div>
+                              
+                              <div class="col-md-4">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerOfficePhone">Office Phone</label>
+                                      
+                                      <input type="text" class="form-control" name="customerOfficePhone" id="customerOfficePhone" placeholder="Office Phone" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerOfficePhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.officePhone}"</c:if> "/>
+                                             
+                                    </div>
+                                </div>
+                            <div class="col-md-12">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                     <legend style="padding-left:10px !important;">Office Address</legend>
+                                     
+                                      <div class="col-md-12"> 
+                                          <div class="col-md-3">
+                                              <label for ="customerOfficeStreet">Street</label>
+                                              <input type="text" class="form-control" name="customerOfficeStreet" id="customerOfficeStreet" placeholder="Street" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerOfficeStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.officeStreet}"</c:if> "/>
+                                       
+                                          </div>
+                                           <div class="col-md-3">
+                                              <label for ="customerOfficeCity">City</label>
+                                              <input type="text" class="form-control" name="customerOfficeCity" id="customerOfficeCity" placeholder="City" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerOfficeCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.officeCity}"</c:if> "/>
+                                       
+                                          </div>
+                                           <div class="col-md-3">
+                                              <label for ="customerOfficeState">State</label>
+                                              <input type="text" class="form-control" name="customerOfficeState" id="customerOfficeState" placeholder="State" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerOfficeState}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.officeState}"</c:if> "/>
+                                       
+                                          </div>
+                                           <div class="col-md-3">
+                                              <label for ="customerOfficeCountry">Country</label>
+                                              <%//work needed to be done here %>
+                                              <select class="form-control" name="customerOfficeCountry" id="customerOfficeCountry" onchange="changePhoneCode()">
+                                              <c:forEach items="${countries}" var="country">
+                                                  <option value="${country.getName()}">${country.getName()}</option>
+                                              </c:forEach>
+                                              </select>
+                                          </div>
+                                      </div>      
+                                    </div>
+                                </div>
+                              
+                             <div class="col-md-12">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                     <legend style="padding-left:10px !important;">Employer Address</legend>
+                                     
+                                      <div class="col-md-12"> 
+                                          <div class="col-md-3">
+                                              <label for ="customerEmployerStreet">Street</label>
+                                              <input type="text" class="form-control" name="customerEmployerStreet" id="customerEmployerStreet" placeholder="Street" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerEmployerStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.employerStreet}"</c:if> "/>
+                                              
+                                          </div>
+                                           <div class="col-md-3">
+                                              <label for ="customerEmployerCity">City</label>
+                                              <input type="text" class="form-control" name="customerEmployerCity" id="customerEmployerCity" placeholder="City" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerEmployerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.employerCity}"</c:if> "/>
+                                       
+                                          </div>
+                                           <div class="col-md-3">
+                                              <label for ="customerEmployerState">State</label>
+                                              <input type="text" class="form-control" name="customerEmployerState" id="customerEmployerState" placeholder="State" 
+                                             <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerEmployerState}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.employerState}"</c:if> "/>
+                                       
+                                          </div>
+                                           <div class="col-md-3">
+                                              <label for ="customerEmployerCountry">Country</label>
+                                                <select class="form-control" name="customerEmployerCountry" id="customerEmployerCountry">
+                                              <c:forEach items="${countries}" var="country">
+                                                  <option value="${country.getName()}">${country.getName()}</option>
+                                              </c:forEach>
+                                              </select>
+                                          </div>
+                                      </div>      
+                                    </div>
+                                </div>
+                              
+                            </fieldset>
+                                         
+                        </div>
                         
+                        <div class="col-md-4">
+                       
+                            <fieldset>
+                                <legend style="padding-left:10px !important;">System Information</legend>
                               
                         <!-- Password show decision area --> 
                         <c:if test="${userTypeId == null}"> <!-- show only when new customer is registering himself -->
@@ -262,31 +430,13 @@
                         
                             </fieldset>
                         </div>
-                         <div class="col-md-4" style="padding-top: 50px">
-                         
-                            <div class="form-group">
-                              <div class="btn-group btn-group-xs">
-                                  <label for="customerPhoto" style="display:block">Customer Photo</label>
-                                  <div class="btn btn-primary">
-                                  <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
-                                  <input type="hidden" name="customerPhotoHidden" 
-                                      <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
-                                      <c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"</c:if> 
-                                      <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"</c:if> 
-                                  />
-                                 </div>
-                                </div>
-                                  
-                           </div>   
-                       </div>
+                        
                                   
                         </div>
                     </div>
-                    </div>
-                   
-                    <div class="box box-default">
+                       <div class="box box-default">
                     
-                    <div class="row" style="padding-top:10px;">
+                    <div class="row" style="padding-top:10px;margin: 10px">
                     <div class="col-md-12" >
                         <fieldset>
                             <legend style="padding-left:10px !important;">Contact Information</legend>
@@ -294,25 +444,23 @@
                         
                         <div class="col-md-12">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             
-                            <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                            <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
                             <label for="customerStreet">Street</label>
                                 <input type="text" class="form-control" id="customerStreet" name="customerStreet" placeholder="Street"  
                                        <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.street}"</c:if> "
-                                       />
+                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.street}"</c:if> "/>
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
-                            <div class="form-group" style="padding-left:10px !important;">
+                        <div class="col-md-3">
+                            <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
                             <label for="customerCity">City</label>
                               
                                 <input type="text" class="form-control" id="customerCity" name="customerCity" placeholder="City"  
                                        <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.city}"</c:if> "
-                                       />
+                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.city}"</c:if> " />
                                   
                                 
                             </div>
@@ -320,10 +468,11 @@
                         <c:if test="${fn:length(errors) > 0 }"><c:set var="state" value="${param.customerState}" scope="session" /></c:if>
                         <c:if test="${fn:length(errors) <= 0 }"><c:set var="state" value="${customer.state}" scope="session" /></c:if>
                       
-                        <div class="col-md-4">
-                            <div class="form-group" style="margin-right:24px !important;padding-left:20px !important;"  />
+                        <div class="col-md-3">
+                            <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;"/>
                               <label for="customerState">State</label>
-                              <select class="form-control" id="customerState" name="customerState" <c:if test='${action == "edit" && userType > 1}'>disabled="disabled"</c:if>  >
+                              <select class="form-control" id="customerState" name="customerState" 
+                              <c:if test='${action == "edit" && userType > 1}'>disabled="disabled"</c:if>  >
                                     <option value="">--choose--</option>
                                     
                                     <option value="ABUJA FCT" <c:if test="${state == 'ABUJA FCT'}"> <jsp:text>selected</jsp:text> </c:if>>ABUJA FCT</option>
@@ -366,13 +515,18 @@
                               </select>
                             </div>
                         </div>
-                        
-                        
-                        
-                    </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="col-md-6">
+                     
+                            <div class="col-md-3">
+                            <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
+                            <label for="customerCountry">Country</label>
+                             <select class="form-control" name="customerCountry" id="customerCountry">
+                                              <c:forEach items="${countries}" var="country">
+                                                  <option value="${country.getName()}">${country.getName()}</option>
+                                              </c:forEach>
+                                              </select>
+                            </div>
+                        </div>  
+                            <div class="col-md-4">
                             <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
                             <label for="customerPhone">Phone Number</label>
                                
@@ -381,25 +535,43 @@
                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.phone}"</c:if> "/>
                                     
                             </div>
-                        </div>
-                            
-                        </div>
+                           </div>
+                         <div class="col-md-4">
+                            <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
+                            <label for="customerOtherPhone">Other Phone</label>
+                               <% //work needed to be done here %>
+                                <input type="tel" class="form-control" id="customerOtherPhone" name="customerOtherPhone" placeholder="Other Phone" 
+                                       <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.phone}"</c:if> "/>
+                                    
+                            </div>
+                           </div>
+                       <div class="col-md-4">
+                            <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
+                            <label for="customerPostalAddress">Postal Address</label>
+                               <% //work needed to be done here %>
+                                <input type="tel" class="form-control" id="customerPostalAddress" name="customerPostalAddress" placeholder="Postal Address" 
+                                       <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.phone}"</c:if> "/>
+                                    
+                            </div>
+                        </div>   
+                    </div>           
                     </div>
                         </fieldset>
                     </div>
                     </div>
                     </div>
-                   
-                    
+                  
                     <div class="box box-default">
-                    <div class="row" style="padding-top:10px;">
+                    <div class="row" style="padding-top:10px;margin: 10px">
                     <div class="col-md-12">
                                 <fieldset>
-                            <legend style="padding-left:20px !important;">Next of Kin</legend>
+                            <legend style="padding-left:10px !important;">Next of Kin</legend>
                             <div class="col-md-12">
                             
                             <div class="row">
-                              <div class="col-md-6">
+                              <div class="col-md-4">
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="customerKinNames">Next of Kin Name</label>
                                       <input type="text" class="form-control" id="customerKinNames" name="customerKinName" placeholder="Enter Kin Name"  
@@ -408,7 +580,27 @@
                                             
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                 <div class="col-md-4">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerKinRelationship">Relationship Of Next Of kin</label>
+                                     
+                                      <input type="text" class="form-control" id="customerKinRelationship" name="customerKinRelationship" placeholder="Relationship"  
+                                          <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                          value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinRelationship}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinRelationship}"</c:if> "/>
+                                            
+                                    </div>
+                                </div> 
+                                <div class="col-md-4">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerKinEmail">Email Of Next Of kin</label>
+                                     
+                                      <input type="text" class="form-control" id="customerKinEmail" name="customerKinEmail" placeholder="Email Of Next Of kin"  
+                                          <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                          value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinEmail}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinEmail}"</c:if> "/>
+                                            
+                                    </div>
+                                </div> 
+                                <div class="col-md-4">
                                     <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
                                     <label for="customerKinPhone">Next of Kin Phone Number</label>
                                        
@@ -419,33 +611,7 @@
                                             
                                     </div>
                                 </div>
-                            </div>
-                            </div>
-                            <div class="col-md-12">
-                            <div  class="row">
-                                 <div class="col-md-4" >
-                                    <div class="row" >
-                                        <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
-
-                                          <div class="btn-group btn-group-xs">
-                                              <label for="customerKinPhoto" style="display:block">Customer Kin Photo</label>
-                                              <div class="btn btn-primary">
-                                                  <input type="file" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" id="customerKinPhoto" >
-                                                  <input type="hidden" name="customerKinPhotoHidden" 
-                                                      <c:if test="${customerKinPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
-                                                      <c:if test="${customerKinPhotoHidden != null}"> value="${customerKinPhotoHidden}"</c:if> 
-                                                      <c:if test="${customer.kinPhotoPath != null}"> value="${customer.kinPhotoPath}"</c:if> 
-                                                  />
-                                              </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                 </div>
-                                  
-                                  
-                                    <div class="col-md-2" style="padding-right:50% !important;"></div>
-                                <div class="col-md-6 " >
+                               <div class="col-md-4 " >
                                     <div class="row" >
                             <div class="form-group" style="padding-left:25px !important;">
                               <label for="customerKinAddress" style="">Next of Kin Address</label>
@@ -456,18 +622,59 @@
                             </div>
                                 </div>
                             </div>
-                                </div>
                             </div>
-                                </fieldset>
+                            </div>
+                            </fieldset>
                     </div>
                          </div>
                   </div><!-- /.box-body -->
+                     
+                  <div class="box box-default">
+                    <div class="row" style="padding-top:10px;margin: 10px">
+                    <div class="col-md-12">
+                                <fieldset>
+                            <legend style="padding-left:10px !important;">Bank Information</legend>
+                            <div class="col-md-12">
+                            
+                            <div class="row">
+                              <div class="col-md-4">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerBanker">Banker</label>
+                                     
+                                      <input type="text" class="form-control" id="customerBanker" name="customerBanker" placeholder="Bank Name"  
+                                          <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                          value=<c:if test="${fn:length(errors) > 0 }">"${param.customerBanker}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.banker}"</c:if> "/>
+                                            
+                                    </div>
+                                </div>
+                                 <div class="col-md-4">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerAccountName">Account Name</label>
+                                      <% //work needed to be done here %>
+                                      <input type="text" class="form-control" id="customerAccountName" name="customerAccountName" placeholder="Account Name"  
+                                          <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                          value=<c:if test="${fn:length(errors) > 0 }">"${param.customerAccountName}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.accountName}"</c:if> "/>
+                                            
+                                    </div>
+                                </div> 
+                                <div class="col-md-4">
+                                    <div class="form-group" style="padding-left:10px !important;">
+                                      <label for="customerAccountNumber">Account Number</label>
+                                      
+                                      <input type="number" class="form-control" id="customerAccountNumber" name="customerAccountNumber" placeholder="Account Number"  
+                                          <c:if test='${action == "edit" && userType > 1}'>readonly</c:if> 
+                                          value=<c:if test="${fn:length(errors) > 0 }">"${param.customerAccountNumber}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.accountNumber}"</c:if> "/>
+                                            
+                                    </div>
+                                </div> 
                          
-                 </div><!-- /.col-md-4 -->
-                </div><!-- /.row -->
-                </div> 
-                   
-              
+                            </div>
+                            </div>
+                            </fieldset>
+                    </div>
+                         </div>
+                  </div><!-- /.box-body -->
+                    
       <c:if test="${action == 'edit'}">
       <div class="col-md-12">
           <c:if test="${userType == 1}">
@@ -477,18 +684,142 @@
       </c:if>
       <c:if test="${action == 'new'}">
       <div class="col-md-12">
-          <a class="btn btn-primary" href="#" onclick="return validateCustomerRegForm()" role="button">Proceed to Order <i class="fa fa-long-arrow-right"></i></a>
+          <a class="btn btn-primary" href="#" onclick="return proceed()" role="button">Proceed <i class="fa fa-long-arrow-right"></i></a>
       </div>
       </c:if>
-              
+                    </div>
+                     
+                        
+                 </div><!-- /.col-md-4 -->
+                </div><!-- /.row -->
+                </div> 
+      </div><!-- /.box -->
+     
+  <!-- Step two . File Upload -->    
+ <div class="row" id="step2" style="display:none">
+           <div class="col-md-12">
+              <!-- general form elements -->
+               
+                <!-- form start -->
+               <div class="box box-primary" id="step2_box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Customer Document
+                      </h3>
+                </div><!-- /.box-header -->
+                <!-- form start -->
+                <div style="background:#ecf0f5 !important;">
+                <div class="box-body">
+                  <div class="box box-default">
+                    
+                    <div class="row" style="padding-top:10px;margin: 10px">
+                    <div class="col-md-12" >
+                        <fieldset>
+                            <legend style="padding-left:10px !important;">Passport Upload</legend>
+                   <div class="row">
+                        
+                        <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-4">
+                            <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                           <label for="customerPhoto" ">Customer Passport</label>
+                                  <div class="btn btn-primary">
+                                  <input    class="form-control" type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
+                                  <input type="hidden" name="customerPhotoHidden" 
+                                      <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                      <c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"</c:if> 
+                                      <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"</c:if> 
+                                  />
+                                 </div>
+                        </div>
+                        </div>
+                       <div class="col-md-4">
+                                  <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                            <label for="customerKinPhoto" ">Customer Kin Photo</label>
+                                  <div class="btn btn-primary">
+                                  <input    class="form-control" type="file" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" id="customerKinPhoto" >
+                                  <input type="hidden" name="customerKinPhotoHidden" 
+                                      <c:if test="${customerKinPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                                      <c:if test="${customerKinPhotoHidden != null}"> value="${customerKinPhotoHidden}"</c:if> 
+                                                      <c:if test="${customer.kinPhotoPath != null}"> value="${customer.kinPhotoPath}"</c:if> 
+                                                 />
+                                 </div>
+                        </div>
+                         </div>  
+                      <div class="col-md-4">
+                     <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                         <label for="customerPhotoID">ID card/Driving License ,etc</label>
+                                  <div class="btn btn-primary">
+                                  <input    class="form-control" type="file" name="customerPhotoID" accept="image/gif, image/jpeg, image/png" id="customerPhotoID" >
+                                  <input type="hidden" name="customerPhotoIDHidden" 
+                                      <c:if test="${customerPhotoIDHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                      <c:if test="${customerPhotoIDHidden != null}"> value="${customerPhotoIDHidden}"</c:if> 
+                                      <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"</c:if> 
+                                  />
+                                 </div>
+                        </div>
+                            </div>      
+                    </div>
+                        </div>
+                      
+                    </div>
+                        </fieldset>
+                    </div>
+                    </div>
+                    </div>
+                   
+                   
+                    <div class="box box-default">
+                    
+                    <div class="row" style="padding-top:10px;margin: 10px">
+                    <div class="col-md-12" >
+                        <fieldset>
+                            <legend style="padding-left:10px !important;">Bank Credentials</legend>
+                   <div class="row">
+                        
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                         <label for="customerBankStandingOrder">Bank Standing Order / Post Dated Cheques </label>
+                                  <div class="btn btn-primary">
+                                  <input    class="form-control" type="file" name="customerBankStandingOrder" accept="image/gif, image/jpeg, image/png" id="customerBankStandingOrder" >
+                                  <input type="hidden" name="customerBankStandingOrder" 
+                                      <c:if test="${customerBankStandingOrder == null && customer.customerBankStandingOrder==null}"> value="" </c:if>
+                                      <c:if test="${customerBankStandingOrder != null}"> value="${customerBankStandingOrder}"</c:if> 
+                                      <c:if test="${customer.customerBankStandingOrder != null}"> value="${customer.customerBankStandingOrder}"</c:if> 
+                                  />
+                                 </div>
+                        </div>    
+                        </div>
+                    </div>
+                        </fieldset>
+                    </div>
+                    </div>
+                    </div>
+                   
+                 <c:if test="${action == 'edit'}">
+      <div class="col-md-12">
+          <c:if test="${userType == 1}">
+          <button class="btn btn-success btn-lg" type="submit">Update</button>
+          </c:if>
+      </div>
+      </c:if>
+      <c:if test="${action == 'new'}">
+      <div class="col-md-12">
+          <a class="btn btn-primary" href="#" onclick="return validateCustomerRegForm()" role="button">Proceed <i class="fa fa-long-arrow-right"></i></a>
+      </div>
+      </c:if>   
+                </div>     
+                 </div><!-- /.col-md-4 -->
+                </div><!-- /.row -->
+                </div> 
       </div><!-- /.box -->
       
-      
-      
+     
 <c:if test="${customer.customerId=='' || customer.customerId== null}">
                     
-                    
-<div class="row" id="step2" style="display:none">
+<!-- step 3  product order -->
+
+<div class="row" id="step3" style="display:none">
     
                <div class="col-md-12">
               <!-- general form elements -->
@@ -938,3 +1269,10 @@
       -->
           <input type="hidden" id="pageContext" value="${pageContext.request.contextPath}" />
 </form>
+<script>
+  $( function() {
+    $( "#customerDateOfBirth" ).datepicker({changeMonth: true, changeYear: true , yearRange: "1930:2017" , dateFormat: "dd/mm/yy" });
+  } );
+  
+  //onclick='$( "#customerDateOfBirth" ).datepicker({changeMonth: true, changeYear: true , yearRange: "1930:2017" });'
+  </script>

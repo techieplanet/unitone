@@ -346,7 +346,7 @@ public class DashboardController extends AppController {
                     break;
             }
 
-            DashboardHelper helper = new DashboardHelper();
+            DashboardHelper helper = new DashboardHelper(super.getAvailableplugins());
             lodgementSummaryJSON = helper.getLodgementSummary(truncatedBy, truncationResultFormat, startDate, endDate);
             System.out.println("orderSummaryJSON: " + lodgementSummaryJSON);
         } catch(Exception e){

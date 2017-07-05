@@ -378,6 +378,63 @@
                   </div>
                  
                 </div>
+                  
+                   <div class="box box-default">
+                    <div class="row" style="padding-top:10px;">
+                    <div class="col-md-12">
+                            <fieldset>
+                        <legend style="padding-left:20px !important;">Documents</legend>
+                        
+                        <div class="col-md-12">
+                        <div id="documents-accordion" class="panel-group"  role="tablist" aria-multiselectable="true" >
+                                    <table class="table table-profile">
+                                
+                                <thead>
+                                    <tr>
+                                        <th ><div >
+                                                <h4>sn</h4>
+                                            </div> </th>
+                                        <th ><div >
+                                                <h4>title</h4>
+                                            </div> </th>
+                                        <th >
+                                            <div >
+                                                <h4>file</h4>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                     <tr class="divider">
+                                        <td colspan="3"></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                           
+                                    <c:forEach items="${documents}" var="document">
+                                        <tr>
+                                        <td >${document.docTypeId.weight}</td>
+                                        <td >${document.docTypeId.title}</td>
+                                        <td ><a href="${documentDir}${document.path}" ><img src="${documentDir}${document.path}" class="img img-responsive img-thumbnail" style="max-width: 100px;max-height: 100px; overflow-y: auto"/></a>
+                                         </td>
+                                    </tr>
+                                       <tr class="divider">
+                                           <td colspan="3"><hr/></td>
+                                    </tr>
+                                    </c:forEach>
+                                </tbody>
+                                    </table>
+                                    
+                                </div>
+                              
+                        </div>
+                       
+                       
+                        
+                           
+                            </fieldset>
+                            </div>
+                    </div>
+                         </div>
+                  
                  </form>
               </div><!-- /.box -->
               </div><!-- /.box -->

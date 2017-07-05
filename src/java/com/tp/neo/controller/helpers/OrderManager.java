@@ -9,20 +9,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.tp.neo.interfaces.SystemUser;
-import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Company;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
-import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.Notification;
-import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.Plugin;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -32,7 +31,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +39,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.PropertyException;
 import org.apache.commons.lang3.text.StrSubstitutor;
         
 /**
- *
+ 
  * @author swedge-mac
  */
 public class OrderManager {
@@ -66,6 +63,7 @@ public class OrderManager {
         this.plugins = map;
     }
     
+    
     /**
      * This method will set up the order, the sale items and the lodgement records.
      * 
@@ -76,10 +74,8 @@ public class OrderManager {
      */
     public ProductOrder processOrder(Customer customer, Lodgement lodgement, List<OrderItem> orderItems, String applicationContext)
     throws PropertyException, RollbackException{
-        
-        em.getTransaction().begin();
-        
         //persist the lodgement and notify admin about it
+        em.getTransaction().begin();
         em.persist(lodgement);
         em.flush();
         
@@ -112,6 +108,7 @@ public class OrderManager {
         
         return order;
     }
+    
     
     /**
      * Insert the order record 
@@ -200,11 +197,11 @@ public class OrderManager {
         List<OrderItem> waitingItems = new ArrayList<OrderItem>();
         List<OrderItem> declinedItems = new ArrayList<OrderItem>();
         
-        for(int i=0; i < allItems.size(); i++){
-            if(allItems.get(i).getApprovalStatus().intValue() > 0) waitingItems.add(allItems.get(i));
-            if(allItems.get(i).getApprovalStatus().intValue() > 1) approvedItems.add(allItems.get(i));
-            if(allItems.get(i).getApprovalStatus().intValue() > 2) declinedItems.add(allItems.get(i));
-        }
+//        for(int i=0; i < allItems.size(); i++){
+//            if(allItems.get(i).getApprovalStatus().intValue() > 0) waitingItems.add(allItems.get(i));
+//            if(allItems.get(i).getApprovalStatus().intValue() > 1) approvedItems.add(allItems.get(i));
+//            if(allItems.get(i).getApprovalStatus().intValue() > 2) declinedItems.add(allItems.get(i));
+//        }
         
         for(int i=0; i < orderItemsList.size(); i++){
             OrderItem thisItem = orderItemsList.get(i);
@@ -502,15 +499,17 @@ public class OrderManager {
             }
             
             //if(sessionUser.getSystemUserTypeId() == 1){
-                orderItem.setCommissionPercentage(saleItem.commp);
                 System.out.println("Sale Item Commp: " + saleItem.commp);
             //}
             if(sessionUser != null){
                 orderItem.setCreatedBy(sessionUser.getSystemUserId()); 
             }
+                
             orderItem.setApprovalStatus(approval);
             orderItem.setUnit(projectUnit);
-            
+            orderItem.setCommissionPercentage(projectUnit.getCommissionPercentage());
+            orderItem.setVatPercentage(projectUnit.getVatPercentage());
+            orderItem.setAnnualMaintenancePercentage(projectUnit.getAnnualMaintenancePercentage());
             orderItemList.add(orderItem);
             
             System.out.println("Notification ID : " + saleItem.dayOfNotification);
@@ -533,9 +532,6 @@ public class OrderManager {
     }
     
     public Lodgement prepareLodgement(Map request, Agent agent) {
-        
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
         
         Lodgement lodgement = new Lodgement();
         

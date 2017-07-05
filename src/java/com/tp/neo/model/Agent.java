@@ -5,10 +5,7 @@
  */
 package com.tp.neo.model;
 
-import com.tp.neo.interfaces.IRestricted;
-import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;

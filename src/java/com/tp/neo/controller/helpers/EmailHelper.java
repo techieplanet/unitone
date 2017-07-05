@@ -5,11 +5,10 @@
  */
 package com.tp.neo.controller.helpers;
 
-import com.tp.neo.model.Agent;
-import com.tp.neo.model.utils.MailSender;
-import static com.tp.neo.controller.components.AppController.defaultEmail;
 import static com.tp.neo.controller.components.AppController.APP_NAME;
 import static com.tp.neo.controller.components.AppController.companyName;
+import static com.tp.neo.controller.components.AppController.defaultEmail;
+import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
@@ -17,6 +16,7 @@ import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
 import com.tp.neo.model.Withdrawal;
+import com.tp.neo.model.utils.MailSender;
 import java.util.HashMap;
 import java.util.List;
 

@@ -6,12 +6,12 @@
 package com.tp.neo.controller.components;
 
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.Agent;
+import com.tp.neo.model.Customer;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Permission;
 import com.tp.neo.model.Plugin;
 import com.tp.neo.model.User;
-import com.tp.neo.model.Agent;
-import com.tp.neo.model.Customer;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -139,34 +139,83 @@ public class AppController extends HttpServlet{
         }
         
         //Get all ID related parameters 
-        Long id  = request.getParameter("id") != null ? Long.parseLong(request.getParameter("id")) : 0;
-        Long customerId  = request.getParameter("customerId") != null ? Long.parseLong(request.getParameter("customerId")) : 0;
-        Long agentId  = request.getParameter("agent_id") != null ? Long.parseLong(request.getParameter("agent_id")) :
-                (request.getParameter("agentId") != null ? Long.parseLong(request.getParameter("agentId")) : 0);
+        Long id  = request.getParameter("id") != null && !((String)(request.getParameter("id"))).isEmpty() ? 
+                Long.parseLong(request.getParameter("id")) : 0;
+        
+        Long customerId  = request.getParameter("customerId") != null && !((String)(request.getParameter("customerId"))).isEmpty() ? 
+                Long.parseLong(request.getParameter("customerId")) : 0;
+        
+        Long agentId  = request.getParameter("agent_id") != null && !((String)(request.getParameter("agent_id"))).isEmpty()? 
+                Long.parseLong(request.getParameter("agent_id")) :
+                (request.getParameter("agentId") != null && !((String)(request.getParameter("agentId"))).isEmpty() ?
+                Long.parseLong(request.getParameter("agentId")) : 0);
         
         //Check is the system user is an Instance of User Class
+        {
         if(user instanceof User)
         {
             //Then we known that it is Either an Admin user or whatever
             //We proceed to check if the Admin has permission 
             
+             //if User is trying to print an invoice
+            String temp = (String) request.getParameter("action");
+            if(( temp!=null ) && temp.equals("lodgement_invoice"))
+            {
+                return true;
+            }
+            
+            //if User   wants the project Unit list
+            temp = request.getMethod();
+            if(temp.equals("GET") && action.equals("edit_project"))
+            {
+                return true;
+            }
+            
+            //if User Tries to create Order
+            if(action.equals("create_order"))
+            {
+                return true;
+            }
+            
              for(String p : permissions)
              {
-                 p =  p.replaceAll("\"", "");
+              //   p =  p.replaceAll("\"", "");
             //log("p: " + p); log("action: " + action);
-            if(p.equalsIgnoreCase(action))
+            if(p.contains(action))
                 return true;
             }
         //No permission so we return false
         return false;    
         }
         
-        //Check is system user is an instance of the Agent Class
+     }
+        
+    //Check is system user is an instance of the Agent Class
         if(user instanceof Agent)
         {
             //Now we can cast the SystemUser Object to an Agent   reference 
             
             Agent agent = (Agent)user;
+            
+             //if User is trying to print an invoice
+            String temp = (String) request.getParameter("action");
+            if(( temp!=null ) && temp.equals("lodgement_invoice"))
+            {
+                return true;
+            }
+            
+            //if User   wants the project Unit list
+            temp = request.getMethod();
+            if(temp.equals("GET") && action.equals("edit_project"))
+            {
+                return true;
+            }
+            
+            //if User Tries to create Order
+            if(action.equals("create_order"))
+            {
+                return true;
+            }
             
             //lets first check if the agent Id belong to the Agent
             if(agentId != 0)
@@ -194,6 +243,7 @@ public class AppController extends HttpServlet{
                 }
             }
             
+                
             /**
             *Now we Know that the Agent is trying to view it Customer Profile
             *Let proceed to get the Customer with that Id; 
@@ -244,15 +294,50 @@ public class AppController extends HttpServlet{
             
             }
             
+            /**
+            * We need to solve a issue where by the agent needs to see all it customers.
+            * then we need to return true if the agentId and the customerId or the Id is not set here
+            */
+            
+            if(id == 0 && agentId == 0 )
+            {
+                if((action.contains("view_user")
+                        ||action.contains("view_agent"))) return false; 
+            }      
+            
+            //This solve the issue of Agent Attempt to Edit or create Project
+            return (!action.contains("project") || action.contains("view_project"))  ;
         }
         
-        //check if system User is an instance of the Customer Class
+      
+        
+//check if system User is an instance of the Customer Class
         if(user instanceof Customer)
         {
             //Now we can cast the SystemUser Object to a customer reference
             
             Customer customer = (Customer)user;
            
+            //if User is trying to print an invoice
+            String temp = (String) request.getParameter("action");
+            if(( temp!=null ) && temp.equals("lodgement_invoice"))
+            {
+                return true;
+            }
+            
+            //if User   wants the project Unit list
+            temp = request.getMethod();
+            if(temp.equals("GET") && action.equals("edit_project"))
+            {
+                return true;
+            }
+            
+            //if User Tries to create Order
+            if(action.equals("create_order"))
+            {
+                return true;
+            }
+            
             //Check if any of the Id Parameter belong to the customer itself
            if(id != 0 )
            {
@@ -262,6 +347,16 @@ public class AppController extends HttpServlet{
            {
                return customerId.equals(customer.getCustomerId());
            }
+           
+           if(id == 0 && customerId == 0 )
+            {
+                if(action.contains("view_user")
+                        ||action.contains("view_agent")
+                        ||action.contains("view_customer")) return false;
+            }
+           
+          //This solve the issue of Customer  attemp to Edit or create Project
+            return (!action.contains("project") || action.contains("view_project"))  ;
         }
         
       return false;

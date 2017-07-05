@@ -126,10 +126,10 @@ public class FileUploader {
             fileSaveName += "." + extension;
         }
         
-        fileTypeUploadDirectory = fileTypeUploadDirectory + fileSeparator + subDirectory;
+        String filedir = fileTypeUploadDirectory + fileSeparator + subDirectory;
         
-        File file = new File(fileTypeUploadDirectory, fileSaveName);
-
+        File file = new File(filedir, fileSaveName);
+       
         System.out.println("fileSaveName: " + fileSaveName);
         try (InputStream input = fileContent) {
             Files.copy(input, file.toPath());
@@ -140,6 +140,7 @@ public class FileUploader {
         
     }
      
+    
      
     private void loadPropertiesFile() throws IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -199,5 +200,9 @@ public class FileUploader {
     
     public String getAccessDirectoryString(){
         return fileTypeAccessDirectory;
+    }
+    
+    public String getFileSeparator(){
+        return fileSeparator;
     }
 }

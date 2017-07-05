@@ -7,52 +7,46 @@ package com.tp.neo.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.tp.neo.exception.SystemLogger;
-import com.tp.neo.model.Customer;
+import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.LodgementManager;
 import com.tp.neo.controller.helpers.MorgageList;
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.Agent;
+import com.tp.neo.model.CompanyAccount;
+import com.tp.neo.model.Customer;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
-import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
-import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.PropertyException;
-import com.google.gson.reflect.TypeToken;
-import com.tp.neo.controller.helpers.LodgementManager;
-import com.tp.neo.model.Agent;
-import com.tp.neo.model.CompanyAccount;
-import com.tp.neo.model.Notification;
-import com.tp.neo.model.NotificationType;
-import com.tp.neo.model.Plugin;
-import java.lang.reflect.Type;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.TimeZone;
-import java.util.logging.Level;
-import javax.persistence.RollbackException;
 
 /**
  *
@@ -499,7 +493,9 @@ public class LodgementController extends AppController {
             totalPaid += lodgementItem.getAmount();
         }
         
-        double unitAmount = orderItem.getUnit().getAmountPayable();
+        //Fixed Bug here 
+        //Formally was : double unitAmount = orderItem.getUnit().getAmountPayable() ;
+        double unitAmount = orderItem.getUnit().getAmountPayable() * orderItem.getQuantity();
         
         if(unitAmount <= totalPaid){
             isComplete = true;

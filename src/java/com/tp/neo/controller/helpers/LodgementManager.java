@@ -285,10 +285,26 @@ public class LodgementManager {
     private void splitUnitFunds(Customer customer, ProjectUnit unit, LodgementItem lodgementItem){
         Account unitAccount = lodgementItem.getItem().getUnit().getAccount();
         
+        //Split Vat amount into vat account
+        double vatAmount = lodgementItem.getItem().calculateVatAmount(lodgementItem.getAmount());
+        Account vatAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "VAT").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, vatAccount, vatAmount);
+        
+        double incomeAfterTax = lodgementItem.getAmount() - vatAmount;
+        
         //Split commissions - credit agent wallet - double entry
         System.out.println("Lodgement order item: " + lodgementItem.getItem().getId());
-        double commissionAmount = lodgementItem.getItem().getCommissionAmount(lodgementItem.getAmount());
+        double commissionAmount = lodgementItem.getItem().getCommissionAmount(incomeAfterTax);
         new TransactionManager(sessionUser).doDoubleEntry(unitAccount, customer.getAgent().getAccount(), commissionAmount);
+        
+        //calculate annual maintenance amount = ama = comm - ( comm * am percentage)/100
+        //double entry - debit: agent , credit : annual maintenace
+        double annualMaintenance = lodgementItem.getItem().calculateAnnualMaintenanceAmount(commissionAmount);
+        Account annualMaintenanceAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "AGENT_ANNUAL_MAINTENANCE").getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(customer.getAgent().getAccount(), annualMaintenanceAccount, annualMaintenance);
+        
+        commissionAmount -= annualMaintenance;
+        
         //calculate the commissions for the upline if MLM is enabled.
         processUplineCommissions(customer.getAgent(), commissionAmount);
         
@@ -302,12 +318,12 @@ public class LodgementManager {
         
         
         //Split reward cost - debit unit, credit loyalty  - double entry
-        Account loyaltyAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "LOYALTY").getSingleResult();
-        System.out.println("Account : " + loyaltyAccount.getAccountCode() + ", LodgementItem RewardPoint : " + lodgementItem.getRewardAmount());
-        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, loyaltyAccount, lodgementItem.getRewardAmount());
+//        Account loyaltyAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "LOYALTY").getSingleResult();
+//        System.out.println("Account : " + loyaltyAccount.getAccountCode() + ", LodgementItem RewardPoint : " + lodgementItem.getRewardAmount());
+//        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, loyaltyAccount, lodgementItem.getRewardAmount());
+//        
         
-        
-        //Split income amount - debit unit, credit property dev  - double entry
+        //Split income amount - debit unit, credit credit income account  - double entry
         Account incomeAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "INCOME").getSingleResult();
         new TransactionManager(sessionUser).doDoubleEntry(unitAccount, incomeAccount, lodgementItem.getItem().getUnit().getIncome() - lodgementItem.getRewardAmount());
     }

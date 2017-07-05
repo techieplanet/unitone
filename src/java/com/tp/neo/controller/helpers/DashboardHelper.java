@@ -12,20 +12,20 @@ import com.tp.neo.model.Plugin;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.utils.DateFunctions;
-import java.util.Date;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 /**
  *
@@ -68,6 +68,7 @@ public class DashboardHelper {
             double paidSum = (Double)itemAndAmount[1];
             
             Date orderItemApprovalDate = orderItem.getApprovalDate();
+            
             int monthsElapsed = DateFunctions.getNumberOfMonthsBetweenDates(orderItemApprovalDate, new Date());
             double expectedMortgageTotal = orderItem.getUnit().getMonthlyPay() * monthsElapsed;
             
@@ -397,7 +398,7 @@ public class DashboardHelper {
         EntityManager em = emf.createEntityManager();
         
         String loyaltyQueryHook = "";
-        if(availablePlugins.containsKey("loyalty")) 
+        if( availablePlugins.containsKey("loyalty")) 
             loyaltyQueryHook = "SUM(l.reward_amount) as rvalue ";
         
         String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount) as lvalue, " +
@@ -407,7 +408,14 @@ public class DashboardHelper {
                        "WHERE l.approval_status = 1 AND (date(l.modified_date) >= '" + startDate.toString() + "' AND date(l.modified_date) <= '" + endDate.toString() + "') " +
                        "GROUP BY grouper";
         
-        List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
+        List<Object[]> summaryObjects = null;
+        
+        try{
+           summaryObjects =  em.createNativeQuery(query).getResultList();
+        } catch(Exception e){
+            e.printStackTrace();
+            return " ";
+        }
         
         List<HashMap> summaryMapsList = new ArrayList<HashMap>();
         

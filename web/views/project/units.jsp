@@ -82,6 +82,7 @@
                                 $('#mpd').val(unit.mpd);
                                 $('#commp').val(unit.commp);
                                 $('#vatp').val(unit.vatp);
+                                $('#amp').val(unit.amp);
                                 $('#reward_points').val(unit.reward_points);
                                 $('#quantity').val(unit.quantity);
 

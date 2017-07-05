@@ -5,7 +5,6 @@
  */
 package com.tp.neo.model;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -70,7 +69,6 @@ public class Lodgement extends BaseModel {
 
     @OneToMany(mappedBy = "lodgement")
     private Collection<LodgementItem> lodgementItemCollection;
-
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -215,25 +213,25 @@ public class Lodgement extends BaseModel {
     public void setCompanyAccountId(CompanyAccount companyAccountId) {
         this.companyAccountId = companyAccountId;
     }
-    
-    
-    public String getPermissionName(String action){
-        if(action.toUpperCase().equals("NEW")) 
+
+    public String getPermissionName(String action) {
+        if (action.toUpperCase().equals("NEW")) {
             return "new_lodgement";
-        else if(action.toUpperCase().equals("LIST_APPROVED"))
+        } else if (action.toUpperCase().equals("LIST_APPROVED")) {
             return "list_approved_lodgement";
-        else if(action.toUpperCase().equals("LIST_UNAPPROVED"))
+        } else if (action.toUpperCase().equals("LIST_UNAPPROVED")) {
             return "list_unapproved_lodgement";
-        else if(action.toUpperCase().equals("LIST_PENDING") || action.equalsIgnoreCase("notification"))
+        } else if (action.toUpperCase().equals("LIST_PENDING") || action.equalsIgnoreCase("notification")) {
             return "list_pending_lodgement";
-        else if(action.toUpperCase().equals("APPROVAL"))
+        } else if (action.toUpperCase().equals("APPROVAL")) {
             return "list_pending_lodgement";
-        else if(action.toUpperCase().equals("APPROVE"))
+        } else if (action.toUpperCase().equals("APPROVE")) {
             return "approve_lodgement";
-        else if(action.toUpperCase().equals("DECLINE"))
+        } else if (action.toUpperCase().equals("DECLINE")) {
             return "decline_lodgement";
-        else 
+        } else {
             return "view_lodgement";
+        }
     }
 
     @Override
@@ -295,10 +293,11 @@ public class Lodgement extends BaseModel {
     }
 
     public Double getRewardAmount() {
-        if(rewardAmount == null)
-            return (double)0;
-        else
+        if (rewardAmount == null) {
+            return (double) 0;
+        } else {
             return rewardAmount;
+        }
     }
 
     public void setRewardAmount(Double rewardAmount) {

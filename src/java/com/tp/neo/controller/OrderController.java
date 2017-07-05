@@ -10,26 +10,20 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
-import com.tp.neo.controller.helpers.NotificationsManager;
 import com.tp.neo.controller.helpers.OrderItemHelper;
+import com.tp.neo.controller.helpers.OrderItemObjectsList;
 import com.tp.neo.controller.helpers.OrderManager;
 import com.tp.neo.controller.helpers.OrderObjectWrapper;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
-import com.tp.neo.model.ProductOrder;
-import com.tp.neo.model.ProjectUnit;
-import com.tp.neo.controller.helpers.OrderItemObject;
-import com.tp.neo.controller.helpers.OrderItemObjectsList;
-import com.tp.neo.model.CompanyAccount;
-import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.Plugin;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.utils.FileUploader;
-import com.tp.neo.model.utils.MailSender;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
@@ -38,11 +32,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,9 +45,12 @@ import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.swing.text.DateFormatter;
 import javax.xml.bind.PropertyException;
 /**
  *
@@ -264,8 +256,8 @@ public class OrderController extends AppController {
         
         
         String imageAccessDirPathCustomer = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
-        request.setAttribute("customerImageAccessDir", imageAccessDirPathCustomer + "/customer");
-        request.setAttribute("customerKinImageAccessDir", imageAccessDirPathCustomer + "/customerKin");
+        request.setAttribute("customerImageAccessDir", imageAccessDirPathCustomer + "/customers");
+        request.setAttribute("customerKinImageAccessDir", imageAccessDirPathCustomer + "/customers/customerkins");
         
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Order");

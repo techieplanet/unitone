@@ -1,24 +1,25 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
- <div class="row">
-            <!-- Customer Registration Form -->
-            <div class="col-md-12">
-              <!-- general form elements -->
-               
-                <!-- form start -->
-               <div class="box box-primary">
-                <div class="box-header with-border">
-                  <h3 class="box-title">Agent Registration Form 
-                        
-                             
-                      
-                       </h3>
-                </div><!-- /.box-header -->
-                <!-- form start -->
-                <div style="background:#ecf0f5 !important;">
-                <form role="form" name="agentRegistration" method="POST" action="Agent?action=${action}&agentId=${agent.agentId}" enctype="multipart/form-data" id="agentForm">
-                  <div class="box-body">
-                  
+
+<!--
+    Process Step
+-->
+<c:if test="${action == 'new'}">
+<div class="stepwizard">
+    <div class="stepwizard-row">
+         <div class="stepwizard-step">
+            <button type="button" id="process-step-2" class="btn btn-default btn-circle"  onclick="return showCustomerReg()">1</button>
+            <p>Agent Form</p>
+        </div>
+        <div class="stepwizard-step">
+            <button type="button" id="process-step-3" class="btn btn-default btn-circle"  onclick="proceed()">2</button>
+            <p>Documents</p>
+        </div>
+    </div>
+</div>
+</c:if>
+ <form role="form" name="agentRegistration" method="POST" action="Agent?action=${action}&agentId=${agent.agentId}" enctype="multipart/form-data" id="agentForm">
+                 
                 <c:if test="${fn:length(errors) > 0 }">
                 <div class="row">
                     <div class="col-md-12 ">
@@ -45,24 +46,21 @@
                     </div>
                 </div>
           </c:if>
-                           <div class="box-footer " style="margin-right:10px !important;margin-top:-10px !important; background-color:transparent;height:50px !important;">
-                              
-                           <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate"/>
+                         
+           <div class="row" id="step1" style="display:block">
+           <div class="col-md-12">
+              <!-- general form elements -->
+               
+                <!-- form start -->
+               <div class="box box-primary" id="step1_box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Agent Registration Form
+                      </h3>
+                </div><!-- /.box-header -->
+                <!-- form start -->
+                <div style="background:#ecf0f5 !important;">
+                    <div class="box-body">
                                
-                           <div class="col-md-6 pull-right">
-                            <%--<c:if test="${agent.agentId !='' && agent.agentId!=null}">--%>
-<!--                                <span id="row${agent.agentId}" style="margin: 0 auto !important;">
-                                 <input id="switch-state" type="checkbox" name="status" value="status" onChange="checkActivateSwitch('${pageContext.request.contextPath}', 'Agent',${agent.agentId});"  <c:if test="${agent.active!='' && agent.active!=null && agent.active=='1'}">checked </c:if>   />
-                             
-                                </span>-->
-                               <%--</c:if>--%> 
-                            </div>
-                  </div>
-                    
-            
-              
-                               
-                                  
                     <div class="box box-default">
                     <div class="row" style="padding-top:10px;">
                         <div class="col-md-4">
@@ -73,8 +71,8 @@
                                   <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentFirstname">First Name</label>
                                       <input type="text"  name="agentFirstname" class="form-control" id="agentFirstname" 
-                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentFirstname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.firstname}"</c:if>  
-                                      placeholder="First Name" >
+                                             value="<c:if test="${fn:length(errors) > 0 }">${param.agentFirstname}</c:if><c:if test="${fn:length(errors) <= 0 }">${agent.firstname}</c:if>  "
+                                      placeholder="First Name" />
                                     </div>
                                 </div>
                             </div>
@@ -83,7 +81,7 @@
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentMiddlename">Middle Name</label>
                                       <input type="text" class="form-control" id="agentMiddlename" name="agentMiddlename" placeholder="Middle Name" 
-                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentMiddlename}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.middlename}"</c:if> ">
+                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentMiddlename}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.middlename}"</c:if> "   />
                                     </div>
                                 </div>
                             </div>
@@ -92,7 +90,7 @@
                                     <div class="form-group" style="padding-left:10px !important;">
                                       <label for="agentLastname">Last Name</label>
                                       <input type="text" class="form-control" name="agentLastname" id="agentLastname" placeholder="Last Name" 
-                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentLastname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.lastname}"</c:if> ">
+                                             value=<c:if test="${fn:length(errors) > 0 }">"${param.agentLastname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.lastname}"</c:if> " />
                                     </div>
                                 </div>
                             </div>
@@ -141,37 +139,7 @@
                                       
                             </fieldset>
                         </div>
-                         <div class="col-md-4">
-                             <div class="row">
-                             <div class="row text-center" id="imgholder">
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group text-center">
-                                <c:if test="${agent.photoPath != null}">
-                                    <img src="${agentImageAccessDir}/${agent.photoPath}" 
-                                        class="img-responsive text-center" style="max-height:220px !important;"/>
-                                </c:if>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
-                            <div class="form-group">
-                              <div class="btn-group btn-group-xs">
-                                  <div class="btn btn-primary">
-                                        <!--Upload Picture  <i class="fa fa-upload" aria-holder="true"></i>--> 
-                                        <input type="file" name="agentPhoto" accept="image/gif, image/jpeg, image/png" id="agentPhoto" />
-                                  </div>
-                                  
-                                <input type="hidden" name="agentPhotoHidden" 
-                                        <c:if test="${agentPhotoHidden == null && agent.photoPath==null}"> value=""</c:if>
-                                        <c:if test="${agentPhotoHidden != null}"> value="${agentPhotoHidden}" </c:if> 
-                                        <c:if test="${agent.photoPath != null}"> value="${agent.photoPath}" </c:if> />
-                              </div>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    
-                  </div>
-                         </div>
+                        
                     </div>
                     </div>
                    
@@ -210,8 +178,8 @@
                         <c:if test="${fn:length(errors) <= 0 }"><c:set var="state" value="${agent.state}" scope="session" /></c:if>
                       
                         <div class="col-md-4">
-                            <div class="form-group" style="margin-right:24px !important;padding-left:20px !important;"  />
-                              <label for="agentState">State</label>
+                            <div class="form-group" style="margin-right:24px !important;padding-left:20px !important;" >
+                              <label for="agentState" >State</label>
                               <select class="form-control" id="agentState" name="agentState"  >
                                     <option value="">--choose--</option>
                                     
@@ -349,35 +317,6 @@
                                             
                                     </div>
                                 </div>
-                            </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div  class="row">
-                             <div class="col-md-4" >
-                                    <div class="row" >
-                            <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
-                              <label for="agentKinPhoto" style="">Next of Kin Picture</label>
-                                    <c:if test="${agent.agentId != '' && agent.kinPhotoPath != null}"> 
-                                        <img src="${agentKinImageAccessDir}/${agent.kinPhotoPath}" 
-                                             class="img-responsive text-center" width="50.33333333%" style="max-height:220px !important;" />
-                                    </c:if> <br/>
-                                    <div class="btn btn-primary">
-                                        <input type="file" id="agentKinPhoto" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" 
-                                         style="max-height:220px !important;"
-                                           />
-                                    </div>
-                                             
-                                    
-                                          
-                                             <input type="hidden" name="agentKinPhotoHidden" 
-                           <c:if test="${agentKinPhotoHidden == null && agent.kinPhotoPath ==null}"> value=""
-                    </c:if><c:if test="${agentKinPhotoHidden != null}"> value="${agentKinPhotoHidden}"
-                    </c:if> <c:if test="${agent.kinPhotoPath != null}"> value="${agent.kinPhotoPath}"
-                    </c:if> />
-                            </div>
-                                </div>
-                            </div>
-                                    <div class="col-md-2" style="padding-right:50% !important;"></div>
                                 <div class="col-md-6 " >
                                     <div class="row" >
                             <div class="form-group" style="padding-left:25px !important;">
@@ -388,40 +327,134 @@
                             </div>
                                 </div>
                             </div>
-                                </div>
                             </div>
+                            </div>
+                            
                                 </fieldset>
                     </div>
-                    <c:if test="${sessionScope.user.getSystemUserTypeId() == 2}">
+                   
+                         </div>
+                             <input type="hidden" name="agent_id" id="agent_id" value="${agent.agentId}">
+                        <input type="hidden" name="id" id="id" value="${agent.agentId}">
+                  <div class="box-footer" style="margin-left:10px !important;margin-right:10px !important;margin-top:-20px !important; background-color:transparent;">
+                      <button type="button" class="btn btn-primary pull-right" onclick="proceed()" >Proceed</button>
+                  </div>
+                 
+                  </div><!-- /.box-body -->
+                       
+                </div>
+              </div><!-- /.box -->
+                </div>
+                  </div>
+                  </div>
+                 
+               <!-- Step two . File Upload -->    
+ <div class="row" id="step2" style="display:none">
+           <div class="col-md-12">
+              <!-- general form elements -->
+               
+                <!-- form start -->
+               <div class="box box-primary" id="step2_box">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Agent Document
+                      </h3>
+                </div><!-- /.box-header -->
+                <!-- form start -->
+                <div style="background:#ecf0f5 !important;">
+                <div class="box-body">
+                  <div class="box box-default">
+                    
+                    <div class="row" style="padding-top:10px;margin: 10px">
+                    <div class="col-md-12" >
+                        <fieldset>
+                            <legend style="padding-left:10px !important;">Passport Upload</legend>
+                   <div class="row">
+                        
+                        <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-4">
+                            <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                           <label for="agentPhoto" ">Agent Passport</label>
+                                  <div class="btn btn-primary">
+                                  <input    class="form-control" type="file" name="agentPhoto" accept="image/gif, image/jpeg, image/png" id="agentPhoto" >
+                                 </div>
+                        </div>
+                        </div>
+                       <div class="col-md-4">
+                                  <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                            <label for="agentKinPhoto" ">Next Of Kin Photo</label>
+                                  <div class="btn btn-primary">
+                                  <input    class="form-control" type="file" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" id="agentKinPhoto" >
+                                  
+                                 </div>
+                        </div>
+                         </div>  
+                         
+                    </div>
+                        </div>
+                      
+                    </div>
+                   </div>
+                        </fieldset>
+                    </div>
+                    </div>
+                    </div>
+                   
+                   
+                    <div class="box box-default">
+                    
+                    <div class="row" style="padding-top:10px;margin: 10px">
+                    <div class="col-md-12" >
+                        <fieldset>
+                            <legend style="padding-left:10px !important;">Others</legend>
+                   <div class="row">
+                        
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                         <label for="UtilityBill">Utility Bill</label>
+                                  <div class="btn btn-primary">
+                                  <input    class="form-control" type="file" name="utilityBill" accept="image/gif, image/jpeg, image/png" id="UtilityBill" >
+                                  
+                                 </div>
+                        </div>    
+                        </div>
+                       <div class="col-md-4">
+                     <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
+                         <label for="agentPhotoID">ID card/Driving License ,etc</label>
+                                  <div class="btn btn-primary">
+                                  <input    class="form-control" type="file" name="agentPhotoID" accept="image/gif, image/jpeg, image/png" id="agentPhotoID" >
+                                  
+                                 </div>
+                        </div>
+                            </div> 
+                    </div>
+                              
+                        </fieldset>
+                    </div>
+                    </div>
+                    </div>
+       <c:if test="${sessionScope.user.getSystemUserTypeId() == 2}">
                             <c:if test="${agent.agentId==null || agent.agentId==''}">
                             <div class="col-md-12" style="text-align:center !important;">
                                 Do you agree to the terms of the <a href="#" onclick="$('#agreementStatusModal').modal();">agreement document?</a>
                             <br/>    <input type="radio" class="" name="agreement_document" id="agree" value="agree"  onclick="agreementStatusChecked(this)" <c:if test="${agent.agentId!=null && agent.agentId!=''}">checked</c:if>/> I agree  &nbsp;&nbsp;&nbsp;&nbsp;
                             <input type="radio" name="agreement_document" id="decline"  onclick="agreementStatusChecked(this)" value="decline"/>I disagree
                             <br/><br/><br/>
+                            </div>
                             </c:if>
+                            
                     </c:if>
-                            <!--
-</div>-->
-                         </div>
-                  </div><!-- /.box-body -->
-                        <input type="hidden" name="agent_id" id="agent_id" value="${agent.agentId}">
-                        <input type="hidden" name="id" id="id" value="${agent.agentId}">
-                  <div class="box-footer" style="margin-left:10px !important;margin-right:10px !important;margin-top:-20px !important; background-color:transparent;">
+         <div class="box-footer" style="margin-left:10px !important;margin-right:10px !important;margin-top:-20px !important; background-color:transparent;">
                       <input type="submit" class="btn btn-primary pull-right" name="agentCreate" value="Save" id="agentCreate" />
                   </div>
-                 
                 </div>
-              </div><!-- /.box -->
-               </form><!-- Form ends here -->
-              </div><!-- /.box -->
-            </div>
-           
-          </div>   <!-- /.row -->
-          
-          <input type="hidden" value="${sessionScope.user.getSystemUserTypeId()}" id="agent_reg_usertypeId" />
-          
-             <div class="modal fade" id="agreementStatusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                     </div>
+                 </div>
+                 </div>
+      </div>
+                </form>
+           <div class="modal fade" id="agreementStatusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
          <div class="vertical-alignment-helper">
           <div class="modal-dialog vertical-align-center">
           <div class="modal-content">

@@ -45,7 +45,7 @@
         <tbody>
             <c:forEach items="${customers}" var="customer">
                 <tr id='row<c:out value="${customer.customerId}" />'>
-                    <td><img alt="No Image" class="img-responsive img-thumbnail" width="55" height="50" src="<c:out value='/uploads/NeoForce/images/customer/${customer.photoPath}'></c:out>" /></td>
+                    <td><img alt="No Image" class="img-responsive img-thumbnail" width="55" height="50" src="<c:out value='/uploads/NeoForce/images/customers/${customer.photoPath}'></c:out>" /></td>
                     <td class="agentId"><c:out value="${customer.customerId}" /></td>
                     <td class="customerFname"><c:out value="${customer.firstname}" /></td>
                     <td class="customerMname"><c:out value="${customer.middlename}" /></td>
@@ -55,8 +55,8 @@
                     <td class="customerState"><c:out value="${customer.state}" /></td>
                     <td class="customerLoyaltyPoint" style="text-align:right">${customer.getRewardPoints()}</td>
                     <td>
-                        <input type="hidden" class="customerImg" value='<c:out value="/uploads/NeoForce/images/customer/${customer.photoPath}"></c:out>' />
-                        <input type="hidden" class="agentImg" value='<c:out value="/uploads/NeoForce/images/agent/${customer.agent.photoPath}"></c:out>' />
+                        <input type="hidden" class="customerImg" value='<c:out value="/uploads/NeoForce/images/customers/${customer.photoPath}"></c:out>' />
+                        <input type="hidden" class="agentImg" value='<c:out value="/uploads/NeoForce/images/agents/${customer.agent.photoPath}"></c:out>' />
                         <input type="hidden" class="agentName" value='<c:out value="${customer.agent.lastname} ${customer.agent.firstname}"></c:out>' />
                         <input type="hidden" class="agentPhone" value='<c:out value="${customer.agent.phone}"></c:out>' />
                         <a class="btn btn-primary" href="#" onclick="selectCustomer('${pageContext.request.contextPath}','${customer.customerId}')" role="button">Choose</a>

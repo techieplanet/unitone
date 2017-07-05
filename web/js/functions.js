@@ -115,7 +115,36 @@ function showSelectedAgent()
         }
         
         $("#step1").css("display","none");
+        $("#step2").css("display","none");
+        $("#step3").css("display","block");
+        
+        $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-2").removeClass('btn-default').addClass('btn-primary');
+        $("#process-step-3").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-3").removeAttr('disabled');
+        
+        return false;
+    }
+    
+    function showCustomerReg()
+    {
+        $("#step1").css("display","block");
+        $("#step2").css("display","none");
+        $("#step3").css("display","none");
+        
+        $("#process-step-1").removeClass('btn-default').addClass('btn-primary');
+        $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-3").removeClass('btn-primary').addClass('btn-default');
+        
+        return false;
+    }
+
+function proceed()
+    {
+       
+        $("#step1").css("display","none");
         $("#step2").css("display","block");
+        $("#step3").css("display","none");
         
         $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
         $("#process-step-2").removeClass('btn-default').addClass('btn-primary');
@@ -125,18 +154,6 @@ function showSelectedAgent()
         return false;
     }
     
-    function showCustomerReg()
-    {
-        $("#step1").css("display","block");
-        $("#step2").css("display","none");
-        
-        $("#process-step-1").removeClass('btn-default').addClass('btn-primary');
-        $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
-        $("#process-step-3").removeClass('btn-primary').addClass('btn-default');
-        
-        return false;
-    }
-
 
 
 /**
@@ -1343,7 +1360,7 @@ function submitPostForm(url, formData){
 
 function validateCustomerRegForm()
 {
-    appendLoadingState("#step1_box");
+    appendLoadingState("#step2_box");
     
     var errors = [];
     
@@ -1391,6 +1408,10 @@ function validateCustomerRegForm()
     {
         errors.push("Please select state");
     }
+     if($("#customerCountry").val().trim() == '')
+    {
+        errors.push("Please select Country");
+    }
     if($("#customerPhone").val().trim() == '')
     {
         errors.push("Please enter Phone Number");
@@ -1408,9 +1429,136 @@ function validateCustomerRegForm()
         errors.push("Please enter kin Address");
     }
     
+    if($("#customerTitle").val().trim() == '')
+    {
+        errors.push("Please enter Customer Title");
+    }
+    
+    if($("#customerGender").val().trim() == '')
+    {
+        errors.push("Please select Customer Gender");
+    }
+    
+    if($("#customerMaritalStatus").val().trim() == '')
+    {
+        errors.push("Please specify Marital Status");
+    }
+    
+    if($("#customerDateOfBirth").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Birth Date");
+    }
+    
+    if($("#customerOccupation").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Occupation");
+    }
+    
+    if($("#customerEmployer").val().trim() == '')
+    {
+        errors.push("Please Enter Customer employer");
+    }
+    
+    if($("#customerOfficePhone").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Office Phone");
+    }
+    
+    if($("#customerOfficeStreet").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Office street");
+    }
+    
+     if($("#customerOfficeCity").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Office City");
+    }
+    
+     if($("#customerOfficeState").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Office State");
+    }
+    
+     if($("#customerOfficeCountry").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Office Country");
+    }
+    
+    
+    if($("#customerEmployerStreet").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Employer  street");
+    }
+    
+     if($("#customerEmployerCity").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Employer  City");
+    }
+    
+     if($("#customerEmployerState").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Employer  State");
+    }
+    
+     if($("#customerEmployerCountry").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Employer  Country");
+    }
+    
+     if($("#customerOtherPhone").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Other Phone");
+    }
+    
+     if($("#customerPostalAddress").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Postal Address");
+    }
+    
+     if($("#customerKinRelationship").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Relationship with Next Of kin");
+    }
+    
+     if($("#customerKinEmail").val().trim() == '')
+    {
+        errors.push("Please Enter Next Of kin  Email ");
+    }
+    
+     if($("#customerBanker").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Banker  ");
+    }
+    
+     if($("#customerAccountName").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Account Name ");
+    }
+    
+     if($("#customerAccountNumber").val().trim() == '')
+    {
+        errors.push("Please Enter Customer Account Number ");
+    }
+    
+     if($("#customerPhoto").val().trim() == '')
+    {
+        errors.push("Please Upload Customer Passport");
+    }
+    
+     if($("#customerKinPhoto").val().trim() == '')
+    {
+        errors.push("Please Upload Customer Kin Passport ");
+    }
+    
+     if($("#customerPhotoID").val().trim() == '')
+    {
+        errors.push("Please Upload Customer ID ");
+    }
+    
     $("#customerErrorModal .modal-body").html("");
     
     var url = $("#pageContext").val();
+    
     
     
     $.ajax({

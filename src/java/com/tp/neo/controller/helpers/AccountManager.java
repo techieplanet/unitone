@@ -38,7 +38,6 @@ public class AccountManager {
         account.setAccountTypeId(new AccountType(3));  //customer account type id is 3
         account.setRemoteId(customer.getCustomerId());
         account.setActive((short)1);
-        
         em.persist(account);
         em.getTransaction().commit();
         

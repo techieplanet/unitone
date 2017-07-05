@@ -52,6 +52,7 @@
                                 <li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
                                 <li role="presentation"><a href="#Orders" aria-controls="orders" role="tab" data-toggle="tab">Customer Orders</a></li>
                                 <li role="presentation"><a href="#Lodgements" aria-controls="Lodgements" role="tab" data-toggle="tab">Customer Lodgements </a></li>
+                                <li role="presentation"><a href="#Documents" aria-controls="Documents" role="tab" data-toggle="tab">Customer Documents </a></li>
                             </ul>
                         </div>
                     </div>
@@ -65,7 +66,7 @@
                         <div class="col-md-2">
                             
                             <h4>Customer Picture</h4>
-                            <img src="/uploads/NeoForce/images/customer/${customer.photoPath}" class="img img-responsive img-thumbnail" />
+                            <img src="/uploads/NeoForce/images/customers/${customer.photoPath}" class="img img-responsive img-thumbnail" />
                             
                             
                             
@@ -101,8 +102,28 @@
                                         <td colspan="2"></td>
                                     </tr>
                                     <tr>
+                                        <td class="field">Title</td>
+                                        <td>${customer.getTitle()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Gender</td>
+                                        <td>${customer.getGender()}</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="field">Marital Status</td>
+                                        <td>${customer.getMaritalStatus()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Date Of Birth</td>
+                                        <td>${customer.getDateOfBirth()}</td>
+                                    </tr>
+                                    <tr>
                                         <td class="field">Mobile</td>
                                         <td><i class="fa fa-mobile-phone"></i> ${customer.getPhone()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Other Phone</td>
+                                        <td><i class="fa fa-mobile-phone"></i> ${customer.getOtherPhone()}</td>
                                     </tr>
                                     <tr>
                                         <td class="field">Street</td>
@@ -116,10 +137,81 @@
                                         <td class="field">State</td>
                                         <td>${customer.getState()}</td>
                                     </tr>
+                                     <tr>
+                                        <td class="field">Country</td>
+                                        <td>${customer.getCountry()}</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="field">Postal Address</td>
+                                        <td>${customer.getPostalAddress()}</td>
+                                    </tr>
                                     <tr>
                                         <td class="field">Account Code</td>
                                         <td>${customer.getAccountCode()}</td>
                                     </tr>
+                                     
+                                    <tr class="highlight">
+                                        <td class="field" colspan="2" style="text-align: left">
+                                            <h4>Work Information</h4>
+                                        </td>
+                                    </tr>
+                                   <tr>
+                                        <td class="field">Occupation</td>
+                                        <td>${customer.getOccupation()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Employer</td>
+                                        <td>${customer.getEmployer()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Office Phone</td>
+                                        <td><i class="fa fa-mobile-phone"></i> ${customer.getOfficePhone()}</td>
+                                    </tr>
+                                    
+                                    <tr class="highlight">
+                                        <td class="field" colspan="2" style="text-align: left">
+                                            <h4>Office Address</h4>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Street</td>
+                                        <td>${customer.getOfficeStreet()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">City</td>
+                                        <td>${customer.getOfficeCity()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">State</td>
+                                        <td>${customer.getOfficeState()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Country</td>
+                                        <td>${customer.getOfficeCountry()}</td>
+                                    </tr>
+                                    
+                                    <tr class="highlight">
+                                        <td class="field" colspan="2" style="text-align: left">
+                                            <h4>Employer Address</h4>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Street</td>
+                                        <td>${customer.getEmployerStreet()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">City</td>
+                                        <td>${customer.getEmployerCity()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">State</td>
+                                        <td>${customer.getEmployerState()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Country</td>
+                                        <td>${customer.getEmployerCountry()}</td>
+                                    </tr>
+                                    
                                     <tr class="highlight">
                                         <td class="field" colspan="2" style="text-align: left">
                                             <h4>Next of Kin Information</h4>
@@ -132,14 +224,41 @@
                                         <td class="field">Name</td>
                                         <td>${customer.getKinName()}</td>
                                     </tr>
-                                    <tr>
+                                     <tr>
+                                        <td class="field">Relationship</td>
+                                        <td>${customer.getKinRelationship()}</td>
+                                    </tr>
+                                     <tr>
                                         <td class="field">Mobile</td>
                                         <td><i class="fa fa-mobile-phone"></i> ${customer.getKinPhone()}</td>
                                     </tr>
                                     <tr>
-                                        <td class="field">State</td>
+                                        <td class="field">Email</td>
+                                        <td><i class="fa fa-envelope-o"></i>${customer.getKinEmail()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Address</td>
                                         <td>${customer.getKinAddress()}</td>
                                     </tr>
+                                    
+                                    <tr class="highlight">
+                                        <td class="field" colspan="2" style="text-align: left">
+                                            <h4>Bank Information</h4>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Banker</td>
+                                        <td>${customer.getBanker()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Account Name</td>
+                                        <td>${customer.getAccountName()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="field">Account Number</td>
+                                        <td>${customer.getAccountNumber()}</td>
+                                    </tr>
+                                    
                                     <tr class="highlight">
                                         <td class="field" colspan="2" style="text-align: left">
                                             <h4>Customer's Agent Information</h4>
@@ -229,6 +348,55 @@
                         
                     </div> <!-- END OF LODGEMENTS TAB -->
                     
+                    
+                     <div role="tabpanel" class="tab-pane" id="Documents">
+                        
+                            <div class="row">
+                            <div class="col-md-12">
+                             
+                                <div id="documents-accordion" class="panel-group"  role="tablist" aria-multiselectable="true" >
+                                    <table class="table table-profile">
+                                
+                                <thead>
+                                    <tr>
+                                        <th ><div >
+                                                <h4>sn</h4>
+                                            </div> </th>
+                                        <th ><div >
+                                                <h4>title</h4>
+                                            </div> </th>
+                                        <th >
+                                            <div >
+                                                <h4>file</h4>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                     <tr class="divider">
+                                        <td colspan="3"></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                           
+                                    <c:forEach items="${documents}" var="document">
+                                        <tr>
+                                        <td >${document.docTypeId.weight}</td>
+                                        <td >${document.docTypeId.title}</td>
+                                        <td ><a href="${documentDir}${document.path}" ><img src="${documentDir}${document.path}" class="img img-responsive img-thumbnail" style="max-width: 100px;max-height: 100px; overflow-y: auto"/></a>
+                                         </td>
+                                    </tr>
+                                       <tr class="divider">
+                                           <td colspan="3"><hr/></td>
+                                    </tr>
+                                    </c:forEach>
+                                </tbody>
+                                    </table>
+                                    
+                                </div>
+                              
+                            </div>
+                        </div>
+                        
+                    </div> <!-- END OF Documents TAB -->
                                     
                     </div> <!-- END OF TAB-CONTENT -->
                 </div>

@@ -116,6 +116,14 @@
           
           
           <div class="form-group marginbottom10">
+            <label for="amp" class="col-sm-4 control-label">Annual Maintenance Percentage*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="amp" id="amp" class="form-control medium text-right" value="">
+            </div>
+          </div>
+          
+          
+          <div class="form-group marginbottom10">
             <label for="reward_points" class="col-sm-4 control-label">Reward Points</label>
             <div class="col-sm-7">            
                 <input type="text" name="reward_points" id="reward_points" class="form-control medium text-right" value="">
@@ -248,15 +256,23 @@
             VATPercentage = !isNaN(VATPercentage) ? VATPercentage : 0; 
             $("#vatp").val(VATPercentage);
             
+            var AMPercentage = parseFloat($("#amp").val());
+            AMPercentage = !isNaN(AMPercentage) ? AMPercentage : 0; 
+            $("#amp").val(AMPercentage);
+            
             var rewardPoints = parseFloat($("#reward_points").val());
             rewardPoints = !isNaN(rewardPoints) ? rewardPoints : 0; 
             $("#reward_points").val(rewardPoints);
             
-            
+            var AMValue = (cpu * AMPercentage / 100);
             var commissionValue = (cpu * commissionPercentage / 100);
+            AMValue = (commissionValue * AMPercentage / 100);
+            commissionValue -= AMValue;
+            
             var VATValue = (cpu * VATPercentage / 100);
             
-            var income = cpu - discountValue - buildingCost - serviceValue - commissionValue - VATValue;
+            
+            var income = cpu - discountValue - buildingCost - serviceValue - commissionValue - VATValue - AMValue;
             income = !isNaN(income) ? income : 0; 
             $("#income").val(income.toFixed(2));
             

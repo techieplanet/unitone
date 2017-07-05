@@ -46,8 +46,8 @@
                         <th>Last Name</th>
                         <th>Phone No</th>
                         <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
+                   <% /**     <th>Street</th>
+                        <th>City</th> */ %>
                         <th>State</th>
                         <th>Action</th>
                         
@@ -58,14 +58,14 @@
                             <tr id="row<c:out value="${pointer.count}" />">
                                 <td><c:out value="${pointer.count}" /></td>
                                 <td>${customer.getAccountCode()}</td>
-                                <td><img src="/uploads/NeoForce/images/customer/${customer.photoPath}" width='55' height='50'/></td>
+                                <td><img src="/uploads/NeoForce/images/customers/${customer.photoPath}" width='55' height='50'/></td>
                                 <td><c:out value="${customer.firstname}" /></td>
                                 <td><c:out value="${customer.middlename}" /></td>
                                 <td><c:out value="${customer.lastname}" /></td>
                                 <td><c:out value="${customer.phone}" /></td>
                                 <td><c:out value="${customer.email}" /></td>
-                                <td><c:out value="${customer.street}" /></td>
-                                <td><c:out value="${customer.city}" /></td>
+                              <% /** <td><c:out value="${customer.street}" /></td>
+                                <td><c:out value="${customer.city}" /></td> */ %>
                                 <td><c:out value="${customer.state}" /></td>
                               
                                 <td style="width:130px">
@@ -98,8 +98,8 @@
                         <th>Last Name</th>
                         <th>Phone No</th>
                         <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
+                    <% /** <th>Street</th>
+                        <th>City</th> */ %>
                         <th>State</th>
                         <th>Action</th>
                       </tr>

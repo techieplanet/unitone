@@ -99,6 +99,10 @@ public class ProjectController extends AppController {
                     processGetRequest(request, response);
                 }
             }
+            else
+            {
+               super.errorPageHandler("forbidden", request, response); 
+            }
         }
     }
     

@@ -65,11 +65,10 @@
                 
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Permissions</h3>
+                        <h3 class="panel-title">Permissions <span class="pull-right"><input class="minimal" type="checkbox" name="select-all" id="select-all"> SELECT ALL</span></h3>
                     </div>
-
                     <!-- Table -->
-                    <table class="table">
+                    <table class="table" id='permissions_table'> 
                       <tbody>
                           <%--<c:set var="currentEntity" value="${permissionsList.value}" />--%>
                           <%--<c:out value="${currentEntity}" />--%>
@@ -113,3 +112,49 @@
 
     </div><!-- /. box -->
 </form>
+          
+          <script>
+               $(document).ready(function(){
+        $("#role_id").on("change",function(){
+           var selectedValue = $("#role_id").val();
+           var data = {"role_id": selectedValue, "action":"rolechange","mode":"ajax"};
+           genericAjax('${pageContext.request.contextPath}', 'Role', "GET", data, updatePermissionListDOM);
+        });
+       
+        $('#select-all').on('ifChecked', function(event){
+            $('#permissions_table input[type="checkbox"].minimal').iCheck('check')
+        });
+        
+        $('#select-all').on('ifUnchecked', function(event){
+            $('#permissions_table input[type="checkbox"].minimal').iCheck('uncheck')
+        });
+    });
+          
+    function updatePermissionListDOM(permissionsDetails){
+        //console.log(permissionsDetails);
+        var permissionsDetailsObj = JSON.parse(permissionsDetails);
+        var allPermissions = permissionsDetailsObj["all"];
+        var selectedPermissions = permissionsDetailsObj["selected"];
+        console.log("selectedPermissions: " + selectedPermissions);
+        
+           <c:forEach items="allPermissions" var="sspermission">
+                   //console.log(<c:out value="${sspermission}" />);
+           </c:forEach>
+        
+            <c:forEach items="${permissionsList}" var="entity">
+                                <c:forEach items="${entity.value}" var="permission">
+                                    var permissionAlias = '${permission.alias}';
+                                    console.log("alias: " + permissionAlias);
+                                    if(selectedPermissions.indexOf(permissionAlias) != -1){
+                                        $("#"+permissionAlias).iCheck('check');
+                                    }
+                                    else{
+                                        $("#"+permissionAlias).iCheck('uncheck');
+                                    }
+                                </c:forEach>
+            </c:forEach>
+                
+    }
+     
+          
+          </script>
