@@ -146,7 +146,7 @@
                
                 <!-- form start -->
                <div class="box box-primary">
-                   <form role="form" name="customerRegistration" method="POST" action="${pageContext.request.contextPath}/Order?action=new_order" enctype="multipart/form-data" onsubmit="return submitForm()">
+  <form role="form" name="customerRegistration" method="POST" action="${pageContext.request.contextPath}/Order?action=new_order" enctype="multipart/form-data" onsubmit="return submitForm()">
                 
                 <input type="hidden" name="agent_id" id="agent_id" value="" />
                    
@@ -200,7 +200,7 @@
                                     	<div class="form-group">
                                             <label for="selectProdcut">Select Customer</label>
                                             
-                                            <input type="hidden" value="{{customerId}}" name="customer_id" />
+                                            <input type="hidden" value="{{customerId}}" name="customer_id" id="customer_id"/>
                                             
                                             <ngx-drop-down-list ngx-on-select="selectItem(event)" ngx-settings="settings">
                                             </ngx-drop-down-list>
@@ -265,11 +265,11 @@
                                 	<div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productAmount">Amount</label>
-                                            <span id="amountPerUnit" class="productSpan">
+                                            <input type="text" class="form-control" id="productAmount" name="productAmount" style="width: 100%;" readonly>
+                                             <span id="amountPerUnit">
                                                 Amount per Unit: <span id="amountUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="amountTotalUnit"></span>
                                             </span>
-                                            <input type="text" class="form-control" id="productAmount" name="productAmount" style="width: 100%;" readonly>
                                         </div> 
 <!--                                            /.form-group amount -->
                                     </div>
@@ -278,11 +278,12 @@
                                 	<div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMinimumInitialAmount">Initial Amount(N)</label>
-                                            <span id="amountPerUnit" class="productSpan">
+                                            <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()" >
+                                            <span id="amountPerUnit" >
                                                 Min initial amt /unit: <span id="initialAmountPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="minInitialAmountSpan"></span><br/>
                                             </span>
-                                            <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()">
+                                            <span id="productMinimumInitialAmountFormat"></span>
                                         </div> 
 <!--                                            /.form-group initial monthly amount -->
                                         </div>
@@ -291,7 +292,7 @@
                                           <div class="col-md-2" >
                                               <div class="form-group">
                                                   <label for="productLoyaltyPoint">Loyalty Point</label>
-                                                  <span class="productSpan">Amount of loyalty point to use for Item</span>
+                                                  <span>Amount of loyalty point to use for Item</span>
                                                   <input type="text" size="4" class="form-control" name="productLoyaltyPoint" id="productLoyaltyPoint" onkeyup="calculateAmountToPay()">
                                               </div>
                                           </div>         
@@ -299,10 +300,9 @@
                                       <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="amountLeft">Balance Payable(N)</label>
-                                            <span id="amountPerUnit" class="productSpan">
-                                               
-                                            </span>
                                             <input type="text" class="form-control" id="amountLeft" name="amountLeft" style="width: 100%;" readonly >
+                                            <span id="amountPerUnit"></span>
+                                            <span id="amountLeftFormat"></span>
                                         </div> 
 <!--                                                  /.form-group initial monthly amount -->
                                     </div>
@@ -310,10 +310,6 @@
                                 	<div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMaximumDuration">Payment Duration</label>
-                                            <span id="amountPerUnit" class="productSpan">
-                                                Max payment duration /unit: <span id="payDurationPerUnit"></span><br/>
-                                                This Sale (x<span id="qty"></span>):  <span id="payDurationPerQuantity"></span>
-                                            </span>
                                             <div class="row">
                                             	<div class="col-md-12">
                                             		<select class="form-control select2"  id="productMaximumDuration" style="width: 100%;" onchange="monthlyPayCalculator('exsiting')">
@@ -322,17 +318,21 @@
                                                     </select>
                                                 </div>
                                             </div>
+                                             <span id="amountPerUnit">
+                                                Max payment duration /unit: <span id="payDurationPerUnit"></span><br/>
+                                                This Sale (x<span id="qty"></span>):  <span id="payDurationPerQuantity"></span>
+                                            </span>
                                         </div> <!-- /.form-group Duration -->
                                     </div>
                                
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMinimumMonthlyPayment">Monthly Payment(N)</label>
-                                            <span id="amountPerUnit" class="productSpan">
+                                            <input type="text" class="form-control" id="productMinimumMonthlyPayment" name="productMinimumMonthlyPayment" style="width: 100%;" onKeyup="calculateDurationFromMonthlyPay()" readonly>
+                                             <span id="amountPerUnit">
                                                 Min monthly pay / unit: <span id="monthlyPayPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="monthlyPayPerQuantity"></span>
                                             </span>
-                                            <input type="text" class="form-control" id="productMinimumMonthlyPayment" name="productMinimumMonthlyPayment" style="width: 100%;" onKeyup="calculateDurationFromMonthlyPay()">
                                             <span id="finalAmount" style="display:block"></span>
                                         </div> <!--/.form-group amount -->
                                     </div>
@@ -343,8 +343,8 @@
                                                   <label>
                                                       Commission(%)
                                                   </label>
-                                                  <span class="productSpan">This is the commission payable to an agent</span>
-                                                  <input type="text" class="form-control" value="0" name="commp" id="commp"/>
+                                                  <input type="text" class="form-control" value="0" name="commp" id="commp" readonly/>
+                                              <span>This is the commission payable to an agent</span>
                                               </div>
                                           </div>
                                     </c:if>  
@@ -355,8 +355,8 @@
                                                   <label>
                                                       Notification Day
                                                   </label>
-                                                  <span class="productSpan">Select the day of the month to receive monthly notification</span>
                                                   <input type="number" class="form-control" min="1" max="31" name="day_of_notification" value="1" id="day_of_notification"/>
+                                                <span >Select the day of the month to receive monthly notification</span>
                                               </div>
                                       </div>
                                       
@@ -636,7 +636,7 @@
   </div><!-- /.box -->
 
 <!--MODAL-->
-      <div class="modal fade" id="deleteModalCart" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
          <div class="vertical-alignment-helper">
           <div class="modal-dialog vertical-align-center">
           <div class="modal-content">

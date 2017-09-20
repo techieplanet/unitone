@@ -74,7 +74,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @OneToMany(mappedBy = "customerId")
     private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "reward_points")
-    private Integer rewardPoints;
+    private double rewardPoints;
     @OneToMany(mappedBy = "customer")
     private Collection<Lodgement> lodgementCollection;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
@@ -149,6 +149,77 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     
     @Transient
     private String permissions = "";
+    
+    @Column(name = "title")
+    private String title;
+    
+    @Column(name = "gender")
+    private String gender;
+    
+    @Column(name = "marital_status")
+    private String  maritalStatus;
+    
+    @Column(name = "date_of_birth")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateOfBirth;
+    
+    @Column(name = "occupation")
+    private String  occupation;
+    
+    @Column(name = "employer")
+    private String  employer;
+    
+    @Column(name = "office_phone")
+    private String  officePhone;
+    
+    @Column(name = "office_street")
+    private String  officeStreet;
+    
+    @Column(name = "office_city")
+    private String  officeCity;
+    
+    @Column(name = "office_state")
+    private String  officeState;
+    
+    @Column(name = "office_country")
+    private String  officeCountry;
+    
+    @Column(name = "employer_street")
+    private String  employerStreet;
+    
+    @Column(name = "employer_city")
+    private String  employerCity;
+    
+    @Column(name = "employer_state")
+    private String  employerState;
+    
+    @Column(name = "employer_country")
+    private String  employerCountry;
+    
+    @Column(name = "other_phone")
+    private String  otherPhone;
+    
+    @Column(name = "postal_address")
+    private String  postalAddress;
+    
+    @Column(name = "country")
+    private String  country;
+    
+    @Column(name = "kin_relationship")
+    private String  kinRelationship;
+    
+    @Column(name = "kin_email")
+    private String  kinEmail;
+    
+    @Column(name = "bank_name")
+    private String  banker;
+    
+    @Column(name = "bank_account_name")
+    private String  accountName;
+    
+    @Column(name = "bank_account_number")
+    private String  accountNumber;
+    
     
     public Customer() {
     }
@@ -501,13 +572,334 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         this.loyaltyHistoryCollection = loyaltyHistoryCollection;
     }
 
-    public Integer getRewardPoints() {
-         return rewardPoints == null ? 0 : rewardPoints; 
+    public double getRewardPoints() {
+         return rewardPoints ; 
     }
 
-    public void setRewardPoints(Integer rewardPoints) {
+    public void setRewardPoints(double rewardPoints) {
         this.rewardPoints = rewardPoints;
     }
 
+    /**
+     * @return the title
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * @param title the title to set
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     * @return the gender
+     */
+    public String getGender() {
+        return gender;
+    }
+
+    /**
+     * @param gender the gender to set
+     */
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    /**
+     * @return the maritalStatus
+     */
+    public String getMaritalStatus() {
+        return maritalStatus;
+    }
+
+    /**
+     * @param maritalStatus the maritalStatus to set
+     */
+    public void setMaritalStatus(String maritalStatus) {
+        this.maritalStatus = maritalStatus;
+    }
+
+    /**
+     * @return the dateOfBirth
+     */
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    /**
+     * @param dateOfBirth the dateOfBirth to set
+     */
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    /**
+     * @return the occupation
+     */
+    public String getOccupation() {
+        return occupation;
+    }
+
+    /**
+     * @param occupation the occupation to set
+     */
+    public void setOccupation(String occupation) {
+        this.occupation = occupation;
+    }
+
+    /**
+     * @return the employer
+     */
+    public String getEmployer() {
+        return employer;
+    }
+
+    /**
+     * @param employer the employer to set
+     */
+    public void setEmployer(String employer) {
+        this.employer = employer;
+    }
+
+    /**
+     * @return the officePhone
+     */
+    public String getOfficePhone() {
+        return officePhone;
+    }
+
+    /**
+     * @param officePhone the officePhone to set
+     */
+    public void setOfficePhone(String officePhone) {
+        this.officePhone = officePhone;
+    }
+
+    /**
+     * @return the officeStreet
+     */
+    public String getOfficeStreet() {
+        return officeStreet;
+    }
+
+    /**
+     * @param officeStreet the officeStreet to set
+     */
+    public void setOfficeStreet(String officeStreet) {
+        this.officeStreet = officeStreet;
+    }
+
+    /**
+     * @return the officeCity
+     */
+    public String getOfficeCity() {
+        return officeCity;
+    }
+
+    /**
+     * @param officeCity the officeCity to set
+     */
+    public void setOfficeCity(String officeCity) {
+        this.officeCity = officeCity;
+    }
+
+    /**
+     * @return the officeState
+     */
+    public String getOfficeState() {
+        return officeState;
+    }
+
+    /**
+     * @param officeState the officeState to set
+     */
+    public void setOfficeState(String officeState) {
+        this.officeState = officeState;
+    }
+
+    /**
+     * @return the officeCountry
+     */
+    public String getOfficeCountry() {
+        return officeCountry;
+    }
+
+    /**
+     * @param officeCountry the officeCountry to set
+     */
+    public void setOfficeCountry(String officeCountry) {
+        this.officeCountry = officeCountry;
+    }
+
+    /**
+     * @return the employerStreet
+     */
+    public String getEmployerStreet() {
+        return employerStreet;
+    }
+
+    /**
+     * @param employerStreet the employerStreet to set
+     */
+    public void setEmployerStreet(String employerStreet) {
+        this.employerStreet = employerStreet;
+    }
+
+    /**
+     * @return the employerCity
+     */
+    public String getEmployerCity() {
+        return employerCity;
+    }
+
+    /**
+     * @param employerCity the employerCity to set
+     */
+    public void setEmployerCity(String employerCity) {
+        this.employerCity = employerCity;
+    }
+
+    /**
+     * @return the employerState
+     */
+    public String getEmployerState() {
+        return employerState;
+    }
+
+    /**
+     * @param employerState the employerState to set
+     */
+    public void setEmployerState(String employerState) {
+        this.employerState = employerState;
+    }
+
+    /**
+     * @return the employerCountry
+     */
+    public String getEmployerCountry() {
+        return employerCountry;
+    }
+
+    /**
+     * @param employerCountry the employerCountry to set
+     */
+    public void setEmployerCountry(String employerCountry) {
+        this.employerCountry = employerCountry;
+    }
+
+    /**
+     * @return the otherPhone
+     */
+    public String getOtherPhone() {
+        return otherPhone;
+    }
+
+    /**
+     * @param otherPhone the otherPhone to set
+     */
+    public void setOtherPhone(String otherPhone) {
+        this.otherPhone = otherPhone;
+    }
+
+    /**
+     * @return the postalAddress
+     */
+    public String getPostalAddress() {
+        return postalAddress;
+    }
+
+    /**
+     * @param postalAddress the postalAddress to set
+     */
+    public void setPostalAddress(String postalAddress) {
+        this.postalAddress = postalAddress;
+    }
+
+    /**
+     * @return the country
+     */
+    public String getCountry() {
+        return country;
+    }
+
+    /**
+     * @param country the country to set
+     */
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    /**
+     * @return the kinRelationship
+     */
+    public String getKinRelationship() {
+        return kinRelationship;
+    }
+
+    /**
+     * @param kinRelationship the kinRelationship to set
+     */
+    public void setKinRelationship(String kinRelationship) {
+        this.kinRelationship = kinRelationship;
+    }
+
+    /**
+     * @return the kinEmail
+     */
+    public String getKinEmail() {
+        return kinEmail;
+    }
+
+    /**
+     * @param kinEmail the kinEmail to set
+     */
+    public void setKinEmail(String kinEmail) {
+        this.kinEmail = kinEmail;
+    }
+
+    /**
+     * @return the banker
+     */
+    public String getBanker() {
+        return banker;
+    }
+
+    /**
+     * @param banker the banker to set
+     */
+    public void setBanker(String banker) {
+        this.banker = banker;
+    }
+
+    /**
+     * @return the accountName
+     */
+    public String getAccountName() {
+        return accountName;
+    }
+
+    /**
+     * @param accountName the accountName to set
+     */
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
+    }
+
+    /**
+     * @return the accountNumber
+     */
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    /**
+     * @param accountNumber the accountNumber to set
+     */
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
 
 }

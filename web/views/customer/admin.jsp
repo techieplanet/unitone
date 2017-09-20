@@ -46,8 +46,8 @@
                         <th>Last Name</th>
                         <th>Phone No</th>
                         <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
+                   <% /**     <th>Street</th>
+                        <th>City</th> */ %>
                         <th>State</th>
                         <th>Action</th>
                         
@@ -58,30 +58,31 @@
                             <tr id="row<c:out value="${pointer.count}" />">
                                 <td><c:out value="${pointer.count}" /></td>
                                 <td>${customer.getAccountCode()}</td>
-                                <td><img src="/uploads/NeoForce/images/customer/${customer.photoPath}" width='55' height='50'/></td>
+                                <td><%//<img src="/uploads/NeoForce/images/customers/customer_150166987523.png" width='55' height='50'/>%>
+                                    <img src="/uploads/NeoForce/images/customers/${customer.photoPath}" alt="no image" width='55' height='50'/> </td>
                                 <td><c:out value="${customer.firstname}" /></td>
                                 <td><c:out value="${customer.middlename}" /></td>
                                 <td><c:out value="${customer.lastname}" /></td>
                                 <td><c:out value="${customer.phone}" /></td>
                                 <td><c:out value="${customer.email}" /></td>
-                                <td><c:out value="${customer.street}" /></td>
-                                <td><c:out value="${customer.city}" /></td>
+                              <% //<td><c:out value="${customer.street}" /></td>
+                                //<td><c:out value="${customer.city}" /></td> */ %>
                                 <td><c:out value="${customer.state}" /></td>
                               
                                 <td style="width:130px">
                                     <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}">
-                                     <a class="btn btn-success btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button"><i class="fa fa-pencil"></i> </a>
+                                     <a class="btn btn-success btn-xs" href="Customer?action=edit&customerId=${customer.customerId}&id=${customer.customerId}" role="button" title="Edit ${customer.firstname} Profile" ><i class="fa fa-pencil"></i> </a>
                                      
                                     </c:if>
                                     
                                      <c:if test="${sessionScope.user.getSystemUserTypeId() <= 2}">
-                                        <a class="btn btn-primary btn-xs" href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${customer.customerId}" role="button"><i class="fa fa-user"></i> </a>
-                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button"><i class="fa fa-cart-plus"></i> </a>
-                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button"><i class="fa fa-dollar"></i> </a>
+                                        <a class="btn btn-primary btn-xs" href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${customer.customerId}" role="button" title="View ${customer.firstname} profile"><i class="fa fa-user"></i> </a>
+                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button" title="View ${customer.firstname} orders"><i class="fa fa-cart-plus"></i> </a>
+                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button" title="View ${customer.firstname} lodgements"><i class="fa fa-dollar"></i> </a>
                                      </c:if>
                                      
                                      <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}"> 
-                                     <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                                     <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Customer', <c:out value="${customer.customerId}"/>)" role="button" title="delete ${customer.firstname} account"><i class="fa fa-remove"></i></a>
                                     </c:if>
                                     
                                 </td>
@@ -98,8 +99,8 @@
                         <th>Last Name</th>
                         <th>Phone No</th>
                         <th>Email</th>
-                        <th>Street</th>
-                        <th>City</th>
+                    <% ///** <th>Street</th>
+                       // <th>City</th> */ %>
                         <th>State</th>
                         <th>Action</th>
                       </tr>

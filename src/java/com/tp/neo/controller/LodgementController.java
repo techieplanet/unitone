@@ -7,52 +7,47 @@ package com.tp.neo.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.tp.neo.exception.SystemLogger;
-import com.tp.neo.model.Customer;
+import com.google.gson.reflect.TypeToken;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.LodgementManager;
 import com.tp.neo.controller.helpers.MorgageList;
 import com.tp.neo.interfaces.SystemUser;
+import com.tp.neo.model.Agent;
+import com.tp.neo.model.CompanyAccount;
+import com.tp.neo.model.Customer;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
-import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
+import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
-import com.tp.neo.model.utils.TrailableManager;
+import com.tp.neo.service.CustomerService;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.PropertyException;
-import com.google.gson.reflect.TypeToken;
-import com.tp.neo.controller.helpers.LodgementManager;
-import com.tp.neo.model.Agent;
-import com.tp.neo.model.CompanyAccount;
-import com.tp.neo.model.Notification;
-import com.tp.neo.model.NotificationType;
-import com.tp.neo.model.Plugin;
-import java.lang.reflect.Type;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.TimeZone;
-import java.util.logging.Level;
-import javax.persistence.RollbackException;
 
 /**
  *
@@ -137,7 +132,7 @@ public class LodgementController extends AppController {
         response.setContentType("text/html;charset=UTF-8");
     
         SystemUser user = sessionUser;
-        System.out.println("SessionUser in Lodgment Get method : " + sessionUser);
+        //System.out.println("SessionUser in Lodgment Get method : " + sessionUser);
         
         String action = request.getParameter("action") != null?request.getParameter("action"):"";
         
@@ -196,23 +191,19 @@ public class LodgementController extends AppController {
              request.setAttribute("table_title", "Pending Lodgments");
          }
          else if(action.equalsIgnoreCase("approval")){//shows the list of Lodgements pending approval
-             
              viewFile = LODGEMENT_APPROVAL;
              request.setAttribute("notificationLodgementId", 0);
              getUnapprovedLodgement(request);
-             
          }
          else if(action.equalsIgnoreCase("approve")){
-             
              approveLodgement(request);
-             response.sendRedirect(request.getContextPath() + "/Lodgement?action=approval");
+             AppController.doRedirection(request, response, "/Lodgement?action=approval");
              isRedirect = true;
              return;
          }
          else if(action.equalsIgnoreCase("decline")){
-             
              declineLodgement(request);
-             response.sendRedirect(request.getContextPath() + "/Lodgement?action=approval");
+             AppController.doRedirection(request, response, "/Lodgement?action=approval");
              return;
          }
          else if(action.equalsIgnoreCase("notification")){
@@ -273,9 +264,16 @@ public class LodgementController extends AppController {
         if(action.equalsIgnoreCase("mortgage")){
              
              String viewFile = LODGEMENT_NEW;
-             payMorgage(request);
-             String contextPath = request.getContextPath();
-             response.sendRedirect(contextPath + "/Lodgement?action=success");
+             StringBuilder errMsg = new StringBuilder();
+             boolean success = payMorgage(request , errMsg);
+             if(success)
+             {
+             AppController.doRedirection(request, response, "/Lodgement?action=success");
+             }
+             else
+             {
+                response.sendError(403, errMsg + "---Go back <a href='" + request.getHeader("referer") + "'>Previous Page</a>");
+             }
          }
         else{
             processInsertRequest(request, response);
@@ -361,6 +359,11 @@ public class LodgementController extends AppController {
         
         List<Customer> custResultList = jplQuery.getResultList();
         
+        //Lets set the loyalty amount of each customer
+        for(Customer c : custResultList)
+        {
+            c.setRewardPoints(CustomerService.getCustomerRewardPointBalance(c));
+        }
         return custResultList;
     }
     
@@ -383,6 +386,12 @@ public class LodgementController extends AppController {
             customerList.add(custAgent.getCustomer());
         }
         
+        //Lets set the loyalty amount of each customer
+        for(Customer c : customerList)
+        {
+            c.setRewardPoints(CustomerService.getCustomerRewardPointBalance(c));
+        }
+        
         return customerList;
         
     }
@@ -403,7 +412,7 @@ public class LodgementController extends AppController {
         
         jplQuery.setParameter("customerId", customer);
         
-        System.out.println("Query : " + jplQuery.toString());
+        //System.out.println("Query : " + jplQuery.toString());
         List<ProductOrder> orderResultSet = jplQuery.getResultList();
         
         List<Map> mapList = new ArrayList<Map>();
@@ -428,7 +437,7 @@ public class LodgementController extends AppController {
         response.getWriter().write(jsonResponse);
         response.getWriter().flush(); 
         response.getWriter().close();
-        System.out.println("jsonResponse: " + jsonResponse);
+        //System.out.println("jsonResponse: " + jsonResponse);
        
         
     }
@@ -499,7 +508,9 @@ public class LodgementController extends AppController {
             totalPaid += lodgementItem.getAmount();
         }
         
-        double unitAmount = orderItem.getUnit().getAmountPayable();
+        //Fixed Bug here 
+        //Formally was : double unitAmount = orderItem.getUnit().getAmountPayable() ;
+        double unitAmount = orderItem.getUnit().getAmountPayable() * orderItem.getQuantity();
         
         if(unitAmount <= totalPaid){
             isComplete = true;
@@ -634,7 +645,7 @@ public class LodgementController extends AppController {
 //        }
     }
     
-    private void payMorgage(HttpServletRequest request) {
+    private boolean payMorgage(HttpServletRequest request , StringBuilder errMsg) {
         
         try {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -675,8 +686,13 @@ public class LodgementController extends AppController {
                 lodgementItem.setCreatedDate(getDateTime().getTime());
                 lodgementItem.setCreatedBy(userId);
                 lodgementItem.setItem(orderItem);
-                lodgementItem.setAmount(morgageItem.getAmount());
+                if(morgageItem.getAmount()<= 0)
+                {
+                    errMsg.append("One or More Lodgment Amount is Invalid");
+                    return false;
+                }
                 
+                lodgementItem.setAmount(morgageItem.getAmount());
                 lodgementAmount += morgageItem.getAmount();
                 
                 if(plugins.containsKey("loyalty")){
@@ -696,6 +712,12 @@ public class LodgementController extends AppController {
                     order = orderItem.getOrder();
                 }
                 
+            }
+            
+            if(lodgement.getAmount() < lodgementAmount)
+            {
+                errMsg.append("Invalid Lodgement Amount");
+                return false;
             }
             
             if(plugins.containsKey("loyalty")){
@@ -724,6 +746,8 @@ public class LodgementController extends AppController {
         } catch (RollbackException ex) {
             Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        return true;
     }
     
     
@@ -803,7 +827,7 @@ public class LodgementController extends AppController {
             lodgement.setLodgmentDate(getDateTime().getTime());
         }
         else if(paymentMethod == 4) {
-            
+            lodgement.setDepositorBankName(request.get("transfer_bankName").toString());
             lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
             lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
             lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());

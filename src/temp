@@ -1,0 +1,73 @@
+ <div class="col-md-4">
+                             <div class="row">
+                             <div class="row text-center" id="imgholder">
+                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
+                            <div class="form-group text-center">
+                                <c:if test="${agent.photoPath != null}">
+                                    <img src="${agentImageAccessDir}/${agent.photoPath}" 
+                                        class="img-responsive text-center" style="max-height:220px !important;"/>
+                                </c:if>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-md-offset-3  col-xs-4 col-xs-offset-4 ">
+                            <div class="form-group">
+                              <div class="btn-group btn-group-xs">
+                                  <div class="btn btn-primary">
+                                        <!--Upload Picture  <i class="fa fa-upload" aria-holder="true"></i>--> 
+                                        <input type="file" name="agentPhoto" accept="image/gif, image/jpeg, image/png" id="agentPhoto" />
+                                  </div>
+                                  
+                                <input type="hidden" name="agentPhotoHidden" 
+                                        <c:if test="${agentPhotoHidden == null && agent.photoPath==null}"> value=""</c:if>
+                                        <c:if test="${agentPhotoHidden != null}"> value="${agentPhotoHidden}" </c:if> 
+                                        <c:if test="${agent.photoPath != null}"> value="${agent.photoPath}" </c:if> />
+                              </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                  </div>
+                         </div>
+
+
+
+<div class="col-md-12">
+                                <div  class="row">
+                             <div class="col-md-4" >
+                                    <div class="row" >
+                            <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
+                              <label for="agentKinPhoto" style="">Next of Kin Picture</label>
+                                    <c:if test="${agent.agentId != '' && agent.kinPhotoPath != null}"> 
+                                        <img src="${agentKinImageAccessDir}/${agent.kinPhotoPath}" 
+                                             class="img-responsive text-center" width="50.33333333%" style="max-height:220px !important;" />
+                                    </c:if> <br/>
+                                    <div class="btn btn-primary">
+                                        <input type="file" id="agentKinPhoto" name="agentKinPhoto" accept="image/gif, image/jpeg, image/png" 
+                                         style="max-height:220px !important;"
+                                           />
+                                    </div>
+                                             
+                                    
+                                          
+                                             <input type="hidden" name="agentKinPhotoHidden" 
+                           <c:if test="${agentKinPhotoHidden == null && agent.kinPhotoPath ==null}"> value=""
+                    </c:if><c:if test="${agentKinPhotoHidden != null}"> value="${agentKinPhotoHidden}"
+                    </c:if> <c:if test="${agent.kinPhotoPath != null}"> value="${agent.kinPhotoPath}"
+                    </c:if> />
+                            </div>
+                                </div>
+                            </div>
+                                    <div class="col-md-2" style="padding-right:50% !important;"></div>
+                                <div class="col-md-6 " >
+                                    <div class="row" >
+                            <div class="form-group" style="padding-left:25px !important;">
+                              <label for="agentKinAddress" style="">Next of Kin - Address</label>
+                               <input type="text" class="form-control" id="agentKinAddress" name="agentKinAddress" placeholder="Enter Kin Address" style="  width:100%;"
+                                      
+                                      value=<c:if test="${fn:length(errors) > 0 }">"${param.agentKinAddress}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${agent.kinAddress}"</c:if> "/><br/>
+                            </div>
+                                </div>
+                            </div>
+                                </div>
+                            </div>

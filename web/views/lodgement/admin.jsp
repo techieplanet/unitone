@@ -83,7 +83,7 @@
                                 <td><c:out value="${lodgement.getTransactionId()}" /></td>
                                 <td><c:out value="${lodgement.depositorName}" /></td>
                                 <td><fmt:formatDate value="${lodgement.createdDate}" type="date" /></td>
-                                <td><a href='#' class="btn btn-primary " onclick="getLodgmentItem('${lodgement.getId()}','${pageContext.request.contextPath}',event)"><i class='fa fa-eye'></i> View</a></td>
+                                <td><a href='#' class="btn btn-primary " onclick="getLodgmentItem('${lodgement.getId()}','${pageContext.request.contextPath}',event)" title="View Lodgment Details"><i class='fa fa-eye'></i> View</a></td>
                               
                             </tr>
                         </c:forEach>

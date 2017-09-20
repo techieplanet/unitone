@@ -37,17 +37,30 @@
                 </div>
             </c:if>
         
-          <c:if test="${success}">
-              <div class="row">
-                    <div class="col-md-12 ">
-                        <p class="bg-success padding10" style="width:95%">
-                          <i class="fa fa-check"></i>Lodgement Approval was Successful
-                        </p>
-                    </div>
-                </div>
-                <c:remove scope="session" var="success"  />
-          </c:if> 
         
+        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Lodgement Approval</h4>
+            </div>
+            <div class="modal-body">
+                Lodgement Approval was Successful
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary pull-right" data-dismiss="modal">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->   
+         
+        <c:if test="${success}">
+            <script>
+               $( function(){ $("#successModal").modal(); }); 
+                </script>
+        <c:remove scope="session" var="success"  />
+        </c:if> 
         
         
          <div class="panel-group" id="accordion2" role="tablist" aria-multiselectable="true">
@@ -91,7 +104,6 @@
                                                   <div class="col-md-8">
                                                       <span>BANK DEPOSIT</span>
                                                   </div>
-
                                                   <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Depositors Name : </span> 
                                                   </div>
@@ -185,6 +197,13 @@
                                                   </div>
                                                   <div class="col-md-8">
                                                       <span>BANK TRANSFER</span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Bank Name : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span>${lodgement.getDepositorBankName()}</span>
                                                   </div>
                                                   <div class="clearfix"></div>
                                                   

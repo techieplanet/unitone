@@ -14,7 +14,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>NeoForce | Invoice</title>
+    <title>NeoForce | Receipt</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     
@@ -76,8 +76,8 @@
           <div class="row">
             <div class="col-xs-12">
               <h2 class="page-header">
-                <i class="fa fa-globe"></i> NEOFORCE, SFA.
-                <small class="pull-right">${transactionDate}</small>
+                 ${companyName}
+                <small class="pull-right">${dateFmt.format(transactionDate)}</small>
               </h2>
             </div><!-- /.col -->
           </div>
@@ -103,11 +103,9 @@
               </address>
             </div><!-- /.col -->
             <div class="col-sm-4 invoice-col">
-              <b>Invoice #</b><br>
-              <br>
-              <c:if test="${empty print}">
-                <b>Order ID:</b> ${productOrderInvoice.getId()}<br>
-              </c:if>
+              <b>Receipt #${lodgement.getId()}</b><br>
+              <b>Transaction Date: ${lodgement.getCreatedDate()}</b><br>
+              
             </div><!-- /.col -->
           </div><!-- /.row -->
 
@@ -120,7 +118,7 @@
                     <th style="text-align:center">S/N</th>
                     <th>Description</th>
                     <th style="text-align:center">Qty</th>
-                    <th style="text-align:center">Subtotal</th>
+                    <th style="text-align:center">Amount &#8358;</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -132,7 +130,7 @@
                             <td>${LI.getItem().getUnit().getProject().getName()} - ${LI.getItem().getUnit().getTitle()}</td>
                             <td style="text-align:center">${LI.getItem().getQuantity()}</td>
                             <c:set var="rewardAmount" value="${LI.getRewardAmount() !=null ? LI.getRewardAmount() : 0}" />
-                            <td style="text-align:right"><fmt:formatNumber value="${LI.getAmount() + rewardAmount}" type="currency" currencySymbol="N" /></td>
+                            <td style="text-align:right"><fmt:formatNumber value="${LI.getAmount() + rewardAmount}" /></td>
                         </tr>
                     </c:forEach>
                     
@@ -140,32 +138,27 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" style="text-align: right">Total : </td>
-                        <td><fmt:formatNumber value="${totalInvoice}" type="currency" currencySymbol="N" /></td>
+                        <td style="text-align: right"><fmt:formatNumber value="${totalInvoice}" /></td>
                     </tr>
                     <tr>                        <td colspan="3" style="text-align: right">VAT : </td>
 
-                        <td><fmt:formatNumber value="${vatInvoice}" type="currency" currencySymbol="N" /></td>
+                        <td style="text-align: right"><fmt:formatNumber value="${vatInvoice}" /></td>
                     </tr>
                     <tr>
                         <td colspan="3" style="text-align: right">Gateway charge : </td>
-                        <td><fmt:formatNumber value="${gatewayChargeInvoice}" type="currency" currencySymbol="N" /></td>
+                        <td style="text-align: right"><fmt:formatNumber value="${gatewayChargeInvoice}" /></td>
                     </tr>
                     <tr>
                         <td colspan="3" style="text-align: right">Grand Total : </td>
-                        <td><fmt:formatNumber value="${grandTotalInvoice}" type="currency" currencySymbol="N" /></td>
+                        <td style="text-align: right"><fmt:formatNumber value="${grandTotalInvoice}" /></td>
                     </tr>
                 </tfoot>
               </table>
-                    <c:remove var="customerInvoice" scope="session" />
-                    <c:remove var="orderItemInvoice" scope="session" />
-                    <c:remove var="productOrderInvoice" scope="session" />
-                    <c:remove var="transactionDate" scope="session" />
-                    <c:remove var="totalInvoice" scope="session" />
-                    <c:remove var="vatInvoice" scope="session" />
-                    <c:remove var="gatewayChargeInvoice" scope="session" />
-                    <c:remove var="grandTotalInvoice" scope="session" />
+                    <div class="pull-right">
+                    <h3 >NEOFORCE SFA.</h3>
+                    <h4>Powered By Techie Planet</h4>
+                </div>
             </div><!-- /.col -->
-            
             
           </div><!-- /.row -->
 
@@ -175,14 +168,13 @@
         <div class="row" style="padding:20px">
             
             <div class="col-md-2 no-print-area">
-                <a href="${pageContext.request.contextPath}/Dashboard" class="btn btn-primary"><i class="fa fa-chevron-left"></i> Back</a>
+                <a href="${pageContext.request.getHeader('referer')}" class="btn btn-primary"><i class="fa fa-chevron-left"></i> Back</a>
             </div>
             
             <div class="col-md-2 pull-right text-right no-print-area">
-                <a href="${pageContext.request.contextPath}/Customer?action=email_lodgement_invoice&id=${L_ID}"><i class="fa fa-envelope" style="color:#FFCD7E"></i></a> &nbsp;
-                <a href="#"><i class="fa fa-file-pdf-o" style="color:#F64934"></i></a> &nbsp;
-                <a href="#"><i class="fa fa-download"></i></a> &nbsp;
-                <a href="#"><i class="fa fa-print" onclick="invoice.printInvoice(event)"></i></a> &nbsp;
+                <a href="${pageContext.request.contextPath}/Customer?action=email_lodgement_invoice&id=${L_ID}"  title="Email To Customer"><i class="fa fa-envelope" style="color:#FFCD7E"></i></a> &nbsp;
+                <a href="${pageContext.request.contextPath}/Customer?action=lodgement_invoice&id=${L_ID}&pdf" title="Download As PDF"><i class="fa fa-download"></i></a> &nbsp;
+                <a href="#"  title="Send To Printer"><i class="fa fa-print" onclick="invoice.printInvoice(event)"></i></a> &nbsp;
             </div>
             
         </div>   

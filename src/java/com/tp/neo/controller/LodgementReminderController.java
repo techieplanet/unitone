@@ -164,14 +164,14 @@ public class LodgementReminderController extends HttpServlet {
 //             Customer customer = (Customer)map.get("customer");
 //             List<Map> items = (List)map.get("order_items");
 //             
-//             System.out.println("***************************************");
-//             System.out.println(customer.getFullName());
-//             System.out.println("***************************************");
+//             //System.out.println("***************************************");
+//             //System.out.println(customer.getFullName());
+//             //System.out.println("***************************************");
 //             
 //             for(Map m : items){
 //                 
-//                 System.out.println("Unit name : " + ((OrderItem)m.get("order_item")).getUnit().getTitle());
-//                 System.out.println("Balance : " + (Double)m.get("balance"));
+//                 //System.out.println("Unit name : " + ((OrderItem)m.get("order_item")).getUnit().getTitle());
+//                 //System.out.println("Balance : " + (Double)m.get("balance"));
 //             }
 //         }
          

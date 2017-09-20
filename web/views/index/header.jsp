@@ -129,8 +129,13 @@ and open the template in the editor.
                     <input type="password" class="form-control" name="password" id="password" placeholder="Password">
                     
                     <button type="submit" class="btn btn-primary">Sign In</button>
-                              
+                    <div class="row">
+                        <div class="text-right " >
+                    <a href="${pageContext.request.contextPath}/PasswordReset" style="color:white;text-decoration: underline" >Forgot Password</a>
+                        </div>
+                    </div>      
               </form>
+                     
                 </div>
             </div>
             

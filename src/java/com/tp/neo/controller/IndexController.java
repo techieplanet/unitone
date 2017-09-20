@@ -5,6 +5,7 @@
  */
 package com.tp.neo.controller;
 
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import java.io.IOException;
@@ -118,7 +119,7 @@ public class IndexController extends HttpServlet {
             ProjectUnit unit = em.find(ProjectUnit.class, Long.parseLong(id));
             units.add(unit);
             project_id = unit.getProject().getId();
-            System.out.println("Unit Id : " + id);
+            //System.out.println("Unit Id : " + id);
         }
         
         HttpSession session = request.getSession();
@@ -127,10 +128,7 @@ public class IndexController extends HttpServlet {
         em.close();
         emf.close();
         
-        
-        
-        response.sendRedirect("Project?action=listunits&project_id="+project_id);
-            
+        AppController.doRedirection(request, response, "/Project?action=listunits&project_id="+project_id);   
     }
     
     private void removeFromCart(HttpServletRequest request,HttpServletResponse response) throws IOException{
@@ -163,7 +161,7 @@ public class IndexController extends HttpServlet {
         
         session.setAttribute("unit_cart", units);
        
-        response.sendRedirect("Project?action=listunits&project_id="+project_id);
+        AppController.doRedirection(request, response, "/Project?action=listunits&project_id="+project_id);
             
     }
     

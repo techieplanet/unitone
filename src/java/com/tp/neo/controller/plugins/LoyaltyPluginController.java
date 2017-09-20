@@ -200,7 +200,7 @@ public class LoyaltyPluginController extends PluginsController {
             }
             catch(PropertyException e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 request.setAttribute("loyaltyPlugin", loyaltyPlugin);
                 request.setAttribute("errors", errorMessages);
                 request.setAttribute("plugins", super.listPlugins()); 
@@ -213,8 +213,8 @@ public class LoyaltyPluginController extends PluginsController {
             }
             
 //            if(success){
-//                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Plugins/LoyaltyPlugin";
-//                response.sendRedirect(page);
+
+//              AppController.doRedirection(request, response, "/Plugins/LoyaltyPlugin");
 //            }
 //            else {
 //                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
@@ -232,7 +232,7 @@ public class LoyaltyPluginController extends PluginsController {
         
 //        for (Map.Entry<String, String> entry : settingsMap.entrySet())
 //        {
-//           System.out.println(entry.getKey() + "/" + entry.getValue());
+//           //System.out.println(entry.getKey() + "/" + entry.getValue());
 //        }
 
         return settingsMap;

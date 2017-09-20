@@ -62,7 +62,8 @@
                         <c:forEach items="${agents}" var="agent" varStatus="pointer">
                             <tr id="row<c:out value="${pointer.count}" />">
                                 <td>${pointer.count}</td>
-                                <td><img src="${agentImageAccessDir}/${agent.photoPath}" width='55' height='50'/></td><td><c:out value="${agent.agentId}" /></td>
+                                <td><%//<img src="/uploads/NeoForce/images/customers/customer_150166987523.png" width='55' height='50'/>%>
+                                   <img src="${agentImageAccessDir}/${agent.photoPath}" alt="no image" width='55' height='50'/></td>
                                 <td><c:out value="${agent.firstname}" /></td>
                                 <td><c:out value="${agent.middlename}" /></td>
                                 <td><c:out value="${agent.lastname}" /></td>
@@ -78,11 +79,11 @@
                                 <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')  || fn:contains(sessionScope.user.permissions, 'delete_agent')}">
                                     <td>
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'view_agent')}">
-                                            <a class="btn btn-primary btn-xs" title="" href="Agent?action=view&route=waiting&agentId=${agent.agentId}" role="button"><i class="fa fa-search"></i></a>
+                                            <a class="btn btn-primary btn-xs" title="View ${agent.firstname.trim()} Informations" href="Agent?action=view&route=waiting&agentId=${agent.agentId}" role="button" ><i class='fa fa-eye'></i></a>
                                         </c:if>
 
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'delete_agent')}">
-                                            <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${agent.agentId}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                                            <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Agent', <c:out value="${agent.agentId}"/>)" role="button" title="Delete ${agent.firstname.trim()} "><i class="fa fa-remove"></i></a>
                                         </c:if>
                                     </td>
                                 </c:if>

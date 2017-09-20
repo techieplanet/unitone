@@ -12,15 +12,13 @@ import com.tp.neo.controller.components.AppController;
 import static com.tp.neo.controller.components.AppController.defaultEmail;
 import com.tp.neo.controller.helpers.OrderItemHelper;
 import com.tp.neo.model.Agent;
+import com.tp.neo.model.Company;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Message;
 import com.tp.neo.model.MessageToRecipient;
-import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.MailSender;
-import com.tp.neo.model.utils.SMSSender;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,7 +35,6 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -108,7 +105,7 @@ public class MessageController extends AppController {
         Long userId = sessionUser.getSystemUserId();
         Integer userType = sessionUser.getSystemUserTypeId();
         
-        System.out.println("UserType : " + userType);
+        //System.out.println("UserType : " + userType);
         
         if(action.equalsIgnoreCase("new") && userType == 1){
             viewFile = ADMIN_COMPOSE_MAIL;
@@ -377,7 +374,9 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
-                new MailSender().sendHtmlEmail(cust.getEmail(), defaultEmail, subject, body);
+                Company company = em.find(Company.class, 1);
+                  
+                new MailSender().sendHtmlEmail(cust.getEmail(), company.getEmail(), subject, body);
             }
             
             for(Customer customer : customerList){
@@ -390,8 +389,8 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
-                
-                new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, subject, body);
+                Company company = em.find(Company.class, 1);
+                new MailSender().sendHtmlEmail(customer.getEmail(), company.getEmail(), subject, body);
             }
             
         }
@@ -450,8 +449,9 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
+                Company company = em.find(Company.class, 1);
                 
-                new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, subject, body);
+                new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), company.getEmail(), subject, body);
             }
         else{
             MessageToRecipient recipient = new MessageToRecipient();
@@ -461,7 +461,8 @@ public class MessageController extends AppController {
             recipient.setStatus(Short.parseShort("0"));
 
             em.persist(recipient);
-            new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, subject, body);
+            Company company = em.find(Company.class, 1);
+            new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), company.getEmail(), subject, body);
         }
         
         em.getTransaction().commit();
@@ -533,8 +534,8 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
-                
-                new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, subject, body);
+                Company company = em.find(Company.class, 1);
+                new MailSender().sendHtmlEmail(agent.getEmail(), company.getEmail(), subject, body);
             }
             
             for(Agent agent : agentList){
@@ -547,8 +548,8 @@ public class MessageController extends AppController {
                 recipient.setStatus(Short.parseShort("0"));
                 
                 em.persist(recipient);
-                
-                new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, subject, body);
+                Company company = em.find(Company.class, 1);
+                new MailSender().sendHtmlEmail(agent.getEmail(), company.getEmail(), subject, body);
             }
             
         }
@@ -633,7 +634,7 @@ public class MessageController extends AppController {
         
         Query query = em.createNamedQuery("Message.findAllThreadByAgent");
         
-        //System.out.println("Agent id : " + sessionUser.getSystemUserId());
+        ////System.out.println("Agent id : " + sessionUser.getSystemUserId());
         
         Customer c = em.find(Customer.class, customerId);
         query.setParameter("cust_id", c.getCustomerId());
@@ -669,7 +670,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                     
                     Map messageMap = new HashMap();
@@ -710,7 +711,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                 }
             }else{ // if this is the end of the list of messages
@@ -725,7 +726,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                     
                     Map messageMap = new HashMap();
@@ -807,7 +808,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                     
                     Map messageMap = new HashMap();
@@ -848,7 +849,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                 }
             }else{ // if this is the end of the list of messages
@@ -863,7 +864,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                     
                     Map messageMap = new HashMap();
@@ -944,7 +945,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                     
                     Map messageMap = new HashMap();
@@ -985,7 +986,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                 }
             }else{ // if this is the end of the list of messages
@@ -1000,7 +1001,7 @@ public class MessageController extends AppController {
                         mReply.put("date", getFormattedDate(msgReply.getCreatedDate()));
 
                         replies.add(mReply);
-                        System.out.println("Reply added");
+                        //System.out.println("Reply added");
                     }
                     
                     Map messageMap = new HashMap();

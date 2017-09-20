@@ -7,25 +7,29 @@ package com.tp.neo.controller.helpers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.tp.neo.model.Account;
+import com.tp.neo.model.Auditlog;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.Plugin;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
+import com.tp.neo.model.Transaction;
 import com.tp.utils.DateFunctions;
-import java.util.Date;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 /**
  *
@@ -33,7 +37,7 @@ import java.util.Set;
  */
 public class DashboardHelper {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-    EntityManager em;
+    EntityManager em = emf.createEntityManager();
     Query query;
     
     Gson gson = new GsonBuilder().create();
@@ -63,11 +67,28 @@ public class DashboardHelper {
         List<Object[]> itemAndAmountList = query.getResultList();
         
         for(Object[] itemAndAmount : itemAndAmountList){
-            //System.out.println("Inside getduepayemnts");
+            ////////System.out.println("Inside getduepayemnts");
             OrderItem orderItem = (OrderItem)itemAndAmount[0];
             double paidSum = (Double)itemAndAmount[1];
             
             Date orderItemApprovalDate = orderItem.getApprovalDate();
+            
+            if(orderItemApprovalDate == null)
+            {
+                em.getTransaction().begin();
+                orderItem.setApprovalStatus((short)0);
+                em.persist(orderItem);
+                Auditlog audit = new Auditlog();
+                audit.setActionName("Order Item Approval");
+                audit.setNote("The order item with id " + orderItem.getId() + " Have been set as approved , with a null approval date");
+                audit.setLogDate(new Date(System.currentTimeMillis()));
+                audit.setUserId(0L);
+                audit.setUsertype(1);
+                em.persist(audit);
+                em.getTransaction().commit();
+                continue;
+            }
+            
             int monthsElapsed = DateFunctions.getNumberOfMonthsBetweenDates(orderItemApprovalDate, new Date());
             double expectedMortgageTotal = orderItem.getUnit().getMonthlyPay() * monthsElapsed;
             
@@ -91,7 +112,7 @@ public class DashboardHelper {
         List<Object[]> itemAndAmountList = query.getResultList();
         
         for(Object[] itemAndAmount : itemAndAmountList){
-            System.out.println("Inside getduepayemnts");
+            //////////System.out.println("Inside getduepayemnts");
             OrderItem orderItem = (OrderItem)itemAndAmount[0];
             double paidSum = (Double)itemAndAmount[1];
             
@@ -152,7 +173,7 @@ public class DashboardHelper {
     public double getTotalCommissionsPayable(){
         query = em.createNamedQuery("AgentBalance.findAllBalanceSum");
         double balanceSum = (Double)query.getSingleResult();
-        System.out.println("Commissions Payable: " + balanceSum);
+        ////////System.out.println("Commissions Payable: " + balanceSum);
         return balanceSum;
     }
     
@@ -186,13 +207,13 @@ public class DashboardHelper {
         List<Object[]> performance = em.createNativeQuery("SELECT p.id, p.name, pno.puid, pno.puname, pno.sold, pno.stock AS setupstock "
                                                             + "FROM project p LEFT JOIN "
                                                             + "(SELECT pu.title AS puname, pu.id AS puid, project_id, COALESCE(SUM(o.quantity),0) AS sold, pu.quantity as stock FROM project_unit pu LEFT JOIN order_item o ON pu.id = o.unit_id AND approval_status = 1 GROUP BY pu.id)" 
-                                                            + "As pno ON p.id = pno.project_id "
+                                                            + "As pno ON p.id = pno.project_id WHERE p.deleted = 0"
                                                             + "ORDER By p.id, puid"
                                                           ).getResultList();
         
         
         //for(Object[] perf : performance){
-          //  System.out.println("ID: " + perf[0] + ", Project: " + perf[1] + ", Unit ID: " + perf[2] + ", Unit: " +  perf[3] + ", Quantity: " + perf[4] + ", Stock: " + perf[5]);
+          //  //////////System.out.println("ID: " + perf[0] + ", Project: " + perf[1] + ", Unit ID: " + perf[2] + ", Unit: " +  perf[3] + ", Quantity: " + perf[4] + ", Stock: " + perf[5]);
         //}
         
         
@@ -240,7 +261,7 @@ public class DashboardHelper {
             projectMap.put("sold", projectSold);
             projectMap.put("setupStock", projectSetupStock);
             double percentage = projectSetupStock !=0 ? (double)projectSold / projectSetupStock * 100 : 0;  //anti division by zero error
-            //System.out.println("Project Name: " + performance.get(i-1)[1] + " projectSold " + projectSold + " projectSetupStock " + projectSetupStock + " project percentage: " + percentage);
+           ////////System.out.println("Project Name: " + performance.get(i-1)[1] + " projectSold " + projectSold + " projectSetupStock " + projectSetupStock + " project percentage: " + percentage);
             projectMap.put("projectPercentage", percentage);
             projectMap.put("units", unitMapsList);
             projectMapsList.add(projectMap);
@@ -250,8 +271,8 @@ public class DashboardHelper {
         
 //        Gson gson = new GsonBuilder().create();
 //        String jsonResponse = gson.toJson(projectMapsList);
-//        System.out.println("JSON: " + jsonResponse);        
-//        System.out.println("set length: " + performance.size());
+//        //////////System.out.println("JSON: " + jsonResponse);        
+//        //////////System.out.println("set length: " + performance.size());
         
         
         return projectMapsList;
@@ -270,7 +291,7 @@ public class DashboardHelper {
                                                                     .setParameter("item_aps", 1)
                                                                     .setParameter("aps", 1)
                                                                     .getResultList();
-        //System.out.println("Length of projects: " + projectsPerformanceList.size());
+       ////////System.out.println("Length of projects: " + projectsPerformanceList.size());
         
         //get the totals for all projects
         long totalProjectsSalesQuotaStock = 0;
@@ -292,7 +313,7 @@ public class DashboardHelper {
                                                                             .setParameter("item_aps", 1)
                                                                             .setParameter("aps", 1)
                                                                             .getResultList();
-            //System.out.println("Length of units: " + unitsPerformanceList.size() + ", project: " + project.getName());
+           ////////System.out.println("Length of units: " + unitsPerformanceList.size() + ", project: " + project.getName());
             //get the totals for all units in this project
             long totalUnitsSalesQuotaStock = 0;
             double totalUnitsSalesQuotaValue = 0;
@@ -323,8 +344,15 @@ public class DashboardHelper {
             
             HashMap projectMap = new HashMap();
             projectMap.put("projectName", project.getName());
-            projectMap.put("stockPercentage", (long)projectDetail[1] / totalProjectsSalesQuotaStock * 100);
-            projectMap.put("valuePercentage", (double)projectDetail[2] / totalProjectsSalesQuotaValue * 100);
+            if(totalProjectsSalesQuotaStock > 0)
+                projectMap.put("stockPercentage", (long)projectDetail[1] / totalProjectsSalesQuotaStock * 100);
+            else 
+                projectMap.put("stockPercentage",0);
+            
+            if(totalProjectsSalesQuotaValue> 0)
+                projectMap.put("valuePercentage", (double)projectDetail[2] / totalProjectsSalesQuotaValue * 100);
+            else
+                projectMap.put("valuePercentage",0);
             projectMap.put("units", unitMapsList);
             
             //add this project to the projects list
@@ -334,7 +362,7 @@ public class DashboardHelper {
         
 //        Gson gson = new GsonBuilder().create();
 //        String jsonResponse = gson.toJson(projectMapsList);
-//        System.out.println("JSON: " + jsonResponse);        
+//        //////////System.out.println("JSON: " + jsonResponse);        
 
         return projectMapsList;
     }
@@ -365,7 +393,7 @@ public class DashboardHelper {
                                                                            "FROM order_item o JOIN project_unit u ON o.unit_id = u.id " +
                                                                            "WHERE o.approval_status = 1 AND (date(o.modified_date) >= '" + startDate.toString() + "' AND date(o.modified_date) <= '" + endDate.toString() + "') " +
                                                                            "GROUP BY orderer, grouper ORDER BY orderer";
-        //System.out.println("Order query: " + query);
+        ////////////System.out.println("Order query: " + query);
         List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
         
         List<HashMap> summaryMapsList = new ArrayList<HashMap>();
@@ -397,17 +425,24 @@ public class DashboardHelper {
         EntityManager em = emf.createEntityManager();
         
         String loyaltyQueryHook = "";
-        if(availablePlugins.containsKey("loyalty")) 
+        if( availablePlugins.containsKey("loyalty")) 
             loyaltyQueryHook = "SUM(l.reward_amount) as rvalue ";
         
         String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount) as lvalue, " +
-                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper, " +
-                       loyaltyQueryHook + " " +
+                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper " +
+                       (!loyaltyQueryHook.isEmpty()? ", " + loyaltyQueryHook : " "  )+ " " +
                        "FROM lodgement_item l " +
                        "WHERE l.approval_status = 1 AND (date(l.modified_date) >= '" + startDate.toString() + "' AND date(l.modified_date) <= '" + endDate.toString() + "') " +
                        "GROUP BY grouper";
         
-        List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
+        List<Object[]> summaryObjects = null;
+        
+        try{
+           summaryObjects =  em.createNativeQuery(query).getResultList();
+        } catch(Exception e){
+            e.printStackTrace();
+            return " ";
+        }
         
         List<HashMap> summaryMapsList = new ArrayList<HashMap>();
         
@@ -442,24 +477,91 @@ public class DashboardHelper {
         return agentMapList;
     }
     
+    public double getTotalIncome(){
+        Account income = (Account)(Account)em
+                        .createNamedQuery("Account.findByAccountCode")
+                        .setParameter("accountCode", "INCOME")
+                        .getSingleResult();
+        double credit =  getTransactionSum(income.getTransactionCollection());
+        double debit = getTransactionSum(income.getTransactionCollection1());
+        
+        if(debit > 0)
+            return credit - debit;
+        else
+            return credit;
+    }
+    
+    public double getTotalWithHoldingTax(){
+         Account withHoldingTax = (Account)(Account)em
+                        .createNamedQuery("Account.findByAccountCode")
+                        .setParameter("accountCode", "AGENT_WITHHOLDING")
+                        .getSingleResult();
+        
+        double credit =  getTransactionSum(withHoldingTax.getTransactionCollection());
+        double debit = getTransactionSum(withHoldingTax.getTransactionCollection1());
+        
+        if(debit > 0)
+            return credit - debit;
+        else
+            return credit;
+    }
+    
+    public double getTotalAnnualMaintenance(){
+        Account annualMaintenance = (Account)(Account)em
+                        .createNamedQuery("Account.findByAccountCode")
+                        .setParameter("accountCode", "AGENT_ANNUAL_MAINTENANCE")
+                        .getSingleResult();
+        double credit =  getTransactionSum(annualMaintenance.getTransactionCollection());
+        double debit = getTransactionSum(annualMaintenance.getTransactionCollection1());
+        
+        if(debit > 0)
+            return credit - debit;
+        else
+            return credit;
+    }
+    
+    public double getTotalVat(){
+        Account VAT = (Account)(Account)em
+                        .createNamedQuery("Account.findByAccountCode")
+                        .setParameter("accountCode", "VAT")
+                        .getSingleResult();
+       double credit =  getTransactionSum(VAT.getTransactionCollection());
+        double debit = getTransactionSum(VAT.getTransactionCollection1());
+        
+        if(debit > 0)
+            return credit - debit;
+        else
+            return credit;
+    }
+    
+    public double getTransactionSum(Collection<Transaction> transactions){
+        double sum = 0;
+        for(Transaction t : transactions)
+        {
+            sum += t.getAmount();
+        }
+        
+        return sum;
+    }
+    
     public static  void main(String[] args){
          
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        System.out.println("Year: " + calendar.get(Calendar.YEAR));
+        //////////System.out.println("Year: " + calendar.get(Calendar.YEAR));
         
         Calendar calendar2 = Calendar.getInstance();
         calendar2.set(2013, 0, 20);
-        System.out.printf("Year %s, Month %s, Day %s: \n", calendar2.get(Calendar.YEAR), calendar2.get(Calendar.MONTH), calendar2.get(Calendar.DAY_OF_MONTH));
+        //////////System.out.printf("Year %s, Month %s, Day %s: \n", calendar2.get(Calendar.YEAR), calendar2.get(Calendar.MONTH), calendar2.get(Calendar.DAY_OF_MONTH));
         
         LocalDate l = LocalDate.of(2015, Month.OCTOBER, 25);
-        System.out.println(l.toString());
+        //////////System.out.println(l.toString());
 
         LocalDate l2 = LocalDate.of(calendar2.get(Calendar.YEAR), calendar2.get(Calendar.MONTH)+1, calendar2.get(Calendar.DAY_OF_MONTH));
-        System.out.println(l2.toString());
+        //////////System.out.println(l2.toString());
         
         Period period  = Period.between(l, l2);
-        System.out.println("Period Months: " + Math.abs(period.toTotalMonths()));
+        //////////System.out.println("Period Months: " + Math.abs(period.toTotalMonths()));
         
     }
 

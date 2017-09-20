@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Permission.findByAlias", query = "SELECT p FROM Permission p WHERE p.alias = :alias"),
     @NamedQuery(name = "Permission.findByWeight", query = "SELECT p FROM Permission p WHERE p.weight = :weight"),
     @NamedQuery(name = "Permission.findByEntity", query = "SELECT p FROM Permission p WHERE p.entity = :entity"),
-    @NamedQuery(name = "Permission.findAllOrderedByEntityAndWeight", query = "SELECT p FROM Permission p ORDER BY p.entity, p.weight")})
+    @NamedQuery(name = "Permission.findAllOrderedByEntityAndWeight", query = "SELECT p FROM Permission p ORDER BY p.entity asc , p.weight")})
 
 public class Permission implements Serializable {
 

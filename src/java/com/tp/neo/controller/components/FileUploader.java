@@ -68,7 +68,7 @@ public class FileUploader {
         String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // Use this instead because of MSIE.
         InputStream fileContent = filePart.getInputStream();
             
-        System.out.println("The uploaded file name: " + fileName);
+        //System.out.println("The uploaded file name: " + fileName);
         
         File file = new File(fileTypeUploadDirectory, fileName);
 

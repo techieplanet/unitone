@@ -129,7 +129,7 @@
                                                 min initial amt /unit: <span id="initialAmountPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="minInitialAmountSpan"></span><br/>
                                             </span>
-                                            <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()">
+                                            <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()" readonly/>
                                         </div> 
 <!--                                            /.form-group initial monthly amount -->
                                     </div>
@@ -185,7 +185,7 @@
                                                             <div class="col-md-2 pull-right">
                                                    <div id="addToCartLabel"  style="margin: 0 auto !important;" >
                                                         <div class="form-group">
-                                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i> Add to Cart</a>
+                                                            <a class="btn btn-success" name="addToCart" id="addToCart" href="#" onClick=" return addToCart(this)" ><i class="fa fa-cart-plus"></i>Add</a>
                                                         </div> 
                                                    </div>
                                                    </div>

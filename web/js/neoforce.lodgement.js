@@ -38,7 +38,7 @@ function selectCustomer(contextPath,id) {
 
 
 function prepareOrderListTable(jsonString){
-    
+    var payId = 0;
     $("#accordion").html("");
     
     refreshCartDetails();
@@ -55,7 +55,6 @@ function prepareOrderListTable(jsonString){
         var customerName = orders[k].customerName;
         
         var sales = JSON.parse(orders[k].sales);
-        
         //Skip if orderItems is empty
         if(sales.length < 1){
             continue;
@@ -80,22 +79,24 @@ function prepareOrderListTable(jsonString){
             tr += "<td>" + unitQty + "</td>";
             tr += "<td>" + accounting.formatMoney(monthlyPay,"N",2,",",".") + "</td>";
             tr += "<td>" + accounting.formatMoney(amountPaid,"N",2,",",".") + "</td>";
-            tr += "<td>" + accounting.formatMoney(amountPayable,"N",2,",",".") + "</td>";
-            tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' value='' /></td>";
+            tr += "<td>" + accounting.formatMoney(amountPayable,"N",2,",",".") + "</td> ";
+            tr+= "<td><span id='pay"+payId + "'>0.00</span></td>";
+            tr += "<td><input type='hidden' class='sale-id' value='" + orderItemId + "' /><input type='text' class='lodgement-amount' onkeyup='updatePayN("+payId+" , this.value)' value='' /></td>";
             if(isLoyaltyEnabled == 1){
                 tr += "<td><input type='text'  class='points' name='' id='' value='0' onkeyup='checkLoyaltyPoint(" + rowId + ",this)' /></td>";
             }
-            tr += "<td><button class='btn btn-success addToCart' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i> Add to Cart</button></td>";
+            tr += "<td><button class='btn btn-success addToCart' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i>Add</button></td>";
             rows += tr;
+            payId++;
         }
         
         var table = "<table class='table table-bordered table-striped table-hover'>";
         table += "<thead><tr>";
         if(isLoyaltyEnabled == 1){
-            table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th>Loyalty Point</th><th>Action</th>";
+            table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay(N)</th><th>Pay</th><th>Loyalty Point</th><th>Action</th>";
         }
         else{
-            table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay</th><th>Action</th>";
+            table += "<th>Project</th><th>Unit Name</th><th>Initial Deposit</th><th>Unit Qty</th><th>monthly Pay</th><th>Amount Paid</th><th>Balance</th><th>Pay(N)</th><th>Pay</th><th>Action</th>";
         }
         table += "</tr></thead>";
         table += rows  + "</table>";
@@ -108,6 +109,10 @@ function prepareOrderListTable(jsonString){
     
     stopLoading("#customerDetailContainer:hidden, #orderItems:hidden, #lodgementCart:hidden");
   
+}
+
+function updatePayN(id , amount){
+    $("#pay" + id).text(accounting.formatNumber(amount, 2));
 }
 
 function populateCustomerDetails(id){
@@ -133,11 +138,13 @@ function populateCustomerDetails(id){
     $("#customerEmail").text(customerEmail.trim());
     $("#customerPhone").text(customerPhone.trim());
     $("#customerState").text(customerState.trim());
+    $("#customerRewardPoint").text(customerLoyaltyPoint);
     
     $("#agentImage").attr("src",agentImgPath);
     $("#agentName").text(agentName.trim());
     $("#agentPhone").text(agentPhone.trim());
 }
+
 function showCustomerList() {
     $("#orderContainer:visible, #customerDetailContainer:visible, #orderItems:visible, #lodgementCart:visible").toggle();
     
@@ -223,6 +230,25 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
     
     var amountFieldSelector = "#" + rowId + " .lodgement-amount";
     var amount = $(amountFieldSelector).val();
+    if(amount)
+    {
+        if(isNaN(amount))
+        {
+        alert("Please Input A Valid Amount to pay");
+        return;
+        }
+        else if(amount <= 0 )
+        {
+            alert("Amount Must Be Greater Than 0");
+        return;
+        }
+    }
+    else
+    {
+        alert("Please Input The Amount to pay");
+        return;
+    }
+    
     var amountFormatted = accounting.formatMoney(amount,"N",2,",",".");
     var itemPoint = 0;
     
@@ -248,7 +274,7 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
     
     var item = {"orderItemId":orderItemId,"amount":amount,"rewardPoint":itemPoint};
     cartData.lodgements.push(item);
-    console.log("Cart : " + JSON.stringify(cartData));
+    //console.log("Cart : " + JSON.stringify(cartData));
     
     
     var id = $("#lodgementCartTable tbody tr:last").attr("id");
@@ -296,7 +322,7 @@ function calculateLodgementCartTotal(){
         }
     }
     
-    console.log("Total = " + total);
+    //console.log("Total = " + total);
     
     var totalFormatted = accounting.formatMoney(total,"N",2,",",".");
     $("#lodgementCartTable tfoot td#cart-total").html("<b>Total = " + totalFormatted + "</b>");
@@ -505,7 +531,7 @@ function checkLoyaltyPoint(rowId,elem){
     var pointsUsed = getTotalLoyaltyPointUsed();
     var totalPoints = pointsUsed + parseInt($(elem).val()) || 0;
     
-    console.log("Points used : " + pointsUsed + ", totalPoints : " + totalPoints );
+    //console.log("Points used : " + pointsUsed + ", totalPoints : " + totalPoints );
     
     if(totalPoints > customerLoyaltyPoint){
         
@@ -537,7 +563,7 @@ function getAllPoints(){
         
     });
     
-    console.log("Total Points : " + points);
+    //console.log("Total Points : " + points);
     
     return points;
 }

@@ -7,19 +7,20 @@ package com.tp.neo.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.model.Role;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.PermissionHelper;
+import com.tp.neo.model.User;
 import com.tp.neo.model.utils.TrailableManager;
+import com.tp.neo.service.RoleService;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -136,27 +137,34 @@ public class RoleController extends AppController {
             request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(role.getPermissions()));
             if(addstat == 1) request.setAttribute("success", true);
             setRequestAttributes(request, role, "edit"); //set others
-            
+            request.setAttribute("supervisors", RoleService.findAllRolesTeirsHigherThan(role.getTier()));
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listroles")){
             viewFile = ROLE_ADMIN;
             request.setAttribute("roles", listRoles());
         }
         else if(action.equalsIgnoreCase("rolechange")){
-            HashMap permissionsListMap = permissionHelper.getSystemPermissionsEntitiesMap(); //all permissions
+            Map permissionsListMap = permissionHelper.getSystemPermissionsEntitiesMap(); //all permissions
             Role selectedRole = em.find(Role.class, Integer.parseInt(request.getParameter("role_id")));
             List selectedRolePermissions = permissionHelper.getSelectedPermissionsCollection(selectedRole.getPermissions());
             
             allAndSelectedPermissionsMap.put("all", permissionsListMap);
             allAndSelectedPermissionsMap.put("selected", selectedRolePermissions);
         }
+        else if(action.equalsIgnoreCase("permissions")){
+            request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+            request.setAttribute("supervisors", RoleService.findAllRolesLowerThanOrEqual(((User)super.sessionUser).getRole().getRoleId()));
+            viewFile = "/views/role/permissions.jsp";
+        }
         else{
             viewFile = ROLE_ADMIN;
             request.setAttribute("roles", listRoles());
+            
         }
         
         //Keep track of the sideBar
         request.setAttribute("sideNav", "Role");
+        if(action.equalsIgnoreCase("permissions")) request.setAttribute("sideNav", "System Permissions");
         
         if(request.getParameter("mode") != null && request.getParameter("mode").equalsIgnoreCase("ajax")){
             response.getWriter().write(gson.toJson(allAndSelectedPermissionsMap));
@@ -181,6 +189,30 @@ public class RoleController extends AppController {
             throws ServletException, IOException {
         
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        
+        if(action.equalsIgnoreCase("role_select"))
+        {
+            try
+            {
+            int teir = Integer.parseInt(request.getParameter("tier"));
+
+            List<Role> roles = RoleService.findAllRolesTeirsHigherThan(teir);
+            Map<String,String> alias = new HashMap<>();
+            for(Role role : roles)
+            {
+                alias.put(role.getTitle() , role.getAlias());
+            }
+            System.out.println(gson.toJson(alias));
+            PrintWriter writer = response.getWriter();
+            writer.append(gson.toJson(alias)).flush();
+            writer.close();
+            }catch(Exception e)
+            {
+                //Error So we return an error
+            }
+            return;
+        }
+        
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Role().getPermissionName(action), request, response)){
                 if(request.getParameter("id").equalsIgnoreCase(""))
@@ -197,7 +229,7 @@ public class RoleController extends AppController {
         
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //System.out.println("Insert mode");
+        ////System.out.println("Insert mode");
         
         em = emf.createEntityManager();
         String viewFile = ROLE_NEW;
@@ -211,6 +243,9 @@ public class RoleController extends AppController {
                 em.getTransaction().begin();
                 
                 role.setTitle(request.getParameter("title"));
+                role.setTier(Integer.parseInt(request.getParameter("tier")));
+                role.setAlias(request.getParameter("alias"));
+                role.setSupervisor(request.getParameter("supervisor"));
                 role.setDescription(request.getParameter("desc"));
                 role.setPermissions(gson.toJson(request.getParameterValues("permissions")));
                 role.setActive((short)1);   
@@ -236,7 +271,7 @@ public class RoleController extends AppController {
             }
             catch(PropertyException e){
                 e.printStackTrace();
-                //System.out.println("inside catch area: " + e.getMessage());
+                ////System.out.println("inside catch area: " + e.getMessage());
                 viewFile = ROLE_NEW;
                 String[] array = request.getParameterValues("permissions");
                 ArrayList<String> selectedPermissions = array != null && array.length > 0 ? new ArrayList<String>(Arrays.asList(array)) : new ArrayList<String>();
@@ -246,13 +281,22 @@ public class RoleController extends AppController {
                 request.setAttribute("errors", errorMessages);
             }
             catch(Exception e){
+                viewFile = ROLE_NEW;
+                String[] array = request.getParameterValues("permissions");
+                ArrayList<String> selectedPermissions = array != null && array.length > 0 ? new ArrayList<String>(Arrays.asList(array)) : new ArrayList<String>();
+                
+                request.setAttribute("selectedPermissions", selectedPermissions);
+                setRequestAttributes(request, role, "new");
+                errorMessages.put("Input", "One or More feilds have Invalid Input");
+                request.setAttribute("errors", errorMessages);
                 e.printStackTrace();
                 SystemLogger.logSystemIssue("Role", gson.toJson(role), e.getMessage());
             }
             
+            request.setAttribute("supervisors", RoleService.findAllRolesTeirsHigherThan(role.getTier()));
             if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Role?action=edit&id=" + role.getRoleId() + "&addstat=1";
-                response.sendRedirect(page);
+                String page = "/Role?action=edit&id=" + role.getRoleId() + "&addstat=1";
+                AppController.doRedirection(request, response, page);
             }
             else{
                 RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
@@ -276,7 +320,10 @@ public class RoleController extends AppController {
                 
                 role = em.find(Role.class, Integer.parseInt(request.getParameter("id")));
                 role.setTitle(request.getParameter("title"));
+                role.setTier(Integer.parseInt(request.getParameter("tier")));
+                role.setAlias(request.getParameter("alias"));
                 role.setDescription(request.getParameter("desc"));
+                role.setSupervisor(request.getParameter("supervisor"));
                 role.setPermissions(gson.toJson(request.getParameterValues("permissions")));
                 role.setActive((short)1);   
                 
@@ -296,7 +343,7 @@ public class RoleController extends AppController {
             }
             catch(PropertyException e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 viewFile = ROLE_NEW;
                 String[] array = request.getParameterValues("permissions");
                 ArrayList<String> selectedPermissions = array != null && array.length > 0 ? new ArrayList<String>(Arrays.asList(array)) : new ArrayList<String>();
@@ -306,10 +353,18 @@ public class RoleController extends AppController {
                 request.setAttribute("errors", errorMessages);
             }
             catch(Exception e){
+                viewFile = ROLE_NEW;
+                String[] array = request.getParameterValues("permissions");
+                ArrayList<String> selectedPermissions = array != null && array.length > 0 ? new ArrayList<String>(Arrays.asList(array)) : new ArrayList<String>();
+                
+                request.setAttribute("selectedPermissions", selectedPermissions);
+                setRequestAttributes(request, role, "new");
+                errorMessages.put("Input", "One or More feilds have Invalid Input");
+                request.setAttribute("errors", errorMessages);
                 e.printStackTrace();
                 SystemLogger.logSystemIssue("Role", gson.toJson(role), e.getMessage());
             }
-            
+            request.setAttribute("supervisors", RoleService.findAllRolesTeirsHigherThan(role.getTier()));
             //new URI(request.getHeader("referer")).getPath();
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
@@ -346,8 +401,14 @@ public class RoleController extends AppController {
     private void validate(Role role) throws PropertyException{
         errorMessages.clear();
         
-        if(role.getTitle().isEmpty()){
+        if(role.getTitle().trim().isEmpty()){
             errorMessages.put("title", "Please enter a title ");
+        }
+        if(role.getAlias().trim().isEmpty()){
+            errorMessages.put("Alias", "Please enter value for role alias ");
+        }
+        if(role.getTier() > 1 && role.getSupervisor().trim().isEmpty()){
+            errorMessages.put("SuperVisor", "Please Select a Supervisor");
         }
         
         if(!(errorMessages.isEmpty())) throw new PropertyException("");

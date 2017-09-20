@@ -13,6 +13,7 @@ import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.model.User;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.PermissionHelper;
+import com.tp.neo.model.Company;
 import com.tp.neo.model.utils.AuthManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -30,7 +31,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.PropertyException;
 import com.tp.neo.model.utils.MailSender;
+import com.tp.neo.service.RoleService;
+import com.tp.neo.service.UserService;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -120,7 +124,7 @@ public class UserController extends AppController {
             throws ServletException, IOException {    
         
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
-        System.out.println("referrer: " + request.getRequestURL().toString());
+        //System.out.println("referrer: " + request.getRequestURL().toString());
         
         User user = new User();
         
@@ -152,9 +156,10 @@ public class UserController extends AppController {
                 
                viewFile = NEW_ENTITY;
                request.setAttribute("userId", "");
-               request.setAttribute("rolesList", rolesList);
+               //remeber that we need any role below our own role
+               request.setAttribute("rolesList", RoleService.findAllRolesLowerThanOrEqual(((User)sessionUser).getRole().getRoleId()));
                request.setAttribute("action", "new");
-               request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
+               request.setAttribute("permissionsList", "" /*permissionHelper.getSystemPermissionsEntitiesMap()*/);
         }
         else if(action.equalsIgnoreCase("delete")){
             this.delete(Integer.parseInt(request.getParameter("id")));
@@ -169,7 +174,7 @@ public class UserController extends AppController {
             User user = em.find(User.class, id);
             request.setAttribute("reqUser", user); //different from session user
             request.setAttribute("action", "edit");
-            request.setAttribute("rolesList", rolesList);
+            request.setAttribute("rolesList", RoleService.findAllRolesLowerThanOrEqual(((User)sessionUser).getRole().getRoleId()));
             request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
             request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
             if(addstat == 1) request.setAttribute("success", true);
@@ -184,11 +189,11 @@ public class UserController extends AppController {
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listusers")){
             viewFile = ENTITY_LIST;
-            request.setAttribute("users", listUsers());
+            request.setAttribute("users", UserService.getUsersBelowAndEqualsToMe((User)sessionUser));
         }
         else{
             viewFile = ENTITY_LIST;
-            request.setAttribute("users", listUsers());
+            request.setAttribute("users",  UserService.getUsersBelowAndEqualsToMe((User)sessionUser));
         }
         
         //Keep track of the sideBar
@@ -214,12 +219,6 @@ public class UserController extends AppController {
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
         User user = new User();
         
-        if(action.equalsIgnoreCase("edit_profile")){
-            
-            editProfile(request, response);
-            return;
-        }
-        
         if(action.equalsIgnoreCase("password_change")){
             
             changeUserPassword(request, response);
@@ -228,6 +227,10 @@ public class UserController extends AppController {
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(user.getPermissionName(action), request, response)){
+                if(action.equalsIgnoreCase("edit_profile")){
+                editProfile(request, response);
+                return;
+                }
                 if(request.getParameter("id").equalsIgnoreCase(""))
                     processInsertRequest(request, response);
                 else
@@ -249,7 +252,7 @@ public class UserController extends AppController {
         boolean insertStatus = false;
         request.setAttribute("success", false);
         
-        System.out.println("Inside processInsertRequest");
+        //System.out.println("Inside processInsertRequest");
         
         User user = new User();
         
@@ -259,12 +262,12 @@ public class UserController extends AppController {
                 user.setFirstname(request.getParameter("firstname"));
                 user.setMiddlename(request.getParameter("middlename"));
                 user.setLastname(request.getParameter("lastname"));
-                user.setEmail(request.getParameter("email"));
+                user.setEmail(request.getParameter("email").toLowerCase());
                 user.setPhone(request.getParameter("phone"));
-                user.setRole(em.find(Role.class, Integer.parseInt(request.getParameter("role_id"))));
+               user.setRole(em.find(Role.class, Integer.parseInt(request.getParameter("role_id"))));
                 user.setDeleted((short)0);   
                 user.setActive((short)1);   
-                user.setPermissions(gson.toJson(request.getParameterValues("permissions")));
+                user.setPermissions(user.getRole().getPermissions());
                 
                 validate(user);
                 
@@ -288,36 +291,32 @@ public class UserController extends AppController {
                 request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
                 request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
                
-                em.close();
-               
                 //send email to user on new registration 
-                String scheme = request.isSecure() ? "https" : "http";
-                String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
-                String host = new URI(request.getHeader("host")).toString();
-                String rootUrl = scheme + "://" + host + context + "/";
-                String message = this.createRegEmail(user.getFirstname(), initPass, rootUrl);
-                new MailSender().sendHtmlEmail(user.getEmail(), defaultEmail, newEmailSubject, message);
-                System.out.println("user message: " + message);
-                
+                String message = this.createRegEmail(user.getFirstname(), initPass, request.getServerName());
+                Company company = em.find(Company.class, 1);
+                new MailSender().sendHtmlEmail(user.getEmail(), company.getEmail(), newEmailSubject, message);
+                //System.out.println("user message: " + message);
+                em.close();
+ 
             }
             catch(PropertyException e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage() + "ACTION: " + action);
+                //System.out.println("inside catch area: " + e.getMessage() + "ACTION: " + action);
                 viewFile = NEW_ENTITY;
                 request.setAttribute("reqUser", user);
                 request.setAttribute("action", action);
-                request.setAttribute("rolesList", rolesList);
+                request.setAttribute("rolesList", RoleService.findAllRolesLowerThan(((User)sessionUser).getRole().getRoleId()));
                 request.setAttribute("errors", errorMessages);
                 request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
                 request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
             }
             catch(RollbackException e){
                 e.printStackTrace();
-                System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
+                //System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
                 viewFile = NEW_ENTITY;
                 request.setAttribute("reqUser", user);
                 request.setAttribute("action", action);
-                request.setAttribute("rolesList", rolesList);
+                request.setAttribute("rolesList", RoleService.findAllRolesLowerThan(((User)sessionUser).getRole().getRoleId()));
                 errorMessages.put("mysqlviolation", e.getMessage());
                 request.setAttribute("errors", errorMessages);
                 request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
@@ -334,8 +333,8 @@ public class UserController extends AppController {
             }
             
             if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/User?action=edit&id=" + user.getUserId() + "&addstat=1";
-                response.sendRedirect(page);
+                String page ="/User?action=edit&id=" + user.getUserId() + "&addstat=1";
+                AppController.doRedirection(request, response, page);
             }
             else{
                 RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
@@ -361,12 +360,13 @@ public class UserController extends AppController {
                 user.setFirstname(request.getParameter("firstname"));
                 user.setMiddlename(request.getParameter("middlename"));
                 user.setLastname(request.getParameter("lastname"));
-                user.setEmail(request.getParameter("email"));
+                user.setEmail(request.getParameter("email").toLowerCase());
                 user.setPhone(request.getParameter("phone"));
                 user.setRole(em.find(Role.class, Integer.parseInt(request.getParameter("role_id"))));
                 user.setDeleted((short)0);   
                 user.setActive((short)1);
-                user.setPermissions(gson.toJson(request.getParameterValues("permissions")));
+                
+                user.setPermissions(user.getRole().getPermissions());
                 
                 validate(user);
                 
@@ -393,22 +393,22 @@ public class UserController extends AppController {
             }
             catch(PropertyException e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 viewFile = NEW_ENTITY;
                 request.setAttribute("reqUser", user);
                 request.setAttribute("action", action);
-                request.setAttribute("rolesList", rolesList);
+                request.setAttribute("rolesList", RoleService.findAllRolesLowerThan(((User)sessionUser).getRole().getRoleId()));
                 request.setAttribute("errors", errorMessages);
                 request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
                 request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
             }
             catch(RollbackException e){
                     e.printStackTrace();
-                    System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
+                    //System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
                     viewFile = NEW_ENTITY;
                     request.setAttribute("reqUser", user);
                     request.setAttribute("action", action);
-                    request.setAttribute("rolesList", rolesList);
+                    request.setAttribute("rolesList", RoleService.findAllRolesLowerThan(((User)sessionUser).getRole().getRoleId()));
                     errorMessages.put("mysqlviiolation", e.getMessage());
                     request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
                     request.setAttribute("selectedPermissions", permissionHelper.getSelectedPermissionsCollection(user.getPermissions()));
@@ -494,6 +494,8 @@ public class UserController extends AppController {
             errorMessages.put("role", "You must select a role");
         }
         
+        
+        
         if(!(errorMessages.isEmpty())) throw new PropertyException("");
     }
     
@@ -510,9 +512,21 @@ public class UserController extends AppController {
     }
      
      private User getUser(HttpServletRequest request) {
-         
+             String idString = request.getParameter("id");
+            Long id ;
+                    
+            if(idString == null){
+                //Then we know that the logged in user is trying to view it own profile
+                //we can now procceed to use the id stored in the session
+                id = sessionUser.getSystemUserId();
+            }
+            else
+            {
+                //Here we know we are about to get the profile of a particular user
+                id = Long.parseLong(idString);
+            }
          em = emf.createEntityManager();
-         User user = em.find(User.class, Long.parseLong(request.getParameter("id")));
+         User user = em.find(User.class, id);
          
          em.close();
          return user;
@@ -609,7 +623,7 @@ public class UserController extends AppController {
             String pwd1 = request.getParameter("pwd1");
             String pwd2 = request.getParameter("pwd2");
             
-            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            //System.out.println("Old Password : " + oldPassword + " Id : " + id);
             em.getTransaction().begin();
             
             User user = em.find(User.class, id);

@@ -62,10 +62,10 @@
                                 <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_user') || fn:contains(sessionScope.user.permissions, 'delete_user')}">
                                     <td class="text-center">
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'edit_user')}">
-                                            <a class="btn btn-success btn-xs" href="User?action=edit&id=<c:out value="${user.userId}"/>" user="button"><i class="fa fa-pencil"></i></a>
+                                            <a class="btn btn-success btn-xs" href="User?action=edit&id=<c:out value="${user.userId}"/>" user="button" title="Edit ${user.firstname} Profile"><i class="fa fa-pencil"></i></a>
                                         </c:if>
                                         <c:if test="${fn:contains(sessionScope.user.permissions, 'delete_user')}">
-                                            <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'User', <c:out value="${user.userId}"/>)" user="button"><i class="fa fa-remove"></i></a>
+                                            <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'User', <c:out value="${user.userId}"/>)" user="button" title="Delete ${user.firstname} Account"><i class="fa fa-remove"></i></a>
                                         </c:if>
                                     </td>
                                 </c:if>

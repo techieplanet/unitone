@@ -1,0 +1,45 @@
+//This information should be in the Documnet section 
+
+ <div class="col-md-4" style="padding-top: 50px">
+                         
+                            <div class="form-group">
+                              <div class="btn-group btn-group-xs">
+                                  <label for="customerPhoto" style="display:block">Customer Photo</label>
+                                  <div class="btn btn-primary">
+                                  <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
+                                  <input type="hidden" name="customerPhotoHidden" 
+                                      <c:if test="${customerPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                      <c:if test="${customerPhotoHidden != null}"> value="${customerPhotoHidden}"</c:if> 
+                                      <c:if test="${customer.photoPath != null}"> value="${customer.photoPath}"</c:if> 
+                                  />
+                                 </div>
+                                </div>
+                                  
+                           </div>   
+                       </div>
+
+                                
+                                
+ <div class="col-md-4" >
+                                    <div class="row" >
+                                        <div class="form-group" style="padding-left:25px !important;padding-right:20px !important">
+
+                                          <div class="btn-group btn-group-xs">
+                                              <label for="customerKinPhoto" style="display:block">Customer Kin Photo</label>
+                                              <div class="btn btn-primary">
+                                                  <input type="file" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" id="customerKinPhoto" >
+                                                  <input type="hidden" name="customerKinPhotoHidden" 
+                                                      <c:if test="${customerKinPhotoHidden == null && customer.photoPath==null}"> value="" </c:if>
+                                                      <c:if test="${customerKinPhotoHidden != null}"> value="${customerKinPhotoHidden}"</c:if> 
+                                                      <c:if test="${customer.kinPhotoPath != null}"> value="${customer.kinPhotoPath}"</c:if> 
+                                                  />
+                                              </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                 </div>
+         
+
+style="padding-left:10px !important;"
+style="padding-top:10px;"                         
