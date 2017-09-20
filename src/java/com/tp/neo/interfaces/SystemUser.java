@@ -5,6 +5,8 @@
  */
 package com.tp.neo.interfaces;
 
+import java.util.Date;
+
 /**
  *
  * @author Swedge

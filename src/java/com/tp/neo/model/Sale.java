@@ -84,7 +84,7 @@ public class Sale implements Serializable {
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     @ManyToOne(optional = false)
     private Customer customerId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sale")
+    @OneToMany(cascade = CascadeType.ALL/*, mappedBy = "sale"*/)
     private Collection<Lodgement> lodgementCollection;
 
     public Sale() {

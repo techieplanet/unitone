@@ -5,16 +5,15 @@
  */
 package com.tp.neo.model;
 
-import com.tp.neo.interfaces.IRestricted;
-import com.tp.neo.interfaces.ITrailable;
 import com.tp.neo.interfaces.SystemUser;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -24,6 +23,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -53,7 +54,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agent.findByKinName", query = "SELECT a FROM Agent a WHERE a.kinName = :kinName"),
     @NamedQuery(name = "Agent.findByKinPhone", query = "SELECT a FROM Agent a WHERE a.kinPhone = :kinPhone"),
     @NamedQuery(name = "Agent.findByKinAddress", query = "SELECT a FROM Agent a WHERE a.kinAddress = :kinAddress"),
-    @NamedQuery(name = "Agent.findByBankName", query = "SELECT a FROM Agent a WHERE a.bankName = :bankName"),
+    @NamedQuery(name = "Agent.findByBank", query = "SELECT a FROM Agent a WHERE a.bank = :bank"),
     @NamedQuery(name = "Agent.findByBankAcctName", query = "SELECT a FROM Agent a WHERE a.bankAcctName = :bankAcctName"),
     @NamedQuery(name = "Agent.findByBankAcctNumber", query = "SELECT a FROM Agent a WHERE a.bankAcctNumber = :bankAcctNumber"),
     @NamedQuery(name = "Agent.findByDeleted", query = "SELECT a FROM Agent a WHERE a.deleted = :deleted"),
@@ -101,13 +102,34 @@ import javax.xml.bind.annotation.XmlTransient;
                                                                     + "WHERE u.project.id = :projectId AND u.project.deleted = 0 AND a.agentId = :agentId "
                                                                     + "GROUP BY u.id ORDER  BY u.id"),
     
-    @NamedQuery(name = "Agent.findNetwork", query = "SELECT a FROM Agent a WHERE a.referrerId = :agentId")
+    @NamedQuery(name = "Agent.findNetwork", query = "SELECT a FROM Agent a WHERE a.referrerId = :agentId"),
+    @NamedQuery(name = "Agent.findALLCorporate", query = "SELECT a FROM Agent a WHERE a.corporate = true"),
+    @NamedQuery(name = "Agent.findALLIndividual", query = "SELECT a FROM Agent a WHERE a.corporate = false")
 
-    
 })
 
 public class Agent extends BaseModel implements SystemUser  {
 
+    /**
+     * @return the RCNumber
+     */
+    public String getRCNumber() {
+        return RCNumber;
+    }
+
+    /**
+     * @param RCNumber the RCNumber to set
+     */
+    public void setRCNumber(String RCNumber) {
+        this.RCNumber = RCNumber;
+    }
+    
+    //Only the coporate agent use this feild
+    @Column(name="rc_number")
+    private String RCNumber;
+    
+    @Column(name = "corporate")
+    boolean corporate;
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "modified_by")
@@ -173,8 +195,10 @@ public class Agent extends BaseModel implements SystemUser  {
     @Lob
     @Column(name = "kin_photo_path")
     private String kinPhotoPath;
-    @Column(name = "bank_name")
-    private String bankName;
+     @Column(name="kin_relationship")
+     private String kinRelationship;
+    @JoinColumn(name="bank_id" , referencedColumnName = "id" )
+    private Bank bank;
     @Column(name = "bank_acct_name")
     private String bankAcctName;
     @Column(name = "bank_acct_number")
@@ -199,6 +223,10 @@ public class Agent extends BaseModel implements SystemUser  {
     //Extra
     transient final Integer USERTYPEID = 2;
     transient String permissions = "view_customer,create_customer,view_order,view_project";
+    transient private Double totalBalance;
+    transient private Double totalPendingWithdrawal;
+    transient private Double totalApprovedWithdrawal;
+    transient private Double totalPaidWithdrawal;
     
     public Agent() {
     }
@@ -326,14 +354,6 @@ public class Agent extends BaseModel implements SystemUser  {
 
     public void setKinPhotoPath(String kinPhotoPath) {
         this.kinPhotoPath = kinPhotoPath;
-    }
-
-    public String getBankName() {
-        return bankName;
-    }
-
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
     }
 
     public String getBankAcctName() {
@@ -509,6 +529,8 @@ public class Agent extends BaseModel implements SystemUser  {
         else if(action.toUpperCase().equals("APPROVAL")) return "agent_approval";
         else if(action.toUpperCase().equals("ACCOUNT_STATEMENT")) return "account_statement";
         else if(action.toUpperCase().equals("WALLET")) return "view_agent_wallet";
+        else if(action.toUpperCase().equals("REFERER")) return "share_referer_code";
+        else if(action.toUpperCase().equals("MAKEPAYOUT")) return "agent_commission_disbursement";
         else return "view_agent";
     }
     
@@ -553,10 +575,13 @@ public class Agent extends BaseModel implements SystemUser  {
 
 
     public String getFullName(){
-        
+        if(this.corporate)
+        {
+            return this.firstname;
+        }
         String mName = middlename!=null ? middlename : "";
         String fullname = lastname + " " + mName + " " + firstname;
-        System.out.println("Agent FullName : " + fullname);
+        ////System.out.println("Agent FullName : " + fullname);
         
         return fullname;
     }
@@ -579,5 +604,127 @@ public class Agent extends BaseModel implements SystemUser  {
         this.referrerId = referrerId;
     }
 
+    public boolean isCorporate(){
+        return this.corporate;
+    }
+    
+    public void setCorporate( boolean corporate){
+        this.corporate = corporate;
+    }
+    
+    public Double getTotalBalance(){
+        
+        if(this.totalBalance != null)
+            return this.totalBalance;
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        Query jpQL = em.createNamedQuery("AgentBalance.findByAgentId");
+        jpQL.setParameter("agentId",this.agentId);
+        
+        AgentBalance agentBalance = (AgentBalance)jpQL.getSingleResult();
+        
+        //System.out.println("AgentBalance : " + agentBalance);
+        double totalCredit = agentBalance.getTotalcredit() != null ? agentBalance.getTotalcredit() : 0.00;
+        double totalDebit = agentBalance.getTotaldebit() != null ? agentBalance.getTotaldebit() : 0.00;
+        
+        
+        this.totalBalance = totalCredit - totalDebit;
+        
+        if(this.totalBalance < 0d)
+            this.totalBalance = 0d;
+        emf.getCache().evictAll();
+        em.close();
+        emf.close();
+        return this.totalBalance;
+    }
+    
+    public Double getTotalPendingWithdrawal(){
+        if(this.totalPendingWithdrawal != null)
+            return this.totalPendingWithdrawal;
+        
+        double totalPending = 0 ;
+        
+        for(Withdrawal w : withdrawalCollection)
+        {
+            if(w.getApproved() == 0)
+                totalPending += w.getAmount();
+        }
+        totalPendingWithdrawal = totalPending;
+        
+        return totalPendingWithdrawal;
+    }
+    
+    public Double getTotalApprovedWithdrawal(){
+        if(totalApprovedWithdrawal != null)
+            return totalApprovedWithdrawal;
+        
+        double totalApproved = 0 ;
+        
+        for(Withdrawal w : withdrawalCollection)
+        {
+            if(w.getApproved() == 1)
+                totalApproved += w.getAmount();
+        }
+        totalApprovedWithdrawal = totalApproved;
+        
+        return totalApprovedWithdrawal;
+    }
+    
+    public Double getTotalPaidWithdrawal(){
+        if(totalPaidWithdrawal != null)
+            return totalPaidWithdrawal;
+        
+        double totalPaid = 0 ;
+        
+        for(Withdrawal w : withdrawalCollection)
+        {
+            if(w.getApproved() == 3)
+                totalPaid += w.getAmount();
+        }
+        totalPaidWithdrawal = totalPaid;
+        
+        return totalPaidWithdrawal;
+    }
+    
+    public Double getEligibleWithdrawalBalance(){
+        
+        double eligible = this.getTotalBalance() - this.getTotalPendingWithdrawal() - this.getTotalApprovedWithdrawal();
+        
+        if(eligible < 0)
+            eligible = 0 ;
+        
+        return eligible;
+         
+    }
+
+    /**
+     * @return the kinRelationship
+     */
+    public String getKinRelationship() {
+        return kinRelationship;
+    }
+
+    /**
+     * @param kinRelationship the kinRelationship to set
+     */
+    public void setKinRelationship(String kinRelationship) {
+        this.kinRelationship = kinRelationship;
+    }
+
+    /**
+     * @return the bank
+     */
+    public Bank getBank() {
+        return bank;
+    }
+
+    /**
+     * @param bank the bank to set
+     */
+    public void setBank(Bank bank) {
+        this.bank = bank;
+    }
     
 }

@@ -16,20 +16,20 @@ import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.utils.DateFunctions;
-import java.util.Date;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 /**
  *
@@ -64,10 +64,10 @@ public class AgentDashboardHelper {
         query.setParameter("item_aps", 1);
         query.setParameter("agentId", agentId);
         List<Object[]> itemAndAmountList = query.getResultList();
-        ///System.out.println("Total Agent Debts: " + gson.toJson(itemAndAmountList.get(0)[1]));
+        /////System.out.println("Total Agent Debts: " + gson.toJson(itemAndAmountList.get(0)[1]));
         
         for(Object[] itemAndAmount : itemAndAmountList){
-            System.out.println("Inside getduepayemnts");
+            //System.out.println("Inside getduepayemnts");
             OrderItem orderItem = (OrderItem)itemAndAmount[0];
             double paidSum = (Double)itemAndAmount[1];
             
@@ -166,7 +166,7 @@ public class AgentDashboardHelper {
         
         
         //for(Object[] perf : performance){
-          //  System.out.println("ID: " + perf[0] + ", Project: " + perf[1] + ", Unit ID: " + perf[2] + ", Unit: " +  perf[3] + ", Quantity: " + perf[4] + ", Stock: " + perf[5]);
+          //  //System.out.println("ID: " + perf[0] + ", Project: " + perf[1] + ", Unit ID: " + perf[2] + ", Unit: " +  perf[3] + ", Quantity: " + perf[4] + ", Stock: " + perf[5]);
         //}
         
         
@@ -214,7 +214,7 @@ public class AgentDashboardHelper {
             projectMap.put("sold", projectSold);
             projectMap.put("setupStock", projectSetupStock);
             double percentage = projectSetupStock !=0 ? (double)projectSold / projectSetupStock * 100 : 0;  //anti division by zero error
-            //System.out.println("Project Name: " + performance.get(i-1)[1] + " projectSold " + projectSold + " projectSetupStock " + projectSetupStock + " project percentage: " + percentage);
+            ////System.out.println("Project Name: " + performance.get(i-1)[1] + " projectSold " + projectSold + " projectSetupStock " + projectSetupStock + " project percentage: " + percentage);
             projectMap.put("projectPercentage", percentage);
             projectMap.put("units", unitMapsList);
             projectMapsList.add(projectMap);
@@ -224,8 +224,8 @@ public class AgentDashboardHelper {
         
 //        Gson gson = new GsonBuilder().create();
 //        String jsonResponse = gson.toJson(projectMapsList);
-//        System.out.println("JSON: " + jsonResponse);        
-//        System.out.println("set length: " + performance.size());
+//        //System.out.println("JSON: " + jsonResponse);        
+//        //System.out.println("set length: " + performance.size());
         
         
         return projectMapsList;
@@ -243,7 +243,7 @@ public class AgentDashboardHelper {
                                                                     .setParameter("aps", 1)
                                                                     .setParameter("agentId", agentId)
                                                                     .getResultList();
-        System.out.println("Length of projects: " + projectsPerformanceList.size());
+        //System.out.println("Length of projects: " + projectsPerformanceList.size());
         
         //get the totals for all projects
         long totalProjectsSalesQuotaStock = 0;
@@ -266,7 +266,7 @@ public class AgentDashboardHelper {
                                                                             .setParameter("aps", 1)
                                                                             .setParameter("agentId", agentId)
                                                                             .getResultList();
-            //System.out.println("Length of units: " + unitsPerformanceList.size() + ", project: " + project.getName());
+            ////System.out.println("Length of units: " + unitsPerformanceList.size() + ", project: " + project.getName());
             //get the totals for all units in this project
             long totalUnitsSalesQuotaStock = 0;
             double totalUnitsSalesQuotaValue = 0;
@@ -281,16 +281,24 @@ public class AgentDashboardHelper {
                 ProjectUnit unit = (ProjectUnit)unitDetail[0];
                 HashMap unitMap = new HashMap();
                 unitMap.put("unitName", unit.getTitle());
+                if(totalUnitsSalesQuotaStock != 0 )
                 unitMap.put("stockPercentage", (long)unitDetail[1] / totalUnitsSalesQuotaStock * 100);
+                
+                if(totalUnitsSalesQuotaValue != 0 )
                 unitMap.put("valuePercentage", (double)unitDetail[2] / totalUnitsSalesQuotaValue * 100);
+                
                 unitMapsList.add(unitMap);
             }
             
-            
             HashMap projectMap = new HashMap();
             projectMap.put("projectName", project.getName());
+   
+           if(totalProjectsSalesQuotaStock != 0 )
             projectMap.put("stockPercentage", (long)projectDetail[1] / totalProjectsSalesQuotaStock * 100);
+           
+           if(totalProjectsSalesQuotaValue != 0 )
             projectMap.put("valuePercentage", (double)projectDetail[2] / totalProjectsSalesQuotaValue * 100);
+            
             projectMap.put("units", unitMapsList);
             
             //add this project to the projects list
@@ -300,7 +308,7 @@ public class AgentDashboardHelper {
         
 //        Gson gson = new GsonBuilder().create();
 //        String jsonResponse = gson.toJson(projectMapsList);
-//        System.out.println("JSON: " + jsonResponse);        
+//        //System.out.println("JSON: " + jsonResponse);        
 
         return projectMapsList;
     }
@@ -322,7 +330,7 @@ public class AgentDashboardHelper {
                                                                            + "JOIN product_order po ON o.order_id = po.id JOIN agent a ON po.agent_id = a.agent_id " 
                                                                            + "WHERE a.agent_id = " + agentId + " AND o.approval_status = 1 AND (date(o.modified_date) >= '" + startDate.toString() + "' AND date(o.modified_date) <= '" + endDate.toString() + "') " 
                                                                            + "GROUP BY grouper";
-        System.out.println("order query: " + query);
+        //System.out.println("order query: " + query);
         List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
         
         List<HashMap> summaryMapsList = new ArrayList<HashMap>();
@@ -358,14 +366,20 @@ public class AgentDashboardHelper {
             loyaltyQueryHook = "SUM(l.reward_amount) as rvalue ";
         
         String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount) as lvalue, " +
-                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper, " +
-                       loyaltyQueryHook + " " +
+                       "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper " +
+                       (!loyaltyQueryHook.isEmpty()? ", " + loyaltyQueryHook : " "  ) + " " +
                        "FROM lodgement_item l JOIN order_item o ON l.item_id = o.id JOIN product_order po ON po.id = o.order_id JOIN agent a ON po.agent_id = a.agent_id " +
                        "WHERE a.agent_id= " + agentId + " AND l.approval_status = 1 AND (date(l.modified_date) >= '" + startDate.toString() + "' AND date(l.modified_date) <= '" + endDate.toString() + "') " +
                        "GROUP BY grouper";
         
-        List<Object[]> summaryObjects = em.createNativeQuery(query).getResultList();
+        List<Object[]> summaryObjects = null;
+        try{
+            summaryObjects = em.createNativeQuery(query).getResultList();
         
+        }catch(Exception e){
+            e.printStackTrace();
+            return "";
+        }
         List<HashMap> summaryMapsList = new ArrayList<HashMap>();
         
         for(Object[] summary : summaryObjects){
@@ -431,20 +445,20 @@ public class AgentDashboardHelper {
          
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        System.out.println("Year: " + calendar.get(Calendar.YEAR));
+        //System.out.println("Year: " + calendar.get(Calendar.YEAR));
         
         Calendar calendar2 = Calendar.getInstance();
         calendar2.set(2013, 0, 20);
-        System.out.printf("Year %s, Month %s, Day %s: \n", calendar2.get(Calendar.YEAR), calendar2.get(Calendar.MONTH), calendar2.get(Calendar.DAY_OF_MONTH));
+        //System.out.printf("Year %s, Month %s, Day %s: \n", calendar2.get(Calendar.YEAR), calendar2.get(Calendar.MONTH), calendar2.get(Calendar.DAY_OF_MONTH));
         
         LocalDate l = LocalDate.of(2015, Month.OCTOBER, 25);
-        System.out.println(l.toString());
+        //System.out.println(l.toString());
 
         LocalDate l2 = LocalDate.of(calendar2.get(Calendar.YEAR), calendar2.get(Calendar.MONTH)+1, calendar2.get(Calendar.DAY_OF_MONTH));
-        System.out.println(l2.toString());
+        //System.out.println(l2.toString());
         
         Period period  = Period.between(l, l2);
-        System.out.println("Period Months: " + Math.abs(period.toTotalMonths()));
+        //System.out.println("Period Months: " + Math.abs(period.toTotalMonths()));
         
     }
 

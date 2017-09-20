@@ -180,7 +180,7 @@ public class MLMPluginController extends PluginsController {
             }
             catch(PropertyException e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 request.setAttribute("mlmPlugin", mlmPlugin);
                 request.setAttribute("errors", errorMessages);
                 request.setAttribute("plugins", super.listPlugins()); 
@@ -204,7 +204,7 @@ public class MLMPluginController extends PluginsController {
         
 //        for (Map.Entry<String, String> entry : settingsMap.entrySet())
 //        {
-//           System.out.println(entry.getKey() + "/" + entry.getValue());
+//           //System.out.println(entry.getKey() + "/" + entry.getValue());
 //        }
 
         return settingsMap;

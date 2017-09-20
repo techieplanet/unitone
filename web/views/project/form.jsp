@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<form name="projectform" id="projectform" method="POST" action="Project?action=${action}&id=${id}"> 
+<form name="projectform" id="projectform" method="POST" action="Project?action=${action}&id=${id}" enctype="multipart/form-data"> 
     <div class="box box-primary">
       <div class="box-header with-border">
         <h3 class="box-title">
@@ -58,6 +58,12 @@
           <div class="form-group">
             <label>Project Location *</label>
             <input type="text" name="location" id="location" class="form-control medium" value="${project.location}">
+          </div>
+          
+          <div class="form-group">
+            <label>Project Image *</label>
+            <span class="marginleft5"><a href="#" style="text-decoration:underline" onclick="showImage('${project.getImage()}' , 0)" >view image</a></span>
+            <input type="file" name="projectImage" id="projectImage" class="form-control medium" value="${project.image}" accept="image/gif, image/jpeg, image/png, image/bmp">
           </div>
 
         <div class="form-group">

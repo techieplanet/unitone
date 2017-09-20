@@ -1,5 +1,3 @@
-
-
               
                 <!-- Admin Side Menu -->
                 <ul class="sidebar-menu">
@@ -48,7 +46,10 @@
                           <ul class="treeview-menu">
                             <li><a href="${pageContext.request.contextPath}/Agent" <c:if test="${sideNavAction eq '' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if>>Approved Agents</a></li>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'create_agent')}">
-                                <li><a href="${pageContext.request.contextPath}/Agent?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if> >New Agent</a></li>
+                                <li><a href="${pageContext.request.contextPath}/Agent?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if> >New Individual Agent</a></li>
+                            </c:if>
+                            <c:if test="${fn:contains(sessionScope.user.permissions, 'create_agent')}">
+                                <li><a href="${pageContext.request.contextPath}/Agent?action=new&corporate" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if> >New Corporate Agent</a></li>
                             </c:if>
                             <c:if test="${fn:contains(sessionScope.user.permissions, 'view_wallet')}">
                                 <li><a href="${pageContext.request.contextPath}/Agent?action=withdrawApproval" <c:if test="${sideNavAction eq 'withdrawApproval' && sideNav eq 'Agent'}"> <c:out value='style=color:#fff' /></c:if> >Pending Withdrawal Request</a></li>
@@ -115,19 +116,23 @@
                         
                   
                    <!--MESSAGE-->
-                  <li class="treeview <c:out value='${sideNav eq "Message" ? "active":""}' /> ">
-                      <a href="#"><i class="fa fa-envelope"></i><span>Messages</span><i class="fa fa-angle-left pull-right"></i></a>
-                      <ul class="treeview-menu">
-                        <li><a href="${pageContext.request.contextPath}/Message?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Message'}"> <c:out value='style=color:#fff' /></c:if> >New</a></li>
-                        <li><a href="${pageContext.request.contextPath}/Message?action=mailbox" <c:if test="${sideNavAction eq 'mailbox' && sideNav eq 'Message'}"> <c:out value='style=color:#fff' /></c:if> >MailBox</a></li>
-                      </ul>
-                  </li>
-                
+                   <%
+                  //<li class="treeview <c:out value='${sideNav eq "Message" ? "active":""}' /> ">
+                  //    <a href="#"><i class="fa fa-envelope"></i><span>Messages</span><i class="fa fa-angle-left pull-right"></i></a>
+                  //    <ul class="treeview-menu">
+                  //      <li><a href="${pageContext.request.contextPath}/Message?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Message'}"> <c:out value='style=color:#fff' /></c:if> >New</a></li>
+                  //      <li><a href="${pageContext.request.contextPath}/Message?action=mailbox" <c:if test="${sideNavAction eq 'mailbox' && sideNav eq 'Message'}"> <c:out value='style=color:#fff' /></c:if> >MailBox</a></li>
+                  //    </ul>
+                  //</li>
+                   %>
                   
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_role')}">
                     <li class="<c:out value='${sideNav eq "Role" ? "active":""}' />" ><a href="${pageContext.request.contextPath}/Role"><i class="fa fa-address-card-o"></i> <span>Roles</span></a></li>
                   </c:if>
-                    
+                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_system_permissions')}">
+                    <li class="<c:out value='${sideNav eq "System Permissions" ? "active":""}' />" ><a href="${pageContext.request.contextPath}/Role?action=permissions"><i class="fa fa-address-card-o"></i> <span>System Permissions</span></a></li>
+                  </c:if> 
+                  
                   <c:if test="${fn:contains(sessionScope.user.permissions, 'view_user')}">
                     <li class="<c:out value='${sideNav eq "User" ? "active":""}' />" ><a href="${pageContext.request.contextPath}/User"><i class="fa fa-users"></i> <span>Users</span></a></li>
                   </c:if>
@@ -135,7 +140,7 @@
                   
                   
                   <!--Settings-->
-                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_settings')}">
+                  <c:if test="${fn:contains(sessionScope.user.permissions, 'view_company_account')}">
                         <li class="treeview <c:out value='${sideNav eq "Settings" ? "active":""}' />" >
                           <a href="#"><i class="fa fa-gears"></i><span>Settings</span><i class="fa fa-angle-left pull-right"></i></a>
                           <ul class="treeview-menu">                            

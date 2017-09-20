@@ -128,9 +128,10 @@
                   <!-- The user image in the menu -->
                   <li class="user-header">
                     <img src="${pageContext.request.contextPath}/images/img/boxed-bg.jpg" class="img-circle" alt="User Image">
+                    
                     <p>
                       ${user.firstname} ${user.lastname}
-                      <small>Member since Nov. 2012</small>
+                      <small>Member since ${user.createdDate!=null? dateFmt.format(user.createdDate) : " "}</small>
                     </p>
                   </li>
                   <!-- Menu Body -->

@@ -21,6 +21,12 @@
         <!-- Main content -->
         
         <section class="content">
+            <c:if test="${pendingOrders.isEmpty()}">  <div style="padding:20px">
+                    <h2>No Waiting Order ....</h2>
+            </div>
+                
+            </c:if>
+            
           <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
               
               <c:forEach items="${pendingOrders}" var="order" varStatus="orderCount">

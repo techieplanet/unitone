@@ -19,8 +19,8 @@
         <!-- Main content -->
         <section class="content">
         
-          
-                <%@ include file="viewForm.jsp" %>      
+                <c:if test="${!corporate}"> <%@ include file="viewForm.jsp" %> </c:if>
+                <c:if test="${corporate}"> <%@ include file="corporate_viewForm.jsp" %> </c:if>
             
           
         </section><!-- /.content -->

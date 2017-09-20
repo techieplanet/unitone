@@ -53,8 +53,9 @@
                         <div class="col-md-12">
                             <ul class="nav nav-tabs" role="tablist">
                                 <li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
-                                <li role="presentation"><a href="#commissions" aria-controls="commissions" role="tab" data-toggle="tab">Earnings</a></li>
+                                <li role="presentation"><a href="#commissions" aria-controls="commissions" role="tab" data-toggle="tab">Transactions</a></li>
                                 <li role="presentation" class=""><a href="#network" aria-controls="network" role="tab" data-toggle="tab">Network</a></li>
+                                 <li role="presentation"><a href="#Documents" aria-controls="Documents" role="tab" data-toggle="tab">Documents </a></li>
                             </ul>
                         </div>
                     </div>
@@ -66,7 +67,7 @@
                         
                         <div role="tabpanel" class="tab-pane fade" id="commissions">
                             <div class="row">
-                                <div class="col-md-7 text-center col-xs-offset-2">
+                                <div class="col-md-9 text-center col-xs-offset-1">
                                     <%@ include file="_earnings_tab_contents.jsp" %>   
                                 </div>
                             </div>
@@ -79,6 +80,52 @@
                                 </div>
                             </div>
                         </div>
+                                
+                        <div role="tabpanel" class="tab-pane" id="Documents">
+                        
+                            <div class="row">
+                            <div class="col-md-12">
+                             <div id="documents-accordion" class="panel-group"  role="tablist" aria-multiselectable="true" >
+                                    <table class="table table-bordered table-striped table-hover">
+                                
+                                <thead>
+                                    <tr>
+                                        <th ><div >
+                                                <h4>sn</h4>
+                                            </div> </th>
+                                        <th ><div >
+                                                <h4>title</h4>
+                                            </div> </th>
+                                        <th >
+                                            <div >
+                                                <h4>file</h4>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                     
+                                </thead>
+                                <tbody>
+                           
+                                    <c:forEach items="${documents}" var="document">
+                                        <tr>
+                                        <td >${document.docTypeId.weight}</td>
+                                        <td >${document.docTypeId.title}</td>
+                                        <td ><a href="${documentDir}${document.path}" target="_blank"><img src="${documentDir}${document.path}" class="img img-responsive img-thumbnail" style="max-width: 50px;max-height: 50px; overflow-y: auto"/></a>
+                                         </td>
+                                    </tr>
+                                       
+                                    </c:forEach>
+                                </tbody>
+                                    </table>
+                                    
+                                </div>
+                              
+                            </div>
+                        </div>
+                        
+                    </div> <!-- END OF Documents TAB -->
+                                    
+                    </div> <!-- END OF TAB-CONTENT -->
                     </div>
                 </div>
             </div>

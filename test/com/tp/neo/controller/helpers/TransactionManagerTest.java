@@ -54,7 +54,7 @@ public class TransactionManagerTest {
     @Test
     public void testDoDoubleEntry() {
         //debit - 1, crdit - 3
-        System.out.println("doDoubleEntry");
+        //System.out.println("doDoubleEntry");
         Account debitAccount = em.find(Account.class, (long)1);
         Account creditAccount = em.find(Account.class, (long)3);
         double amount = (double)3000000;

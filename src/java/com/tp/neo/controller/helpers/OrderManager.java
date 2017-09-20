@@ -9,20 +9,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.tp.neo.interfaces.SystemUser;
-import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Company;
 import com.tp.neo.model.CompanyAccount;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
-import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.Notification;
-import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.Plugin;
+import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -32,7 +31,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +39,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.PropertyException;
 import org.apache.commons.lang3.text.StrSubstitutor;
         
 /**
- *
+ 
  * @author swedge-mac
  */
 public class OrderManager {
@@ -66,6 +63,7 @@ public class OrderManager {
         this.plugins = map;
     }
     
+    
     /**
      * This method will set up the order, the sale items and the lodgement records.
      * 
@@ -76,10 +74,8 @@ public class OrderManager {
      */
     public ProductOrder processOrder(Customer customer, Lodgement lodgement, List<OrderItem> orderItems, String applicationContext)
     throws PropertyException, RollbackException{
-        
-        em.getTransaction().begin();
-        
         //persist the lodgement and notify admin about it
+        em.getTransaction().begin();
         em.persist(lodgement);
         em.flush();
         
@@ -112,6 +108,7 @@ public class OrderManager {
         
         return order;
     }
+    
     
     /**
      * Insert the order record 
@@ -186,7 +183,7 @@ public class OrderManager {
     
     /********************* APPROVAL **********************/
     public void processOrderApproval(ProductOrder order, List<OrderItem> orderItemsList, Customer customer, Notification notification) throws PropertyException, RollbackException{
-        
+        EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         
         //AlertManager alertManager = new AlertManager();
@@ -200,11 +197,11 @@ public class OrderManager {
         List<OrderItem> waitingItems = new ArrayList<OrderItem>();
         List<OrderItem> declinedItems = new ArrayList<OrderItem>();
         
-        for(int i=0; i < allItems.size(); i++){
-            if(allItems.get(i).getApprovalStatus().intValue() > 0) waitingItems.add(allItems.get(i));
-            if(allItems.get(i).getApprovalStatus().intValue() > 1) approvedItems.add(allItems.get(i));
-            if(allItems.get(i).getApprovalStatus().intValue() > 2) declinedItems.add(allItems.get(i));
-        }
+//        for(int i=0; i < allItems.size(); i++){
+//            if(allItems.get(i).getApprovalStatus().intValue() > 0) waitingItems.add(allItems.get(i));
+//            if(allItems.get(i).getApprovalStatus().intValue() > 1) approvedItems.add(allItems.get(i));
+//            if(allItems.get(i).getApprovalStatus().intValue() > 2) declinedItems.add(allItems.get(i));
+//        }
         
         for(int i=0; i < orderItemsList.size(); i++){
             OrderItem thisItem = orderItemsList.get(i);
@@ -215,7 +212,7 @@ public class OrderManager {
                 //note that 1 has been set for the item approval status already
                 //this will now set the audit dates and approval date
                 setOrderItemDates(thisItem); 
-                
+                //em.persist(thisItem);
                 
                 //get/set corresponding lodgment item
 
@@ -223,6 +220,7 @@ public class OrderManager {
                 LodgementItem lodgementItem = (LodgementItem) lodgementItems.get(0);
 
                 setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
+                //em.persist(lodgementItem);
                 
                 approvedLodgementItems.add(lodgementItem);
                 
@@ -233,9 +231,9 @@ public class OrderManager {
                 //Now process the lodgment item, which is a part of the whole lodgement 
                 //double entry: debit customer, credit unit
                 //TransactionManager transactionManager = new TransactionManager(sessionUser);
-                //System.out.println("Customer Account = " + customer.getAccount());
-                //System.out.println("Unit Account = " + thisItem.getUnit().getAccount());
-                //System.out.println("Initial Deposit = " + thisItem.getInitialDep() );
+                ////System.out.println("Customer Account = " + customer.getAccount());
+                ////System.out.println("Unit Account = " + thisItem.getUnit().getAccount());
+                ////System.out.println("Initial Deposit = " + thisItem.getInitialDep() );
                 
                 //transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getUnit().getAccount(), thisItem.getInitialDep());
                 
@@ -244,9 +242,9 @@ public class OrderManager {
                 
                 //double entry (credit agent wallet): credit agent, debit unit                
                 //double commissionAmount = thisItem.getCommissionAmount(lodgementItem.getAmount());
-                //System.out.println("LODGEMENT AMOUNT: " + lodgementItem.getAmount());
-                //System.out.println("COMMISSION PCENT: " + thisItem.getCommissionPercentage());
-                //System.out.println("COMMISSION AMOUNT: " + commissionAmount);
+                ////System.out.println("LODGEMENT AMOUNT: " + lodgementItem.getAmount());
+                ////System.out.println("COMMISSION PCENT: " + thisItem.getCommissionPercentage());
+                ////System.out.println("COMMISSION AMOUNT: " + commissionAmount);
                 //transactionManager.doDoubleEntry(thisItem.getUnit().getAccount(), customer.getAgent().getAccount(), commissionAmount);
                 
                 //send wallet credit alert
@@ -278,14 +276,13 @@ public class OrderManager {
             new LodgementManager(sessionUser).processApprovedLodgementItems(approvedLodgementItems, customer, order);
         }
         /*******************************************************************************************************/
-        System.out.println("Approved Items : " + approvedItems.size() + ", All Items : " + allItems.size());
+        //System.out.println("Approved Items : " + approvedItems.size() + ", All Items : " + allItems.size());
         //set the resultant status of the order based on the statuses of the items in it
         if(approvedItems.size() + declinedItems.size()  == allItems.size()){ //each item has either approved or declined status
             setOrderStatus(order, (short)2); //complete the order
-            
             //set the notification status here
             notification.setStatus((short)2);
-            em.merge(notification);
+           // em.persist(notification);
             
         }
         else if(declinedItems.size() == allItems.size()){
@@ -298,9 +295,11 @@ public class OrderManager {
             //no need to treat lodgement items
             
         }
-        em.flush();
-        em.merge(order);
+        
+        //em.persist(order);
+        //em.flush();
         em.getTransaction().commit();
+        em.close();
     }
     
     /**
@@ -341,14 +340,14 @@ public class OrderManager {
     private void setOrderStatus(ProductOrder order, short status) throws PropertyException, RollbackException{
         order.setApprovalStatus(status);
         new TrailableManager(order).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.flush();
+        //em.flush();
     }
     
     private void setOrderItemDates(OrderItem orderItem) throws PropertyException, RollbackException{
         //set approval date first
         orderItem.setApprovalDate(new Date());
         new TrailableManager(orderItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.flush();
+        //em.flush();
     }
     
     private void setLodgementStatus(Lodgement lodgement, short status) throws PropertyException, RollbackException{
@@ -360,7 +359,7 @@ public class OrderManager {
     private void setLodgementItemStatus(LodgementItem lodgementItem, short status) throws PropertyException, RollbackException{
         lodgementItem.setApprovalStatus(status);
         new TrailableManager(lodgementItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
-        em.flush();
+        //em.flush();
     }
     
     private static String getInvoiceFileContent(String invoiceFilePath) throws IOException{
@@ -370,9 +369,9 @@ public class OrderManager {
         Path path = Paths.get(invoiceFilePath);
         String content = new String(Files.readAllBytes(path));
         
-        //System.out.println("Shout: " + content);
+        ////System.out.println("Shout: " + content);
         //URL location = OrderManager.class.getProtectionDomain().getCodeSource().getLocation();
-        //System.out.println("location: " + location.getFile());
+        ////System.out.println("location: " + location.getFile());
         return content;
     }
     
@@ -446,10 +445,10 @@ public class OrderManager {
             String invoiceContent = getInvoiceFileContent(invoiceMarkupFilePath);
             
             resolvedString = resolveInvoiceValues(customer, lodgement, company, invoiceContent);
-            System.out.println("resolvedString: " + resolvedString);
+            //System.out.println("resolvedString: " + resolvedString);
         }
         catch(IOException e){
-            System.out.println("Error: " + e.getMessage());
+            //System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
         
@@ -502,18 +501,20 @@ public class OrderManager {
             }
             
             //if(sessionUser.getSystemUserTypeId() == 1){
-                orderItem.setCommissionPercentage(saleItem.commp);
-                System.out.println("Sale Item Commp: " + saleItem.commp);
+              //  //System.out.println("Sale Item Commp: " + saleItem.commp);
             //}
             if(sessionUser != null){
                 orderItem.setCreatedBy(sessionUser.getSystemUserId()); 
             }
+                
             orderItem.setApprovalStatus(approval);
             orderItem.setUnit(projectUnit);
-            
+            orderItem.setCommissionPercentage(projectUnit.getCommissionPercentage());
+            orderItem.setVatPercentage(projectUnit.getVatPercentage());
+            orderItem.setAnnualMaintenancePercentage(projectUnit.getAnnualMaintenancePercentage());
             orderItemList.add(orderItem);
             
-            System.out.println("Notification ID : " + saleItem.dayOfNotification);
+            ////System.out.println("Notification ID : " + saleItem.dayOfNotification);
         }
         
         return orderItemList;
@@ -533,9 +534,6 @@ public class OrderManager {
     }
     
     public Lodgement prepareLodgement(Map request, Agent agent) {
-        
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
         
         Lodgement lodgement = new Lodgement();
         
@@ -568,7 +566,7 @@ public class OrderManager {
             
         }
         else if(paymentMethod == 4) {
-            
+            lodgement.setDepositorBankName(request.get("transfer_bankName").toString());
             lodgement.setAmount(Double.parseDouble(request.get("transfer_amount").toString()));
             lodgement.setOriginAccountName(request.get("transfer_accountName").toString());
             lodgement.setOriginAccountNumber(request.get("transfer_accountNo").toString());
@@ -587,19 +585,19 @@ public class OrderManager {
     //This method processes the new order items, sent as json data via request attribute from new order form
     private OrderItemObjectsList processJsonData(String json) {
         Gson gson = new GsonBuilder().create();
-        //System.out.println(json);
+        ////System.out.println(json);
         
         OrderItemObjectsList salesObj = gson.fromJson(json,OrderItemObjectsList.class);
         
         ArrayList<OrderItemObject> sales = salesObj.sales;
         
-        for(OrderItemObject s : sales) {
-            System.out.println("Product Name : " + s.productName);
-            System.out.println("Product Qty : " + s.productQuantity);
-            System.out.println("Product Amount Per Unit " + s.amountUnit);
-            System.out.println("Product Cost " + s.amountTotalUnit);
-            System.out.println("Commision Payable : " + s.commp);
-        }
+       /* for(OrderItemObject s : sales) {
+            //System.out.println("Product Name : " + s.productName);
+            //System.out.println("Product Qty : " + s.productQuantity);
+            //System.out.println("Product Amount Per Unit " + s.amountUnit);
+            //System.out.println("Product Cost " + s.amountTotalUnit);
+            //System.out.println("Commision Payable : " + s.commp);
+        }*/
         
         return salesObj;
     }

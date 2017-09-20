@@ -5,17 +5,13 @@
  */
 package com.tp.neo.controller.helpers;
 
-import static com.tp.neo.controller.components.AppController.APP_NAME;
-import static com.tp.neo.controller.components.AppController.defaultEmail;
-import com.tp.neo.model.utils.SMSSender;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProjectUnit;
-import com.tp.neo.model.User;
 import com.tp.neo.model.Withdrawal;
-import com.tp.neo.model.utils.MailSender;
+import com.tp.neo.model.utils.SMSSender;
 import java.util.HashMap;
 import java.util.List;
 

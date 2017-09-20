@@ -17,7 +17,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Mortgage Payment Confirmation
+           Payment Confirmation
           </h1>
         </section>
 

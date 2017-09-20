@@ -167,7 +167,7 @@
                 
                 $.ajax({
                     type: "POST",
-                    url: '${appContext}' + '/Agent',
+                    url: '${appContext}' + '/Agent?action=referer',
                     data: {referralMode:'email',refAgentId:agentId, recipientEmail:$("#email").val()},
                     success: function(result){codeSender.sharingResult('email_modal',result)},
                     error : function(xhr,status_code,status_text){

@@ -42,9 +42,23 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Role.findByCreatedDate", query = "SELECT r FROM Role r WHERE r.createdDate = :createdDate"),
     @NamedQuery(name = "Role.findByCreatedBy", query = "SELECT r FROM Role r WHERE r.createdBy = :createdBy"),
     @NamedQuery(name = "Role.findByModifiedDate", query = "SELECT r FROM Role r WHERE r.modifiedDate = :modifiedDate"),
-    @NamedQuery(name = "Role.findByModifiedBy", query = "SELECT r FROM Role r WHERE r.modifiedBy = :modifiedBy")})
-public class Role extends BaseModel {
+    @NamedQuery(name = "Role.findByModifiedBy", query = "SELECT r FROM Role r WHERE r.modifiedBy = :modifiedBy"),
+    @NamedQuery(name = "Role.findRolesLowerThan", query = "SELECT r FROM Role r WHERE r.tier > :tier"),
+    @NamedQuery(name = "Role.findRolesHigherThan", query = "SELECT r FROM Role r WHERE r.tier < :tier AND r.tier !=0"),
+    @NamedQuery(name = "Role.findRolesWithTier", query = "SELECT r FROM Role r WHERE r.tier = :tier"),
+    @NamedQuery(name = "Role.findRolesWithAlias", query = "SELECT r FROM Role r WHERE r.alias = :alias"),
+    @NamedQuery(name = "Role.findRolesLowerThanOrEqual", query = "SELECT r FROM Role r WHERE r.tier >= :tier")
+  })
 
+public class Role extends BaseModel {
+    
+    @Column(name="tier")
+    private Integer tier;
+    @Column(name="role_alias")
+    private String alias;
+    @Column(name="role_supervisor")
+    private String supervisor;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
     private Collection<User> userCollection;
 
@@ -165,6 +179,7 @@ public class Role extends BaseModel {
         if(action.toUpperCase().equals("NEW")) return "create_role";
         else if(action.toUpperCase().equals("EDIT")) return "edit_role";
         else if(action.toUpperCase().equals("DELETE")) return "delete_role";
+        else if(action.toUpperCase().equals("PERMISSIONS")) return "view_system_permissions";
         else return "view_role";
     }
     
@@ -201,6 +216,48 @@ public class Role extends BaseModel {
 
     public void setUserCollection(Collection<User> userCollection) {
         this.userCollection = userCollection;
+    }
+
+    /**
+     * @return the teir
+     */
+    public int getTier() {
+        return tier;
+    }
+
+    /**
+     * @param teir the teir to set
+     */
+    public void setTier(int tier) {
+        this.tier = tier;
+    }
+
+    /**
+     * @return the alias
+     */
+    public String getAlias() {
+        return alias;
+    }
+
+    /**
+     * @param alias the alias to set
+     */
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    /**
+     * @return the supervisor
+     */
+    public String getSupervisor() {
+        return supervisor;
+    }
+
+    /**
+     * @param supervisor the supervisor to set
+     */
+    public void setSupervisor(String supervisor) {
+        this.supervisor = supervisor;
     }
        
 }

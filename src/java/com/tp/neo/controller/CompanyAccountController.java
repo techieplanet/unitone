@@ -248,7 +248,7 @@ public class CompanyAccountController extends AppController {
         }
         catch(PropertyException pex){
             
-            System.out.println("Error Raised");
+            //System.out.println("Error Raised");
             
             request.setAttribute("account", account);
             request.setAttribute("action", "edit");
@@ -257,7 +257,7 @@ public class CompanyAccountController extends AppController {
             request.getRequestDispatcher(viewFile).forward(request, response);
         }
         catch(Exception ex){
-            System.out.println("Exception : " + ex.getMessage());  
+            //System.out.println("Exception : " + ex.getMessage());  
             ex.printStackTrace();
             request.setAttribute("account", account);
             request.setAttribute("action", "edit");

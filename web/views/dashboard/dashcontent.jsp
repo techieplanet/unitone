@@ -2,16 +2,17 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/code/highcharts.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/code/modules/drilldown.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/code/modules/exporting.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/code/modules/no-data-to-display.js"></script>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <div class="row">
-            
+            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_total_receivable')}">
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
               <div class="small-box bg-blue">
                 <div class="inner">
                   <h3><c:out value="${totalOutstanding}" /></h3>
-                  <p class="bold">TOTAL OUTSTANDING PAYMENTS</p>
+                  <p class="bold">TOTAL RECEIVABLE</p>
                 </div>
                 <div class="icon">
                   <i class="fa fa-cart-plus"></i>
@@ -20,13 +21,14 @@
                 <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
               </div>
             </div><!-- ./col -->
-    
+            </c:if>
+            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_total_due_receivable')}">
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
               <div class="small-box bg-green">
                 <div class="inner">
                     <h3><c:out value="${totalDue}" /></h3>
-                    <p class="bold">TOTAL DUE PAYMENTS</p>
+                    <p class="bold">TOTAL DUE RECEIVABLE</p>
                 </div>
                 <div class="icon">
                   <i class="fa fa-cart-plus"></i>
@@ -35,8 +37,9 @@
                 <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
               </div>
             </div><!-- ./col -->
+            </c:if>
             
-            
+            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_total_stock_value')}">
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
               <div class="small-box bg-red">
@@ -51,7 +54,9 @@
                 <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
               </div>
             </div><!-- ./col -->
+            </c:if>
             
+            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_total_commission_payable')}">
             <div class="col-lg-3 col-xs-6">
               <!-- small box -->
               <div class="small-box bg-yellow">
@@ -66,9 +71,54 @@
                 <a href="" onclick="return false;" class="small-box-footer">&nbsp;</i></a>
               </div>
             </div><!-- ./col -->
-            
+            </c:if>
           </div><!-- /.row -->
           
+          <div class="row">
+              <c:if test="${fn:contains(sessionScope.user.permissions, 'view_income')}">
+            <div class="col-md-3 col-sm-5 col-xs-12">
+                <div class="callout bg-green">
+                    <strong>
+                        INCOME
+                        <span class="pull-right">${income}</span>
+                    </strong>
+                </div>
+            </div><!-- /.col -->
+              </c:if>
+            
+            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_annual_maintenance')}">
+            <div class="col-md-3 col-sm-5 col-xs-12">
+                <div class="callout bg-green">
+                    <strong>
+                        ANNUAL MAINTENANCE
+                        <span class="pull-right">${annualMaintenance}</span>
+                    </strong>
+                </div>
+            </div><!-- /.col -->
+            </c:if>
+            
+            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_with_holding_tax')}">
+            <div class="col-md-3 col-sm-5 col-xs-12">
+                <div class="callout bg-olive">
+                    <strong>
+                     WITHHOLDING TAX
+                        <span class="pull-right">${withHoldingTax}</span>
+                    </strong>
+                </div>
+            </div><!-- /.col -->
+            </c:if>
+            
+            <c:if test="${fn:contains(sessionScope.user.permissions, 'view_vat')}">
+            <div class="col-md-3 col-sm-5 col-xs-12">
+                <div class="callout bg-olive">
+                    <strong>
+                        V.A.T
+                        <span class="pull-right">${VAT}</span>
+                    </strong>
+                </div>
+            </div><!-- /.col -->
+            </c:if>
+        </div><!-- /.row -->
           
           <!--Perfomance Tabs-->
           <div class="box box-primary">
@@ -110,7 +160,7 @@
 
                                             <div class="col-md-1">
                                                 <br/>
-                                                <a class="btn btn-primary" href="#" onclick="return filterOrderSummary(); return false;">Filter</a>
+                                                <a class="btn btn-primary" href="#" onclick="filterOrderSummary()">Filter</a>
                                             </div>
                                         </div>
                                      </div>
@@ -150,7 +200,7 @@
 
                                                <div class="col-md-1">
                                                    <br/>
-                                                   <a class="btn btn-primary" href="#" onclick="return filterLodgementSummary(); return false;">Filter</a>
+                                                   <a class="btn btn-primary" href="#" onclick="filterLodgementSummary()">Filter</a>
                                                </div>
                                            </div>
                                         </div>
@@ -181,7 +231,7 @@
           
 
     <!--COSTS LINE-->
-        <div class="row">
+        <div class="row" title="Number of Customers">
             <div class="col-md-3 col-sm-6 col-xs-12">
               <div class="info-box">
                 <span class="info-box-icon bg-aqua"><i class="fa fa-users"></i></span>
@@ -192,7 +242,7 @@
               </div><!-- /.info-box -->
             </div><!-- /.col -->
             
-            <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="col-md-3 col-sm-6 col-xs-12" title="Number of Approved Agents">
               <div class="info-box">
                 <span class="info-box-icon bg-red"><i class="fa fa-user-plus"></i></span>
                 <div class="info-box-content">
@@ -205,7 +255,7 @@
             <!-- fix for small devices only -->
             <div class="clearfix visible-sm-block"></div>
 
-            <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="col-md-3 col-sm-6 col-xs-12" title="Processing / Completed Orders">
               <div class="info-box">
                 <span class="info-box-icon bg-green"><i class="fa fa-cart-arrow-down"></i></span>
                 <div class="info-box-content">
@@ -214,7 +264,7 @@
                 </div><!-- /.info-box-content -->
               </div><!-- /.info-box -->
             </div><!-- /.col -->
-            <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="col-md-3 col-sm-6 col-xs-12" title="Average Customer per Agent">
               <div class="info-box">
                 <span class="info-box-icon bg-yellow"><i class="fa fa-user-times"></i></span>
                 <div class="info-box-content">
@@ -386,6 +436,7 @@
             tooltip: {
                 shared: true
             },
+            lang: {noData: 'No data to display' },
             legend: {
                 layout: 'horizontal',
                 align: 'center',
@@ -518,6 +569,7 @@
             tooltip: {
                 shared: true
             },
+            lang: {noData: 'No data to display' },
             legend: {
                 layout: 'horizontal',
                 align: 'center',
@@ -531,27 +583,24 @@
         });
     }
     
-    
-    
-    
     function drawPerformancePieChart(){
         var projectDataArray = new Array();
         var drillObjectsArray = new Array();
         
         <c:forEach items="${projectPerformanceBySalesQuota}" var="project">
                 projectObject = {};
-                projectObject.name = '${project.projectName}';
+                projectObject.name = "${project.projectName}";
                 projectObject.y = ${project.valuePercentage};
-                projectObject.drilldown = '${project.projectName}';
+                projectObject.drilldown = "${project.projectName}";
                 projectDataArray.push(projectObject);
                 
                 //handle the units
                 var drillObject = {};
-                drillObject.name = '${project.projectName}';
-                drillObject.id = '${project.projectName}';
+                drillObject.name = "${project.projectName}";
+                drillObject.id = "${project.projectName}";
                 drillObjectDataArray = new Array();
                 <c:forEach items="${project.units}" var="unit">
-                    drillObjectDataArray.push(new Array('${unit.unitName}',${unit.valuePercentage})); //push a unit into the drill down object
+                    drillObjectDataArray.push(new Array("${unit.unitName}",${unit.valuePercentage})); //push a unit into the drill down object
                 </c:forEach>
                     
                 drillObject.data = drillObjectDataArray;
@@ -605,7 +654,8 @@
                     "textDecoration": "none", 
                 },
                 series: drillObjectsArray
-            }
+            },
+            lang: {noData: 'No data to display' }
         });
     }
     
@@ -614,6 +664,7 @@
         Highcharts.setOptions({
                 colors: ['#CC0000', '#00a65a', '#3366CC', '#FF9900', '#109618', '#990099', '#0099C6', '#DD4477', '#AAAA11', '#B77322']
             });
+            
             
         var projectDataArray = new Array();
         var criteriaArray = new Array("Stock", "Sold"); //Mind the order
@@ -625,7 +676,7 @@
         seriesObject.name = "In Stock";
         <c:forEach items="${projectPerformanceByStockSold}" var="project">
                 projectObject = {};
-                projectObject.name = '${project.projectName}';
+                projectObject.name = "${project.projectName}";
                 projectObject.y = (${project.setupStock} - ${project.sold});
                 projectObject.drilldown = true;
                 projectDataArray.push(projectObject);
@@ -639,7 +690,7 @@
         seriesObject.name = "Sold";
         <c:forEach items="${projectPerformanceByStockSold}" var="project">
                 projectObject = {};
-                projectObject.name = '${project.projectName}';
+                projectObject.name = "${project.projectName}";
                 projectObject.y = ${project.sold};
                 projectObject.drilldown = true;
                 projectDataArray.push(projectObject);
@@ -675,6 +726,7 @@
         title: {
             text: 'Projects and their units'
         },
+        lang: {noData: 'No data to display' },
         subtitle: {
                 text: 'Click the bars to view units under each project.'
             },
@@ -747,30 +799,30 @@
         <c:forEach items="${projectPerformanceByStockSold}" var="project">
                 projectObject = {};
                 projectUnitsArray = new Array();
-                projectObject.name = '${project.projectName}';
+                projectObject.name = "${project.projectName}";
                 
                 //handle the units
                 <c:forEach items="${project.units}" var="unit">
-                    projectUnitsArray.push(new Array('${unit.name}',(${unit.setupStock}-${unit.sold})));
+                    projectUnitsArray.push(new Array("${unit.name}",(${unit.setupStock}-${unit.sold})));
                 </c:forEach>
                 projectObject.data = projectUnitsArray;
                 
-                drillDownSeriiObject1['${project.projectName}'] = projectObject;
+                drillDownSeriiObject1["${project.projectName}"] = projectObject;
         </c:forEach>
             console.log("drillDownSeriiObject1: " + JSON.stringify(drillDownSeriiObject1));
         //sold
         <c:forEach items="${projectPerformanceByStockSold}" var="project">
                 projectObject = {};
                 projectUnitsArray = new Array();
-                projectObject.name = '${project.projectName}';
+                projectObject.name = "${project.projectName}";
                 
                 //handle the units
                 <c:forEach items="${project.units}" var="unit">
-                    projectUnitsArray.push(new Array('${unit.name}', ${unit.sold}));
+                    projectUnitsArray.push(new Array("${unit.name}", ${unit.sold}));
                 </c:forEach>
                 projectObject.data = projectUnitsArray;
                 
-                drillDownSeriiObject2['${project.projectName}'] = projectObject;
+                drillDownSeriiObject2["${project.projectName}"] = projectObject;
         </c:forEach>
             
             

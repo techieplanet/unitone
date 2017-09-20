@@ -7,7 +7,6 @@ package com.tp.neo.controller.helpers;
 
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
-import com.tp.neo.model.Agent;
 import com.tp.neo.model.User;
 import com.tp.neo.model.Withdrawal;
 import com.tp.neo.model.utils.TrailableManager;
@@ -52,6 +51,16 @@ public class WithdrawalManager {
     public void processWithdrawalApproval(Withdrawal w, String applicationContext){
         em.getTransaction().begin();
         w.setApproved((short)1);
+        new TrailableManager(w).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+        
+        
+        em.merge(w);
+        em.getTransaction().commit();
+    }
+    
+    public void processWithdrawalDisApproval(Withdrawal w, String applicationContext){
+        em.getTransaction().begin();
+        w.setApproved((short)2);
         new TrailableManager(w).registerUpdateTrailInfo(sessionUser.getSystemUserId());
         
         

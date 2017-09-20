@@ -5,7 +5,6 @@
  */
 package com.tp.neo.model;
 
-import com.tp.neo.model.plugins.LoyaltyHistory;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -84,6 +83,11 @@ import javax.xml.bind.annotation.XmlTransient;
 
 public class OrderItem extends BaseModel {
 
+    @Column(name = "vat_percentage")
+    private Double vatPercentage;
+    @Column(name = "annual_maintenance_percentage")
+    private Double annualMaintenancePercentage;
+    
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "modified_by")
@@ -303,8 +307,8 @@ public class OrderItem extends BaseModel {
     
     public double getCommissionAmount(double lodgementAmount){
         DecimalFormat df = new DecimalFormat(".##");
-        System.out.println("lodgementAmount: " + lodgementAmount);
-        System.out.println("comm perc: " + this.getCommissionPercentage());
+        //System.out.println("lodgementAmount: " + lodgementAmount);
+        //System.out.println("comm perc: " + this.getCommissionPercentage());
         double amount = lodgementAmount * this.getCommissionPercentage() / 100;
         String amountString = df.format(amount); //rounded to two decimal places
         return Double.parseDouble(amountString); //change back to double and return
@@ -367,6 +371,34 @@ public class OrderItem extends BaseModel {
         return total;
     }
     
+    public Double getVatPercentage() {
+        return vatPercentage;
+    }
+
+    public void setVatPercentage(Double vatPercentage) {
+        this.vatPercentage = vatPercentage;
+    }
+
+    public double calculateVatAmount(double amount){
+        return (amount * vatPercentage)/(100 + vatPercentage);
+    }
     
+    public double calculateAnnualMaintenanceAmount(double amount){
+        return (amount * getAnnualMaintenancePercentage() )/100;
+    }
+
+    /**
+     * @return the annualMaintenancePercentage
+     */
+    public Double getAnnualMaintenancePercentage() {
+        return annualMaintenancePercentage;
+    }
+
+    /**
+     * @param annualMaintenancePercentage the annualMaintenancePercentage to set
+     */
+    public void setAnnualMaintenancePercentage(Double annualMaintenancePercentage) {
+        this.annualMaintenancePercentage = annualMaintenancePercentage;
+    }
 
 }

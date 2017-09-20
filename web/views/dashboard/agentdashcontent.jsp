@@ -2,6 +2,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/code/highcharts.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/code/modules/drilldown.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/code/modules/exporting.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/highcharts/code/modules/no-data-to-display.js"></script>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <div class="row">
@@ -144,7 +145,7 @@
 
                                             <div class="col-md-1">
                                                 <br/>
-                                                <a class="btn btn-primary" href="#" onclick="return filterOrderSummary(); return false;">Filter</a>
+                                                <a class="btn btn-primary" href="#" onclick="filterOrderSummary()">Filter</a>
                                             </div>
                                         </div>
                                      </div>
@@ -184,7 +185,7 @@
 
                                                <div class="col-md-1">
                                                    <br/>
-                                                   <a class="btn btn-primary" href="#" onclick="return filterLodgementSummary(); return false;">Filter</a>
+                                                   <a class="btn btn-primary" href="#" onclick="filterLodgementSummary()">Filter</a>
                                                </div>
                                            </div>
                                         </div>
@@ -377,6 +378,8 @@
             tooltip: {
                 shared: true
             },
+            
+            lang: {noData: 'No data to display' },
             legend: {
                 layout: 'horizontal',
                 align: 'center',
@@ -508,6 +511,7 @@
             tooltip: {
                 shared: true
             },
+            lang: {noData: 'No data to display' },
             legend: {
                 layout: 'horizontal',
                 align: 'center',
@@ -530,18 +534,18 @@
         
         <c:forEach items="${projectPerformanceBySalesQuota}" var="project">
                 projectObject = {};
-                projectObject.name = '${project.projectName}';
+                projectObject.name = "${project.projectName}";
                 projectObject.y = ${project.valuePercentage};
-                projectObject.drilldown = '${project.projectName}';
+                projectObject.drilldown = "${project.projectName}";
                 projectDataArray.push(projectObject);
                 
                 //handle the units
                 var drillObject = {};
-                drillObject.name = '${project.projectName}';
-                drillObject.id = '${project.projectName}';
+                drillObject.name = "${project.projectName}";
+                drillObject.id = "${project.projectName}";
                 drillObjectDataArray = new Array();
                 <c:forEach items="${project.units}" var="unit">
-                    drillObjectDataArray.push(new Array('${unit.unitName}',${unit.valuePercentage})); //push a unit into the drill down object
+                    drillObjectDataArray.push(new Array("${unit.unitName}",${unit.valuePercentage})); //push a unit into the drill down object
                 </c:forEach>
                     
                 drillObject.data = drillObjectDataArray;
@@ -582,6 +586,7 @@
                 }
 
             },
+            lang: {noData: 'No data to display' },
             series: [{
                 name: 'Projects',
                 data: projectDataArray
@@ -599,7 +604,7 @@
         });
     }
     
-    
+    <%
 //    function drawPerformanceBarChart(){
 //        Highcharts.setOptions({
 //                colors: ['#CC0000', '#00a65a', '#3366CC', '#FF9900', '#109618', '#990099', '#0099C6', '#DD4477', '#AAAA11', '#B77322']
@@ -623,16 +628,16 @@
 ////            }]
 ////        }
 //        
-//        //stock: unsold
+//        stock: unsold
 //        var seriesObject = {};
 //        seriesObject.name = "In Stock";
-        <%--<c:forEach items="${projectPerformance}" var="project">--%>
+ //       <c:forEach items="${projectPerformance}" var="project">
 //                projectObject = {};
 //                projectObject.name = '${project.projectName}';
 //                projectObject.y = (${project.setupStock} - ${project.sold});
 //                projectObject.drilldown = true;
 //                projectDataArray.push(projectObject);
-        <%--</c:forEach>--%>
+ //       </c:forEach>
 //        seriesObject.data = projectDataArray;
 //        seriesArray.push(seriesObject);
 //            
@@ -640,13 +645,13 @@
 //        projectDataArray = new Array();
 //        seriesObject = {};
 //        seriesObject.name = "Sold";
-        <%--<c:forEach items="${projectPerformance}" var="project">--%>
+  //      <c:forEach items="${projectPerformance}" var="project">
 //                projectObject = {};
 //                projectObject.name = '${project.projectName}';
 //                projectObject.y = ${project.sold};
 //                projectObject.drilldown = true;
 //                projectDataArray.push(projectObject);
-        <%--</c:forEach>--%>
+//     </c:forEach>
 //        seriesObject.data = projectDataArray;
 //        seriesArray.push(seriesObject);
 //            
@@ -731,49 +736,39 @@
 //        });
 //
 //    }
-    
+%>
     function getChartAndDrillDownArray(obj,e){
         var drillDownSeriiObject1 = {color: 'green'};
         var drillDownSeriiObject2 = {color: '#FF0000'};
-        
-//        drilldowns = {
-//            'Animals': {
-//                name: 'Animals',
-//                color: '#3150b4',
-//                data: [
-//                    ['Cows', 2],
-//                    ['Sheep', 3]
-//                ]
-//            },
 
         //stock: unsold
         <c:forEach items="${projectPerformance}" var="project">
                 projectObject = {};
                 projectUnitsArray = new Array();
-                projectObject.name = '${project.projectName}';
+                projectObject.name = "${project.projectName}";
                 
                 //handle the units
                 <c:forEach items="${project.units}" var="unit">
-                    projectUnitsArray.push(new Array('${unit.name}',(${unit.setupStock}-${unit.sold})));
+                    projectUnitsArray.push(new Array("${unit.name}",(${unit.setupStock}-${unit.sold})));
                 </c:forEach>
                 projectObject.data = projectUnitsArray;
                 
-                drillDownSeriiObject1['${project.projectName}'] = projectObject;
+                drillDownSeriiObject1["${project.projectName}"] = projectObject;
         </c:forEach>
             console.log("drillDownSeriiObject1: " + JSON.stringify(drillDownSeriiObject1));
         //sold
         <c:forEach items="${projectPerformance}" var="project">
                 projectObject = {};
                 projectUnitsArray = new Array();
-                projectObject.name = '${project.projectName}';
+                projectObject.name = "${project.projectName}";
                 
                 //handle the units
                 <c:forEach items="${project.units}" var="unit">
-                    projectUnitsArray.push(new Array('${unit.name}', ${unit.sold}));
+                    projectUnitsArray.push(new Array("${unit.name}", ${unit.sold}));
                 </c:forEach>
                 projectObject.data = projectUnitsArray;
                 
-                drillDownSeriiObject2['${project.projectName}'] = projectObject;
+                drillDownSeriiObject2["${project.projectName}"] = projectObject;
         </c:forEach>
             
             

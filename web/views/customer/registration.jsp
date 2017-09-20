@@ -111,8 +111,12 @@
             <button type="button" id="process-step-1" class="btn btn-primary btn-circle" onclick="return showCustomerReg()">1</button>
             <p>Register</p>
         </div>
+         <div class="stepwizard-step">
+            <button type="button" id="process-step-2" class="btn btn-default btn-circle" disabled="disabled" onclick="" >2</button>
+            <p>Documents</p>
+        </div>
         <div class="stepwizard-step">
-            <button type="button" id="process-step-2" class="btn btn-default btn-circle" disabled="disabled" onclick="return showOrderProduct()">2</button>
+            <button type="button" id="process-step-3" class="btn btn-default btn-circle" disabled="disabled" onclick="return showOrderProduct()">3</button>
             <p>Order/Checkout</p>
         </div>
     </div>

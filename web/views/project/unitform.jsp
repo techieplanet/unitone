@@ -1,13 +1,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<form name="projectunitform1" id="projectunitform" method="POST" action="ProjectUnit" class="form-horizontal" role="form"> 
+<form name="projectunitform1" id="projectunitform" method="POST" action="ProjectUnit" class="form-horizontal" role="form" >
     <div class="">
       <div class="box-header with-border">
         <h3 class="box-title">
             <span class="title-text"></span>
             
-            <!--<span class="income-text pull-right">Income: <span id="income-value"></span></span>-->
                     
             <span id="loading" class="hidden" style="float:right;">
                 <small>Fetching Data... &nbsp;&nbsp;&nbsp;</small> 
@@ -49,7 +48,6 @@
                 <input type="text" name="title" id="title" class="form-control" value="">
             </div>
           </div>
-          
           <div class="form-group marginbottom10">
             <label for="quantity" class="col-sm-4 control-label">Quantity Available*</label>
             <div class="col-sm-7">            
@@ -70,25 +68,26 @@
                 </select>
             </div>
           </div>
-          
-          <div class="form-group marginbottom10">
+          <div class="form-group marginbottom10 ">
             <label for="cpu" class="col-sm-4 control-label">Selling Price*</label>
-            <div class="col-sm-7">
-                <input type="text" name="cpu" id="cpu" class="form-control text-right medium" value="">
+            <div class="col-sm-8">
+                <input type="text" name="cpu" id="cpu" class="col-sm-6 text-right" value="" onfocus="showElement('cpuFormat' , this.value)" onkeyup="formatAmount('cpuFormat' , this.value)">
+                <span id="cpuFormat" class=" col-sm-6 text-right" ></span>
             </div>
-          </div>
-          
+            </div>
           <div class="form-group marginbottom10">
             <label for="building_cost" class="col-sm-4 control-label">Building/Land Cost*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="building_cost" id="building_cost" class="form-control medium text-right" value="">
+            <div class="col-sm-8"> 
+                <input type="text" name="building_cost" id="building_cost" class="col-sm-6 text-right" value="" onfocus="showElement('building_costFormat' , this.value)" onkeyup="formatAmount('building_costFormat' , this.value)">
+               <span  id="building_costFormat" class=" col-sm-6 text-right"></span>
             </div>
           </div>
           
           <div class="form-group marginbottom10">
             <label for="service_value" class="col-sm-4 control-label">Service Value*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="service_value" id="service_value" class="form-control medium text-right" value="">
+            <div class="col-sm-8">            
+                <input type="text" name="service_value" id="service_value" class="col-sm-6 text-right text-right" value="" onfocus="showElement('service_valueFormat' , this.value)" onkeyup="formatAmount('service_valueFormat' , this.value)">
+                <span  id="service_valueFormat" class="col-sm-6 text-right" ></span>
             </div>
           </div>
           
@@ -105,15 +104,19 @@
                 <input type="text" name="commp" id="commp" class="form-control medium text-right" value="">
             </div>
           </div>
-          
+           <div class="form-group marginbottom10">
+            <label for="amp" class="col-sm-4 control-label">Agent Annual Maintenance Percentage*</label>
+            <div class="col-sm-7">            
+                <input type="text" name="amp" id="amp" class="form-control medium text-right" value="">
+            </div>
+          </div>
           
           <div class="form-group marginbottom10">
             <label for="vatp" class="col-sm-4 control-label">V.A.T Percentage*</label>
             <div class="col-sm-7">            
-                <input type="text" name="vatp" id="vatp" class="form-control medium text-right" value="">
+                <input type="text" name="vatp" id="vatp" class="form-control medium text-right" value="5.0">
             </div>
           </div>
-          
           
           <div class="form-group marginbottom10">
             <label for="reward_points" class="col-sm-4 control-label">Reward Points</label>
@@ -126,8 +129,9 @@
           
           <div class="form-group marginbottom10">
             <label for="income" class="col-sm-4 control-label">Income</label>
-            <div class="col-sm-7">            
-                <input type="text" name="income" id="income" readonly="readonly" class="form-control medium text-right" value="">
+            <div class="col-sm-8">            
+                <input type="text" name="income" id="income" readonly="readonly" class="col-sm-6 text-right" value="">
+                <span  id="incomeFormat" class="col-sm-6 text-right" ></span>
             </div>
           </div>
           
@@ -135,15 +139,17 @@
           <h4 style="border-bottom: 1px solid #cccccc;">Payment</h4>
           <div class="form-group marginbottom10">
             <label for="amt_payable" class="col-sm-4 control-label">Amount Payable*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="amt_payable" id="amt_payable" readonly="readony" class="form-control medium text-right" value="">
+            <div class="col-sm-8">            
+                <input type="text" name="amt_payable" id="amt_payable" readonly="readony" class="col-sm-6 text-right" value="" >
+                <span  id="amt_payableFormat" class="col-sm-6 text-right "></span>
             </div>
           </div>
           
           <div class="form-group marginbottom10">
             <label for="lid" class="col-sm-4 control-label">Least Initial Deposit*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="lid" id="lid" class="form-control medium text-right" value="">
+            <div class="col-sm-8">            
+                <input type="text" name="lid" id="lid" class="col-sm-6 text-right" value="" onfocus="showElement('lidFormat' , this.value)" onkeyup="formatAmount('lidFormat' , this.value)">
+                <span  id="lidFormat" class="col-sm-6 text-right"></span>
             </div>
           </div>
           
@@ -156,8 +162,9 @@
           
           <div class="form-group marginbottom10">
             <label for="mpd" class="col-sm-4 control-label">Monthly Payment*</label>
-            <div class="col-sm-7">            
-                <input type="text" name="monthly_pay" id="monthly_pay" readonly="readony" class="form-control medium text-right" value="">
+            <div class="col-sm-8">            
+                <input type="text" name="monthly_pay" id="monthly_pay" readonly="readony" class="col-sm-6 text-right" value="" >
+                <span  id="monthly_payFormat" class="col-sm-6 text-right" ></span>
             </div>
           </div>
           
@@ -180,13 +187,22 @@
 
 </form>
           
+          
+      
 <script>
 
+    function showElement(element , value){
+        $('#' + element).text("# "+ accounting.formatNumber(value , 2));
+    }
+    
+    function formatAmount(element , value ){
+        $('#' + element).text("# "+ accounting.formatNumber(value , 2));
+    }
     
     $(document).ready(function(){
         
         //on key up for diacount and cost per unit, calculating amount payable
-        $("#discount, #cpu, #lid, #mpd").on("keyup", function(){
+        $("#discount, #cpu, #lid, #mpd").on("change", function(){
             
             var cpu = parseFloat($("#cpu").val());
             cpu = !isNaN(cpu) ? cpu : 0; 
@@ -198,6 +214,7 @@
             
             var amt_payable = cpu - (discount/100*cpu);
             $("#amt_payable").val(amt_payable.toFixed(2));
+            $("#amt_payableFormat").text("# "+ accounting.formatNumber(amt_payable , 2));
             
 //            var amt_payable = parseFloat($("#amt_payable").val());
 //            amt_payable = !isNaN(amt_payable) ? amt_payable : 0; 
@@ -206,14 +223,17 @@
             var lid = parseFloat($("#lid").val());
             lid = !isNaN(lid) ? lid : 0; 
             $("#lid").val(lid);
+            $("#lidFormat").text("# "+ accounting.formatNumber(lid , 2));
             
             var mpd = parseInt($("#mpd").val());
             mpd = !isNaN(mpd) ? mpd : 0;
             $("#mpd").val(mpd);
+            $("#mpdFormat").text("# "+accounting.formatNumber(mpd , 2));
             
             var monthly_pay = (amt_payable - lid) / mpd;
             monthly_pay = isFinite(monthly_pay) ? monthly_pay : 0;
             $("#monthly_pay").val(monthly_pay.toFixed(2));
+            $("#monthly_payFormat").text("# "+ accounting.formatNumber(monthly_pay , 2));
             
             console.log("cpu: " + cpu, "discount: " + discount, "amt: " + amt_payable);
             console.log("lid " + lid, "mpd " + mpd, "amt_payable " + amt_payable, "monthly_pay: " + monthly_pay);
@@ -248,18 +268,30 @@
             VATPercentage = !isNaN(VATPercentage) ? VATPercentage : 0; 
             $("#vatp").val(VATPercentage);
             
+            var AMPercentage = parseFloat($("#amp").val());
+            AMPercentage = !isNaN(AMPercentage) ? AMPercentage : 0; 
+            $("#amp").val(AMPercentage);
+            
             var rewardPoints = parseFloat($("#reward_points").val());
             rewardPoints = !isNaN(rewardPoints) ? rewardPoints : 0; 
             $("#reward_points").val(rewardPoints);
             
+            //Vat should be calculated after deducting service value 
+            var realCost = cpu - (serviceValue +discountValue);
             
-            var commissionValue = (cpu * commissionPercentage / 100);
-            var VATValue = (cpu * VATPercentage / 100);
+            var VATValue = ((costMinusServiceValue) * VATPercentage / (100 + VATPercentage) );
             
-            var income = cpu - discountValue - buildingCost - serviceValue - commissionValue - VATValue;
+            //var AMValue = (cpu * AMPercentage / 100);
+            var commissionValue = ((costMinusServiceValue-VATValue) * commissionPercentage / 100);
+            //AMValue = (commissionValue * AMPercentage / 100);
+            //commissionValue -= AMValue;
+            
+            
+           var income = cpu - (discountValue +buildingCost + serviceValue + commissionValue + VATValue) ;//- AMValue;
+           
             income = !isNaN(income) ? income : 0; 
             $("#income").val(income.toFixed(2));
-            
+            $("#incomeFormat").text("# "+ accounting.formatNumber(income , 2));
             
         });
         
@@ -286,7 +318,7 @@
 //        dataObject.projectid = $('#projectid').val();
 
         
-        console.log("send data: " + $('#projectunitform').serialize());
+      //  console.log("send data: " + $('#projectunitform').serialize());
         submitPostForm('${pageContext.request.contextPath}/ProjectUnit', 
                         $('#projectunitform').serialize()
                      );
@@ -302,7 +334,9 @@
        if($('#id').val().length == 0){//insert mode
            var html = '<li id="' + 'row'+result.UNIT_ID + '" class="list-group-item noborder">' +
                         '<span class="" style="width: 60%; display: inline-table;">' + result.TITLE + '<span class="badge marginleft5">' + result.QUANTITY + '</span></span>' +
+                        '<span class="marginleft5"><a href="#" style="text-decoration:underline" onclick="showImage(\'\' , 1)" >view image</a></span>'+
                         '<a class="pull-right btn btn-danger btn-xs marginleft5" href="#" onclick="showDeleteModal('+ "'/NeoForce', 'ProjectUnit'," + result.UNIT_ID + ')" role="button"><i class="fa fa-remove"></i></a>' +
+                        '<a class="pull-right btn btn-success btn-xs marginleft5" onclick="uploadUnitImage('+ result.UNIT_ID +')" role="button"><i class="fa fa-upload" ></i></a>'+
                         '<a class="pull-right btn btn-success btn-xs" onclick="launchEditUnitForm(' + result.UNIT_ID + ",'/NeoForce'" + ')" role="button"><i class="fa fa-pencil"></i></a>' +
                     '</li>';
             $('.list-group').append(html);
