@@ -23,6 +23,7 @@ import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.utils.FileUploader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -177,7 +178,7 @@ public class OrderController extends AppController {
         
         //HttpSession session = request.getSession();
         SystemUser user = sessionUser;
-        System.out.println("System User : " + user);
+        //System.out.println("System User : " + user);
         
         request.setAttribute("userType", sessionUser.getSystemUserTypeId());
         request.setAttribute("agents",agent.listAgents());
@@ -361,11 +362,20 @@ public class OrderController extends AppController {
             }
             
             OrderItemObjectsList orderItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
-           
+           Map<String , String> requestParams = getRequestParameters(request);
             
             
             List<OrderItem> orderItems = orderManager.prepareOrderItem(orderItemObject, agent);
-            Lodgement lodgement = orderManager.prepareLodgement(getRequestParameters(request), agent);
+            Lodgement lodgement = orderManager.prepareLodgement(requestParams, agent);
+            
+            StringBuilder eMsg = new StringBuilder();
+            boolean valid = validateOrder(orderItems , lodgement , eMsg);
+            if(!valid)
+            {
+                sendErrorMessage(request, response , eMsg.toString());
+                return;
+                
+            }
             
             if(plugins.containsKey("loyalty")){
                 lodgement = orderManager.setLodgementRewardPoint(lodgement, orderItems);
@@ -653,7 +663,7 @@ public class OrderController extends AppController {
 //        Short s = 3; // Get Orders that are not declined approved
 //        jplQuery.setParameter("approvalStatus", s);
 //        
-//        System.out.println("Query : " + jplQuery.toString());
+//        //System.out.println("Query : " + jplQuery.toString());
 //        List<ProductOrder> orderResultSet = jplQuery.getResultList();
 
         String q = "SELECT p FROM ProductOrder p "
@@ -688,7 +698,7 @@ public class OrderController extends AppController {
             orderWrapperList.add(ordersWrapper);
         }
         
-         System.out.println("ObjectWrappper : " + orderWrapperList.size()); 
+         //System.out.println("ObjectWrappper : " + orderWrapperList.size()); 
         
          
          em.close();
@@ -712,7 +722,7 @@ public class OrderController extends AppController {
         
         List<OrderItem> resultSet = jplQuery.getResultList();
         
-        System.out.println("Order items count " + resultSet.size() + ", for order " + order.getId());
+        //System.out.println("Order items count " + resultSet.size() + ", for order " + order.getId());
        
         return resultSet;
     }
@@ -722,7 +732,6 @@ public class OrderController extends AppController {
     private void approveOrder(HttpServletRequest request,HttpServletResponse response, String viewFile){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        emf.getCache().evictAll();
         
         HttpSession session = request.getSession();
         HashMap<String,Plugin> plugins = (HashMap)session.getAttribute("availablePlugins");
@@ -737,6 +746,7 @@ public class OrderController extends AppController {
         List<OrderItem> orderItemList = new ArrayList();
         Customer customer = null;
         ProductOrder productOrder = null;
+        Date date = new Date(System.currentTimeMillis());
         
         if(approveOrders != null) {
             for(int i=0; i < approveOrders.length;i++){
@@ -745,9 +755,28 @@ public class OrderController extends AppController {
                 OrderItem orderItem = em.find(OrderItem.class, id);
                 short s = 1;
                 orderItem.setApprovalStatus(s);
-                em.merge(orderItem);
-                em.persist(orderItem);
+                //em.persist(orderItem);
                 orderItemList.add(orderItem);
+                
+                //Lets make a Loyalty history entry 
+                //This entry will have the number of loyalty that the customer 
+                //order
+               if(plugins != null)
+                if(plugins.containsKey("loyalty")){
+                    customer = orderItem.getOrder().getCustomer();
+                    
+                    int quantity = orderItem.getQuantity();
+                    
+                    for(int x = 0 ; x < quantity ; x ++ )
+                    {
+                    LoyaltyHistory lH = new LoyaltyHistory();
+                    lH.setCustomerId(customer);
+                    lH.setRewardPoints(orderItem.getUnit().getRewardPoints());
+                    lH.setType((short)1);
+                    lH.setCreatedDate(date);
+                    em.persist(lH);
+                    }
+                }
               
             }
         }
@@ -759,14 +788,10 @@ public class OrderController extends AppController {
                 OrderItem orderItem = em.find(OrderItem.class, id);
                 short s = 2;
                 orderItem.setApprovalStatus(s);
-                em.merge(orderItem);
+                //em.persist(orderItem);
                 orderItemList.add(orderItem);
             }
         }
-        
-        
-        
-        em.getTransaction().commit();
         
         
         if(orderItemList.size() > 0){
@@ -779,7 +804,7 @@ public class OrderController extends AppController {
             jpQl.setParameter("remoteId", productOrder.getId());
             jpQl.setParameter("typeTitle","Order");
 
-            Notification notification = (Notification)jpQl.getSingleResult();
+            Notification notification = (Notification)jpQl.getResultList().get(0);
             
             OrderManager orderManager = new OrderManager(sessionUser);
             
@@ -787,11 +812,10 @@ public class OrderController extends AppController {
                 orderManager = new OrderManager(sessionUser, plugins);
             }
             orderManager.processOrderApproval(productOrder, orderItemList, customer, notification);
-            System.out.println("Successful");
+            //System.out.println("Successful");
             
         }
-        
-        
+        em.getTransaction().commit();
         em.close();
         emf.close();
         
@@ -801,7 +825,15 @@ public class OrderController extends AppController {
         pe.printStackTrace();
     }
     catch(RollbackException rollBack){
+        if(em.getTransaction().isActive())
         em.getTransaction().rollback();
+        em.close();
+        emf.close();
+    }
+    catch(Exception e){
+        em.getTransaction().rollback();
+        em.close();
+        emf.close();
     }
    }
     
@@ -816,6 +848,7 @@ public class OrderController extends AppController {
             ProductOrder productOrder = em.find(ProductOrder.class, productOrderId);
             
             request.setAttribute("pendingOrders", listPendingOrders());
+            if(productOrder != null)
             request.setAttribute("singleOrderId",productOrder.getId());
             
             
@@ -835,8 +868,7 @@ public class OrderController extends AppController {
 //            request.setAttribute("pendingOrders", listPendingOrders());
 //            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
 //            dispatcher.forward(request, response);
-            
-            response.sendRedirect(request.getContextPath() + "/Order?action=approval");
+            AppController.doRedirection(request, response, "/Order?action=approval");
             
         } catch (IOException ex) {
             Logger.getLogger(OrderController.class.getName()).log(Level.SEVERE, null, ex);
@@ -879,7 +911,7 @@ public class OrderController extends AppController {
        
        String payLoad = gson.toJson(orderItemMap);
        
-       System.out.println("Order : " + payLoad);
+       //System.out.println("Order : " + payLoad);
        
        response.setContentType("text/plain");
        response.setCharacterEncoding("UTF-8");
@@ -936,7 +968,32 @@ public class OrderController extends AppController {
         return map;
     }
    
-    
-    
+   private boolean validateOrder(List<OrderItem> orderItems , Lodgement lodgement, StringBuilder errorMSG){
+      
+       //Validating if the initial payment specified by user is lesser that what is required
+       Double customerTotalInitialPayment = 0.0;
+       
+       for(OrderItem item : orderItems)
+       {
+          customerTotalInitialPayment += item.getInitialDep();
+          if(item.getInitialDep() < item.getUnit().getLeastInitDep())
+          {
+              errorMSG.append("One or more Order have an Invalid Initial deposit amount");
+              return false;
+          }
+       }
+       
+       if(lodgement.getAmount() < customerTotalInitialPayment)
+       {
+           errorMSG.append("The Lodgement Amount is invalid");
+           return false;
+       }
+       
+       
+      return true;
+  }
    
+   private void sendErrorMessage(HttpServletRequest request, HttpServletResponse response , String msg) throws IOException{
+       response.sendError(403, msg+ "---Go back <a href='" + request.getHeader("referer") + "'>Previous Page</a>");
+   }
 }

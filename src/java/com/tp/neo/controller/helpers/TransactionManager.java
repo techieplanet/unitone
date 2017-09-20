@@ -23,9 +23,9 @@ import javax.persistence.Query;
  */
 public class TransactionManager {
  
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-    EntityManager em = emf.createEntityManager();
-    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+    static EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+    static EntityManager em = emf.createEntityManager();
+    static Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
     SystemUser sessionUser;
                 
     public TransactionManager(SystemUser sessionUser){
@@ -44,7 +44,7 @@ public class TransactionManager {
         transaction.setAmount(amount);
         
         em.persist(transaction);
-        System.out.println("after  perist: " + transaction.getId());
+        //System.out.println("after  perist: " + transaction.getId());
         
         em.getTransaction().commit();
         

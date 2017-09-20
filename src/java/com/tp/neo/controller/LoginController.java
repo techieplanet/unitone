@@ -8,6 +8,7 @@ package com.tp.neo.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.tp.neo.controller.components.AppController;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Auditlog;
@@ -103,6 +104,10 @@ public class LoginController extends HttpServlet {
        if(action.equals("logout")){
            processLogoutRequest(request, response);
        }
+       else
+       {
+          AppController.doRedirection(request, response, "/");
+       }
     }
 
     /**
@@ -133,6 +138,7 @@ public class LoginController extends HttpServlet {
     public void processLoginRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String email = request.getParameter("email") != null ? request.getParameter("email") : "";
+        email = email.toLowerCase();
         String password = request.getParameter("password") != null ? request.getParameter("password") : "";//[B@3c9a818d
         String userTypeString = request.getParameter("usertype") != null ? request.getParameter("usertype") : "";
         
@@ -141,7 +147,7 @@ public class LoginController extends HttpServlet {
             redirectToLogin(request, response);
         }
         
-        System.out.println("Password: " + password);
+        //System.out.println("Password: " + password);
         
         try{
             em = emf.createEntityManager();
@@ -152,30 +158,33 @@ public class LoginController extends HttpServlet {
                 return;
             }
             String storedPassword = user.getPassword();
-            System.out.println("storedPassword: " + storedPassword);
+            //System.out.println("storedPassword: " + storedPassword);
             
             if(AuthManager.check(password, storedPassword)){
                 log("logged in");
-                System.out.println("This is the stored password "+ storedPassword);
-                System.out.println("UserType : " + user.getSystemUserTypeId());
+                //System.out.println("This is the stored password "+ storedPassword);
+                //System.out.println("UserType : " + user.getSystemUserTypeId());
                 //start the session
                 HttpSession session = request.getSession();
-                session.setMaxInactiveInterval(900); //15 minutes
+                session.setMaxInactiveInterval(600); //10min
                 session.setAttribute("user", user);
                 session.setAttribute("userTypeString", userTypeString);
                 session.setAttribute("userTypes", userTypes);
                 session.setAttribute("availablePlugins", getAvailableplugins());
                 
                 if(user.getSystemUserTypeId() == 2){//agent or customer so go get the permissions from db
-                    user.setPermissions(this.getUserTypePermissions(user,"Agent"));
+                    //user.setPermissions(this.getUserTypePermissions(user,"Agent"));
                 }
                 else if(user.getSystemUserTypeId() == 3){//agent or customer so go get the permissions from db
-                    user.setPermissions(this.getUserTypePermissions(user,"Customer"));
+                    //user.setPermissions(this.getUserTypePermissions(user,"Customer"));
+                }else if(user.getSystemUserTypeId() == 1)
+                {
+                    user.setPermissions(((User)user).getRole().getPermissions());
                 }
                     
                 String referrerURI = new URI(request.getHeader("referer")).toString();
                 String referrerPath = new URI(request.getHeader("referer")).getPath();
-                System.out.println("Context: " + URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath());
+                //System.out.println("Context: " + URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath());
                 
                 //do logging here
                 em.getTransaction().begin();
@@ -191,28 +200,29 @@ public class LoginController extends HttpServlet {
                 
                 em.persist(auditlog);
                 em.getTransaction().commit();
-                String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
-                System.out.println("RequestUrl resolve contextPath : " + context);
+                String context  = request.getContextPath();
+                        
+                //System.out.println("RequestUrl resolve contextPath : " + context);
                 
                 if(session.getAttribute("loginCallback") == null){
                     //context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
                     if(userTypeString.equals(userTypesEnum.CUSTOMER.toString().trim())){
-                       response.sendRedirect(context + "/Customer?action=profile&customerId="+user.getSystemUserId());
+                       AppController.doRedirection(request, response, "/Customer?action=profile&customerId="+user.getSystemUserId());
                        return;
                     }
-                    response.sendRedirect(context + "/Dashboard");
+                    AppController.doRedirection(request, response, "/Dashboard");
                     ////AuthManager.ucfirst(userType
                     return;
                 }
                 else{ 
-                     System.out.println("THis is the login call back of the session before redirect not null"+ referrerURI );
+                     //System.out.println("THis is the login call back of the session before redirect not null"+ referrerURI );
                      
                     response.sendRedirect(session.getAttribute("loginCallback").toString());
                     return;
                 }
                 
             }else{
-                System.out.println("Failed!");
+                //System.out.println("Failed!");
                 redirectToLogin(request, response);
             }
                 
@@ -225,7 +235,7 @@ public class LoginController extends HttpServlet {
         }
         catch(Exception e){
             e.printStackTrace();
-            System.out.println(e.getMessage());
+            //System.out.println(e.getMessage());
         } finally{
             em.close();
         }
@@ -256,8 +266,8 @@ public class LoginController extends HttpServlet {
             systemUser = (SystemUser) customerUser;
         }
         
-        System.out.println(queryArg+" This is the query arguments");
-        System.out.println(" hello "+email);
+        //System.out.println(queryArg+" This is the query arguments");
+        //System.out.println(" hello "+email);
        
         return systemUser;
     }
@@ -311,25 +321,19 @@ public class LoginController extends HttpServlet {
                 em.persist(auditlog);
                 em.getTransaction().commit();
             }    
-            String scheme = request.isSecure() ? "https" : "http";
-            String context = URI.create(request.getRequestURL().toString()).resolve(request.getContextPath()).getPath();
-            String host = new URI(request.getHeader("host")).toString();
-            rootUrl = scheme + "://" + host + context + "/";
-            
-            System.out.println(scheme + "://|" + host + "|" + context + "|/");
             
             session.invalidate();
-            response.sendRedirect(rootUrl);
+            //response.sendRedirect(request.getContextPath());
                 
         } catch(IllegalStateException e){
-            response.sendRedirect(rootUrl);
         }
         catch(Exception e){
             e.printStackTrace();
-            System.out.println(e.getMessage());
+            //System.out.println(e.getMessage());
         }
         finally {
             em.close();
+            AppController.doRedirection(request, response, "/");
         }
     }
     

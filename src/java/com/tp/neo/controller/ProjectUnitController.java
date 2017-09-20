@@ -14,6 +14,8 @@ import com.tp.neo.model.Account;
 import com.tp.neo.model.Project;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.ProjectUnitType;
+import com.tp.neo.model.User;
+import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,6 +28,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,6 +40,7 @@ import javax.xml.bind.PropertyException;
  * @author Swedge
  */
 @WebServlet(name = "ProjectUnit", urlPatterns = {"/ProjectUnit"})
+@MultipartConfig
 public class ProjectUnitController extends AppController {
 
     private static String INSERT_OR_EDIT = "/user.jsp";
@@ -152,7 +156,7 @@ public class ProjectUnitController extends AppController {
             response.getWriter().write(jsonResponse);
             response.getWriter().flush(); 
             response.getWriter().close();
-            System.out.println("jsonResponse: " + jsonResponse);
+            //System.out.println("jsonResponse: " + jsonResponse);
         }
 //        else if (action.isEmpty() || action.equalsIgnoreCase("listprojects")){
 //            viewFile = PROJECTS_ADMIN;
@@ -180,7 +184,10 @@ public class ProjectUnitController extends AppController {
         
             if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new ProjectUnit().getPermissionName(action), request, response)){
-                if(request.getParameter("id").equals(""))  //save mode
+            
+            if(action.equals("imageUpload"))
+                projectUnitImageUpload(request, response);
+            else if(request.getParameter("id").equals(""))  //save mode
                 processInsertRequest(request, response);
             else
                 processUpdateRequest(request, response);
@@ -221,15 +228,16 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
                 projectUnit.setVatPercentage(Double.parseDouble(request.getParameter("vatp")));
                 projectUnit.setAnnualMaintenancePercentage(Double.parseDouble(request.getParameter("amp")));
-                projectUnit.setRewardPoints(Integer.parseInt(request.getParameter("reward_points")));
+                projectUnit.setRewardPoints(Double.parseDouble(request.getParameter("reward_points")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
                 projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
                 projectUnit.setUnitType(em.find(ProjectUnitType.class, Integer.parseInt(request.getParameter("unittype"))));
 
                 projectUnit.setMonthlyPay(Double.parseDouble(request.getParameter("monthly_pay")));
                 projectUnit.setAmountPayable(Double.parseDouble(request.getParameter("amt_payable")));
-
+               /*
                 
+                */
                 new TrailableManager(projectUnit).registerInsertTrailInfo(sessionUser.getSystemUserId());
                 
                 //set the Project object
@@ -256,7 +264,7 @@ public class ProjectUnitController extends AppController {
                     List puList = jpqlQuery.setMaxResults(1).getResultList();
                     projectUnit = (ProjectUnit)puList.get(0);                                    
                 }
-               //System.out.println("Getting the ID: " + projectUnit.getTitle());
+               ////System.out.println("Getting the ID: " + projectUnit.getTitle());
                 
                 em.close();
                 emf.close();
@@ -267,25 +275,25 @@ public class ProjectUnitController extends AppController {
                 messages.put("QUANTITY", projectUnit.getQuantity() + "");
                 
                 jsonResponse = gson.toJson(messages);
-                //System.out.println("BEFORE RETURN: " + jsonResponse);
+                ////System.out.println("BEFORE RETURN: " + jsonResponse);
             }
             catch(PropertyException e){
-                System.out.println("inside catch area: " + gson.toJson(errorMessages));
+                //System.out.println("inside catch area: " + gson.toJson(errorMessages));
                 Iterator it = errorMessages.entrySet().iterator(); String errorString="";
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry)it.next();
-                    //System.out.println(pair.getKey() + " = " + pair.getValue());
+                    ////System.out.println(pair.getKey() + " = " + pair.getValue());
                     errorString += pair.getValue() + "<br/>";
                     //it.remove(); // avoids a ConcurrentModificationException
                 }
                 messages.put("STATUS", "ERROR");
                 messages.put("MESSAGE", errorString);
                 jsonResponse = gson.toJson(messages);
-                System.out.println("Error Messages: " + jsonResponse);
+                //System.out.println("Error Messages: " + jsonResponse);
             }
             catch(Exception e){
                 e.printStackTrace();
-                System.out.println("System Error: " + e.getMessage());
+                //System.out.println("System Error: " + e.getMessage());
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("title", projectUnit.getTitle());
 
@@ -318,7 +326,7 @@ public class ProjectUnitController extends AppController {
     
     protected void processUpdateRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("This is the update mode");
+        //System.out.println("This is the update mode");
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
@@ -346,7 +354,7 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setCommissionPercentage(Double.parseDouble(request.getParameter("commp")));
                 projectUnit.setVatPercentage(Double.parseDouble(request.getParameter("vatp")));
                 projectUnit.setAnnualMaintenancePercentage(Double.parseDouble(request.getParameter("amp")));
-                projectUnit.setRewardPoints(Integer.parseInt(request.getParameter("reward_points")));
+                projectUnit.setRewardPoints(Double.parseDouble(request.getParameter("reward_points")));
                 projectUnit.setQuantity(Integer.parseInt(request.getParameter("quantity")));
                 projectUnit.setIncome(Double.parseDouble(request.getParameter("income")));
 
@@ -355,7 +363,17 @@ public class ProjectUnitController extends AppController {
                 projectUnit.setUnitType(em.find(ProjectUnitType.class, Integer.parseInt(request.getParameter("unittype"))));
                 
                 new TrailableManager(projectUnit).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+                /*
+                String saveName = request.getPart("Image").getSubmittedFileName().trim();
                 
+                if(!saveName.isEmpty())
+                {
+                FileUploader fUpload = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);String subdir = "projectunits";
+                saveName = "pojectunit" + System.currentTimeMillis()+ "." + FileUploader.getSubmittedFileExtension(saveName);
+                projectUnit.setImage("projects/"+saveName);
+                fUpload.uploadFile(request.getPart("Image"), subdir, saveName, true);
+                }
+                */
                 em.getTransaction().commit();
                                 
                 em.close();
@@ -367,25 +385,25 @@ public class ProjectUnitController extends AppController {
                 messages.put("QUANTITY", projectUnit.getQuantity() + "");
                 
                 jsonResponse = gson.toJson(messages);
-                //System.out.println("BEFORE RETURN: " + jsonResponse);
+                ////System.out.println("BEFORE RETURN: " + jsonResponse);
             }
             catch(PropertyException e){
-                System.out.println("inside catch area: " + gson.toJson(errorMessages));
+                //System.out.println("inside catch area: " + gson.toJson(errorMessages));
                 Iterator it = errorMessages.entrySet().iterator(); String errorString="";
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry)it.next();
-                    //System.out.println(pair.getKey() + " = " + pair.getValue());
+                    ////System.out.println(pair.getKey() + " = " + pair.getValue());
                     errorString += pair.getValue() + "<br/>";
                     //it.remove(); // avoids a ConcurrentModificationException
                 }
                 messages.put("STATUS", "ERROR");
                 messages.put("MESSAGE", errorString);
                 jsonResponse = gson.toJson(messages);
-                System.out.println("Error Messages: " + jsonResponse);
+                //System.out.println("Error Messages: " + jsonResponse);
             }
             catch(Exception e){
                 e.printStackTrace();
-                System.out.println("System Error: " + e.getMessage());
+                //System.out.println("System Error: " + e.getMessage());
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("title", projectUnit.getTitle());
 
@@ -479,7 +497,7 @@ public class ProjectUnitController extends AppController {
         }    
         
         if(!request.getParameter("monthly_pay").matches("^\\d+(\\.?\\d+$)?") || Double.parseDouble(request.getParameter("monthly_pay")) <= 0 ){
-            errorMessages.put("monthly_pay", "Monthly Pay cannot be empty or 0. Please adjust other values.");
+          //  errorMessages.put("monthly_pay", "Monthly Pay cannot be empty or 0. Please adjust other values.");
 
         }    
         
@@ -495,7 +513,7 @@ public class ProjectUnitController extends AppController {
             errorMessages.put("amp", "Please enter Annual Maintenance Percentage");
         }
         
-        if(!request.getParameter("reward_points").matches("^\\d+$")){
+        if(!request.getParameter("reward_points").matches("^\\d+(\\.?\\d+$)?")){
             errorMessages.put("reward_points", "Please enter a valid Reward Point value");
         }
         
@@ -529,4 +547,62 @@ public class ProjectUnitController extends AppController {
         return "Short description";
     }// </editor-fold>
 
+    public void projectUnitImageUpload(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{
+                EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+                EntityManager em = emf.createEntityManager();
+                String unitId = request.getParameter("imgUnitId");
+                Long id = Long.valueOf(unitId);
+                if(id == null)
+                {
+                    response.sendError(404, "You Have Made An Invalid Request");
+                    return;
+                }
+                
+                ProjectUnit projectUnit = em.find(ProjectUnit.class, id);
+                String saveName = request.getPart("Image").getSubmittedFileName().trim();
+                em.getTransaction().begin();
+                if(!saveName.isEmpty())
+                {
+                FileUploader fUpload = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+                String subdir = "projectunits";
+                saveName = "projectunit" + System.currentTimeMillis()+ "." + FileUploader.getSubmittedFileExtension(saveName);
+                projectUnit.setImage("projectunits/"+saveName);
+                fUpload.uploadFile(request.getPart("Image"), subdir, saveName, true);
+                }
+                em.getTransaction().commit();
+                
+             List<User> usersList = em.createNamedQuery("User.findAll").getResultList();
+             
+            //find by ID
+            Project project = projectUnit.getProject();
+            
+            /**
+             * the collection is usually not updated in runtime, even after refreshing the page severally.
+             * So force a hard refresh by querying the db to get the actual set of valid elements 
+             * then use that as the valid collection
+             */
+            Query query = em.createNamedQuery("ProjectUnit.findByProjectAndActive")
+                                                .setParameter("project", project)
+                                                .setParameter("deleted", 0);
+            List<ProjectUnit> projectUnits = query.getResultList();    
+            
+            //good to do this to put every object/entity in sync
+            project.setProjectUnitCollection(projectUnits);
+            
+            /*
+                Get the project unit types
+            */
+            List<ProjectUnitType> unitTypes = em.createNamedQuery("ProjectUnitType.findByActive").setParameter("active", 1).getResultList();
+                    
+            log("length: " + unitTypes.size());
+            request.setAttribute("units", projectUnits);
+            request.setAttribute("unitTypes", unitTypes);
+            request.setAttribute("project", project);
+            request.setAttribute("action", "edit");
+            request.setAttribute("id", project.getId());
+            request.setAttribute("users", usersList);
+            request.setAttribute("unitSuccess", true);
+            request.getRequestDispatcher(PROJECTS_NEW).forward(request, response);
+            return;
+    }
 }

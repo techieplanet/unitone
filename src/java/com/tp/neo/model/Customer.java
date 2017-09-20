@@ -74,7 +74,7 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @OneToMany(mappedBy = "customerId")
     private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "reward_points")
-    private Integer rewardPoints;
+    private double rewardPoints;
     @OneToMany(mappedBy = "customer")
     private Collection<Lodgement> lodgementCollection;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
@@ -572,11 +572,11 @@ public class Customer implements Serializable, ITrailable, SystemUser {
         this.loyaltyHistoryCollection = loyaltyHistoryCollection;
     }
 
-    public Integer getRewardPoints() {
-         return rewardPoints == null ? 0 : rewardPoints; 
+    public double getRewardPoints() {
+         return rewardPoints ; 
     }
 
-    public void setRewardPoints(Integer rewardPoints) {
+    public void setRewardPoints(double rewardPoints) {
         this.rewardPoints = rewardPoints;
     }
 

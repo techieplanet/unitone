@@ -14,6 +14,7 @@ import com.tp.neo.controller.components.AppController;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.ProjectUnitType;
 import com.tp.neo.model.User;
+import com.tp.neo.model.utils.FileUploader;
 
 import com.tp.neo.model.utils.TrailableManager;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import javax.xml.bind.PropertyException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.RollbackException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -39,6 +41,7 @@ import javax.servlet.http.HttpSession;
  * @author Swedge
  */
 @WebServlet(name = "Project", urlPatterns = {"/Project"})
+@MultipartConfig
 public class ProjectController extends AppController {
     public final String pageTitle = "Project";
 
@@ -91,7 +94,7 @@ public class ProjectController extends AppController {
         
         if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Project().getPermissionName(action), request, response)){
-                System.out.println("passed haspermission");
+                //System.out.println("passed haspermission");
                 if(action.equalsIgnoreCase("punits")){
                   long id = Long.parseLong(request.getParameter("project_id"));
                   sendProjectUnitsData(request, response,id);
@@ -137,7 +140,7 @@ public class ProjectController extends AppController {
             response.setContentType("text/plain");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(jsonResponse);
-            System.out.println("jsonResponse: " + jsonResponse);
+            //System.out.println("jsonResponse: " + jsonResponse);
   
     }
 
@@ -145,7 +148,7 @@ public class ProjectController extends AppController {
             throws ServletException, IOException {        
         response.setContentType("text/html;charset=UTF-8");
     
-        System.out.println("Inside get project");
+        //System.out.println("Inside get project");
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         viewFile = PROJECTS_ADMIN; 
@@ -190,7 +193,7 @@ public class ProjectController extends AppController {
                 Get the project unit types
             */
             List<ProjectUnitType> unitTypes = em.createNamedQuery("ProjectUnitType.findByActive").setParameter("active", 1).getResultList();
-                    
+                  
             log("length: " + unitTypes.size());
             request.setAttribute("units", projectUnits);
             request.setAttribute("unitTypes", unitTypes);
@@ -291,7 +294,7 @@ public class ProjectController extends AppController {
 
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("Insert mode");
+        //System.out.println("Insert mode");
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         viewFile = PROJECTS_NEW;
@@ -301,7 +304,11 @@ public class ProjectController extends AppController {
         Project project = new Project();
         Gson gson = new GsonBuilder().create();
         List<ProjectUnit> projectUnits = new ArrayList<ProjectUnit>();
+        List<User> usersList = em.createNamedQuery("User.findAll").getResultList();
         
+        request.setAttribute("users", usersList);
+         List<ProjectUnitType> unitTypes = em.createNamedQuery("ProjectUnitType.findByActive").setParameter("active", 1).getResultList();
+        request.setAttribute("unitTypes", unitTypes); 
             try{                                
 
                 em.getTransaction().begin();
@@ -312,12 +319,21 @@ public class ProjectController extends AppController {
                 project.setProjectManager(request.getParameter("pmanager"));
                 project.setDeleted((short)0);
                 project.setActive((short)1);
+                String saveName = request.getPart("projectImage").getSubmittedFileName().trim();
+                project.setImage(saveName);
                 
                 //sessionUser is a class variable 
                 new TrailableManager(project).registerInsertTrailInfo(sessionUser.getSystemUserId());
                 
-                validate(project);
+                validateInsertWithImage(project);
                 
+                FileUploader fUpload = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+                
+                String subdir = "projects";
+                saveName = "poject" + System.currentTimeMillis()+ "." + FileUploader.getSubmittedFileExtension(saveName);
+                
+                project.setImage("projects/"+saveName);
+                fUpload.uploadFile(request.getPart("projectImage"), subdir, saveName, true);
                 em.persist(project);
                 
                 em.getTransaction().commit();
@@ -341,7 +357,7 @@ public class ProjectController extends AppController {
             }
             catch(PropertyException e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 viewFile = PROJECTS_NEW;
                 request.setAttribute("project", project);
                 request.setAttribute("units", projectUnits);
@@ -351,7 +367,7 @@ public class ProjectController extends AppController {
             }
             catch(RollbackException e){
                 e.printStackTrace();
-                System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
+                //System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
                 viewFile = PROJECTS_NEW;
                 request.setAttribute("project", project);
                 request.setAttribute("action", action);
@@ -361,13 +377,12 @@ public class ProjectController extends AppController {
             }
             catch(Exception e){
                 e.printStackTrace();
-                System.out.println("System Error: " + e.getMessage());
+                //System.out.println("System Error: " + e.getMessage());
                 SystemLogger.logSystemIssue("Project", gson.toJson(project), e.getMessage());
             }
         
             if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Project?action=edit&id=" + project.getId() + "&addstat=1";
-                response.sendRedirect(page);
+                AppController.doRedirection(request, response, "/Project?action=edit&id=" + project.getId() + "&addstat=1");
             }
             else {
                 RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
@@ -378,7 +393,7 @@ public class ProjectController extends AppController {
     
     protected void processUpdateRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("Update mode");
+        //System.out.println("Update mode");
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
@@ -388,7 +403,11 @@ public class ProjectController extends AppController {
         Project project = new Project();
         Gson gson = new GsonBuilder().create();
         List<ProjectUnit> projectUnits = new ArrayList<ProjectUnit>();
+        List<User> usersList = em.createNamedQuery("User.findAll").getResultList();
         
+        request.setAttribute("users", usersList);
+        List<ProjectUnitType> unitTypes = em.createNamedQuery("ProjectUnitType.findByActive").setParameter("active", 1).getResultList();
+        request.setAttribute("unitTypes", unitTypes); 
         try{                                
                 em.getTransaction().begin();
                 
@@ -405,12 +424,24 @@ public class ProjectController extends AppController {
                 projectUnits = (List)project.getProjectUnitCollection();
                 
                 //sessionUser is a class variable 
-                System.out.println("sessionUser.getSystemUserId(): " + sessionUser.getSystemUserId());
+                //System.out.println("sessionUser.getSystemUserId(): " + sessionUser.getSystemUserId());
                 new TrailableManager(project).registerUpdateTrailInfo(sessionUser.getSystemUserId());
                 log("update");
                 //log("Project data" + gson.toJson(projectUnits));
                 
                 validate(project);
+                
+                if(!request.getPart("projectImage").getSubmittedFileName().trim().isEmpty())
+                {
+                FileUploader fUpload = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+                String saveName = request.getPart("projectImage").getSubmittedFileName().trim();
+                String subdir = "projects";
+                saveName = "poject" + System.currentTimeMillis()+ "." + FileUploader.getSubmittedFileExtension(saveName);
+                
+                project.setImage("projects/"+saveName);
+                fUpload.uploadFile(request.getPart("projectImage"), subdir, saveName, true);
+                }
+                
                 log("validate");
                                 
                 em.getTransaction().commit();
@@ -427,7 +458,7 @@ public class ProjectController extends AppController {
             }
             catch(PropertyException e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 viewFile = PROJECTS_NEW;
                 request.setAttribute("project", project);
                 request.setAttribute("units", projectUnits);
@@ -437,7 +468,7 @@ public class ProjectController extends AppController {
             }
             catch(Exception e){
                 e.printStackTrace();
-                System.out.println("System Error: " + e.getMessage());
+                //System.out.println("System Error: " + e.getMessage());
                 HashMap<String, String> projectValues = new HashMap<String, String>();
                 projectValues.put("id", project.getId().toString());
                 projectValues.put("pname", project.getName());
@@ -493,7 +524,14 @@ public class ProjectController extends AppController {
         if(!(errorMessages.isEmpty())) throw new PropertyException("");
     }
     
-    
+    private void validateInsertWithImage(Project project ) throws PropertyException {
+        validate(project);
+        if(project.getImage().isEmpty())
+        {
+             errorMessages.put("errors5", "Please input file for Project image");
+        }
+        if(!(errorMessages.isEmpty())) throw new PropertyException("");
+    }
      public List<Project> listProjects(){
         //List<Project> projectList = new ArrayList<Project>();
         
@@ -515,7 +553,7 @@ public class ProjectController extends AppController {
         EntityManager em = emf.createEntityManager();
         
         Project project = em.find(Project.class, Long.parseLong(request.getParameter("project_id")));
-                
+        request.setAttribute("project", project);
         Query query = em.createNamedQuery("ProjectUnit.findByProjectAndQty");
         query.setParameter("project", project);
         
@@ -547,7 +585,7 @@ public class ProjectController extends AppController {
             ProjectUnit unit = em.find(ProjectUnit.class, Long.parseLong(id));
             units.add(unit);
             project_id = unit.getProject().getId();
-            System.out.println("Unit Id : " + id);
+            //System.out.println("Unit Id : " + id);
         }
         
         HttpSession session = request.getSession();
@@ -558,9 +596,9 @@ public class ProjectController extends AppController {
         
         
         if(loggedIn.equalsIgnoreCase("no")){
-            response.sendRedirect("Project?action=listunits&project_id="+project_id+"&loggedin=no");
+            AppController.doRedirection(request, response, "Project?action=listunits&project_id="+project_id+"&loggedin=no");
         }else{
-            response.sendRedirect("Project?action=listunits&project_id="+project_id);
+            AppController.doRedirection(request, response, "Project?action=listunits&project_id="+project_id);
         }
             
     }
@@ -596,9 +634,9 @@ public class ProjectController extends AppController {
         session.setAttribute("unit_cart", units);
        
         if(loggedIn.equalsIgnoreCase("no")){
-            response.sendRedirect("Project?action=listunits&project_id="+project_id+"&loggedin=no");
+            AppController.doRedirection(request, response, "Project?action=listunits&project_id="+project_id+"&loggedin=no");
         }else{
-        response.sendRedirect("Project?action=listunits&project_id="+project_id);
+        AppController.doRedirection(request, response, "Project?action=listunits&project_id="+project_id);
         }
     }
     

@@ -75,6 +75,24 @@
         </div><!-- /.modal-dialog -->
 </div>
 
+
+<div class="modal fade" id="withdrawFailedModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+         <div class="vertical-alignment-helper">
+          <div class="modal-dialog vertical-align-center">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title">Agent Withdrawal Request </h4>
+                </div>
+
+                <div class="modal-body">
+                    <p>Your withdrawal request is Unsuccessful</p>
+                </div>
+              </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+</div>
+
 <div class="modal fade" id="withdrawLoading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
          <div class="vertical-alignment-helper">
           <div class="modal-dialog vertical-align-center">
@@ -144,7 +162,10 @@
                      });
           },
           error : function(){
-              alert("Ooops, something went wrong... ");
+              $("#withdrawLoading").modal("hide");
+                    $("#withdrawFailedModal").modal({
+                        backdrop : false
+                     });
           }
       });
       

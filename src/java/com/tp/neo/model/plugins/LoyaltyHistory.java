@@ -41,7 +41,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "LoyaltyHistory.findByCreatedBy", query = "SELECT l FROM LoyaltyHistory l WHERE l.createdBy = :createdBy"),
     @NamedQuery(name = "LoyaltyHistory.findByCreatedDate", query = "SELECT l FROM LoyaltyHistory l WHERE l.createdDate = :createdDate"),
     @NamedQuery(name = "LoyaltyHistory.findByModifiedBy", query = "SELECT l FROM LoyaltyHistory l WHERE l.modifiedBy = :modifiedBy"),
-    @NamedQuery(name = "LoyaltyHistory.findByModifiedDate", query = "SELECT l FROM LoyaltyHistory l WHERE l.modifiedDate = :modifiedDate")})
+    @NamedQuery(name = "LoyaltyHistory.findByModifiedDate", query = "SELECT l FROM LoyaltyHistory l WHERE l.modifiedDate = :modifiedDate")
+    })
 public class LoyaltyHistory implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -51,7 +52,7 @@ public class LoyaltyHistory implements Serializable {
     @Column(name = "id")
     private Long id;
     @Column(name = "reward_points")
-    private Integer rewardPoints;
+    private double rewardPoints;
     @Column(name = "type")
     private Short type;
     @Column(name = "deleted")
@@ -88,11 +89,11 @@ public class LoyaltyHistory implements Serializable {
         this.id = id;
     }
 
-    public Integer getRewardPoints() {
+    public double getRewardPoints() {
         return rewardPoints;
     }
 
-    public void setRewardPoints(Integer rewardPoints) {
+    public void setRewardPoints(double rewardPoints) {
         this.rewardPoints = rewardPoints;
     }
 

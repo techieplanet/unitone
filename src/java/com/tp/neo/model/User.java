@@ -55,7 +55,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "User.findByModifiedDate", query = "SELECT u FROM User u WHERE u.modifiedDate = :modifiedDate"),
     @NamedQuery(name = "User.findByModifiedBy", query = "SELECT u FROM User u WHERE u.modifiedBy = :modifiedBy")})
 public class User extends BaseModel implements SystemUser{
-
+   
     @Basic(optional = false)
     @Column(name = "firstname")
     private String firstname;
@@ -318,5 +318,4 @@ public class User extends BaseModel implements SystemUser{
         return "com.tp.neo.model.User[ userId=" + userId + " ]";
     }
 
-    
 }

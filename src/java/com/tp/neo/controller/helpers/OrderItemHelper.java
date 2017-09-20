@@ -89,7 +89,7 @@ public class OrderItemHelper {
             date = sdf.format(cal.getTime());
         }
 
-        System.out.println("Month = " + (int) months);
+        //System.out.println("Month = " + (int) months);
 
         return date;
     }

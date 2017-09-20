@@ -16,14 +16,10 @@ import javax.persistence.Persistence;
  * @author SWEDGE
  */
 public class CountryService {
+    static EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+    static    EntityManager em = emf.createEntityManager();
     public static List<Country> getCountryList(){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
         List<Country> countries = (List<Country>)em.createNamedQuery("Country.findAll").getResultList();
-        
-        em.close();
-        emf.close();
        return countries;
     }
 }

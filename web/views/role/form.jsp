@@ -45,14 +45,49 @@
                     </div>
                 </div>
           </c:if>
-              
-          <div class="form-group">
+          <div class="col-md-12 col-lg-12">  
+          <div class="form-group col-sm-6">
               <label for="title" class="col-sm-2 control-label">Title</label>
               <div class="col-sm-10">
-                <input type="text" size="30" name="title" id="title" class="form-control medium" value="${role.title}">
+                <input type="text"  name="title" id="title" class="form-control medium" value="${role.title}">
               </div>
           </div>
-              
+           <div class="form-group col-sm-6">
+              <label for="tier" class="col-sm-2 control-label">Tier</label>
+              <div class="col-sm-10">
+                  <input type="number"  name="tier" id="tier" class="form-control medium" value="${role.tier}" onchange="updateSupervisorList()">
+              </div>
+          </div>
+      </div>
+              <div class="col-md-12 col-lg-12">
+          <div class="form-group col-sm-6">
+              <label for="alias" class="col-sm-2 control-label">Role Alias</label>
+              <div class="col-sm-10">
+                <input type="text"  name="alias" id="alias" class="form-control medium" value="${role.alias}">
+              </div>
+          </div>
+          <div class="form-group col-sm-6">
+              <label for="alias" class="col-sm-2 control-label">Supervisor</label>
+              <div class="col-sm-10">
+                  <select name="supervisor" id="supervisor" class="form-control medium" > 
+                      <c:choose>
+                          <c:when test="${supervisors != null && !supervisors.isEmpty()}" >
+                              <option value="">-----choose-----</option> 
+                          </c:when>
+                          <c:when test="${role.tier != null}" >
+                              <option value="">-----choose-----</option> 
+                          </c:when>
+                          <c:otherwise>
+                            <option value="">--Please Input a Tier--</option>  
+                          </c:otherwise>
+                      </c:choose>
+                    <c:forEach items="${supervisors}" var="supervisor" >
+                        <option value="${supervisor.alias}" <c:if test="${role.supervisor == supervisor.alias}" > selected </c:if>>${supervisor.title}</option>
+                    </c:forEach>
+                </select>
+              </div>
+          </div>
+      </div>
           <div class="form-group">
                <label for="desc" class="col-sm-2 control-label">Description</label>
                 <div class="col-sm-10">
@@ -156,5 +191,35 @@
                 
     }
      
+    function updateSupervisorList()
+    {
+        //tier //supervisor
+        $("#supervisor").html("Loading...");
+        $.post(window.location.pathname , "action=role_select&tier="+$("#tier").val() , function(data){
+            data = $.parseJSON(data);
+            if(Object.keys(data).length === 0)
+            {
+               $("#supervisor").html("");
+               var option =  document.createElement("option");
+               option.setAttribute("value" , "");
+               option.textContent = "No higher hirachy for the selected tier";
+               $("#supervisor").append(option);
+            }
+            else
+            {
+              $("#supervisor").html("");
+              var option =  document.createElement("option");
+              option.setAttribute("value" , "");
+               option.textContent = "-----choose-----";
+               $("#supervisor").append(option);
+            $.each(data , function(key , value){
+               var option =  document.createElement("option");
+               option.setAttribute("value" , value);
+               option.textContent = key;
+               $("#supervisor").append(option);
+            });
+             }
+        });
+    }
           
           </script>

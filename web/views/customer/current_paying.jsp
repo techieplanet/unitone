@@ -54,7 +54,8 @@
                     <tbody>
                         <c:forEach items="${customers}" var="customer">
                             <tr id="row<c:out value="${customer.customerId}" />">
-                                <td><img src="/uploads/NeoForce/images/customer/${customer.photoPath}" width='55' height='50'/></td>
+                                <td><%//<img src="/uploads/NeoForce/images/customers/customer_150166987523.png" width='55' height='50'/>%>
+                                    <img src="/uploads/NeoForce/images/customers/${customer.photoPath}" alt="no image" width='55' height='50'/></td>
                                 <td><c:out value="${customer.getAccountCode()}" /></td>
                                 <td><c:out value="${customer.firstname}" /></td>
                                 <td><c:out value="${customer.middlename}" /></td>

@@ -7,12 +7,15 @@ package com.tp.neo.controller.components;
 
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
+import com.tp.neo.model.AgentProspect;
+import com.tp.neo.model.Company;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Notification;
 import com.tp.neo.model.Permission;
 import com.tp.neo.model.Plugin;
 import com.tp.neo.model.User;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -28,27 +31,39 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
+import com.tp.neo.model.utils.MailSender;
 /**
  *
  * @author Swedge
  */
 public class AppController extends HttpServlet{
     public static final String APP_NAME = "NeoForce";
-    public static final String defaultEmail = "noreply@techieplanet.net.com";
+    public static  String defaultEmail = "noreply@techieplanet.net.com";
+    
     
     public Calendar calendar;
     protected long userType;
     protected SystemUser sessionUser;
     protected String callbackUrRL = "";
     protected boolean isAjaxRequest;
-    public static final String companyName = "TechiePlanet Ltd.";
+    public static  String companyName = "TechiePlanet Ltd.";
     protected String companyAddress = "214 Allen Avenue, Ikeja, Lagos.";
-    protected String companyPhone = "(+234) 816-4334-657";
-    protected String companyEmail = "info@techieplanetltd.com ";
+    protected static String companyPhone = "(+234) 816-4334-657";
+    protected static String companyEmail = "info@techieplanetltd.com ";
+    
+    //to improve page loading
+    static protected EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+    static {
+        Company company = emf.createEntityManager().find(Company.class, 1);
+        defaultEmail = company.getEmail();
+        companyName = company.getName();
+        companyPhone = company.getPhone();
+        companyEmail = company.getEmail();
+        MailSender.companyName = companyName;
+    }
     
     public AppController(){
-        System.out.println("Inside TPController");
+        //System.out.println("Inside TPController");
         calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
     }
     
@@ -61,10 +76,11 @@ public class AppController extends HttpServlet{
     
     public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, java.io.IOException {
      
-        System.out.println("Inside Service Method");
+        //System.out.println("Inside Service Method");
         //hasActiveUserSession(req, res);
         
         sessionUser = (SystemUser)req.getSession().getAttribute("user");
+        req.setAttribute("dateFmt", new SimpleDateFormat("EEE, d MMM yyyy"));
         
         req.setAttribute("notifications", getNotifications());
         req.setAttribute("loggedInUser",sessionUser);
@@ -87,12 +103,11 @@ public class AppController extends HttpServlet{
         log("callbackURL: " + callbackURL);
         session.setAttribute("loginCallback", callbackURL);
         
-        System.out.println("Session User : " +  session.getAttribute("user"));
+        //System.out.println("Session User : " +  session.getAttribute("user"));
         
         if(session.getAttribute("user") == null){
-            System.out.println("User not logged in");
+            //System.out.println("User not logged in");
             session.setAttribute("loginCallback", callbackURL);
-            String loginPage = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/";
             
             if(isAjaxRequest){
                 response.setCharacterEncoding("UTF-8");
@@ -103,7 +118,7 @@ public class AppController extends HttpServlet{
                 return false;
             }
             
-            response.sendRedirect(loginPage);
+            AppController.doRedirection(request, response, "/");
             return false;
         }
         
@@ -123,9 +138,9 @@ public class AppController extends HttpServlet{
     }
        
     public boolean hasActionPermission(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{                
-        System.out.println("Session User in HasPermission  : " + sessionUser);
-        System.out.println("Session User Permissions : " + sessionUser.getPermissions() );
-        System.out.println("Action : " + action);
+        //System.out.println("Session User in HasPermission  : " + sessionUser);
+        //System.out.println("Session User Permissions : " + sessionUser.getPermissions() );
+        //System.out.println("Action : " + action);
         String[] permissions = sessionUser.getPermissions().split(",");
         //log("action: " + action); log("cleanedPermissions: " + sessionUser.getPermissions());
         
@@ -156,10 +171,10 @@ public class AppController extends HttpServlet{
         {
             //Then we known that it is Either an Admin user or whatever
             //We proceed to check if the Admin has permission 
-            
+           
              //if User is trying to print an invoice
             String temp = (String) request.getParameter("action");
-            if(( temp!=null ) && temp.equals("lodgement_invoice"))
+            if(( temp!=null ) && temp.contains("lodgement_invoice"))
             {
                 return true;
             }
@@ -193,15 +208,36 @@ public class AppController extends HttpServlet{
     //Check is system user is an instance of the Agent Class
         if(user instanceof Agent)
         {
+            
             //Now we can cast the SystemUser Object to an Agent   reference 
+            
+            //This solve the issue of Agent Attempt to Edit or create Project
+            if (action.contains("view_project")) return true ;
             
             Agent agent = (Agent)user;
             
-             //if User is trying to print an invoice
             String temp = (String) request.getParameter("action");
-            if(( temp!=null ) && temp.equals("lodgement_invoice"))
+            
+             //Let check if Agent is trying to see it propective customers
+            if(temp!=null && temp.equalsIgnoreCase("edit_prospect"))
+             {
+                 AgentProspect prospect = emf.createEntityManager().find(AgentProspect.class, id);
+                 
+                 if(prospect == null)
+                     return false;
+                 
+                return agent.getAgentId().equals(prospect.getAgent().getAgentId());
+             }
+                 
+            //if User is trying to print an invoice
+            if(( temp!=null ) && temp.contains("lodgement_invoice"))
             {
                 return true;
+            }
+            
+            //if user tries to share referral code
+            if(action.contains("referer")){
+                    return true;
             }
             
             //if User   wants the project Unit list
@@ -305,8 +341,8 @@ public class AppController extends HttpServlet{
                         ||action.contains("view_agent"))) return false; 
             }      
             
-            //This solve the issue of Agent Attempt to Edit or create Project
-            return (!action.contains("project") || action.contains("view_project"))  ;
+            
+            return true;
         }
         
       
@@ -320,7 +356,7 @@ public class AppController extends HttpServlet{
            
             //if User is trying to print an invoice
             String temp = (String) request.getParameter("action");
-            if(( temp!=null ) && temp.equals("lodgement_invoice"))
+            if(( temp!=null ) && temp.contains("lodgement_invoice"))
             {
                 return true;
             }
@@ -364,9 +400,7 @@ public class AppController extends HttpServlet{
     
     
     public void errorPageHandler(String action, HttpServletRequest request, HttpServletResponse response) throws IOException{
-        String errorPage = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Error?action="+action;
-        log("errorPage: " + errorPage);
-        response.sendRedirect(errorPage);
+       doRedirection(request , response ,  "/Error?action="+action);
     }
     
     
@@ -393,10 +427,9 @@ public class AppController extends HttpServlet{
             request.removeAttribute(attributeNames.nextElement());
     }
     
-    
-    
-    public void log(String str){ System.out.println(str); }
-    
+    public void log(String str){ //System.out.println(str); 
+        
+    }
     
     private List<Notification> getNotifications(){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -416,7 +449,6 @@ public class AppController extends HttpServlet{
         
         return notificationList;
     }
-    
     
     public HashMap<String, Plugin> getAvailableplugins(){
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -448,5 +480,19 @@ public class AppController extends HttpServlet{
         
         return bool;
                     
+    }
+
+    public static void doRedirection(HttpServletRequest request , HttpServletResponse response , String redirect) throws IOException{
+       String context = request.getContextPath();
+       context += redirect;
+       context = context.replaceAll("//", "/");
+       response.sendRedirect(context);
+    }
+    
+    public static String doRedirection(HttpServletRequest request , String redirect) throws IOException{
+       String context = request.getContextPath();
+       context += redirect;
+       context = context.replaceAll("//", "/");
+       return request.getServerName() + context;
     }
 }

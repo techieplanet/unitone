@@ -14,7 +14,7 @@
     <section class="content-header">
         
         <h1>
-            <a href="#">Agent Withdrawal History</a>
+            <a href="#">Agent Debit History</a>
         </h1>
         
     </section>
@@ -25,7 +25,7 @@
             
             <div class="box-header with-border"> 
                 <div class="callout callout-warning" style="margin-bottom: 0;">
-                    <h4 style="margin-bottom: 0;">Withdrawal History</h4>
+                    <h4 style="margin-bottom: 0;">Debit History</h4>
                 </div>
      
             </div>

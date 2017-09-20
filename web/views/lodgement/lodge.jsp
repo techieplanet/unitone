@@ -45,7 +45,8 @@
         <tbody>
             <c:forEach items="${customers}" var="customer">
                 <tr id='row<c:out value="${customer.customerId}" />'>
-                    <td><img alt="No Image" class="img-responsive img-thumbnail" width="55" height="50" src="<c:out value='/uploads/NeoForce/images/customers/${customer.photoPath}'></c:out>" /></td>
+                    <td><%//<img src="/uploads/NeoForce/images/customers/customer_150166987523.png" width='55' height='50'/>%>
+                        <img alt="No Image" class="img-responsive img-thumbnail" width="55" height="50" src="/uploads/NeoForce/images/customers/${customer.photoPath}" /></td>
                     <td class="agentId"><c:out value="${customer.customerId}" /></td>
                     <td class="customerFname"><c:out value="${customer.firstname}" /></td>
                     <td class="customerMname"><c:out value="${customer.middlename}" /></td>
@@ -104,6 +105,7 @@
                                  <span id="customerPhone"></span> <br />
                                  <span id="customerEmail"></span> <br />
                                  <span id="customerState"></span> <br />
+                                 <span>Reward point :</span> <span id="customerRewardPoint"></span> <br />
                              </div>
                          </div>
                          
@@ -137,7 +139,7 @@
           <div class="box">
                 <div class="box-header">
                   <h3 class="box-title block">
-                      Lodgement Cart
+                      Lodgement Summary
                   </h3>
                 </div><!-- /.box-header -->
                  <div class="box-body">
@@ -273,7 +275,7 @@
                                 	<div class="col-md-2">
                                             <div class="form-group">
                                                 <label for="tellerNumber">Click to proceed to payment</label>
-                                                <!--<a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>
+                                              <%//  <!--<a href="${pageContext.request.contextPath}/images/img/webpay.png" target="_blank" class="btn btn-success"><i class="fa fa-angle-double-right"></i> Pay Now</a>%>
                                                 --> <button type="submit"  name="Pay" class="btn btn-success"  style="vertical-align:bottom !important;"><i class="fa fa-angle-double-right"></i> Pay Now</button>
                                             </div> 
                                         </div>
@@ -293,14 +295,14 @@
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="accountNo">Depositor's Account No</label>
-                                            <input type="text" class="form-control" id="transfer_accountNo" name="accountNo" style="width: 100%;">
+                                            <input type="text" class="form-control" id="transfer_accountNo" name="transfer_accountNo" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
                                     <div class="col-md-3">
                                     	<div class="form-group">
                                             <label for="accountNo">Depositor's Account Name</label>
-                                            <input type="text" class="form-control" id="transfer_accountName" name="accountName" style="width: 100%;">
+                                            <input type="text" class="form-control" id="transfer_accountName" name="transfer_accountName" style="width: 100%;">
                                         </div> 
                                     </div>
                                     
@@ -397,8 +399,8 @@
     var customerLoyaltyPoint = 0;
     var isLoyaltyEnabled = "${plugins.containsKey('loyalty') ? 1 : 0}";
     var pointToCurrency = "${pointToCurrency}";
-    console.log("isLoyaltyEnabled : " + isLoyaltyEnabled);
-    console.log("pointToCurrency : " + pointToCurrency);
+    //console.log("isLoyaltyEnabled : " + isLoyaltyEnabled);
+    //console.log("pointToCurrency : " + pointToCurrency);
 </script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/neoforce.lodgement.js"></script>

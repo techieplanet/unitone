@@ -10,14 +10,17 @@ import com.google.gson.GsonBuilder;
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.controller.helpers.EmailHelper;
 import com.tp.neo.controller.helpers.OrderItemHelper;
 import com.tp.neo.controller.helpers.OrderItemObjectsList;
 import com.tp.neo.controller.helpers.OrderManager;
+import com.tp.neo.controller.helpers.PDFHelper;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.AgentProspect;
+import com.tp.neo.model.Company;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.CustomerAgent;
 import com.tp.neo.model.Document;
@@ -40,6 +43,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,7 +76,10 @@ import javax.xml.bind.PropertyException;
  *
  * @author John
  */
-@WebServlet(name = "Customer", urlPatterns = {"/Customer"})
+@WebServlet(name = "Customer", urlPatterns =
+{
+    "/Customer"
+})
 @MultipartConfig
 public class CustomerController extends AppController {
 
@@ -104,7 +111,8 @@ public class CustomerController extends AppController {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        try {
+        try
+        {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
@@ -115,7 +123,8 @@ public class CustomerController extends AppController {
             out.println("<h1>Servlet CustomerController at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
-        } finally {
+        } finally
+        {
             out.close();
         }
     }
@@ -136,14 +145,25 @@ public class CustomerController extends AppController {
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
 
         //Check if request is XMLHttpRequest
-        if (isAjaxRequest) {
+        if (action.equals("lodgement_invoice"))
+        {
+            if (request.getParameter("pdf") != null)
+            {
+                new PDFHelper().sendPDFInvoice(request, response);
+                return;
+            }
+        }
+        if (isAjaxRequest)
+        {
 
-            if (action.equalsIgnoreCase("email_validation")) {
+            if (action.equalsIgnoreCase("email_validation"))
+            {
 
                 validateEmail(request, response);
                 return;
             }
-            if (action.equalsIgnoreCase("customer_lodgements")) {
+            if (action.equalsIgnoreCase("customer_lodgements"))
+            {
 
                 getCustomerLodgments(request, response, true);
                 return;
@@ -151,10 +171,14 @@ public class CustomerController extends AppController {
 
         }
 
-        if (super.hasActiveUserSession(request, response)) {
-            if (super.hasActionPermission(new Customer().getPermissionName(action), request, response)) {
+        if (super.hasActiveUserSession(request, response))
+        {
+            if (super.hasActionPermission(new Customer().getPermissionName(action), request, response))
+            {
                 processGetRequest(request, response);
-            } else {
+            }
+            else
+            {
                 super.errorPageHandler("forbidden", request, response);
             }
         }
@@ -181,21 +205,27 @@ public class CustomerController extends AppController {
          * need to check permission.
          *
          */
-        if (!requestFrom.equals("")) {
+        if (!requestFrom.equals(""))
+        {
             processInsertRequest(request, response);
         }
 
         //Ajax Post Request for Password Change
-        if (action.equalsIgnoreCase("password_change")) {
+        if (action.equalsIgnoreCase("password_change"))
+        {
 
             changeCustomerPassword(request, response);
             return;
         }
 
-        if (super.hasActiveUserSession(request, response)) {
-            if (super.hasActionPermission(new Customer().getPermissionName(action), request, response)) {
+        if (super.hasActiveUserSession(request, response))
+        {
+            if (super.hasActionPermission(new Customer().getPermissionName(action), request, response))
+            {
                 processPostRequest(request, response);
-            } else {
+            }
+            else
+            {
                 super.errorPageHandler("forbidden", request, response);
             }
         }
@@ -207,25 +237,34 @@ public class CustomerController extends AppController {
         Gson gson = new GsonBuilder().create();
         //  String viewFile = AGENTS_ADMIN;
         Customer customer = new Customer();
-        try {
-            if (request.getParameter("action").equals("update")) { //edit mode
+        try
+        {
+            if (request.getParameter("action").equals("update"))
+            { //edit mode
                 this.processUpdateRequest(request, response);
                 return;
-            } else if (request.getParameter("action").equals("new_prospect")) {
+            }
+            else if (request.getParameter("action").equals("new_prospect"))
+            {
 
                 addNewProspect(request, response);
                 return;
-            } else if (request.getParameter("action").equals("edit_prospect")) {
+            }
+            else if (request.getParameter("action").equals("edit_prospect"))
+            {
 
                 updateProspect(request, response);
                 return;
-            } else {
+            }
+            else
+            {
                 this.processInsertRequest(request, response);
             }
 
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
-            //System.out.println("inside catch area: " + e.getMessage());
+            ////System.out.println("inside catch area: " + e.getMessage());
             request.setAttribute("errors", errorMessages);
             SystemLogger.logSystemIssue("Customer", gson.toJson(customer), e.getMessage());
         }
@@ -239,17 +278,14 @@ public class CustomerController extends AppController {
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         final EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
         String viewFile = CUSTOMER_NEW;
         final Customer customer = new Customer();
 
-        String customerFileName = FileUploader.getSubmittedFileName(request.getPart("customerPhoto"));
-        String customerKinFileName = FileUploader.getSubmittedFileName(request.getPart("customerKinPhoto"));
-        String customerPhotoId = FileUploader.getSubmittedFileName(request.getPart("customerPhotoID"));
-        String customerBankStandingOrderImage = FileUploader.getSubmittedFileName(request.getPart("customerBankStandingOrder"));
-        
-        
-        
-        
+        Company company = em.find(Company.class, 1);
+        String customerFileName = "";
+        String customerKinFileName = "";
+
         request.setAttribute("success", false);
         Gson gson = new GsonBuilder().create();
 
@@ -257,33 +293,41 @@ public class CustomerController extends AppController {
 
         final SystemUser user = sessionUser;
 
-        //Remember to clear this when done
-        request.getParameterMap().forEach((String attribute, String[] values) -> {
-            System.out.print(attribute + "  ");
-            for (String value : values) {
-                System.out.print(value + "  ");
-            }
-            System.out.println("");
-        });
-
-        try {
-
-            long unixTime = System.currentTimeMillis() / 1000L;
+        try
+        {
 
             validate(customer, request);
 
+           /* //Remember to clear this when done
+            //request.getParameterMap().forEach((String attribute, String[] values) ->
+            {
+                //System.out.print(attribute + "  ");
+                for (String value : values)
+                {
+                    //System.out.print(value + "  ");
+                }
+                //System.out.println("");
+            });*/
+
+            long unixTime = System.currentTimeMillis() / 1000L;
+
             Agent agent = null;
 
-            if (requestFrom.equalsIgnoreCase("customerRegistrationController")) {
+            if (requestFrom.equalsIgnoreCase("customerRegistrationController"))
+            {
 
                 //Assign default companies Agent to the customer
                 Query query = em.createNamedQuery("Agent.findByFullname");
                 query.setParameter("firstname", "company");
                 query.setParameter("lastname", "company");
                 agent = (Agent) query.getSingleResult();
-            } else if (user.getSystemUserTypeId() == 2) { //agent
+            }
+            else if (user.getSystemUserTypeId() == 2)
+            { //agent
                 agent = em.find(Agent.class, user.getSystemUserId());
-            } else {
+            }
+            else
+            {
                 long agentId = Long.parseLong(request.getParameter("agent_id"));
                 agent = em.find(Agent.class, agentId);
             }
@@ -292,17 +336,23 @@ public class CustomerController extends AppController {
             customer.setTitle(request.getParameter("customerTitle"));
             customer.setFirstname(request.getParameter("customerFirstname"));
             customer.setLastname(request.getParameter("customerLastname"));
-            customer.setEmail(request.getParameter("customerEmail"));
+            customer.setEmail(request.getParameter("customerEmail").toLowerCase());
             customer.setMiddlename(request.getParameter("customerMiddlename"));
             customer.setGender(request.getParameter("customerGender"));
             customer.setMaritalStatus(request.getParameter("customerMaritalStatus"));
 
             //LocalDate lDate = LocalDate.parse(request.getParameter("customerDateOfBirth"), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            Date tDate = new Date();
-            String sDate[] = request.getParameter("customerDateOfBirth").split("/");
-            tDate.setDate(Integer.parseInt(sDate[0]));
-            tDate.setMonth(Integer.parseInt(sDate[1]));
-            tDate.setYear(Integer.parseInt(sDate[2]));
+            SimpleDateFormat myFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+            Date tDate = null;
+            try
+            {
+                tDate = myFormat.parse(request.getParameter("customerDateOfBirth"));
+            } catch (ParseException ex)
+            {
+                Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
             customer.setDateOfBirth(tDate);
 
             //customer.setPassword(AuthManager.getSaltedHash(request.getParameter("customerPassword")));
@@ -313,7 +363,7 @@ public class CustomerController extends AppController {
             String password = request.getParameter("customerPassword") != null && !((String)request.getParameter("customerPassword")).isEmpty() ?
                                request.getParameter("customerPassword") : "secret";
             customer.setPassword(AuthManager.getSaltedHash(password)); */
-            
+
             //Customer Contact Location
             customer.setStreet(request.getParameter("customerStreet"));
             customer.setCity(request.getParameter("customerCity"));
@@ -352,10 +402,13 @@ public class CustomerController extends AppController {
             customer.setAccountName(request.getParameter("customerAccountName"));
             customer.setAccountNumber(request.getParameter("customerAccountNumber"));
 
-            if (requestFrom.equalsIgnoreCase("customerRegistrationController")) {
+            if (requestFrom.equalsIgnoreCase("customerRegistrationController"))
+            {
                 //Assign default created by user
                 //customer.setCreatedBy(10);
-            } else {
+            }
+            else
+            {
                 customer.setCreatedBy(user.getSystemUserId());
             }
             customer.setCreatedDate(getDateTime().getTime());
@@ -365,10 +418,10 @@ public class CustomerController extends AppController {
             new TrailableManager(customer).registerInsertTrailInfo((long) 1);
             customer.setDeleted((short) 0);
 
-            System.out.println("*********************************************");
-            System.out.println("Path : " + request.getPart("customerPhoto").getSubmittedFileName());
-            System.out.println("*********************************************");
-            
+            //System.out.println("*********************************************");
+            //System.out.println("Path : " + request.getPart("customerPhoto").getSubmittedFileName());
+            //System.out.println("*********************************************");
+
             /*
               //handle the pictures now
             if (customerFileName != null && !customerFileName.equals("")) {
@@ -391,86 +444,88 @@ public class CustomerController extends AppController {
                 customer.setKinPhotoPath("default");
             }
             
-            */
+             */
             customer.setPhotoPath("default");
             customer.setKinPhotoPath("default");
             //persist only on save mode
-            em.getTransaction().begin();
+            if(!em.getTransaction().isActive())
+             em.getTransaction().begin();
             log("Will now persist the customer");
             em.persist(customer);
             em.flush();
-            
+
             //New Update Handles The Images As Documents
-            
             //We are going to put all the image into an Hash map specifying the title of the Image also
-            Map<String, Part>  documents = new HashMap<>();
+            Map<String, Part> documents = new HashMap<>();
             documents.put("customer_", request.getPart("customerPhoto"));
             documents.put("customerKin_", request.getPart("customerKinPhoto"));
             documents.put("customer_ID_Card_", request.getPart("customerPhotoID"));
             documents.put("customer_Bank_Standing_Order_", request.getPart("customerBankStandingOrder"));
-            
+
             em.refresh(customer);
-           FileUploader fUpload  = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
-           
-           documents.forEach((String typeAlias , Part path) -> {
-                DocumentType doctype = (DocumentType)em
+            FileUploader fUpload = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+
+            documents.forEach((String typeAlias, Part path) ->
+            {
+                DocumentType doctype = (DocumentType) em
                         .createNamedQuery("DocumentType.findByTypeAlias")
                         .setParameter("typeAlias", typeAlias)
                         .getSingleResult();
                 Document doc = new Document();
-               
+
                 String saveName = typeAlias + unixTime + customer.getCustomerId() + "." + FileUploader.getSubmittedFileExtension(path);
-                
-                String  subdir = "customers";
-                String  dir = "";
-                
-                switch(typeAlias)
+
+                String subdir = "customers";
+                String dir = "";
+
+                switch (typeAlias)
                 {
                     case "customer_":
-                        customer.setPhotoPath(saveName); 
+                        customer.setPhotoPath(saveName);
                         break;
-                        
+
                     case "customerKin_":
-                        customer.setKinPhotoPath(saveName); 
-                        subdir = subdir + fUpload.getFileSeparator() + "customerkins" ;
+                        customer.setKinPhotoPath(saveName);
+                        subdir = subdir + fUpload.getFileSeparator() + "customerkins";
                         dir = "/customerkins";
                         break;
-                       
+
                     case "customer_ID_Card_":
-                        subdir = subdir + fUpload.getFileSeparator() + "ids" ;
+                        subdir = subdir + fUpload.getFileSeparator() + "ids";
                         dir = "/ids";
                         break;
-                        
-                    case "customer_Bank_Standing_Order_": 
-                        subdir = subdir + fUpload.getFileSeparator() + "bankstandingorders" ;
+
+                    case "customer_Bank_Standing_Order_":
+                        subdir = subdir + fUpload.getFileSeparator() + "bankstandingorders";
                         dir = "/bankstandingorders";
                         break;
                 }
-                 
-                 
+
                 doc.setDocTypeId(doctype);
                 doc.setOwnerId(BigInteger.valueOf(customer.getCustomerId()));
                 doc.setOwnerTypeId(customer.getSystemUserTypeId());
-                doc.setPath("customers" + dir + "/"+saveName);
+                doc.setPath("customers" + dir + "/" + saveName);
                 doc.setCreatedDate(getDateTime().getTime());
-                
+
                 em.persist(doctype);
                 em.persist(doc);
-                
-                try 
+
+                try
                 {
                     fUpload.uploadFile(path, subdir, saveName, true);
-                }catch(IOException e){
+                } catch (IOException e)
+                {
                     e.printStackTrace();
                 }
             });
-           
-           customerFileName = customer.getPhotoPath();
-           customerKinFileName = customer.getKinPhotoPath();
-           em.persist(customer);
-           em.flush();
-            
+
+            customerFileName = customer.getPhotoPath();
+            customerKinFileName = customer.getKinPhotoPath();
+            em.persist(customer);
+            em.flush();
+
             Account account = new AccountManager().createCustomerAccount(customer);
+            em.persist(account);
             em.persist(customer);
             em.refresh(customer);
             customer.setAccount(account);
@@ -483,39 +538,63 @@ public class CustomerController extends AppController {
 
             log("Will now persistr the customerAgent");
             em.persist(customerAgent);
+            
+            OrderManager orderManager = new OrderManager(sessionUser);
 
+            OrderItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
+            Map<String ,String> requestParameters = getRequestParameters(request);
+
+            List<OrderItem> orderItem = orderManager.prepareOrderItem(saleItemObjectList, agent);
+            Lodgement lodgement = orderManager.prepareLodgement(requestParameters, agent);
+            
+            StringBuilder eMsg = new StringBuilder();
+            boolean valid = validateOrder(orderItem , lodgement , eMsg);
+            //Remove customer account if the Order is not valid
+            if(!valid)
+            {
+                errorMessages.put("error2", eMsg.toString());
+                em.getTransaction().rollback();
+                em.close();
+                emf.close();
+                throw new PropertyException("Error while validating Customer Order");
+            }
+            
+            //done With Validation , We can Now Proceed
+            String Url = request.getServerName() + "/" + request.getContextPath();
+            new EmailHelper().sendUserWelcomeMessageAndPassword(customer.getEmail(), company.getEmail(), initPass, customer, company, Url);
             em.getTransaction().commit();
             em.close();
             emf.close();
 
-            OrderManager orderManager = new OrderManager(sessionUser);
-
-            OrderItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
-            Map requestParameters = getRequestParameters(request);
-
-            List<OrderItem> orderItem = orderManager.prepareOrderItem(saleItemObjectList, agent);
-            Lodgement lodgement = orderManager.prepareLodgement(requestParameters, agent);
-
             lodgement.setCustomer(customer);
 
-            if (requestFrom.equalsIgnoreCase("customerRegistrationController")) {
+            if (requestFrom.equalsIgnoreCase("customerRegistrationController"))
+            {
                 //user = (SystemUser) customer;
             }
 
             ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItem, request.getContextPath());
 
-            if (productOrder != null) {
-                if (productOrder.getId() != null) {
-                } else {
+            if (productOrder != null)
+            {
+                if (productOrder.getId() != null)
+                {
+                }
+                else
+                {
                     //Delete Customer and Customer Account
                 }
-            } else {
+            }
+            else
+            {
                 //Delete Customer and Customer
             }
 
             //Check if a customer is the one registering him/her self 
-            if (requestFrom.equalsIgnoreCase("customerRegistrationController")) {
-                if (lodgement.getPaymentMode() == 2) {
+            if (requestFrom.equalsIgnoreCase("customerRegistrationController"))
+            {
+                if (lodgement.getPaymentMode() == 2)
+                {
 
                     Date date = lodgement.getCreatedDate();
                     SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
@@ -537,37 +616,57 @@ public class CustomerController extends AppController {
                     request.getSession().setAttribute("vatInvoice", vat);
                     request.getSession().setAttribute("gatewayChargeInvoice", gateWayCharge);
 
-                } else {
+                }
+                else
+                {
                     viewFile = "/views/customer/success.jsp";
                     request.setAttribute("customer", customer);
                 }
-            } else {
+            }
+            else
+            {
 
                 //Registration is done by agent/admin, so forward them to customer profile
-                viewFile = "Customer?action=profile&customerId=" + customer.getCustomerId();
-                response.sendRedirect(viewFile);
-                return;
+                //viewFile = "Customer?action=profile&customerId=" + customer.getCustomerId();
+                //response.sendRedirect(viewFile);
+                //return;
                 //request.setAttribute("action","profile");
                 //request.setAttribute("customerId", customer.getCustomerId());
+                viewFile = CUSTOMER_NEW;
+
+                request.setAttribute("customer", customer);
+                request.setAttribute("userType", sessionUser.getSystemUserTypeId());
+                request.setAttribute("countries", CountryService.getCountryList());
+                request.setAttribute("action", "edit");
+                request.setAttribute("registrationSuccess", true);
             }
 
             request.setAttribute("customerKinPhotoHidden", customerKinFileName);
             request.setAttribute("customerPhotoHidden", customerFileName);
             request.setAttribute("customers", listCustomers());
-            request.setAttribute("success", true);
+            //request.setAttribute("success", true);
+            request.setAttribute("action", "edit");
+            request.setAttribute("registrationSuccess", true);
             request.setAttribute("customer", customer);
-            request.setAttribute("action", "");
-            if (sessionUser == null) {
+
+            if (sessionUser == null)
+            {
                 request.setAttribute("userType", 3);
-            } else {
+            }
+            else
+            {
                 request.setAttribute("userType", sessionUser.getSystemUserTypeId());
             }
 
-        } catch (PropertyException err) {
+        } catch (PropertyException err)
+        {
+            if(em.getTransaction().isActive())
+                em.getTransaction().rollback();
             err.printStackTrace();
-            viewFile = CUSTOMER_NEW;
+            viewFile = "/views/customer/add.jsp";
 
-            if (requestFrom.equalsIgnoreCase("customerRegistrationController")) {
+            if (requestFrom.equalsIgnoreCase("customerRegistrationController"))
+            {
                 viewFile = "/views/customer/registration.jsp";
             }
 
@@ -581,15 +680,39 @@ public class CustomerController extends AppController {
             request.setAttribute("agents", new AgentController().listAgents());
             request.setAttribute("action", "new");
             request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
+            request.setAttribute("countries", CountryService.getCountryList());
 
-            SystemLogger.logSystemIssue("Customer", gson.toJson(customer), err.getMessage());
-        } catch (RollbackException rollExcept) {
+            SystemLogger.logSystemIssue("Customer", /*gson.toJson(customer)*/ "Process Insert Request", err.getMessage());
+        } catch (RollbackException rollExcept)
+        {
 
             em.getTransaction().rollback();
 
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
+             if(em.getTransaction().isActive())
+                em.getTransaction().rollback();
             e.printStackTrace();
-            SystemLogger.logSystemIssue("Customer", gson.toJson(customer), e.getMessage());
+            viewFile = "/views/customer/add.jsp";
+
+            if (requestFrom.equalsIgnoreCase("customerRegistrationController"))
+            {
+                viewFile = "/views/customer/registration.jsp";
+            }
+
+            request.setAttribute("customerKinPhotoHidden", customerKinFileName);
+            request.setAttribute("customerPhotoHidden", customerFileName);
+            request.setAttribute("customer", customer);
+            errorMessages.put("fatal error", "One or more Fields are invalid");
+            request.setAttribute("errors", errorMessages);
+            request.setAttribute("projects", new ProjectController().listProjects());
+            request.setAttribute("userTypeId", userType);
+            request.setAttribute("userType", sessionUser.getSystemUserId());
+            request.setAttribute("agents", new AgentController().listAgents());
+            request.setAttribute("action", "new");
+            request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
+            request.setAttribute("countries", CountryService.getCountryList());
+            SystemLogger.logSystemIssue("Customer", /*customer.getCustomerId().toString()*/ "Process Insert Request", e.getMessage());
         }
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
@@ -602,95 +725,224 @@ public class CustomerController extends AppController {
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
-        try {
+        Long id = Long.parseLong(request.getParameter("customer_id"));
+        Customer customer = em.find(Customer.class, id);
+        try
+        {
             errorMessages.clear();
 
-            String lname = request.getParameter("lname");
-            String fname = request.getParameter("fname");
-            String mname = request.getParameter("mname");
-            String email = request.getParameter("email");
-
-            Part customerPhoto = request.getPart("customerPhoto");
-            Part customerKinPhoto = request.getPart("customerKinPhoto");
-
-            String street = request.getParameter("street");
-            String city = request.getParameter("city");
-            String state = request.getParameter("state");
-            String phone = request.getParameter("phone");
-
-            String customerKinNames = request.getParameter("customerKinNames");
-            String customerKinPhone = request.getParameter("customerKinPhone");
-            String customerKinAddress = request.getParameter("customerKinAddress");
-
-            validateCustomerUpdate(request);
-
+            //validate(customer, request);
+            final SystemUser user = sessionUser;
             em.getTransaction().begin();
-
-            long id = Long.parseLong(request.getParameter("id"));
-
-            Customer customer = em.find(Customer.class, id);
-
-            customer.setLastname(lname);
-            customer.setFirstname(fname);
-            customer.setMiddlename(mname);
-            customer.setEmail(email);
-            customer.setStreet(street);
-            customer.setCity(city);
-            customer.setState(state);
-            customer.setPhone(phone);
-            customer.setKinName(customerKinNames);
-            customer.setKinAddress(customerKinAddress);
-            customer.setKinPhone(customerKinPhone);
-
             long unixTime = System.currentTimeMillis() / 1000L;
 
-            String customerFileName = FileUploader.getSubmittedFileName(request.getPart("customerPhoto"));
-            String customerKinFileName = FileUploader.getSubmittedFileName(request.getPart("customerKinPhoto"));
+            //customer Personal information
+            customer.setTitle(request.getParameter("customerTitle"));
+            customer.setFirstname(request.getParameter("customerFirstname"));
+            customer.setLastname(request.getParameter("customerLastname"));
+            customer.setEmail(request.getParameter("customerEmail").toLowerCase());
+            customer.setMiddlename(request.getParameter("customerMiddlename"));
+            customer.setGender(request.getParameter("customerGender"));
+            customer.setMaritalStatus(request.getParameter("customerMaritalStatus"));
 
-            if (customerFileName != null && !customerFileName.equals("")) {
-                Part filePart = request.getPart("customerPhoto");
-                String saveName = "customer_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
-                customer.setPhotoPath(saveName);
-                customerFileName = saveName;
-                new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "customer", saveName, true);
-            } else {
+            //LocalDate lDate = LocalDate.parse(request.getParameter("customerDateOfBirth"), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            SimpleDateFormat myFormat = new SimpleDateFormat("dd/MM/yyyy");
 
+            Date tDate = null;
+            try
+            {
+                tDate = myFormat.parse(request.getParameter("customerDateOfBirth"));
+            } catch (ParseException ex)
+            {
+                myFormat = new SimpleDateFormat("EEE, d MMM yyyy");
+                try
+                {
+                    tDate = myFormat.parse(request.getParameter("customerDateOfBirth"));
+                } catch (ParseException e)
+                {
+                    Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, e);
+                }
+                Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            if (customerKinFileName != null && !customerKinFileName.equals("")) {
-                Part filePart = request.getPart("customerKinPhoto");
-                String saveName = "customerKin_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
-                customer.setKinPhotoPath(saveName);
-                customerKinFileName = saveName;
-                new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "customerKin", saveName, true);
-            } else {
+            customer.setDateOfBirth(tDate);
 
-            }
+            //Customer Contact Location
+            customer.setStreet(request.getParameter("customerStreet"));
+            customer.setCity(request.getParameter("customerCity"));
+            customer.setState(request.getParameter("customerState"));
+            customer.setCountry(request.getParameter("customerCountry"));
+            customer.setPostalAddress(request.getParameter("customerPostalAddress"));
+            customer.setPhone(request.getParameter("customerPhone"));
+            customer.setOtherPhone(request.getParameter("customerOtherPhone"));
 
+            //Customer Work Information
+            customer.setOccupation(request.getParameter("customerOccupation"));
+            customer.setEmployer(request.getParameter("customerEmployer"));
+            customer.setOfficePhone(request.getParameter("customerOfficePhone"));
+
+            //Office Address 
+            customer.setOfficeStreet(request.getParameter("customerOfficeStreet"));
+            customer.setOfficeCity(request.getParameter("customerOfficeCity"));
+            customer.setOfficeState(request.getParameter("customerOfficeState"));
+            customer.setOfficeCountry(request.getParameter("customerOfficeCountry"));
+
+            //Employer Address
+            customer.setEmployerStreet(request.getParameter("customerEmployerStreet"));
+            customer.setEmployerCity(request.getParameter("customerEmployerCity"));
+            customer.setEmployerState(request.getParameter("customerEmployerState"));
+            customer.setEmployerCountry(request.getParameter("customerEmployerCountry"));
+
+            //customer Kin Information
+            customer.setKinName(request.getParameter("customerKinName"));
+            customer.setKinPhone(request.getParameter("customerKinPhone"));
+            customer.setKinAddress(request.getParameter("customerKinAddress"));
+            customer.setKinRelationship(request.getParameter("customerKinRelationship"));
+            customer.setKinEmail(request.getParameter("customerKinEmail"));
+
+            //Banker Information
+            customer.setBanker(request.getParameter("customerBanker"));
+            customer.setAccountName(request.getParameter("customerAccountName"));
+            customer.setAccountNumber(request.getParameter("customerAccountNumber"));
+
+            customer.setModifiedBy(user.getSystemUserId());
+
+            customer.setModifiedDate(getDateTime().getTime());
+
+            new TrailableManager(customer).registerInsertTrailInfo((long) 1);
+            customer.setDeleted((short) 0);
+
+            //New Update Handles The Images As Documents
+            //We are going to put all the image into an Hash map specifying the title of the Image also
+            Map<String, Part> documents = new HashMap<>();
+            documents.put("customer_", request.getPart("customerPhoto"));
+            documents.put("customerKin_", request.getPart("customerKinPhoto"));
+            documents.put("customer_ID_Card_", request.getPart("customerPhotoID"));
+            documents.put("customer_Bank_Standing_Order_", request.getPart("customerBankStandingOrder"));
+
+            FileUploader fUpload = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+
+            documents.forEach((String typeAlias, Part path) ->
+            {
+
+                if (path != null && !path.getSubmittedFileName().trim().isEmpty())
+                {
+                    DocumentType doctype = (DocumentType) em
+                            .createNamedQuery("DocumentType.findByTypeAlias")
+                            .setParameter("typeAlias", typeAlias)
+                            .getSingleResult();
+                    Document doc = new Document();
+
+                    //Remove previous Document of This Type
+                    //formal document
+                    List<Document> fDoc = em.createNamedQuery("Document.findByOwnerIdDoctypeIdOwnerTypeId")
+                            .setParameter("ownerID", customer.getCustomerId())
+                            .setParameter("docTypeId", doctype)
+                            .setParameter("ownerTypeId", customer.getSystemUserTypeId())
+                            .getResultList();
+                    if (fDoc != null && !fDoc.isEmpty())
+                    {
+                        for (Document tDoc : fDoc)
+                        {
+                            em.remove(tDoc);
+                        }
+                    }
+
+                    String saveName = typeAlias + unixTime + customer.getCustomerId() + "." + FileUploader.getSubmittedFileExtension(path);
+
+                    String subdir = "customers";
+                    String dir = "";
+
+                    switch (typeAlias)
+                    {
+                        case "customer_":
+                            customer.setPhotoPath(saveName);
+                            break;
+
+                        case "customerKin_":
+                            customer.setKinPhotoPath(saveName);
+                            subdir = subdir + fUpload.getFileSeparator() + "customerkins";
+                            dir = "/customerkins";
+                            break;
+
+                        case "customer_ID_Card_":
+                            subdir = subdir + fUpload.getFileSeparator() + "ids";
+                            dir = "/ids";
+                            break;
+
+                        case "customer_Bank_Standing_Order_":
+                            subdir = subdir + fUpload.getFileSeparator() + "bankstandingorders";
+                            dir = "/bankstandingorders";
+                            break;
+                    }
+
+                    doc.setDocTypeId(doctype);
+                    doc.setOwnerId(BigInteger.valueOf(customer.getCustomerId()));
+                    doc.setOwnerTypeId(customer.getSystemUserTypeId());
+                    doc.setPath("customers" + dir + "/" + saveName);
+                    doc.setCreatedDate(getDateTime().getTime());
+
+                    em.persist(doctype);
+                    em.persist(doc);
+
+                    try
+                    {
+                        fUpload.uploadFile(path, subdir, saveName, true);
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            em.persist(customer);
             em.merge(customer);
             em.getTransaction().commit();
             em.close();
             emf.close();
 
-            String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
-            request.setAttribute("customerImageAccessDir", imageAccessDirPath + "/customer");
-            request.setAttribute("customerKinImageAccessDir", imageAccessDirPath + "/customerKin");
-            request.setAttribute("success", true);
+            //request.getRequestDispatcher("/views/customer/update.jsp").forward(request, response);
+            String viewFile = CUSTOMER_NEW;
+
             request.setAttribute("customer", customer);
-            request.getRequestDispatcher("/views/customer/update.jsp").forward(request, response);
+            request.setAttribute("userType", sessionUser.getSystemUserTypeId());
+            request.setAttribute("countries", CountryService.getCountryList());
+            request.setAttribute("action", "edit");
+            request.setAttribute("success", true);
+            request.getRequestDispatcher(viewFile).forward(request, response);
+        }//<editor-fold>catch (PropertyException err) {
+        //   err.printStackTrace();
+        //  String  viewFile = CUSTOMER_NEW;
+        // if (requestFrom.equalsIgnoreCase("customerRegistrationController")) {
+        //      viewFile = "/views/customer/registration.jsp";
+        //  }
+        //            request.setAttribute("customer", customer);
+        //            request.setAttribute("errors", errorMessages);
+        //            request.setAttribute("userType",sessionUser.getSystemUserTypeId());
+        //            request.setAttribute("countries", CountryService.getCountryList());
+        //
+        //            request.setAttribute("action", "edit");
+        //            
+        //            request.getRequestDispatcher(viewFile).forward(request, response);
+        //            SystemLogger.logSystemIssue("Customer", /*gson.toJson(customer)*/"Process update Request", err.getMessage());
+        //        }</editor-fold>
+        catch (Exception ex)
+        {
 
-            //response.sendRedirect("Customer?action=edit&customerId="+customer.getCustomerId());
-        } catch (PropertyException ex) {
-
+            ex.printStackTrace();
             Enumeration it = request.getParameterNames();
             Map<String, String> map = new HashMap();
-            while (it.hasMoreElements()) {
+            while (it.hasMoreElements())
+            {
                 map.put(it.nextElement().toString(), request.getParameter(it.nextElement().toString()));
             }
-
             request.setAttribute("data", map);
             request.setAttribute("errors", errorMessages);
-            request.getRequestDispatcher("/views/customer/update.jsp");
+            String viewFile = CUSTOMER_NEW;
+            request.setAttribute("customer", customer);
+            request.setAttribute("userType", sessionUser.getSystemUserTypeId());
+            request.setAttribute("countries", CountryService.getCountryList());
+            request.getRequestDispatcher(viewFile).forward(request, response);
 
             Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -718,38 +970,49 @@ public class CustomerController extends AppController {
         String customerKinPhone = request.getParameter("customerKinPhone");
         String customerKinAddress = request.getParameter("customerKinAddress");
 
-        if (lname.equalsIgnoreCase("")) {
+        if (lname.equalsIgnoreCase(""))
+        {
             errorMessages.put("error1", "Last Name is required");
         }
-        if (fname.equalsIgnoreCase("")) {
+        if (fname.equalsIgnoreCase(""))
+        {
             errorMessages.put("erorr2", "First Name is required");
         }
-        if (email.equalsIgnoreCase("")) {
+        if (email.equalsIgnoreCase(""))
+        {
             errorMessages.put("error3", "Email is required");
         }
-        if (street.equalsIgnoreCase("")) {
+        if (street.equalsIgnoreCase(""))
+        {
             errorMessages.put("error4", "Street is required");
         }
-        if (city.equalsIgnoreCase("")) {
+        if (city.equalsIgnoreCase(""))
+        {
             errorMessages.put("error5", "City is required");
         }
-        if (state.equalsIgnoreCase("")) {
+        if (state.equalsIgnoreCase(""))
+        {
             errorMessages.put("error6", "State is required");
         }
-        if (phone.equalsIgnoreCase("")) {
+        if (phone.equalsIgnoreCase(""))
+        {
             errorMessages.put("error7", "Phone is required");
         }
-        if (customerKinNames.equalsIgnoreCase("")) {
+        if (customerKinNames.equalsIgnoreCase(""))
+        {
             errorMessages.put("error8", "Customer Kin Name is required");
         }
-        if (customerKinPhone.equalsIgnoreCase("")) {
+        if (customerKinPhone.equalsIgnoreCase(""))
+        {
             errorMessages.put("error9", "Customer Kin Phone No is required");
         }
-        if (customerKinAddress.equalsIgnoreCase("")) {
+        if (customerKinAddress.equalsIgnoreCase(""))
+        {
             errorMessages.put("error10", "Customer Kin Address is required");
         }
 
-        if (errorMessages.size() > 0) {
+        if (errorMessages.size() > 0)
+        {
             throw new PropertyException("Validation Error");
         }
     }
@@ -768,7 +1031,8 @@ public class CustomerController extends AppController {
 
         AgentController agent = new AgentController();
 
-        if (action.equalsIgnoreCase("new")) {
+        if (action.equalsIgnoreCase("new"))
+        {
             viewFile = CUSTOMER_NEW;
             request.setAttribute("userTypeId", userType);
             request.setAttribute("userType", sessionUser.getSystemUserId());
@@ -785,27 +1049,38 @@ public class CustomerController extends AppController {
             dispatcher.forward(request, response);
 
             return;
-        } else if (action.equalsIgnoreCase("new_prospect")) {
+        }
+        else if (action.equalsIgnoreCase("new_prospect"))
+        {
 
             viewFile = CUSTOMER_NEW_PROSPECT;
 
-        } else if (action.equalsIgnoreCase("list_prospects")) {
+        }
+        else if (action.equalsIgnoreCase("list_prospects"))
+        {
 
             viewFile = LIST_PROSPECT;
 
             request.setAttribute("prospects", getProspectiveCustomers(request));
 
-        } else if (action.equalsIgnoreCase("edit_prospect")) {
+        }
+        else if (action.equalsIgnoreCase("edit_prospect"))
+        {
             viewFile = "/views/customer/edit_prospect.jsp";
 
             request.setAttribute("prospect", getProspect(request));
             action = "lis_prospects";
-        } else if (action.equalsIgnoreCase("delete")) {
+        }
+        else if (action.equalsIgnoreCase("delete"))
+        {
 
             this.delete(Integer.parseInt(request.getParameter("id")));
             action = "";
-        } else if (action.equalsIgnoreCase("edit")) {
-            viewFile = "/views/customer/update.jsp";
+        }
+        else if (action.equalsIgnoreCase("edit"))
+        {
+            //viewFile = "/views/customer/update.jsp";
+            viewFile = CUSTOMER_NEW;
 
             int id = Integer.parseInt(request.getParameter("customerId"));
             Query jpqlQuery = em.createNamedQuery("Customer.findByCustomerId");
@@ -816,13 +1091,33 @@ public class CustomerController extends AppController {
 
             request.setAttribute("customer", customerList.get(0));
             request.setAttribute("userType", sessionUser.getSystemUserTypeId());
-
-            action = "";
-        } else if (action.equalsIgnoreCase("profile")) {
+            request.setAttribute("countries", CountryService.getCountryList());
+            request.setAttribute("action", "edit");
+            request.setAttribute("dateFmt", new SimpleDateFormat("EEE, d MMM yyyy"));
+            action = "edit";
+        }
+        else if (action.equalsIgnoreCase("profile"))
+        {
             viewFile = "/views/customer/profile.jsp";
 //            
+            //Check if the user doesnot specify id parameter
+            String idString = request.getParameter("customerId");
+
+            Long id;
+
+            if (idString == null)
+            {
+                //Then we know that the logged in user is trying to view it own profile
+                //we can now procceed to use the id stored in the session
+                id = sessionUser.getSystemUserId();
+            }
+            else
+            {
+                //Here we know we are about to get the profile of a particular user
+                id = Long.parseLong(idString);
+            }
+
 //            //find by ID
-            int id = Integer.parseInt(request.getParameter("customerId"));
             Query jpqlQuery = em.createNamedQuery("Customer.findByCustomerId");
             jpqlQuery.setParameter("customerId", id);
             jpqlQuery.setParameter("deleted", (short) 0);
@@ -835,34 +1130,58 @@ public class CustomerController extends AppController {
             request.setAttribute("orders", getCustomerOrders(request, response, false));
             request.setAttribute("lodgements", getCustomerLodgments(request, response, false));
             request.setAttribute("documents", DocumentService.getCustomerDocuments(id));
-        } else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers")) {
+            request.setAttribute("dateFmt", new SimpleDateFormat("EEE, d MMM yyyy"));
+        }
+        else if (action.isEmpty() || action.equalsIgnoreCase("listcustomers"))
+        {
             viewFile = CUSTOMER_ADMIN;
 
-            if (sessionUser.getSystemUserTypeId() == 2) {
+            if (sessionUser.getSystemUserTypeId() == 2)
+            {
                 request.setAttribute("customers", listAgentCustomers());
-            } else {
+            }
+            else
+            {
                 request.setAttribute("customers", listCustomers());
             }
 
             action = "";
-        } else if (action.equalsIgnoreCase("current")) {
+        }
+        else if (action.equalsIgnoreCase("current"))
+        {
 
             viewFile = CUSTOMER_CURRENT_PAYING;
             request.setAttribute("customers", getCurrentPayingCustomers());
-        } else if (action.equalsIgnoreCase("completed")) {
+        }
+        else if (action.equalsIgnoreCase("completed"))
+        {
 
             viewFile = CUSTOMER_COMPLETED_PAYMENT;
             request.setAttribute("customers", getCompletedPaymentCustomers());
-        } else if (action.equalsIgnoreCase("lodgement_invoice")) {
+        }
+        else if (action.equalsIgnoreCase("lodgement_invoice"))
+        {
             action = "";
             getLodgmentInvoice(request, response);
             return;
-        } else if (action.equalsIgnoreCase("email_lodgement_invoice")) {
+        }
+        else if (action.equalsIgnoreCase("email_lodgement_invoice"))
+        {
             action = "";
+            new PDFHelper().sendPDFEmail(request, response);
             sendCustomerInvoiceEmail(request, response);
-            response.sendRedirect(request.getContextPath() + "/Customer");
+            if (sessionUser.getSystemUserTypeId() == 3)
+            {
+                AppController.doRedirection(request, response, "/Customer?action=lodgement_invoice&id=" + request.getParameter("id"));
+            }
+            else
+            {
+                AppController.doRedirection(request, response, "/Customer");
+            }
             return;
-        } else if (action.equalsIgnoreCase("customer_orders")) {
+        }
+        else if (action.equalsIgnoreCase("customer_orders"))
+        {
             action = "";
             getCustomerOrders(request, response, true);
             return;
@@ -877,7 +1196,7 @@ public class CustomerController extends AppController {
         String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
         request.setAttribute("customerImageAccessDir", imageAccessDirPath + "/customers");
         request.setAttribute("customerKinImageAccessDir", imageAccessDirPath + "/customers/customerkins");
-        request.setAttribute("documentDir", imageAccessDirPath+"/");
+        request.setAttribute("documentDir", imageAccessDirPath + "/");
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
         dispatcher.forward(request, response);
@@ -919,19 +1238,26 @@ public class CustomerController extends AppController {
         String root = getServletContext().getRealPath("/");
         String path = root + "/images/uploads/customers/";
         long unixTime = System.currentTimeMillis() / 1000L;
-        if ((request.getPart("customerPhoto") != null) || (!request.getParameter("customerPhotoHidden").isEmpty() && request.getParameter("customerPhotoHidden") != null)) {
-            if (request.getPart("customerPhoto") != null) {
+        if ((request.getPart("customerPhoto") != null) || (!request.getParameter("customerPhotoHidden").isEmpty() && request.getParameter("customerPhotoHidden") != null))
+        {
+            if (request.getPart("customerPhoto") != null)
+            {
                 /*TP: Customer personal file upload*/
                 Part customerPartPhoto = request.getPart("customerPhoto");
                 String myName = getFileName(customerPartPhoto);
 
-                if (myName == null && !request.getParameter("customerPhotoHidden").isEmpty()) {
+                if (myName == null && !request.getParameter("customerPhotoHidden").isEmpty())
+                {
 
                     customerFileName = request.getParameter("customerPhotoHidden");
                     customer.setPhotoPath(request.getParameter("customerPhotoHidden"));
-                } else if (myName == null && request.getParameter("customerPhotoHidden").isEmpty()) {
+                }
+                else if (myName == null && request.getParameter("customerPhotoHidden").isEmpty())
+                {
                     customer.setPhotoPath("default");
-                } else {
+                }
+                else
+                {
 
                     int fnameLength = myName.length();
                     int startingPoint = fnameLength - 4;
@@ -940,7 +1266,9 @@ public class CustomerController extends AppController {
 
                     this.photoImageUpload(customerFileName, path, customerPartPhoto);
                 }
-            } else if (!request.getParameter("customerPhotoHidden").isEmpty()) {
+            }
+            else if (!request.getParameter("customerPhotoHidden").isEmpty())
+            {
                 customerFileName = request.getParameter("customerPhotoHidden");
                 customer.setPhotoPath(request.getParameter("customerPhotoHidden"));
             }
@@ -955,28 +1283,37 @@ public class CustomerController extends AppController {
         String root = getServletContext().getRealPath("/");
         String path = root + "/images/uploads/customers/";
         long unixTime = System.currentTimeMillis() / 1000L;
-        if ((request.getPart("customerKinPhoto") != null) || (!request.getParameter("customerKinPhotoHidden").isEmpty() && request.getParameter("customerKinPhotoHidden") != null)) {
+        if ((request.getPart("customerKinPhoto") != null) || (!request.getParameter("customerKinPhotoHidden").isEmpty() && request.getParameter("customerKinPhotoHidden") != null))
+        {
 
-            if (request.getPart("customerKinPhoto") != null) {
+            if (request.getPart("customerKinPhoto") != null)
+            {
                 /*TP: Customer Kin personal file upload*/
                 Part customerKinPartPhoto = request.getPart("customerKinPhoto");
                 String myNameKin = "";
                 myNameKin = getFileName(customerKinPartPhoto);
-                //System.out.println("This is the my name of the next of kin we are testing for "+request.getParameter("customerKinPhotoHidden"));
-                if (myNameKin == null && (!request.getParameter("customerKinPhotoHidden").isEmpty())) {
+                ////System.out.println("This is the my name of the next of kin we are testing for "+request.getParameter("customerKinPhotoHidden"));
+                if (myNameKin == null && (!request.getParameter("customerKinPhotoHidden").isEmpty()))
+                {
                     customerKinFileName = request.getParameter("customerKinPhotoHidden");
                     customer.setPhotoPath(request.getParameter("customerKinPhotoHidden"));
-                } else if (myNameKin == null && request.getParameter("customerKinPhotoHidden").isEmpty()) {
+                }
+                else if (myNameKin == null && request.getParameter("customerKinPhotoHidden").isEmpty())
+                {
                     customer.setKinPhotoPath("default");
-                } else {
+                }
+                else
+                {
                     int fnameLengthK = myNameKin.length();
                     int startingPointK = fnameLengthK - 4;
                     myNameKin = myNameKin.substring(startingPointK, fnameLengthK);
                     customerKinFileName = "customerKin_" + unixTime + myNameKin;
                     photoImageUpload(customerKinFileName, path, customerKinPartPhoto);
                 }
-            } else if (!request.getParameter("customerKinPhotoHidden").isEmpty()) {
-                System.out.println("photo nd hidden photo is empty");
+            }
+            else if (!request.getParameter("customerKinPhotoHidden").isEmpty())
+            {
+                //System.out.println("photo nd hidden photo is empty");
                 customerKinFileName = request.getParameter("customerKinPhotoHidden");
                 customer.setPhotoPath(request.getParameter("customerKinPhotoHidden"));
             }
@@ -991,8 +1328,10 @@ public class CustomerController extends AppController {
         InputStream filecontent = null;
 
         String type = customerPartPhoto.getHeader("content-type");
-        if (type.equals("image/jpeg") || type.equals("image/png") || type.equals("image/jpg") || type.equals("image/gif") || type.equals("image/bmp")) {
-            try {
+        if (type.equals("image/jpeg") || type.equals("image/png") || type.equals("image/jpg") || type.equals("image/gif") || type.equals("image/bmp"))
+        {
+            try
+            {
                 fout = new FileOutputStream(new File(path + customerFileName));
 
                 filecontent = customerPartPhoto.getInputStream();
@@ -1000,15 +1339,19 @@ public class CustomerController extends AppController {
                 int read = 0;
                 final byte[] bytes = new byte[32 * 1024];
 // 
-                while ((read = filecontent.read(bytes)) != -1) {
+                while ((read = filecontent.read(bytes)) != -1)
+                {
                     fout.write(bytes, 0, read);
                 }
                 fout.flush();
                 fout.close();
-            } catch (Exception e) {
+            } catch (Exception e)
+            {
                 errorMessages.put("error7", "Invalid File Format");
             }
-        } else {
+        }
+        else
+        {
             errorMessages.put("error7", "Invalid File Format");
         }
     }
@@ -1022,50 +1365,178 @@ public class CustomerController extends AppController {
         Query jpqlQuery = em.createNamedQuery("Customer.findByEmail");
         jpqlQuery.setParameter("email", request.getParameter("customerEmail"));
         List<Customer> customerDetails = jpqlQuery.getResultList();
-        //System.out.println(customerDetails);
-        if (request.getParameter("customerFirstname").isEmpty()) {
-            errorMessages.put("errors1", "Please enter First Name");
-        }
 
-        if (request.getParameter("customerLastname").isEmpty()) {
-            errorMessages.put("errors2", "Please enter Last Name");
-        }
-        if (request.getParameter("customerEmail").isEmpty()) {
-            errorMessages.put("errors3", "Please enter Email");
-        }
-
-        if ((request.getParameter("customer_id").equals(""))) { //insert mode
-            if (request.getParameter("customerPassword") != null && request.getParameter("customerPassword").isEmpty()) {
-                errorMessages.put("errors4", "Please enter Password");
+        String formFieldStage1[][] =
+        {
+            {
+                "customerTitle", "select", "Customer Title"
+            } //<editor-fold>
+            ,
+                        {
+                "customerFirstname", "", "Customer First Name"
+            },
+                        {
+                "customerMiddlename", "", "Customer Middle Name"
+            },
+                        {
+                "customerLastname", "", "Customer Last Name"
+            },
+                        {
+                "customerGender", "select", "Customer Gender"
+            },
+                        {
+                "customerMaritalStatus", "select", "Customer Marital Status"
+            },
+                        {
+                "customerDateOfBirth", "", "Customer Date Of Birth"
+            },
+                        {
+                "customerEmail", "", "Customer Email"
+            },
+                        {
+                "customerOccupation", "", "Customer Occupation"
+            },
+                        {
+                "customerEmployer", "", "Customer Employer"
+            },
+                        {
+                "customerOfficePhone", "", "Customer Office Phone"
+            },
+                        {
+                "customerOfficeStreet", "", "Customer Office Street"
+            },
+                        {
+                "customerOfficeCity", "", "Customer Office City"
+            },
+                        {
+                "customerOfficeState", "", "Customer Office State"
+            },
+                        {
+                "customerOfficeCountry", "select", "Customer Office Country"
+            },
+                        {
+                "customerEmployerStreet", "", "Customer Employer Street"
+            },
+                        {
+                "customerEmployerCity", "", "Customer Employer City"
+            },
+                        {
+                "customerEmployerState", "", "Employer State"
+            },
+                        {
+                "customerEmployerCountry", "select", "Customer Employer Country"
+            },
+                        {
+                "customerStreet", "", "Customer Street"
+            },
+                        {
+                "customerCity", "", "Customer City"
+            },
+                        {
+                "customerState", "", "Customer State"
+            },
+                        {
+                "customerCountry", "select", "Customer Country"
+            },
+                        {
+                "customerPhone", "", "Customer Phone"
+            } //,["customerOtherPhone" , "select" , "Customer Country"]
+            ,
+                        {
+                "customerPostalAddress", "", "Customer  Postal Address"
+            },
+                        {
+                "customerKinName", "", "Customer Next Of Kin Name"
+            },
+                        {
+                "customerKinRelationship", "", "Customer Next Of Kin Relationship"
+            },
+                        {
+                "customerKinEmail", "", "Customer Next Of Kin Email"
+            },
+                        {
+                "customerKinPhone", "", "Customer Next Of Kin Phone Number"
+            },
+                        {
+                "customerKinAddress", "", "Customer  Next Of Kin Address"
+            },
+                        {
+                "customerBanker", "", "Customer Banker"
+            },
+                        {
+                "customerAccountName", "", "Customer Account Name"
+            },
+                        {
+                "customerAccountNumber", "", "Customer Account Number"
             }
-            if (!customerDetails.isEmpty()) {
-                errorMessages.put("errors6", "Email has already been used");
+        };
+        //</editor-fold>
+
+        String formFieldStage2[][] =
+        {
+            {
+                "customerPhoto", "", " Customer PassPort"
+            } //<editor-fold>
+            ,
+                        {
+                "customerKinPhoto", "", "Customer Next Of Kin Passport"
+            },
+            {
+                "customerPhotoID", "", "Customer ID card /Driver Lincense etc"
+            },
+            {
+                "customerBankStandingOrder", "", "Customer Post-dated Cheques/Bank Standing Order"
+            }
+        }; //</editor-fold>
+        int error = 0;
+        for (String field[] : formFieldStage1)
+        {
+            String parameter = request.getParameter(field[0]);
+            if (parameter != null)
+            {
+                if (parameter.isEmpty() || parameter.equals("select"))
+                {
+                    if (field[1].isEmpty())
+                    {
+                        errorMessages.put("errors" + error, "Please Enter Value For " + field[2]);
+                    }
+                    else if (field[1].equals("select"))
+                    {
+                        errorMessages.put("errors" + error, "Please Select Value For " + field[2]);
+                    }
+                    error++;
+                }
             }
         }
 
-        if (request.getParameter("customerStreet").isEmpty()) {
-            errorMessages.put("errors7", "Please enter Street");
-        }
-        if (request.getParameter("customerCity").isEmpty()) {
-            errorMessages.put("errors8", "Please enter City");
-        }
-        if (request.getParameter("customerState").isEmpty()) {
-            errorMessages.put("errors9", "Please select a State");
-        }
-        if (request.getParameter("customerPhone").isEmpty()) {
-            errorMessages.put("errors10", "Please enter Phone Number");
-        }
-        if (request.getParameter("customerKinName").isEmpty()) {
-            errorMessages.put("errors14", "Please enter Kin Name");
-        }
-        if (request.getParameter("customerKinPhone").isEmpty()) {
-            errorMessages.put("errors15", "Please enter Kin Phone Number");
-        }
-        if (request.getParameter("customerKinAddress").isEmpty()) {
-            errorMessages.put("errors16", "Please enter Kin Address");
+        for (String field[] : formFieldStage2)
+        {
+            String fileName = request.getPart(field[0]).getSubmittedFileName();
+            if (fileName != null)
+            {
+                if (fileName.isEmpty())
+                {
+                    errorMessages.put("errors" + error, "Please Upload File For " + field[2]);
+                    error++;
+                }
+            }
         }
 
-        if (!(errorMessages.isEmpty())) {
+        if (!customerDetails.isEmpty())
+        {
+            errorMessages.put("errors" + error, "Email Already Exit");
+            error++;
+        }
+
+        //Validate Every Image File the User Upload
+        boolean validateFile = FileUploader.validateFile(request.getParts());
+        if (!validateFile)
+        {
+            errorMessages.put("errors" + error, "One or More Upload Files are Invalid (Please Upload Image File With Max Size Of 2MB)");
+        }
+
+        if (!(errorMessages.isEmpty()))
+        {
             throw new PropertyException("");
         }
     }
@@ -1074,18 +1545,23 @@ public class CustomerController extends AppController {
     private String getFileName(final Part part) {
         final String partHeader = part.getHeader("content-disposition");
         LOGGER.log(Level.INFO, "Part Header = {0}", partHeader);
-        for (String content : part.getHeader("content-disposition").split(";")) {
-            if (content.trim().startsWith("filename")) {
+        for (String content : part.getHeader("content-disposition").split(";"))
+        {
+            if (content.trim().startsWith("filename"))
+            {
 //                    return content.substring(
 //                    content.indexOf('=') + 1).trim().replace("\"", "");
-                System.out.println("Content = " + content.indexOf("="));
+                //System.out.println("Content = " + content.indexOf("="));
                 String filename = content.substring(content.indexOf("=") + 2, content.length() - 1);
 
                 String filenameCleaned = filename.trim().replace("\"", "");
 
-                if (filenameCleaned.equals("")) {
+                if (filenameCleaned.equals(""))
+                {
                     return null;
-                } else {
+                }
+                else
+                {
                     return filenameCleaned;
                 }
             }
@@ -1124,7 +1600,8 @@ public class CustomerController extends AppController {
 
         Query JPQL = em.createNamedQuery(queryString);
 
-        if (sessionUser.getSystemUserTypeId() == 2) {
+        if (sessionUser.getSystemUserTypeId() == 2)
+        {
             Agent agent = em.find(Agent.class, sessionUser.getSystemUserId());
             JPQL.setParameter("agent", agent);
         }
@@ -1145,7 +1622,8 @@ public class CustomerController extends AppController {
 
         Query JPQL = em.createNamedQuery(queryString);
 
-        if (sessionUser.getSystemUserTypeId() == 2) {
+        if (sessionUser.getSystemUserTypeId() == 2)
+        {
             Agent agent = em.find(Agent.class, sessionUser.getSystemUserId());
             JPQL.setParameter("agent", agent);
         }
@@ -1168,7 +1646,8 @@ public class CustomerController extends AppController {
         double total = 0.00;
         double grandTotal = 0.00;
 
-        for (LodgementItem LI : LItems) {
+        for (LodgementItem LI : LItems)
+        {
 
             double rewardAmount = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
             total += LI.getAmount() + rewardAmount;
@@ -1185,16 +1664,23 @@ public class CustomerController extends AppController {
 
     private void validateEmail(HttpServletRequest request, HttpServletResponse response) {
 
-        try {
+        try
+        {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
             EntityManager em = emf.createEntityManager();
 
+            String email = request.getParameter("email") != null ? request.getParameter("email").toLowerCase() : "";
+
+            if (email == null)
+            {
+                return;
+            }
             Query query = em.createNamedQuery("Customer.findByEmail");
-            query.setParameter("email", request.getParameter("email"));
+            query.setParameter("email", email);
 
             List<Customer> customer = query.getResultList();
 
-            System.out.println("Customer count : " + customer.size());
+            //System.out.println("Customer count : " + customer.size());
 
             Integer code = customer.size() == 0 ? 1 : -1;
 
@@ -1208,14 +1694,16 @@ public class CustomerController extends AppController {
             response.getWriter().write(gson.toJson(map));
             response.getWriter().flush();
             response.getWriter().close();
-        } catch (IOException ex) {
+        } catch (IOException ex)
+        {
             Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private void changeCustomerPassword(HttpServletRequest request, HttpServletResponse response) {
 
-        try {
+        try
+        {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
             EntityManager em = emf.createEntityManager();
 
@@ -1227,25 +1715,32 @@ public class CustomerController extends AppController {
             String pwd1 = request.getParameter("pwd1");
             String pwd2 = request.getParameter("pwd2");
 
-            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            //System.out.println("Old Password : " + oldPassword + " Id : " + id);
             em.getTransaction().begin();
 
             Customer customer = em.find(Customer.class, id);
 
-            if (AuthManager.check(oldPassword, customer.getPassword())) {
+            if (AuthManager.check(oldPassword, customer.getPassword()))
+            {
 
-                if (pwd1.equals(pwd2) && !pwd1.equals("")) {
+                if (pwd1.equals(pwd2) && !pwd1.equals(""))
+                {
                     customer.setPassword(AuthManager.getSaltedHash(pwd1));
                     resMap.put("success", "Password changed successfully");
-                } else {
+                }
+                else
+                {
                     resMap.put("error", "Password and Re-enter password do not match");
                 }
 
-            } else {
+            }
+            else
+            {
                 resMap.put("error", "Invalid old password");
             }
 
-            if (customer != null) {
+            if (customer != null)
+            {
                 em.merge(customer);
 
             }
@@ -1264,7 +1759,8 @@ public class CustomerController extends AppController {
             response.getWriter().flush();
             response.getWriter().close();
 
-        } catch (Exception ex) {
+        } catch (Exception ex)
+        {
             Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -1277,9 +1773,12 @@ public class CustomerController extends AppController {
 
         long id;
 
-        if (isAjax) {
+        if (isAjax)
+        {
             id = Long.parseLong(request.getParameter("id"));
-        } else {
+        }
+        else
+        {
             id = Long.parseLong(request.getParameter("customerId"));
         }
 
@@ -1297,7 +1796,8 @@ public class CustomerController extends AppController {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
 
-        for (Lodgement l : lodgementList) {
+        for (Lodgement l : lodgementList)
+        {
 
             Map<String, Object> map = new HashMap();
 
@@ -1317,7 +1817,8 @@ public class CustomerController extends AppController {
 
             short mode = l.getPaymentMode();
 
-            switch (mode) {
+            switch (mode)
+            {
                 case 1:
                     paymentMode = "Bank Deposit";
                     break;
@@ -1334,7 +1835,8 @@ public class CustomerController extends AppController {
 
             short s = l.getApprovalStatus();
 
-            switch (s) {
+            switch (s)
+            {
                 case 0:
                     status = "pending";
                     break;
@@ -1362,16 +1864,19 @@ public class CustomerController extends AppController {
 
         String jsonResponse = gson.toJson(responseMap);
 
-        System.out.println("Lodgements Json = " + jsonResponse);
+        //System.out.println("Lodgements Json = " + jsonResponse);
 
         String payLoad = "";
-        if (isAjax) {
+        if (isAjax)
+        {
             response.setContentType("text/plain");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(jsonResponse);
             response.getWriter().flush();
             response.getWriter().close();
-        } else {
+        }
+        else
+        {
             payLoad = jsonResponse;
         }
 
@@ -1392,7 +1897,8 @@ public class CustomerController extends AppController {
 
         Set<Long> set = new HashSet<Long>();
 
-        for (OrderItem item : orderItemList) {
+        for (OrderItem item : orderItemList)
+        {
 
             set.add(item.getOrder().getId());
 
@@ -1404,21 +1910,25 @@ public class CustomerController extends AppController {
         //Each list item represents an order containing List of OrderItem Map
         List<List<Map>> groupedOrderItem = new ArrayList();
 
-        for (Long oid : orderId) {
+        for (Long oid : orderId)
+        {
 
             //check if order value has being set
             boolean isOrderValueSet = false;
 
             List<Map> mapList = new ArrayList();
 
-            for (OrderItem item : orderItemList) {
+            for (OrderItem item : orderItemList)
+            {
 
-                if (oid == item.getOrder().getId()) {
+                if (oid == item.getOrder().getId())
+                {
 
                     Map<String, String> map = new HashMap();
                     Double total_paid = itemHelper.getTotalItemPaidAmount((List) item.getLodgementItemCollection());
 
-                    if (!isOrderValueSet) {
+                    if (!isOrderValueSet)
+                    {
                         map.put("orderValue", String.format("%.2f", itemHelper.getOrderValue(oid)));
                         isOrderValueSet = true;
                     }
@@ -1464,29 +1974,33 @@ public class CustomerController extends AppController {
 
         Lodgement lodgement = em.find(Lodgement.class, lodgement_id);
 
+        Company company = em.find(Company.class, 1);
+
         List<LodgementItem> LItems = (List) lodgement.getLodgementItemCollection();
 
         Date date = lodgement.getCreatedDate();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
-        String dateString = sdf.format(date);
+        //SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
+        //String dateString = sdf.format(date);
 
         double vat = 0.00;
         double gateWayCharge = 0.00;
         Map map = getInvoicData(LItems, vat, gateWayCharge);
 
         String viewFile = "/views/customer/invoice.jsp";
-        request.getSession().setAttribute("print", 1);
-        request.getSession().setAttribute("orderItemInvoice", LItems);
-        request.getSession().setAttribute("transactionDate", dateString);
-        request.getSession().setAttribute("customerInvoice", lodgement.getCustomer());
-        request.getSession().setAttribute("totalInvoice", (Double) map.get("total"));
-        request.getSession().setAttribute("grandTotalInvoice", (Double) map.get("grandTotal"));
-        request.getSession().setAttribute("vatInvoice", vat);
-        request.getSession().setAttribute("gatewayChargeInvoice", gateWayCharge);
-        request.getSession().setAttribute("companyName", super.companyName);
-        request.getSession().setAttribute("companyAddress", super.companyAddress);
-        request.getSession().setAttribute("companyPhone", super.companyPhone);
-        request.getSession().setAttribute("companyEmail", super.companyEmail);
+        request.setAttribute("print", 1);
+        request.setAttribute("lodgement", lodgement);
+        request.setAttribute("orderItemInvoice", LItems);
+        request.setAttribute("transactionDate", date);
+        request.setAttribute("customerInvoice", lodgement.getCustomer());
+        request.setAttribute("totalInvoice", (Double) map.get("total"));
+        request.setAttribute("grandTotalInvoice", (Double) map.get("grandTotal"));
+        request.setAttribute("vatInvoice", vat);
+        request.setAttribute("gatewayChargeInvoice", gateWayCharge);
+        request.setAttribute("companyName", company.getName());
+        request.setAttribute("companyAddress", company.getAddressLine1() + " , " + company.getAddressLine2());
+        request.setAttribute("companyPhone", company.getPhone());
+        request.setAttribute("companyEmail", company.getEmail());
+        request.setAttribute("companyLogo", company.getLogoPath());
 
         request.getRequestDispatcher(viewFile).forward(request, response);
     }
@@ -1516,23 +2030,30 @@ public class CustomerController extends AppController {
          * Copy HTML content into Text File
          */
         FileWriter writer = null;
-        try {
-            File file = new File("c:\\users\\hp\\desktop\\htmloutput.txt");
+        try
+        {
+            File file = new File("htmloutput.txt");
 
             //FileOutputStream fout = new FileOutputStream(file);
             writer = new FileWriter(file);
             writer.write(htmlOutput);
             writer.close();
-        } catch (FileNotFoundException fnfe) {
-            System.out.println("Exception : " + fnfe.getMessage());
-        } catch (IOException ioe) {
-            System.out.println("Exception : " + ioe.getMessage());
-        } finally {
-            if (writer != null) {
-                try {
+        } catch (FileNotFoundException fnfe)
+        {
+            //System.out.println("Exception : " + fnfe.getMessage());
+        } catch (IOException ioe)
+        {
+            //System.out.println("Exception : " + ioe.getMessage());
+        } finally
+        {
+            if (writer != null)
+            {
+                try
+                {
                     writer.close();
-                } catch (IOException ex) {
-                    System.out.println("Unable To Close File : " + ex.getMessage());
+                } catch (IOException ex)
+                {
+                    //System.out.println("Unable To Close File : " + ex.getMessage());
                 }
             }
         }
@@ -1586,7 +2107,8 @@ public class CustomerController extends AppController {
 
         int count = 1;
         double total = 0;
-        for (LodgementItem LI : LItems) {
+        for (LodgementItem LI : LItems)
+        {
             double reward = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
             double amount = LI.getAmount() + reward;
 
@@ -1658,7 +2180,8 @@ public class CustomerController extends AppController {
 
         List<Map> ordersMapList = new ArrayList();
 
-        for (ProductOrder order : orders) {
+        for (ProductOrder order : orders)
+        {
 
             Map<String, Object> orderMap = new HashMap();
             List<OrderItem> items = em.createNamedQuery("OrderItem.findByOrder").setParameter("order", order).getResultList();
@@ -1666,7 +2189,8 @@ public class CustomerController extends AppController {
             orderMap.put("order_date", sdf.format(order.getCreatedDate()));
             List<Map> itemMapList = new ArrayList();
 
-            for (OrderItem item : items) {
+            for (OrderItem item : items)
+            {
 
                 Map<String, String> map = new HashMap();
 
@@ -1683,7 +2207,8 @@ public class CustomerController extends AppController {
             ordersMapList.add(orderMap);
         }
 
-        if (!returnJson) {
+        if (!returnJson)
+        {
             return ordersMapList;
         }
 
@@ -1703,7 +2228,8 @@ public class CustomerController extends AppController {
         EntityManagerFactory emf = null;
         EntityManager em = null;
 
-        try {
+        try
+        {
 
             validateAgentProspect(request);
 
@@ -1714,7 +2240,8 @@ public class CustomerController extends AppController {
             Query query = em.createNamedQuery("AgentProspect.findByEmail").setParameter("email", request.getParameter("email"));
             List<AgentProspect> prospect = query.getResultList();
 
-            if (prospect.size() > 0) {
+            if (prospect.size() > 0)
+            {
                 errorMessages.put("Email", "Email alredy exists for " + prospect.get(0).getFullName());
                 throw new PropertyException("Email Already Exist");
             }
@@ -1741,20 +2268,25 @@ public class CustomerController extends AppController {
 
             request.setAttribute("success", "Prospective client details has been registered successfully");
 
-        } catch (PropertyException pe) {
+        } catch (PropertyException pe)
+        {
 
-            System.out.println("PropertyException : " + pe.getMessage());
+            //System.out.println("PropertyException : " + pe.getMessage());
             request.setAttribute("errors", errorMessages);
-        } catch (RollbackException rbe) {
-            System.out.println("Transaction Rolled Back : " + rbe.getMessage());
+        } catch (RollbackException rbe)
+        {
+            //System.out.println("Transaction Rolled Back : " + rbe.getMessage());
 
-        } finally {
+        } finally
+        {
 
-            if (em != null) {
+            if (em != null)
+            {
                 em.close();
             }
 
-            if (emf != null) {
+            if (emf != null)
+            {
                 emf.close();
             }
 
@@ -1768,7 +2300,8 @@ public class CustomerController extends AppController {
         EntityManagerFactory emf = null;
         EntityManager em = null;
 
-        try {
+        try
+        {
 
             validateAgentProspect(request);
 
@@ -1801,20 +2334,25 @@ public class CustomerController extends AppController {
             request.setAttribute("prospect", em.find(AgentProspect.class, customer.getId()));
             request.setAttribute("success", "Prospective client details has been updated successfully");
 
-        } catch (PropertyException pe) {
+        } catch (PropertyException pe)
+        {
 
-            System.out.println("PropertyException : " + pe.getMessage());
+            //System.out.println("PropertyException : " + pe.getMessage());
             request.setAttribute("errors", errorMessages);
-        } catch (RollbackException rbe) {
-            System.out.println("Transaction Rolled Back : " + rbe.getMessage());
+        } catch (RollbackException rbe)
+        {
+            //System.out.println("Transaction Rolled Back : " + rbe.getMessage());
 
-        } finally {
+        } finally
+        {
 
-            if (em != null) {
+            if (em != null)
+            {
                 em.close();
             }
 
-            if (emf != null) {
+            if (emf != null)
+            {
                 emf.close();
             }
 
@@ -1828,43 +2366,53 @@ public class CustomerController extends AppController {
 
         errorMessages.clear();
 
-        if (request.getParameter("fname").isEmpty()) {
+        if (request.getParameter("fname").isEmpty())
+        {
             errorMessages.put("First Name", "First name is required");
         }
 
-        if (request.getParameter("lname").isEmpty()) {
+        if (request.getParameter("lname").isEmpty())
+        {
             errorMessages.put("Last Name", "Last name is required");
         }
 
-        if (request.getParameter("street").isEmpty()) {
+        if (request.getParameter("street").isEmpty())
+        {
             errorMessages.put("Street", "Street is required");
         }
 
-        if (request.getParameter("city").isEmpty()) {
+        if (request.getParameter("city").isEmpty())
+        {
             errorMessages.put("City", "City is required");
         }
 
-        if (request.getParameter("state").isEmpty()) {
+        if (request.getParameter("state").isEmpty())
+        {
             errorMessages.put("State", "State is required");
         }
 
-        if (request.getParameter("phone").isEmpty()) {
+        if (request.getParameter("phone").isEmpty())
+        {
             errorMessages.put("Phone", "Phone is required");
         }
 
-        if (request.getParameter("email").isEmpty()) {
+        if (request.getParameter("email").isEmpty())
+        {
             errorMessages.put("Email", "Email is required");
         }
 
-        if (request.getParameter("customer_comapany_name").isEmpty()) {
+        if (request.getParameter("customer_comapany_name").isEmpty())
+        {
             errorMessages.put("Company Name", "Company name is required");
         }
 
-        if (request.getParameter("customer_post").isEmpty()) {
+        if (request.getParameter("customer_post").isEmpty())
+        {
             errorMessages.put("Customer Post", "Customer post is required");
         }
 
-        if (!errorMessages.isEmpty()) {
+        if (!errorMessages.isEmpty())
+        {
 
             throw new PropertyException("Prospective Customer validation error");
         }
@@ -1881,7 +2429,7 @@ public class CustomerController extends AppController {
         Query query = em.createNamedQuery("AgentProspect.findByAgent").setParameter("agent", agent);
 
         List<AgentProspect> prospects = query.getResultList();
-        System.out.println("Prospects count : " + prospects.size());
+        //System.out.println("Prospects count : " + prospects.size());
 
         //em.close();
         return prospects;
@@ -1905,10 +2453,11 @@ public class CustomerController extends AppController {
      * @return Map This method returns the parameters of an HTTP request as a
      * Map object
      */
-    public Map getRequestParameters(HttpServletRequest request) {
+    public Map<String , String> getRequestParameters(HttpServletRequest request) {
         Map<String, String> map = new HashMap();
         Enumeration params = request.getParameterNames();
-        while (params.hasMoreElements()) {
+        while (params.hasMoreElements())
+        {
             String elem = params.nextElement().toString();
             map.put(elem, request.getParameter(elem));
         }
@@ -1919,7 +2468,7 @@ public class CustomerController extends AppController {
     private String getRequestHistory(HttpServletRequest request) {
 
         String url = request.getHeader("referer");
-        System.out.println("History : " + url);
+        //System.out.println("History : " + url);
         return url;
     }
 
@@ -1938,4 +2487,28 @@ public class CustomerController extends AppController {
         return "Short description";
     }// </editor-fold>
 
+   private boolean validateOrder(List<OrderItem> orderItems , Lodgement lodgement, StringBuilder errorMSG){
+      
+       //Validating if the initial payment specified by user is lesser that what is required
+       Double customerTotalInitialPayment = 0.0;
+       
+       for(OrderItem item : orderItems)
+       {
+          customerTotalInitialPayment += item.getInitialDep();
+          if(item.getInitialDep() < item.getUnit().getLeastInitDep())
+          {
+              errorMSG.append("One or more Order have an Invalid Initial deposit amount");
+              return false;
+          }
+       }
+       
+       if(lodgement.getAmount() < customerTotalInitialPayment)
+       {
+           errorMSG.append("The Lodgement Amount is invalid");
+           return false;
+       }
+       
+       
+      return true;
+  }
 }

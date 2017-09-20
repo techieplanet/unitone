@@ -52,14 +52,15 @@
                      </div>
                   </div>
                   
-                  <table class="table table-striped table-hover table-bordered table-condensed" >
+                  <table id="accStatement" class="table table-striped table-hover table-bordered table-condensed" >
                       
                       <thead>
                           <tr>
-                              <td>#</td>
+                              <td class="text-center">SN</td>
                               <td class="text-center">Date</td>
                               <td class="text-center">Debit</td>
                               <td class="text-center">Credit</td>
+                              <td class="text-center">Balance</td>
                           </tr>
                       </thead>
                       
@@ -73,20 +74,25 @@
                               <c:if test='${transaction["type"] eq "Credit"}'> 
                                   <c:set var="creditAmount" value="${transaction['amount']}"  />
                                   <c:set var="totalCredit" value="${transaction['amount'] + totalCredit}" />
+                                  <tr>
+                                  <td class="text-center">${pointer.count}</td>
+                                  <td class="text-center">${transaction['date']}</td>
+                                  <td class="text-right"></td>
+                                  <td class="text-right"><fmt:formatNumber value="${creditAmount}" type="currency" currencySymbol="N" /></td> 
+                                  <td class="text-right"><fmt:formatNumber value="${transaction['accbalance']}" type="currency" currencySymbol="N" /></td> 
+                              </tr>
                               </c:if>
-                              <c:if test='${transaction["type"] eq "Dedit"}'> 
+                              <c:if test='${transaction["type"] eq "Debit"}'> 
                                   <c:set var="debitAmount" value="${transaction['amount']}" />
-                                  <c:set var="totalDedit" value="${transaction['amount'] + totalDedit}" />
-                              </c:if>
-                              
-                              
-                              
-                              <tr>
-                                  <td>${pointer.count}</td>
+                                  <c:set var="totalDedit" value="${transaction['amount'] + totalDebit}" />
+                                  <tr>
+                                  <td class="text-center">${pointer.count}</td>
                                   <td class="text-center">${transaction['date']}</td>
                                   <td class="text-right"><fmt:formatNumber value="${debitAmount}" type="currency" currencySymbol="N" /></td>
-                                  <td class="text-right"><fmt:formatNumber value="${creditAmount}" type="currency" currencySymbol="N" /></td> 
+                                  <td class="text-right"></td> 
+                                  <td class="text-right"><fmt:formatNumber value="${transaction['accbalance']}" type="currency" currencySymbol="N" /></td> 
                               </tr>
+                              </c:if>
                               
                           </c:forEach>
                           
@@ -150,6 +156,14 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.PrintArea.js"></script>
 <script>
           
+           $(function () {
+            $("#accStatement").DataTable({
+                "autoWidth": false,
+                "columnDefs": [
+                    { "sortable": true, "width":"20px", "targets": 0 }
+                ]
+            });
+        });
 
       var agentHistory = {
           

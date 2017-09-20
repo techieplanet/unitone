@@ -38,6 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Document.findByPath", query = "SELECT d FROM Document d WHERE d.path = :path"),
     @NamedQuery(name = "Document.findByCreatedDate", query = "SELECT d FROM Document d WHERE d.createdDate = :createdDate"),
     @NamedQuery(name = "Document.findByModifiedDate", query = "SELECT d FROM Document d WHERE d.modifiedDate = :modifiedDate"),
+    @NamedQuery(name = "Document.findByOwnerIdDoctypeIdOwnerTypeId", query = "SELECT d FROM Document d WHERE d.ownerId = :ownerID AND d.docTypeId = :docTypeId AND d.ownerTypeId = :ownerTypeId"),
     @NamedQuery(name = "Document.findByOwnerIdAndOwnerTypeId", query = "SELECT d FROM Document d WHERE d.ownerId = :ownerId AND d.ownerTypeId = :ownerTypeId ORDER by d.docTypeId.weight")})
 public class Document implements Serializable {
 

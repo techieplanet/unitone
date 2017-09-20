@@ -32,14 +32,20 @@
                   </h3>
                   
                   <div class="row" style="margin-top:10px">
-                        <c:if test="${projectUnits.size() > 0}">   
+                        <c:if test="${projectUnits.size() > 0}">  
+                            <c:set var="project" value="${projectUnits.get(0).getProject()}" />
+                             
                          <div class="col-md-2">
-                             <img src="${pageContext.request.contextPath}/images/img/project.jpg"  alt="No Preview Image" class="img img-thumbnail" />
+                                <c:if test="${project.getImage() == null}" >
+                                    <img src="${pageContext.request.contextPath}/images/img/project.jpg"  alt="No Preview Image" class="img img-thumbnail" />
+                              </c:if>
+                             <c:if test="${project.getImage() != null}" >
+                                        <img src="/uploads/NeoForce/images/${project.getImage()}" alt="No Preview Image" class="img img-thumbnail" >
+                                </c:if>
                          </div>
                          
                          <div class="col-md-8">
                              
-                             <c:set var="project" value="${projectUnits.get(0).getProject()}" />
                              <div class="well-lg">
                                  <div class="col-md-2"><b>Name</b></div><div class="col-md-10"><p>${project.getName()}</p></div>
                                  <div class="col-md-2"><b>Location</b></div><div class="col-md-10"><p>${project.getLocation()}</p></div>
@@ -66,8 +72,12 @@
                          
                               <div class="col-md-3">
                                 <div class="thumbnail">
-                                  <img src="${pageContext.request.contextPath}/images/img/unit.jpg" class="img" style="height: 200px"  alt="No Preview">
-                                  <div class="caption text-center">
+                                  <c:if test="${unit.getImage() == null}" >
+                                    <img src="${pageContext.request.contextPath}/images/img/unit.jpg" class="img" style="height: 200px"  alt="No Preview">
+                                    </c:if>
+                                    <c:if test="${unit.getImage() != null}" >
+                                       <img src="/uploads/NeoForce/images/${unit.getImage()}" alt="No Preview Image" class="img img-thumbnail" >
+                                    </c:if><div class="caption text-center">
                                     <h4>${unit.getTitle()}</h4>
                                     <span><fmt:formatNumber value="${unit.getCpu()}" type="currency" currencySymbol="N" /></span><br />
                                     <span>In Stock : ${unit.getQuantity()}</span> 

@@ -32,14 +32,14 @@ public class AccountManager {
      */
     public Account createCustomerAccount(Customer customer) throws PropertyException, RollbackException{
         Account account = new Account();
-        em.getTransaction().begin();
+        //em.getTransaction().begin();
         
         account.setAccountCode("CU" + this.createAccountCode(customer.getCustomerId()) );
         account.setAccountTypeId(new AccountType(3));  //customer account type id is 3
         account.setRemoteId(customer.getCustomerId());
         account.setActive((short)1);
-        em.persist(account);
-        em.getTransaction().commit();
+        //em.persist(account);
+        //em.getTransaction().commit();
         
         return account;
     }
@@ -111,8 +111,8 @@ public class AccountManager {
     }
     
     public void deactivateAccount(Account account) throws PropertyException, RollbackException{
-        System.out.println("Inside deactivateAccount: " + account.getId());
-        System.out.println("Active status: " + account.getActive());
+        //System.out.println("Inside deactivateAccount: " + account.getId());
+        //System.out.println("Active status: " + account.getActive());
         em.getTransaction().begin();
         Account myAccount = em.find(Account.class, account.getId());
         myAccount.setActive((short)0);

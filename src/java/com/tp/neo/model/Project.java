@@ -61,6 +61,8 @@ public class Project extends BaseModel{
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
+    @Column(name = "image")
+    private String image;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
 
     
@@ -256,6 +258,20 @@ public class Project extends BaseModel{
 
     public void setProjectUnitCollection(Collection<ProjectUnit> projectUnitCollection) {
         this.projectUnitCollection = projectUnitCollection;
+    }
+
+    /**
+     * @return the image
+     */
+    public String getImage() {
+        return image;
+    }
+
+    /**
+     * @param image the image to set
+     */
+    public void setImage(String image) {
+        this.image = image;
     }
 
 }

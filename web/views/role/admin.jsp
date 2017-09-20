@@ -48,8 +48,8 @@
                                 <td><c:out value="${role.roleId}" /></td>
                                 <td><c:out value="${role.title}" /></td>
                                 <td class="text-center">
-                                    <a class="btn btn-success btn-xs" href="Role?action=edit&id=<c:out value="${role.roleId}"/>" role="button"><i class="fa fa-pencil"></i></a>
-                                    <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Role', <c:out value="${role.roleId}"/>)" role="button"><i class="fa fa-remove"></i></a>
+                                    <a class="btn btn-success btn-xs" href="Role?action=edit&id=<c:out value="${role.roleId}"/>" role="button" title="Edit the ${role.title} role"><i class="fa fa-pencil"></i></a>
+                                    <a class="btn btn-danger btn-xs" href="#" onclick="showDeleteModal('${pageContext.request.contextPath}', 'Role', <c:out value="${role.roleId}"/>)" role="button" title="Delete the ${role.title} role"><i class="fa fa-remove"></i></a>
                                 </td>
                             </tr>
                         </c:forEach>

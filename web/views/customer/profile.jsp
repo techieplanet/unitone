@@ -20,7 +20,6 @@
                 </div>
           </c:if>  
         
-          
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
@@ -36,9 +35,15 @@
                 
                 
                 <div class="panel-heading" style="background-color: #ffffff">
-                    <div class="row">
-                        <div class="col-md-12">
+                   <div class="row">
+                        <div class="col-md-2 margintop40">
                             <a href="${history}" class="btn btn-primary" /><i class="fa fa-chevron-left"></i> Back </a>
+                        </div>
+                        <div class="col-md-8 margintop20">
+                            <h1>${customer.getFullName()} - ${customer.account.accountCode}</h1>
+                        </div>
+                        <div class="col-md-2">
+                            <img src="/uploads/NeoForce/images/customers/${customer.photoPath}" class="img img-responsive img-thumbnail" />
                         </div>
                     </div>
                 </div>
@@ -63,16 +68,13 @@
                     
                     <div class="row">
                         
-                        <div class="col-md-2">
-                            
-                            <h4>Customer Picture</h4>
-                            <img src="/uploads/NeoForce/images/customers/${customer.photoPath}" class="img img-responsive img-thumbnail" />
-                            
-                            
-                            
-                        </div>
+                      <%// <div class="col-md-2">
+                           //  <h4>Customer Picture</h4>
+                          //  <img src="/uploads/NeoForce/images/customers/${customer.photoPath}" class="img img-responsive img-thumbnail" />
+                         // </div>
+                      %>
                         
-                        <div class="col-md-10">
+                        <div class="col-md-5 col-xs-offset-2">
                             
                             <table class="table table-profile">
                                 
@@ -80,10 +82,10 @@
                                     <tr>
                                         <th></th>
                                         <th>
-                                            <div class="col-md-9">
-                                                <h4>${customer.getFullName()}</h4>
-                                            </div>
-                                
+                                            <%// <div class="col-md-9">
+                                              //  <h4>${customer.getFullName()}</h4>
+                                            //</div>
+                                            %>
                                             <c:if test="${sessionScope.user.getSystemUserTypeId() == 3}">
                                             <div class="col-md-3">
                                                 <a href="#" class="pull-right" onclick="customerProfile.showPasswordModal(event)" style="text-decoration: none; border-bottom: 1px dotted blue;">Change password</a>
@@ -115,7 +117,7 @@
                                     </tr>
                                     <tr>
                                         <td class="field">Date Of Birth</td>
-                                        <td>${customer.getDateOfBirth()}</td>
+                                        <td>${customer.dateOfBirth != null? dateFmt.format(customer.dateOfBirth) : ""}</td>
                                     </tr>
                                     <tr>
                                         <td class="field">Mobile</td>
@@ -355,7 +357,7 @@
                             <div class="col-md-12">
                              
                                 <div id="documents-accordion" class="panel-group"  role="tablist" aria-multiselectable="true" >
-                                    <table class="table table-profile">
+                                    <table class="table table-bordered table-striped table-hover">
                                 
                                 <thead>
                                     <tr>
@@ -371,9 +373,7 @@
                                             </div>
                                         </th>
                                     </tr>
-                                     <tr class="divider">
-                                        <td colspan="3"></td>
-                                    </tr>
+                                    
                                 </thead>
                                 <tbody>
                            
@@ -381,12 +381,10 @@
                                         <tr>
                                         <td >${document.docTypeId.weight}</td>
                                         <td >${document.docTypeId.title}</td>
-                                        <td ><a href="${documentDir}${document.path}" ><img src="${documentDir}${document.path}" class="img img-responsive img-thumbnail" style="max-width: 100px;max-height: 100px; overflow-y: auto"/></a>
+                                        <td ><a href='${documentDir}${document.path}' target="_blank" ><img src="${documentDir}${document.path}" class="img img-responsive img-thumbnail" style="max-width: 50px;max-height: 50px; overflow-y: auto"/></a>
                                          </td>
                                     </tr>
-                                       <tr class="divider">
-                                           <td colspan="3"><hr/></td>
-                                    </tr>
+                                       
                                     </c:forEach>
                                 </tbody>
                                     </table>

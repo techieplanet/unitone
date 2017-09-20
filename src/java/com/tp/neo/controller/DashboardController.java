@@ -11,12 +11,15 @@ import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.AgentDashboardHelper;
 import com.tp.neo.controller.helpers.DashboardHelper;
 import com.tp.neo.exception.SystemLogger;
+import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.Transaction;
 import com.tp.utils.DateFunctions;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +69,7 @@ public class DashboardController extends AppController {
         
         action = request.getParameter("action") != null ? request.getParameter("action") : "";
          log("action in do get: " + action);
-         System.out.println("Inside do get");
+         ////System.out.println("Inside do get");
          
          if(super.hasActiveUserSession(request, response)){
 //            if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
@@ -128,7 +131,7 @@ public class DashboardController extends AppController {
                 int groupId = Integer.parseInt(request.getParameter("grouping"));
 
                 String jsonResponse = this.fetchLodgementSummary(startDate, endDate, groupId);
-                System.out.println("jsonResponse: " + jsonResponse );
+                ////System.out.println("jsonResponse: " + jsonResponse );
 
                 response.getWriter().write(jsonResponse);
                 response.getWriter().flush(); 
@@ -157,9 +160,21 @@ public class DashboardController extends AppController {
                 request.setAttribute("completedOrders", em.createNamedQuery("ProductOrder.findByApprovalStatus").setParameter("approvalStatus", 2).getResultList().size());  
                 request.setAttribute("processingOrders", em.createNamedQuery("ProductOrder.findByApprovalStatus").setParameter("approvalStatus", 1).getResultList().size());  
                 request.setAttribute("customersPerAgent", String.format("%.2f", agentCount == 0 ? 0 : (float)customerCount/agentCount));  
-
+                
+                //Lets get the total income 
+                request.setAttribute("income",String.format("%,.2f",helper.getTotalIncome()));
+                
+                //Lets get the total annual Maintenance 
+                request.setAttribute("annualMaintenance",String.format("%,.2f",helper.getTotalAnnualMaintenance()));
+                
+                //Lets get the total with Holding Tax 
+                request.setAttribute("withHoldingTax",String.format("%,.2f",helper.getTotalWithHoldingTax()));
+                
+                 //Lets get the total VAT 
+                request.setAttribute("VAT",String.format("%,.2f",helper.getTotalVat()));
+                
                 //request.setAttribute("topFiveAgentLocations", helper.getTopFiveAgentLocations());  //not needed anymore
-                //System.out.println("top: " + em.createNamedQuery("Agent.findByTopSellingLocations").getResultList().size());
+               ////System.out.println("top: " + em.createNamedQuery("Agent.findByTopSellingLocations").getResultList().size());
                 
                 //Keep track of the sideBar
                 request.setAttribute("sideNav", "Dashboard");
@@ -214,7 +229,7 @@ public class DashboardController extends AppController {
                 int groupId = Integer.parseInt(request.getParameter("grouping"));
 
                 String jsonResponse = this.fetchLodgementSummary(startDate, endDate, groupId);
-                System.out.println("jsonResponse: " + jsonResponse );
+               ////System.out.println("jsonResponse: " + jsonResponse );
 
                 response.getWriter().write(jsonResponse);
                 response.getWriter().flush(); 
@@ -310,7 +325,7 @@ public class DashboardController extends AppController {
             DashboardHelper helper = new DashboardHelper();
             orderSummaryJSON = helper.getOrderSummary(truncatedBy, truncationResultFormat, startDate, endDate);
         } catch(Exception e){
-            System.out.println("Error: " + e.getMessage());
+            ////System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
         
@@ -348,9 +363,9 @@ public class DashboardController extends AppController {
 
             DashboardHelper helper = new DashboardHelper(super.getAvailableplugins());
             lodgementSummaryJSON = helper.getLodgementSummary(truncatedBy, truncationResultFormat, startDate, endDate);
-            System.out.println("orderSummaryJSON: " + lodgementSummaryJSON);
+            ////System.out.println("orderSummaryJSON: " + lodgementSummaryJSON);
         } catch(Exception e){
-            System.out.println("Error: " + e.getMessage());
+            ////System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
         
@@ -367,4 +382,6 @@ public class DashboardController extends AppController {
         return "Short description";
     }// </editor-fold>
 
+    
+            
 }

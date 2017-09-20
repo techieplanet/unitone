@@ -199,7 +199,7 @@
                                      <div class="col-md-4">
                                          <div class="form-group">
                                              <label>Post</label>
-                                             <input type="text" class="form-control" name="customer_post" placeholder="Company Name" required />
+                                             <input type="text" class="form-control" name="customer_post" placeholder="Job Position" required />
                                          </div>
                                      </div>
                                      

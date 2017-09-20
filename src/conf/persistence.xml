@@ -43,21 +43,36 @@
     <class>com.tp.neo.model.MessageToRecipient</class>
     <class>com.tp.neo.model.DocumentType</class>
     <class>com.tp.neo.model.Document</class>
+    <class>com.tp.neo.model.PasswordReset</class>
+    <class>com.tp.neo.model.Bank</class>
+    <class>com.tp.neo.model.Settings</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <!--LOCALHOST-->
-   <!-- <properties>
+    
+    <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/xforce"/>
       <property name="javax.persistence.jdbc.user" value="postgres"/>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
       <property name="javax.persistence.jdbc.password" value="techie50"/>
-    </properties> -->
+    </properties>
+  
+    <!--APPSERVER2-->
+    <!--
+      <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://108.161.131.16:5432/xforce"/>
+      <property name="javax.persistence.jdbc.user" value="neoforce"/>
+      <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="ne0fussm@n"/>
+    </properties>  
+      -->
     <!--APPSERVER-->
+    <!--
       <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://108.161.136.211:5432/xforce"/>
       <property name="javax.persistence.jdbc.user" value="postgres"/>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
       <property name="javax.persistence.jdbc.password" value="Postm@n0"/>
-    </properties> 
+    </properties>  -->
     <!--AWS CONFIGURATION-->
     <!--    <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://db949.cehusrnzup8i.us-east-1.rds.amazonaws.com:5432/xforce"/>

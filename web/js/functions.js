@@ -119,8 +119,8 @@ function showSelectedAgent()
         $("#step3").css("display","block");
         
         $("#process-step-1").removeClass('btn-primary').addClass('btn-default');
-        $("#process-step-2").removeClass('btn-default').addClass('btn-primary');
-        $("#process-step-3").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-2").removeClass('btn-primary').addClass('btn-default');
+        $("#process-step-3").removeClass('btn-default').addClass('btn-primary');
         $("#process-step-3").removeAttr('disabled');
         
         return false;
@@ -380,6 +380,38 @@ function addToCart(event){
   var commission = $('#commp').val();
   var dayOfNotification = $("#day_of_notification").val();
   var loyaltyPoint = 0;
+  
+  //Validating The Information
+  //Product , Unit , quantity , initial amount , payment duration , 
+  
+  if(!productId)
+  {
+      alert("Please Select a Product");
+      return;
+  }
+  if(!productUnitId)
+  {
+      alert("Please Select a Unit ");
+      return;
+  }
+  if(!productQuantity)
+  {
+      alert("Please Select a Quantity");
+      return;
+  }
+  if(!isNaN(productMinimumInitialAmount))
+  {
+      if(productMinimumInitialAmount < (productQuantity * initialAmountPerUnit) )
+      {
+          alert("Initial Payment can't be lesser that " + (productQuantity  * initialAmountPerUnit ));
+            return;
+      }
+  }
+  else
+  {
+      alert("Initial amount is invalid");
+      return;
+  }
   
   //If loyaltyPlugin is enabled
     if(isLoyaltyEnabled == 1){
@@ -648,7 +680,7 @@ function deleteDataFromCart(id){
     $("#productCart tbody").focus();
     
        console.log("Delete Successful");
-       $('#deleteModalCart').modal('hide');
+       $('#deleteModal').modal('hide');
        $('#'+id + ',#'+id + ' td').addClass("deleting");
        $('#'+id).fadeOut(1000); 
        $("tr#"+id).remove();
@@ -1039,7 +1071,16 @@ function monthlyPayCalculator(){
     }
     
     var payLeft = productAmount - productMinimumInitialAmount;
+    if(payLeft > 0)
+    {
     $("#amountLeft").val(payLeft);
+    $("#amountLeftFormat").text(accounting.formatNumber(payLeft , 2));
+    }
+    else
+    {
+         $("#amountLeft").val("");
+    $("#amountLeftFormat").text("");
+    }
     var monthlyPay = payLeft / productMaximumDuration;
     $("#productMinimumMonthlyPayment").val(monthlyPay.toFixed(2));
     $("#monthlyPayPerUnit").text((monthlyPay * 1).toFixed(2));
@@ -1064,6 +1105,7 @@ function calculateAmountToPay(){
    
     $("#addToCart").attr("disabled",false);
     var userInitialAmount = parseInt($("#productMinimumInitialAmount").val());
+    $("#productMinimumInitialAmountFormat").text(accounting.formatNumber(userInitialAmount , 2));
     
     //If loyaltyPlugin is enabled
     if(isLoyaltyEnabled == 1){
@@ -1106,7 +1148,16 @@ function calculateAmountToPay(){
     }else{
         $("#errorInitDep").remove();
         $("#errorText").text("");
-        $("#amountLeft").val(productAmount - userInitialAmount);
+        var ammountleftTopay =productAmount - userInitialAmount; 
+        if(ammountleftTopay > 0)
+        {$("#amountLeft").val(ammountleftTopay);
+         $("#amountLeftFormat").text(accounting.formatNumber(ammountleftTopay , 2));
+        }
+        else
+        {
+             $("#amountLeft").val("");
+            $("#amountLeftFormat").text("");
+        }
         calculateDurationFromMonthlyPay();
     }
     
@@ -1292,8 +1343,8 @@ function showActivateModal(context, entityName, id, status){
 /*TP: the delete modal for the cart system*/
 function showDeleteCartModal( id){    
     var args = "deleteDataFromCart("+id+")";
-    $("#deleteModalCart #ok").attr("onclick", args);
-    $('#deleteModalCart').modal();
+    $("#deleteModal #ok").attr("onclick", args);
+    $('#deleteModal').modal();
     return false;
 }
 
@@ -1335,6 +1386,7 @@ function submitPostForm(url, formData){
     
     $.ajax({
        type : 'POST',
+       //contentType: 'multipart/form-data',
        url : url,
        data : formData,
        success: function(response){
@@ -1368,10 +1420,10 @@ function validateCustomerRegForm()
     {
         errors.push("Please enter first name");
     }
-//    if($("#customerMiddlename").val().trim() == '')
-//    {
-//        errors.push("Please enter middle name");
-//    }
+    if($("#customerMiddlename").val().trim() == '')
+    {
+    errors.push("Please enter middle name");
+     }
     if($("#customerLastname").val().trim() == '')
     {
         errors.push("Please enter last name");
@@ -1416,7 +1468,7 @@ function validateCustomerRegForm()
     {
         errors.push("Please enter Phone Number");
     }
-    if($("#customerKinNames").val().trim() == '')
+    if($("#customerKinName").val().trim() == '')
     {
         errors.push("Please enter kin name");
     }
@@ -1553,6 +1605,11 @@ function validateCustomerRegForm()
      if($("#customerPhotoID").val().trim() == '')
     {
         errors.push("Please Upload Customer ID ");
+    }
+    
+    if($("#customerBankStandingOrder").val().trim() == '')
+    {
+        errors.push("Please Upload Customer Bank Standing Order / Post dated Cheque");
     }
     
     $("#customerErrorModal .modal-body").html("");
@@ -1715,6 +1772,16 @@ function submitForm(){
                
            }
            
+           if($("#customer_id").val()){}
+           else{
+               //window.location.href
+               if(window.location.href.includes("Order"))//We are on the order page
+               {
+                   alert("You have not select a Customer");
+               return false;
+                }
+           }
+           
            return submitOk;
        }
        
@@ -1728,4 +1795,62 @@ function validateEmail(x) {
         return false;
     }
     return true;
+}
+
+var directorCount = 1;
+
+function addNewDirector(){
+    directorCount ++;
+    
+    var parent = $("#directors");
+    
+    var tRow = document.createElement("tr");
+    
+    //SN
+    var tCol = document.createElement("td");
+    tCol.textContent = directorCount;
+    tRow.appendChild(tCol);
+    
+    //Director name
+    var tCol = document.createElement("td");
+    var input = document.createElement("input");
+    input.setAttribute("type" ,"text");
+    input.setAttribute("placeholder","Director Name");
+    input.setAttribute("name",  "agentDirectorName" + directorCount);
+    input.setAttribute("class","form-control");
+    
+    tCol.appendChild(input);
+    tRow.appendChild(tCol);
+    
+    var tCol = document.createElement("td");
+    var input = document.createElement("input");
+    input.setAttribute("type" ,"file");
+    input.setAttribute("name",  "agentDirectorPassport" + directorCount);
+    input.setAttribute("class","form-control");
+    input.setAttribute("accept","image/gif, image/jpeg, image/png");
+    
+    tCol.appendChild(input);
+    tRow.appendChild(tCol);
+    
+    var tCol = document.createElement("td");
+    var input = document.createElement("input");
+    input.setAttribute("type" ,"file");
+    input.setAttribute("name",  "agentDirectorIDCard" + directorCount);
+    input.setAttribute("class","form-control");
+    input.setAttribute("accept","image/gif, image/jpeg, image/png , image/bmp");
+    
+    tCol.appendChild(input);
+    tRow.appendChild(tCol);
+    
+    parent.append(tRow);
+}
+
+function removeLastDirectorEntry(){
+    if(directorCount < 2)
+        return;
+    var parent = document.getElementById("directors");
+    var tRow = parent.lastChild;
+    parent.removeChild(tRow);
+    
+    directorCount --;
 }

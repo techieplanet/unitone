@@ -41,8 +41,13 @@
                          
                               <div class="col-md-4">
                                 <div class="thumbnail">
+                                    <c:if test="${project.getImage() == null}" >
                                     <img src="${pageContext.request.contextPath}/images/img/project.jpg" class="img img-responsive" style="min-height: 200px" width="300px" height="200px" alt="No Preview">
-                                  <div class="caption text-center">
+                                    </c:if>
+                                    <c:if test="${project.getImage() != null}" >
+                                        <img src="/uploads/NeoForce/images/${project.getImage()}" class="img img-responsive" style="min-height: 200px" width="300px" height="200px" alt="No Preview">
+                                    </c:if>
+                                    <div class="caption text-center">
                                     <h3>${project.getName()}</h3>
                                     <p>
                                         ${fn:substring(project.getDescription(),0,47)}

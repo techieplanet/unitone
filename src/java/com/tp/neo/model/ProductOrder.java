@@ -50,9 +50,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ProductOrder.findByApprovalStatusAgent", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus AND o.agent = :agent"),
     @NamedQuery(name = "ProductOrder.findByApprovalStatusCustomer", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = :approvalStatus AND o.customer = :customer"),
     
-    @NamedQuery(name = "ProductOrder.findByProcessing", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 1 AND o.mortgageStatus = 0 ORDER BY o.id DESC"),
-    @NamedQuery(name = "ProductOrder.findByProcessingAgent", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 1 AND o.mortgageStatus = 0 AND o.agent = :agent"),
-    @NamedQuery(name = "ProductOrder.findByProcessingCustomer", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 1 AND o.mortgageStatus = 0 AND o.customer = :customer"),
+    @NamedQuery(name = "ProductOrder.findByProcessing", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 1 OR o.approvalStatus = 0 AND o.mortgageStatus = 0 ORDER BY o.id DESC"),
+    @NamedQuery(name = "ProductOrder.findByProcessingAgent", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 1 OR o.approvalStatus = 0 AND o.mortgageStatus = 0 AND o.agent = :agent"),
+    @NamedQuery(name = "ProductOrder.findByProcessingCustomer", query = "SELECT o FROM ProductOrder o WHERE o.approvalStatus = 1 OR o.approvalStatus = 0 AND o.mortgageStatus = 0 AND o.customer = :customer"),
     
     @NamedQuery(name = "ProductOrder.findByALLCurrentPayingCustomer", query = "SELECT DISTINCT o.customer FROM ProductOrder o WHERE o.mortgageStatus = 0 ORDER BY o.id DESC"),
     @NamedQuery(name = "ProductOrder.findByALLCompletedPaymentCustomer", query = "SELECT DISTINCT o.customer FROM ProductOrder o WHERE o.mortgageStatus = 1 ORDER BY o.id DESC"),

@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 import javax.servlet.http.Part;
+import java.util.Collection;
 
 /**
  *
@@ -72,7 +73,7 @@ public class FileUploader {
         String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // Use this instead because of MSIE.
         InputStream fileContent = filePart.getInputStream();
             
-        System.out.println("The uploaded file name: " + fileName);
+        //System.out.println("The uploaded file name: " + fileName);
         
         File file = new File(fileTypeUploadDirectory, fileName);
 
@@ -130,7 +131,7 @@ public class FileUploader {
         
         File file = new File(filedir, fileSaveName);
        
-        System.out.println("fileSaveName: " + fileSaveName);
+        //System.out.println("fileSaveName: " + fileSaveName);
         try (InputStream input = fileContent) {
             Files.copy(input, file.toPath());
         } catch(Exception e){
@@ -154,18 +155,18 @@ public class FileUploader {
         String dir =""; 
         
         if(checker.isWindows()){
-            dir = properties.getProperty(this.windowsUploadDir);
             fileSeparator = "\\";
+            dir = System.getProperty( "catalina.base" ) + properties.getProperty(this.windowsUploadDir);
         }
         
         if(checker.isMac()){
-            dir = properties.getProperty(this.macUploadDir);
             fileSeparator = "/";
+            dir = System.getProperty( "catalina.base" ) + properties.getProperty(this.macUploadDir);
         }
         
         if(checker.isUnix()){
-            dir = properties.getProperty(this.linuxUploadDir);
             fileSeparator = "/";
+            dir = System.getProperty( "catalina.base" ) + properties.getProperty(this.linuxUploadDir);
         }
         
         if(fileType.equalsIgnoreCase(fileTypesEnum.IMAGE.toString())){
@@ -204,5 +205,55 @@ public class FileUploader {
     
     public String getFileSeparator(){
         return fileSeparator;
+    }
+    
+    /**
+     * validate if all the Part in this collection have a file extension of 
+     * .gif .jpeg .png .bmp .jpg
+     * @param part
+     * @return 
+     */
+    public static boolean validateFile(Collection<Part> parts){
+        //gif, jpeg,png,bmp , jpg
+     
+       String acceptedFileExt[] = {"gif" ,"jpeg", "png" , "bmp" , "jpg"};
+       String extension = "";
+       boolean success = true;
+       
+       for(Part part : parts)
+       {
+           extension = part.getSubmittedFileName();
+           if(!(extension != null && !extension.isEmpty()))
+               continue;
+           extension = extension.substring(extension.length() - 4);
+           
+           //1024 byte =  1 kb
+           //1024 kb = 1 mb
+           // 2mb = 2097152b;
+           if(part.getSize() > 2097152L) // If greater 2mb
+           {
+               success = false;
+           }
+           
+           boolean fileExtAccepted = false;
+           
+           for(int x = 0 ; x < acceptedFileExt.length ; x++ )
+           {
+               if(extension.toLowerCase().contains(acceptedFileExt[x]))
+               {
+                  fileExtAccepted = true;
+                   break;
+               }
+               
+           }
+           
+           if(!fileExtAccepted)
+           {
+               success = false;
+           }
+           
+       }
+       
+       return success;
     }
 }

@@ -10,31 +10,39 @@ import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.components.AuditLogger;
 import com.tp.neo.controller.helpers.AccountManager;
 import com.tp.neo.controller.helpers.AlertManager;
+import com.tp.neo.controller.helpers.EmailHelper;
 import com.tp.neo.controller.helpers.TransactionManager;
 import com.tp.neo.controller.helpers.WithdrawalManager;
 import com.tp.neo.exception.SystemLogger;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
-import com.tp.neo.model.AgentBalance;
+import com.tp.neo.model.Bank;
+import com.tp.neo.model.Company;
+import com.tp.neo.model.Director;
 import com.tp.neo.model.Document;
 import com.tp.neo.model.DocumentType;
 import com.tp.neo.model.GenericUser;
-import com.tp.neo.model.Notification;
 import com.tp.neo.model.Transaction;
 import com.tp.neo.model.User;
 import com.tp.neo.model.Withdrawal;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
+import com.tp.neo.service.BankService;
+import com.tp.neo.service.DirectorService;
 import com.tp.neo.service.DocumentService;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +97,7 @@ public class AgentController extends AppController {
     
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em;
-    Gson gson = new GsonBuilder().create();
+    static Gson gson = new GsonBuilder().create();
     
     private String action = "";
     private String viewFile = "";
@@ -111,17 +119,27 @@ public class AgentController extends AppController {
          
          action = request.getParameter("action") != null ? request.getParameter("action") : "";
          log("action in do get: " + action);
-         System.out.println("Inside do get");
-         System.out.println("is Ajax Request : " + isAjaxRequest);
+         //System.out.println("Inside do get");
+         //System.out.println("is Ajax Request : " + isAjaxRequest);
          
-         if(super.hasActiveUserSession(request, response)){
+         if(action.equalsIgnoreCase("email_validation")){
+            validateEmail(request,  response);
+           
+         }
+         else if(action.equalsIgnoreCase("referral"))
+         {
+             getReferrerInfo( request,  response);
+         }
+         else if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
                 processGetRequest(request, response);
             }
             else{
+                
                 super.errorPageHandler("forbidden", request, response);
             }
          }
+        
     }
 
     /*TP: processes the get request in general*/
@@ -135,7 +153,7 @@ public class AgentController extends AppController {
 //
 //        String line = null;
 //            while( ( line = reader.readLine() ) != null )  {
-//       System.out.println(line);
+//       //System.out.println(line);
 //        }
 //        reader.close();
 
@@ -152,6 +170,11 @@ public class AgentController extends AppController {
         if (action.equalsIgnoreCase("new")){
                 request.setAttribute("action","new");
                viewFile = AGENTS_NEW;
+               if(request.getParameter("corporate") != null)
+               {
+                  request.setAttribute("corporate" , true);
+               }
+               request.setAttribute("Banks", BankService.getAllBanks());
         }
         else if(action.equalsIgnoreCase("registration")){
               viewFile = AGENTS_REGISTRATION;
@@ -171,8 +194,11 @@ public class AgentController extends AppController {
         else if(action.equalsIgnoreCase("withdrawal")){
                 
             viewFile = AGENTS_WITHDRAWAL;
-            request.setAttribute("agent", getAgentDetails());
-            request.setAttribute("balance", getAgentBalance());
+            
+             em = emf.createEntityManager();
+             Agent agent = em.find(Agent.class, this.sessionUser.getSystemUserId());
+             request.setAttribute("agent", agent);
+             request.setAttribute("balance", agent.getEligibleWithdrawalBalance() );
         }
         else if(action.equalsIgnoreCase("credit_history")){
             
@@ -214,6 +240,12 @@ public class AgentController extends AppController {
             //request.setAttribute("waitingroute", true);
             request.setAttribute("documents", DocumentService.getAgentDocuments(id));
             request.setAttribute("documentDir", imageAccessDirPath+"/");
+            
+            if(agentList.get(0).isCorporate())
+            {
+                request.setAttribute("corporate" ,true);
+                request.setAttribute("Directors" ,DirectorService.getDirectors(agentList.get(0).getAgentId()));
+            }
         }
         else if(action.equalsIgnoreCase("edit")){
             viewFile = AGENTS_NEW;
@@ -233,13 +265,30 @@ public class AgentController extends AppController {
             
             request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
             request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agents/agentkins");
-            
+            request.setAttribute("Banks", BankService.getAllBanks());
             log("imageAccessDirPath: " + imageAccessDirPath);
         }
         else if(action.equalsIgnoreCase("profile")){
             
+            //Check if the user doesnot specify id parameter
+            String idString = request.getParameter("id");
+            
+            Long id ;
+                    
+            if(idString == null){
+                //Then we know that the logged in user is trying to view it own profile
+                //we can now procceed to use the id stored in the session
+                id = sessionUser.getSystemUserId();
+            }
+            else
+            {
+                //Here we know we are about to get the profile of a particular user
+                id = Long.parseLong(idString);
+            }
+
+            
             viewFile = AGENT_PROFILE;
-            long id = Long.parseLong(request.getParameter("id"));
+            
             Agent agent = em.find(Agent.class, id);
             
             String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
@@ -248,7 +297,6 @@ public class AgentController extends AppController {
             request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agents/agentkins");
             request.setAttribute("sideNav", "profile");
             request.setAttribute("agent", agent);
-            
             
             //transaction history 
             Map<String, Object> historymap = getAgentAccountHistory(request, response);
@@ -260,6 +308,11 @@ public class AgentController extends AppController {
             request.setAttribute("documents", DocumentService.getAgentDocuments(id));
             request.setAttribute("documentDir", imageAccessDirPath+"/");
             
+             if(agent.isCorporate())
+            {
+                viewFile = "/views/agent/corporate_profile.jsp";
+                request.setAttribute("Directors" ,DirectorService.getDirectors(agent.getAgentId()));
+            }
         }
         else if (action.isEmpty() || action.equalsIgnoreCase("listagents")){
             viewFile = AGENTS_ADMIN;
@@ -272,7 +325,7 @@ public class AgentController extends AppController {
         }
         else if(action.equalsIgnoreCase("wallet")){
             Map<String, Object> historymap = getAgentAccountHistory(request, response);
-            System.out.println("Maps List: " + historymap.get("transactionMapsList"));
+            //System.out.println("Maps List: " + historymap.get("transactionMapsList"));
             request.setAttribute("agentDetails", historymap.get("agentDetails"));
             request.setAttribute("transactionMapsList", historymap.get("transactionMapsList"));
         }
@@ -283,6 +336,15 @@ public class AgentController extends AppController {
             getAgentAccountHistory(request);
             
         }
+        else if(action.equalsIgnoreCase("email_validation")){
+            validateEmail(request,  response);
+            return;
+        }
+        else if( action.equalsIgnoreCase("makePayout"))
+           {
+               processPayout( request,  response);
+               return;
+           }
         
         if(request.getAttribute("sideNav") == null){
             //Keep track of the sideBar
@@ -316,6 +378,11 @@ public class AgentController extends AppController {
                 changeAgentPassword(request,response);
                 return;
             }
+            else if (action.equalsIgnoreCase("new"))
+            {
+                processInsertRequest(request, response);
+                return;
+            }
         
          if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new Agent().getPermissionName(action), request, response)){
@@ -338,8 +405,7 @@ public class AgentController extends AppController {
             String withdrawal_id = request.getParameter("withdrawal_id") != null ? request.getParameter("withdrawal_id") : "";
             String agent_id = request.getParameter("agent_id") != null ? request.getParameter("agent_id") : "";
             String referralMode = request.getParameter("referralMode") != null ? request.getParameter("referralMode") : "";
-            System.out.println("referralMode: " + request.getParameter("referralMode"));
-            
+            //System.out.println("referralMode: " + request.getParameter("referralMode"));
             
             try{
                     if(!withdrawal_id.equalsIgnoreCase("")){
@@ -373,20 +439,19 @@ public class AgentController extends AppController {
                         em = emf.createEntityManager();
                         
                         if(referralMode.equalsIgnoreCase("email")){
-                            Class<Agent> agentClass = Agent.class;
                             Agent agent = em.find(Agent.class, Long.parseLong(refAgentId));
-                            String refLink = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/AgentRegistration?action=ref&refCode=%s&refId=%s&target=%s";
+                            String refLink = request.getScheme() + "://" + request.getServerName() + request.getContextPath() + "/AgentRegistration?action=ref&refCode=%s&refId=%s&target=%s";
                             //refLink = String.format(refLink, agent.getAccount().getAccountCode(), agent.getAgentId());
-                            //System.out.println("Initial reflink: " + refLink);
+                            ////System.out.println("Initial reflink: " + refLink);
                             
                             //String encodeMe = "&refcode=" + agent.getAccount().getAccountCode() + "&refid=" + agent.getAccount().getAccountCode();
                             refLink = String.format(refLink, 
                                                     Base64.getEncoder().encodeToString(agent.getAccount().getAccountCode().getBytes("utf-8")),
                                                     Base64.getEncoder().encodeToString(agent.getAgentId().toString().getBytes("utf-8")),
                                                     Base64.getEncoder().encodeToString(recipientEmail.getBytes("utf-8")));
-                            System.out.println("reflink: " + refLink);
+                            //System.out.println("reflink: " + refLink);
                             //byte[] decodedBytes = Base64.getUrlDecoder().decode(refLink);
-                            //System.out.println("Original String: " + new String(decodedBytes));
+                            ////System.out.println("Original String: " + new String(decodedBytes));
                             new AlertManager().sendReferralCodeEmail(recipientEmail, agent, refLink);
                             returnValue = "OK";
                         }
@@ -403,7 +468,7 @@ public class AgentController extends AppController {
             }
             catch(Exception e){
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 request.setAttribute("errors", errorMessages);    
                 SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
             }
@@ -413,12 +478,24 @@ public class AgentController extends AppController {
     /*TP: Processes every insert request of request type POST*/
     protected void processInsertRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //Clear When Done
+        
+        String corporate = request.getParameter("corporate");
+        //Check if it is a Corporate agant registartion Form
+        if(corporate != null && corporate.equals("true"))
+        {
+            //Proceed to handle the corporate agent Datas
+            processCorporateAgentRegistration(request,response);
+            return;
+        }
+       
+            
         
         errorMessages.clear();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         final EntityManager em = emf.createEntityManager();
-        
+        Company company = em.find(Company.class, 1);
         String agentFileName = "";
         String agentKinFileName = "";
         
@@ -456,27 +533,49 @@ public class AgentController extends AppController {
                 agent.setFirstname(request.getParameter("agentFirstname"));
                 agent.setLastname(request.getParameter("agentLastname"));
                 agent.setMiddlename(request.getParameter("agentMiddlename"));
-                agent.setEmail(request.getParameter("agentEmail"));
-               // String initPass = AuthManager.generateInitialPassword();  //randomly generated password
-                agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
+                agent.setEmail(request.getParameter("agentEmail").toLowerCase().trim());
+                String initPass = AuthManager.generateInitialPassword();  //randomly generated password
+                agent.setPassword(AuthManager.getSaltedHash(initPass));
                 //agent.setPassword(request.getParameter("agentPassword"));
                 agent.setStreet(request.getParameter("agentStreet"));
                 agent.setCity(request.getParameter("agentCity"));
                 agent.setState(request.getParameter("agentState"));
                 agent.setPhone(request.getParameter("agentPhone"));
-                agent.setBankName(request.getParameter("agentBankName"));
+                //agent.setBankName(request.getParameter("agentBankName"));
+                Bank bank = em.find(Bank.class, Integer.parseInt(request.getParameter("agentBankId")));
+                agent.setBank(bank);
                 agent.setBankAcctNumber(request.getParameter("agentBankAccountNumber"));
                 agent.setBankAcctName(request.getParameter("agentBankAccountName"));
                 agent.setKinName(request.getParameter("agentKinName"));
                 agent.setKinPhone(request.getParameter("agentKinPhone"));
                 agent.setKinAddress(request.getParameter("agentKinAddress"));
+                agent.setKinRelationship(request.getParameter("agentKinRelationship"));
                 agent.setActive((short)0);
                 agent.setApprovalStatus((short)-1);
                 agent.setAgreementStatus((short)1);
                 agent.setDeleted((short)0);
-                agent.setReferrerId(0L); //set to ) when Admin is entering the data so it does not return null
+                
                 agent.setPhotoPath("default");
                 agent.setKinPhotoPath("default");
+                agent.setCreatedDate(AgentController.getDateTime().getTime());
+                agent.setCorporate(false);
+                
+                //Set the Referral id 
+                //Referral id have format of AG000XXXX
+                String sRefId = request.getParameter("refCode");
+                if(sRefId != null && !sRefId.trim().isEmpty())
+                {
+                    Long lRefId = Long.parseLong(sRefId.substring(5));
+                    agent.setReferrerId(lRefId);
+                }
+                else
+                {
+                    agent.setReferrerId(0L);
+                }
+                
+                if(sessionUser != null)
+                    agent.setCreatedBy(sessionUser.getSystemUserId());
+                //<editor-fold>
                 /*
                 //handle the pictures now
                 agentFileName = FileUploader.getSubmittedFileName(request.getPart("agentPhoto"));
@@ -508,7 +607,7 @@ public class AgentController extends AppController {
                 }
                 
                 */
-                
+                //</editor-fold>
                //persist only on save mode
                 em.persist(agent);   
                 
@@ -523,17 +622,19 @@ public class AgentController extends AppController {
             documents.put("agent_ID_Card_", request.getPart("agentPhotoID"));
             documents.put("agent_utility_bill_", request.getPart("utilityBill"));
             
-            em.refresh(agent);
+           em.refresh(agent);
            FileUploader fUpload  = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
            final Agent temp_agent = agent;
            documents.forEach((String typeAlias , Part path) -> {
+                if(path != null && !path.getSubmittedFileName().trim().isEmpty())
+               {
                 DocumentType doctype = (DocumentType)em
                         .createNamedQuery("DocumentType.findByTypeAlias")
                         .setParameter("typeAlias", typeAlias)
                         .getSingleResult();
                 Document doc = new Document();
                
-                String saveName = typeAlias + unixTime + temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(path);
+                String saveName = typeAlias + unixTime +"_"+ temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(path);
                 String subdir = "agents";
                 String  dir = "";
                 
@@ -576,7 +677,8 @@ public class AgentController extends AppController {
                 }catch(IOException e){
                     e.printStackTrace();
                 }
-            });
+            }
+           });
                 
                 agentFileName = agent.getPhotoPath();
                 agentKinFileName = agent.getKinPhotoPath();
@@ -592,14 +694,13 @@ public class AgentController extends AppController {
                 em.flush();
                 
                 em.getTransaction().commit();
-                
+                String Url = request.getServerName()+"/"+request.getContextPath();
+                new EmailHelper().sendUserWelcomeMessageAndPassword(agent.getEmail() , company.getEmail() , initPass , agent , company,Url );
+                insertStatus = true;
                 if(sessionUser == null)
                     sessionUser = (SystemUser)agent;
                 
                 new TrailableManager(agent).registerInsertTrailInfo(sessionUser.getSystemUserId());
-                
-                insertStatus = true;
-                
                 em.refresh(agent);  
                 
                 //HANDLE SYSTEM ID
@@ -609,64 +710,402 @@ public class AgentController extends AppController {
                 //update the agent record with the generic id 
                 setAgentGenericId(agent, systemuser);
                 
+                
                 em.close();
                 emf.close();
                 
-                viewFile = AGENTS_NEW;
                 request.setAttribute("agentKinPhotoHidden",agentKinFileName);
                 request.setAttribute("agentPhotoHidden",agentFileName);
                 request.setAttribute("agents", listAgents());
                 request.setAttribute("success",true);
                 request.setAttribute("agent", agent);
-                
+                request.setAttribute("action", "edit");
+                insertStatus = true;
             }
             catch(PropertyException e){
                 e.printStackTrace();
+                agent = new Agent();
                 request.setAttribute("agent", agent);
                 request.setAttribute("action", action);
                 request.setAttribute("agentKinPhotoHidden",agentKinFileName);
                 request.setAttribute("agentPhotoHidden",agentFileName);
-                errorMessages.put("mysqlviolation", e.getMessage());
+                //errorMessages.put("mysqlviolation", e.getMessage());
                 request.setAttribute("errors", errorMessages);
-                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
+                SystemLogger.logSystemIssue("Agent", /*agent.getAgentId().toString()*/"process Insert Request", e.getMessage());
             }
             catch(RollbackException e){
+                agent = new Agent();
                 e.printStackTrace();
-                System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
+                //System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
                 request.setAttribute("agentKinPhotoHidden",agentKinFileName);
                 request.setAttribute("agentPhotoHidden",agentFileName);
                 request.setAttribute("agent", agent);
                 request.setAttribute("action", action);
-                errorMessages.put("mysqlviolation", e.getMessage());
+                //errorMessages.put("mysqlviolation", e.getMessage());
                 request.setAttribute("errors", errorMessages);
-                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
+                SystemLogger.logSystemIssue("Agent", /*agent.getAgentId().toString()*/"process Insert Request", e.getMessage());
             }
             catch(Exception e){
+                agent = new Agent();
                 e.printStackTrace();
-                System.out.println("inside catch area: " + e.getMessage());
+                //System.out.println("inside catch area: " + e.getMessage());
                 request.setAttribute("agentKinPhotoHidden",agentKinFileName);
                 request.setAttribute("agentPhotoHidden",agentFileName);
                 request.setAttribute("agent", agent);
-                errorMessages.put("errormessage", e.getMessage());
+                //errorMessages.put("errormessage", e.getMessage());
                 request.setAttribute("errors", errorMessages);
-                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
+                SystemLogger.logSystemIssue("Agent", /*agent.getAgentId().toString()*/"process Insert Request", e.getMessage());
             }
            
             if(insertStatus && requestOrigin.equalsIgnoreCase("agent_registration")){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/AgentRegistration?action=success";
-                response.sendRedirect(page);
+                viewFile = "/views/agent/success.jsp";
             }
-            else if(insertStatus){
-                String page = request.getScheme()+ "://" + request.getHeader("host") + "/" + APP_NAME + "/Agent?action=edit&agentId=" + agent.getAgentId() + "&addstat=1";
-                response.sendRedirect(page);
+            
+            if(requestOrigin.equalsIgnoreCase("agent_registration"))
+            {
+                request.setAttribute("from", "agent_registration");
             }
-            else{
-                RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
-                dispatcher.forward(request, response);
-            }
+            request.setAttribute("Banks", BankService.getAllBanks());
+            request.setAttribute("corporate", false);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+            dispatcher.forward(request, response);
     }
 
     
+    
+    protected void processCorporateAgentRegistration(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+         errorMessages.clear();
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        final EntityManager em = emf.createEntityManager();
+        Company company = em.find(Company.class, 1);
+        String agentFileName = "";
+        
+        boolean insertStatus = false;
+        
+        String requestOrigin = request.getParameter("from") != null ? request.getParameter("from") : "";
+        
+        request.setAttribute("success", false);
+        Gson gson = new GsonBuilder().create();
+        
+        if(requestOrigin.equalsIgnoreCase("agent_registration")){
+            viewFile = AGENTS_REGISTRATION;
+        }
+        else {
+            viewFile = AGENTS_NEW;
+        }
+        
+        try{
+
+               em.getTransaction().begin();
+               
+               Date date = new Date();
+               SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
+               String formattedDate = sdf.format(date);
+               
+               long unixTime = System.currentTimeMillis() / 1000L;
+               
+               validateCorporate(agent,request);
+               
+                 /**********************************************************************
+                 //agentFileName = uploadAgentPicture(agent,request,agentFileName);
+                 //agentKinFileName = uploadAgentKinPicture(agent,request,agentKinFileName);
+                 **********************************************************************/
+                 
+                agent.setFirstname(request.getParameter("agentFirstname"));
+               agent.setEmail(request.getParameter("agentEmail").toLowerCase().trim());
+               agent.setCorporate(true);
+               agent.setRCNumber(request.getParameter("agentRCNumber"));
+               String initPass = AuthManager.generateInitialPassword();  //randomly generated password
+                agent.setPassword(AuthManager.getSaltedHash(initPass));
+                //agent.setPassword(request.getParameter("agentPassword"));
+                agent.setStreet(request.getParameter("agentStreet"));
+                agent.setCity(request.getParameter("agentCity"));
+                agent.setState(request.getParameter("agentState"));
+                agent.setPhone(request.getParameter("agentPhone"));
+                //agent.setBankName(request.getParameter("agentBankName"));
+                Bank bank = em.find(Bank.class, Integer.parseInt(request.getParameter("agentBankId")));
+                agent.setBank(bank);
+                agent.setBankAcctNumber(request.getParameter("agentBankAccountNumber"));
+                agent.setBankAcctName(request.getParameter("agentBankAccountName"));
+                agent.setActive((short)0);
+                agent.setApprovalStatus((short)-1);
+                agent.setAgreementStatus((short)1);
+                agent.setDeleted((short)0);
+                //agent.setReferrerId(0L); //set to ) when Admin is entering the data so it does not return null
+                agent.setPhotoPath("default");
+                agent.setCreatedDate(AgentController.getDateTime().getTime());
+                if(sessionUser != null)
+                    agent.setCreatedBy(sessionUser.getSystemUserId());
+               
+                //Set the Referral id 
+                //Referral id have format of AG000XXXX
+                String sRefId = request.getParameter("refCode");
+                if(sRefId != null && !sRefId.trim().isEmpty())
+                {
+                    Long lRefId = Long.parseLong(sRefId.substring(5));
+                    agent.setReferrerId(lRefId);
+                }
+                else
+                {
+                    agent.setReferrerId(0L);
+                }
+                
+               //persist only on save mode
+                em.persist(agent);   
+                
+                em.flush(); //flush so you can have agent id
+                
+                 //New Update Handles The Images As Documents
+            
+                em.refresh(agent);
+            final Agent temp_agent = agent;
+            FileUploader fUpload  = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+           
+            //loops that will get the Documents of Directors
+            Enumeration<String> parameterName = request.getParameterNames();
+            int count = 1;
+            while(parameterName.hasMoreElements())
+            {
+                
+                String pName = parameterName.nextElement();
+                if(pName.contains("agentDirectorName")&& !request.getParameter(pName).trim().isEmpty())
+                {
+                    int index = Integer.parseInt(pName.substring(17));
+                    Director director = new Director();
+                    director.setName(request.getParameter(pName));
+                    director.setAgent(agent);
+                    
+                    //Setting up  The Passport Document
+                    
+                    Part part = request.getPart("agentDirectorPassport"+index);
+               
+                    String saveName = "Director_Passport_"+ unixTime +count  +"_"+ temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(part);
+                    String  dir = "agents" + fUpload.getFileSeparator() + "Directors" + fUpload.getFileSeparator() + "Passports" ;
+                    
+                    DocumentType doctype = (DocumentType)em
+                        .createNamedQuery("DocumentType.findByTypeAlias")
+                        .setParameter("typeAlias", "Director_Passport_")
+                        .getSingleResult();
+                    
+                    Document doc = new Document();
+                    
+                    doc.setDocTypeId(doctype);
+                    doc.setPath("agents/Directors/Passports/" + saveName);
+                    doc.setOwnerId(BigInteger.valueOf(agent.getAgentId()));
+                    doc.setOwnerTypeId(agent.getSystemUserTypeId());
+                    doc.setCreatedDate(CustomerController.getDateTime().getTime());
+                    
+                    em.persist(doctype);
+                    em.persist(doc);
+                    em.flush();
+                    try 
+                     {
+                        fUpload.uploadFile(part, dir, saveName, true);
+                    }catch(IOException e){
+                        e.printStackTrace();
+                    }
+                    
+                    //done setting Up the passport
+                    //Now lets set The director passport Id 
+                    director.setPassport(doc.getId());
+                    
+                    //Now Lets setUp The ID card 
+                     part = request.getPart("agentDirectorIDCard"+index);
+               
+                     saveName = "Director_IDCard_" + unixTime + count +"_"+  temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(part);
+                      dir = "agents" + fUpload.getFileSeparator() + "Directors" + fUpload.getFileSeparator() + "IDCards";
+                    
+                     doctype = (DocumentType)em
+                        .createNamedQuery("DocumentType.findByTypeAlias")
+                        .setParameter("typeAlias", "Director_IDCard_")
+                        .getSingleResult();
+                    
+                     doc = new Document();
+                    
+                    doc.setDocTypeId(doctype);
+                    doc.setPath("agents/Directors/IDCards/" + saveName);
+                    doc.setOwnerId(BigInteger.valueOf(agent.getAgentId()));
+                    doc.setOwnerTypeId(agent.getSystemUserTypeId());
+                    doc.setCreatedDate(CustomerController.getDateTime().getTime());
+                    
+                    em.persist(doctype);
+                    em.persist(doc);
+                    em.flush();
+                    try 
+                     {
+                        fUpload.uploadFile(part, dir, saveName, true);
+                    }catch(IOException e){
+                        e.printStackTrace();
+                    }
+                    
+                    //Done saving The ID Card
+                    //Now Lets Load it up into the Director Object
+                    director.setiDCard(doc.getId());
+                    
+                    //Now that we are done dealing with the Director lets Persist The Director
+                    em.persist(director);
+                    em.flush();
+                    count ++;
+                }
+            }
+           
+            //We are going to put all the image into an Hash map specifying the title of the Image also
+            Map<String, Part>  documents = new HashMap<>();
+            documents.put("CompanyLogo_", request.getPart("agentPhoto"));
+            documents.put("CertOfIncorporation_", request.getPart("agentCertOfIncorporation"));
+            documents.put("BoardResolution_", request.getPart("agentBoardResolution"));
+            documents.put("RepPassport_", request.getPart("agentPassportOfRep"));
+            documents.put("RepIDCard_", request.getPart("agentIDCardOfRep"));
+            documents.put("RepUtilityBill_", request.getPart("agentUtilityBillOfRep"));
+            
+           documents.forEach((String typeAlias , Part path) -> {
+                DocumentType doctype = (DocumentType)em
+                        .createNamedQuery("DocumentType.findByTypeAlias")
+                        .setParameter("typeAlias", typeAlias)
+                        .getSingleResult();
+                Document doc = new Document();
+               
+                String saveName = typeAlias + unixTime + "_"+ temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(path);
+                String subdir = "agents";
+                String  dir = "";
+                
+                switch(typeAlias)
+                {
+                    case "CompanyLogo_":
+                        temp_agent.setPhotoPath(saveName); 
+                        break;
+                        
+                    
+                    case "CertOfIncorporation_":
+                        subdir = subdir + fUpload.getFileSeparator() + "CertOfIncorporations" ;
+                         dir = "/CertOfIncorporations";
+                        break;
+                        
+                    case "BoardResolution_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "BoardResolutions" ;
+                         dir = "/BoardResolutions";
+                        break;
+                        
+                    case "RepPassport_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "RepPassports" ;
+                         dir = "/RepPassports";
+                        break;
+                        
+                    case "RepIDCard_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "RepIDCards" ;
+                         dir = "/RepIDCards";
+                        break;
+                        
+                    case "RepUtilityBill_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "RepUtilityBills" ;
+                         dir = "/RepUtilityBills";
+                        break;
+                }
+                
+                
+                doc.setDocTypeId(doctype);
+                doc.setOwnerId(BigInteger.valueOf(temp_agent.getAgentId()));
+                doc.setOwnerTypeId(temp_agent.getSystemUserTypeId());
+                doc.setPath("agents" + dir + "/"+saveName);
+                doc.setCreatedDate(CustomerController.getDateTime().getTime());
+                
+                em.persist(doctype);
+                em.persist(doc);
+                
+                try 
+                {
+                    fUpload.uploadFile(path, subdir, saveName, true);
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+            });
+                
+                agentFileName = agent.getPhotoPath();
+                em.persist(agent); 
+                em.flush();
+                 
+                //set up the account for this unit
+                Account account = new AccountManager().createAgentAccount(agent);
+                
+                //now link the unit and the account by updating the agent
+                em.refresh(agent);
+                agent.setAccount(account);
+                em.flush();
+                
+                em.getTransaction().commit();
+                String Url = request.getServerName()+"/"+request.getContextPath();
+                new EmailHelper().sendUserWelcomeMessageAndPassword(agent.getEmail() , company.getEmail() , initPass , agent , company,Url );
+                insertStatus = true;
+                if(sessionUser == null)
+                    sessionUser = (SystemUser)agent;
+                
+                new TrailableManager(agent).registerInsertTrailInfo(sessionUser.getSystemUserId());
+                em.refresh(agent);  
+                
+                //HANDLE SYSTEM ID
+                //set the agent ID into the generic user table
+                GenericUser systemuser = setUpAgentGenericRecord(agent);
+                
+                //update the agent record with the generic id 
+                setAgentGenericId(agent, systemuser);
+                 
+                em.close();
+                emf.close();
+                
+                request.setAttribute("agentPhotoHidden",agentFileName);
+                request.setAttribute("agents", listAgents());
+                request.setAttribute("success",true);
+                request.setAttribute("agent", agent);
+                request.setAttribute("action" , "edit");
+                insertStatus = true;
+            }
+            catch(PropertyException e){
+                agent = new Agent();
+                e.printStackTrace();
+                request.setAttribute("agent", agent);
+                request.setAttribute("action", action);
+                request.setAttribute("agentPhotoHidden",agentFileName);
+                //errorMessages.put("mysqlviolation", e.getMessage());
+                request.setAttribute("errors", errorMessages);
+                SystemLogger.logSystemIssue("Agent", /*agent.getAgentId().toString()*/"Insert Request ", e.getMessage());
+            }
+            catch(RollbackException e){
+                agent = new Agent();
+                e.printStackTrace();
+                //System.out.println("inside MYSQL area: " + e.getMessage() + "ACTION: " + action);
+                request.setAttribute("agentPhotoHidden",agentFileName);
+                request.setAttribute("agent", agent);
+                request.setAttribute("action", action);
+                //errorMessages.put("mysqlviolation", e.getMessage());
+                request.setAttribute("errors", errorMessages);
+                SystemLogger.logSystemIssue("Agent", /*agent.getAgentId().toString()*/"Insert Request ", e.getMessage());
+            }
+            catch(Exception e){
+                agent = new Agent();
+                e.printStackTrace();
+                //System.out.println("inside catch area: " + e.getMessage());
+                request.setAttribute("agentPhotoHidden",agentFileName);
+                request.setAttribute("agent", agent);
+                request.setAttribute("action", action);
+                //errorMessages.put("errormessage", e.getMessage());
+                request.setAttribute("errors", errorMessages);
+                SystemLogger.logSystemIssue("Agent", /*agent.getAgentId().toString()*/"Insert Request ", e.getMessage());
+            }
+           
+           if(insertStatus && requestOrigin.equalsIgnoreCase("agent_registration")){
+                viewFile = "/views/agent/success.jsp";
+            }
+            
+            if(requestOrigin.equalsIgnoreCase("agent_registration"))
+            {
+                request.setAttribute("from", "agent_registration");
+            }
+            request.setAttribute("Banks", BankService.getAllBanks());
+            request.setAttribute("corporate", true);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+            dispatcher.forward(request, response);
+    }
     /*
         this method inserts the agent id into the system (generic) user table
     */
@@ -721,18 +1160,18 @@ public class AgentController extends AppController {
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(jsonResponse);
 
-            System.out.println("jsonResponse: " + jsonResponse);
+            //System.out.println("jsonResponse: " + jsonResponse);
            }
 //        catch(PropertyException err){
 //                err.printStackTrace();
-//                System.out.println("inside catch area: " + err.getMessage());
+//                //System.out.println("inside catch area: " + err.getMessage());
 //                  
 //                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), err.getMessage());
 //            }
             catch(Exception e){
                
                 e.printStackTrace();
-                System.out.println("System Error: " + e.getMessage());
+                //System.out.println("System Error: " + e.getMessage());
                 SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
             }
     }
@@ -762,18 +1201,18 @@ public class AgentController extends AppController {
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(jsonResponse);
 
-//            System.out.println("jsonResponse: " + jsonResponse);
+//            //System.out.println("jsonResponse: " + jsonResponse);
            }
 //        catch(PropertyException err){
 //                err.printStackTrace();
-//                System.out.println("inside catch area: " + err.getMessage());
+//                //System.out.println("inside catch area: " + err.getMessage());
 //                  
 //                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), err.getMessage());
 //            }
             catch(Exception e){
                
                 e.printStackTrace();
-                System.out.println("System Error: " + e.getMessage());
+                //System.out.println("System Error: " + e.getMessage());
                 SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
             }
     }
@@ -805,7 +1244,7 @@ public class AgentController extends AppController {
       
                 System.err.println("user ID: " + ((User)request.getSession().getAttribute("user")).getUserId() + " and " + agent.getSystemUserTypeId());
 //                while(request.getSession().getAttributeNames().hasMoreElements()){
-//                    System.out.println("request attribute: " + request.getAttributeNames().nextElement());
+//                    //System.out.println("request attribute: " + request.getAttributeNames().nextElement());
 //                }
 
                 //log, send email, send SMS
@@ -827,7 +1266,7 @@ public class AgentController extends AppController {
             }
     }
     
-    protected void processUpdateRequest(HttpServletRequest request, HttpServletResponse response)
+    protected void processCorporateUpdateRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException{
         
         errorMessages.clear();
@@ -858,57 +1297,207 @@ public class AgentController extends AppController {
                
                long unixTime = System.currentTimeMillis() / 1000L;
                 
-               validate(agent,request);
-               
-               agent.setFirstname(request.getParameter("agentFirstname"));
-               agent.setLastname(request.getParameter("agentLastname"));  
-               agent.setMiddlename(request.getParameter("agentMiddlename"));
-               agent.setEmail(request.getParameter("agentEmail"));
-               //agent.setPassword(request.getParameter("agentPassword"));
-                
-//               if(!request.getParameter("agentPassword").isEmpty()){
-//                    agent.setPassword(AuthManager.getSaltedHash(request.getParameter("agentPassword")));
-//               }
-                
+               //validate(agent,request);
+                agent.setFirstname(request.getParameter("agentFirstname"));
+               agent.setEmail(request.getParameter("agentEmail").toLowerCase());
+               agent.setCorporate(true);
+               agent.setRCNumber(request.getParameter("agentRCNumber"));
                 agent.setStreet(request.getParameter("agentStreet"));
                 agent.setCity(request.getParameter("agentCity"));
                 agent.setState(request.getParameter("agentState"));
                 agent.setPhone(request.getParameter("agentPhone"));
-                agent.setBankName(request.getParameter("agentBankName"));
+                //agent.setBankName(request.getParameter("agentBankName"));
+                Bank bank = em.find(Bank.class, Integer.parseInt(request.getParameter("agentBankId")));
+                agent.setBank(bank);
                 agent.setBankAcctNumber(request.getParameter("agentBankAccountNumber"));
                 agent.setBankAcctName(request.getParameter("agentBankAccountName"));
-                agent.setKinName(request.getParameter("agentKinName"));
-                agent.setKinPhone(request.getParameter("agentKinPhone"));
-                agent.setKinAddress(request.getParameter("agentKinAddress"));
-                
-                //handle the pictures now
-                agentFileName = FileUploader.getSubmittedFileName(request.getPart("agentPhoto"));
-                agentKinFileName = FileUploader.getSubmittedFileName(request.getPart("agentKinPhoto"));
-                
-
-                if(agentFileName!=null && !agentFileName.equals("")){
-                    log("Inside agent side");
-                    Part filePart = request.getPart("agentPhoto");
-                    String saveName = "agent_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
-                    agent.setPhotoPath(saveName);
-                    agentFileName = saveName;
-                    new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "agents", saveName, true);
+                agent.setModifiedDate(AgentController.getDateTime().getTime());
+                if(sessionUser != null)
+                   agent.setModifiedBy(sessionUser.getSystemUserId());
+               //persist only on save mode
+                em.persist(agent);   
+               
+            final Agent temp_agent = agent;
+            FileUploader fUpload  = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+           
+            //loops that will get the Documents of Directors
+            Enumeration<String> parameterName = request.getParameterNames();
+            int count = 1;
+            while(parameterName.hasMoreElements())
+            {
+                String pName = parameterName.nextElement();
+                if(pName.contains("agentDirectorName") && !request.getParameter(pName).trim().isEmpty())
+                {
+                    int index = Integer.parseInt(pName.substring(17));
+                    Director director = new Director();
+                    director.setName(request.getParameter(pName));
+                    director.setAgent(agent);
+                    
+                    //Setting up  The Passport Document
+                    
+                    Part part = request.getPart("agentDirectorPassport"+index);
+               
+                    String saveName = "Director_Passport_"+ unixTime +count  +"_"+ temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(part);
+                    String  dir = "agents" + fUpload.getFileSeparator() + "Directors" + fUpload.getFileSeparator() + "Passports" ;
+                    
+                    DocumentType doctype = (DocumentType)em
+                        .createNamedQuery("DocumentType.findByTypeAlias")
+                        .setParameter("typeAlias", "Director_Passport_")
+                        .getSingleResult();
+                    
+                    Document doc = new Document();
+                    
+                    doc.setDocTypeId(doctype);
+                    doc.setPath("agents/Directors/Passports/" + saveName);
+                    doc.setOwnerId(BigInteger.valueOf(agent.getAgentId()));
+                    doc.setOwnerTypeId(agent.getSystemUserTypeId());
+                    doc.setCreatedDate(CustomerController.getDateTime().getTime());
+                    
+                    em.persist(doctype);
+                    em.persist(doc);
+                    em.flush();
+                    try 
+                     {
+                        fUpload.uploadFile(part, dir, saveName, true);
+                    }catch(IOException e){
+                        e.printStackTrace();
+                    }
+                    
+                    //done setting Up the passport
+                    //Now lets set The director passport Id 
+                    director.setPassport(doc.getId());
+                    
+                    //Now Lets setUp The ID card 
+                     part = request.getPart("agentDirectorIDCard"+index);
+               
+                     saveName = "Director_IDCard_" + unixTime + count +"_"+  temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(part);
+                      dir = "agents" + fUpload.getFileSeparator() + "Directors" + fUpload.getFileSeparator() + "IDCards";
+                    
+                     doctype = (DocumentType)em
+                        .createNamedQuery("DocumentType.findByTypeAlias")
+                        .setParameter("typeAlias", "Director_IDCard_")
+                        .getSingleResult();
+                    
+                     doc = new Document();
+                    
+                    doc.setDocTypeId(doctype);
+                    doc.setPath("agents/Directors/IDCards/" + saveName);
+                    doc.setOwnerId(BigInteger.valueOf(agent.getAgentId()));
+                    doc.setOwnerTypeId(agent.getSystemUserTypeId());
+                    doc.setCreatedDate(CustomerController.getDateTime().getTime());
+                    
+                    em.persist(doctype);
+                    em.persist(doc);
+                    em.flush();
+                    try 
+                     {
+                        fUpload.uploadFile(part, dir, saveName, true);
+                    }catch(IOException e){
+                        e.printStackTrace();
+                    }
+                    
+                    //Done saving The ID Card
+                    //Now Lets Load it up into the Director Object
+                    director.setiDCard(doc.getId());
+                    
+                    //Now that we are done dealing with the Director lets Persist The Director
+                    em.persist(director);
+                    em.flush();
+                    count ++;
                 }
+            }
+           
+            //We are going to put all the image into an Hash map specifying the title of the Image also
+            Map<String, Part>  documents = new HashMap<>();
+            documents.put("CompanyLogo_", request.getPart("agentPhoto"));
+            documents.put("CertOfIncorporation_", request.getPart("agentCertOfIncorporation"));
+            documents.put("BoardResolution_", request.getPart("agentBoardResolution"));
+            documents.put("RepPassport_", request.getPart("agentPassportOfRep"));
+            documents.put("RepIDCard_", request.getPart("agentIDCardOfRep"));
+            documents.put("RepUtilityBill_", request.getPart("agentUtilityBillOfRep"));
+            
+           documents.forEach((String typeAlias , Part path) -> {
+               
+               if(path != null && !path.getSubmittedFileName().trim().isEmpty()){
+                DocumentType doctype = (DocumentType)em
+                        .createNamedQuery("DocumentType.findByTypeAlias")
+                        .setParameter("typeAlias", typeAlias)
+                        .getSingleResult();
+                Document doc = new Document();
                 
-                if(agentKinFileName!=null && !agentKinFileName.equals("")){
-                    log("Inside kin side");
-                    Part filePart = request.getPart("agentKinPhoto");
-                    String saveName = "agentkin_" + unixTime + "." + FileUploader.getSubmittedFileExtension(filePart);
-                    agent.setKinPhotoPath(saveName);
-                    agentKinFileName = saveName;
-                    System.out.println("kinPhot savname : " + saveName);
-                    new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true).uploadFile(filePart, "agentkins", saveName, true);
+                //Remove previous Document of This Type
+                //formal document
+                List<Document> fDoc = em.createNamedQuery("Document.findByOwnerIdDoctypeIdOwnerTypeId")
+                                       .setParameter("ownerID", temp_agent.getAgentId() )
+                                       .setParameter("docTypeId", doctype )
+                                       .setParameter("ownerTypeId", temp_agent.getSystemUserTypeId())
+                                       .getResultList();
+                if(fDoc != null && !fDoc.isEmpty())
+                {
+                    for(Document tDoc : fDoc)
+                        em.remove(tDoc);
                 }
                
-                new TrailableManager(agent).registerUpdateTrailInfo(sessionUser.getSystemUserId());
+                String saveName = typeAlias + unixTime + "_"+ temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(path);
+                String subdir = "agents";
+                String  dir = "";
                 
-                log("Inside processUpdateRequest 2");
+                switch(typeAlias)
+                {
+                    case "CompanyLogo_":
+                        temp_agent.setPhotoPath(saveName); 
+                        break;
+                        
+                    
+                    case "CertOfIncorporation_":
+                        subdir = subdir + fUpload.getFileSeparator() + "CertOfIncorporations" ;
+                         dir = "/CertOfIncorporations";
+                        break;
+                        
+                    case "BoardResolution_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "BoardResolutions" ;
+                         dir = "/BoardResolutions";
+                        break;
+                        
+                    case "RepPassport_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "RepPassports" ;
+                         dir = "/RepPassports";
+                        break;
+                        
+                    case "RepIDCard_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "RepIDCards" ;
+                         dir = "/RepIDCards";
+                        break;
+                        
+                    case "RepUtilityBill_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "RepUtilityBills" ;
+                         dir = "/RepUtilityBills";
+                        break;
+                }
                 
+                
+                doc.setDocTypeId(doctype);
+                doc.setOwnerId(BigInteger.valueOf(temp_agent.getAgentId()));
+                doc.setOwnerTypeId(temp_agent.getSystemUserTypeId());
+                doc.setPath("agents" + dir + "/"+saveName);
+                doc.setCreatedDate(AgentController.getDateTime().getTime());
+                
+                em.persist(doctype);
+                em.persist(doc);
+                
+                try 
+                {
+                    fUpload.uploadFile(path, subdir, saveName, true);
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+           });
+                
+                agentFileName = agent.getPhotoPath();
+                em.persist(agent); 
+                em.flush();
+               
                 em.getTransaction().commit();
                 
                 em.close();
@@ -919,6 +1508,194 @@ public class AgentController extends AppController {
                 request.setAttribute("agents", listAgents());
                 request.setAttribute("success",true);
                 request.setAttribute("agent", agent);
+                request.setAttribute("corporate", true);
+                request.setAttribute("action", "edit");
+                
+                String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
+                log("imageAccessDirPath: " + imageAccessDirPath);
+                request.setAttribute("agentImageAccessDir", imageAccessDirPath + "/agents");
+                request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agentkins");
+                
+            }//<editor-fold>
+//            catch(PropertyException err){
+//                err.printStackTrace();
+//                //System.out.println("inside catch area: " + err.getMessage());
+//                
+//                request.setAttribute("agentKinPhotoHidden",agentKinFileName);
+//                request.setAttribute("agentPhotoHidden",agentFileName);
+//                request.setAttribute("agent", agent);
+//                request.setAttribute("errors", errorMessages);   
+//                request.setAttribute("corporate", true);
+//                request.setAttribute("action", "edit");
+//                SystemLogger.logSystemIssue("Agent", agent.getAgentId().toString(), err.getMessage());
+//            }</editor-fold>
+            catch(Exception e){
+                e.printStackTrace();
+                //System.out.println("System Error: " + e.getMessage());
+                 request.setAttribute("corporate", true);
+                request.setAttribute("action", "edit");
+                SystemLogger.logSystemIssue("Agent", agent.getAgentId().toString(), e.getMessage());
+            }
+            request.setAttribute("Banks", BankService.getAllBanks());
+            RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
+            dispatcher.forward(request, response);
+    }
+    
+     protected void processUpdateRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException{
+        
+        errorMessages.clear();
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        viewFile = AGENTS_NEW;
+        
+        String agentFileName = ""; String agentKinFileName = "";
+        
+        request.setAttribute("success", false);
+        Gson gson = new GsonBuilder().create();
+        
+        log("Inside processUpdateRequest");
+        
+        try{
+
+                em.getTransaction().begin();
+                
+                if(!(request.getParameter("agent_id").equals(""))) { //edit mode
+                    agent = em.find(Agent.class, new Long(Integer.parseInt(request.getParameter("agent_id"))));
+                }
+               
+                if(agent.isCorporate())
+                {
+                    processCorporateUpdateRequest(request , response);
+                    return;
+                }
+               Date date = new Date();
+               SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
+               String formattedDate = sdf.format(date);
+              
+               
+               long unixTime = System.currentTimeMillis() / 1000L;
+                
+               //validate(agent,request);
+               agent.setFirstname(request.getParameter("agentFirstname"));
+                agent.setLastname(request.getParameter("agentLastname"));
+                agent.setMiddlename(request.getParameter("agentMiddlename"));
+                agent.setEmail(request.getParameter("agentEmail").toLowerCase());
+               
+                agent.setStreet(request.getParameter("agentStreet"));
+                agent.setCity(request.getParameter("agentCity"));
+                agent.setState(request.getParameter("agentState"));
+                agent.setPhone(request.getParameter("agentPhone"));
+                //agent.setBankName(request.getParameter("agentBankName"));
+                Bank bank = em.find(Bank.class, Integer.parseInt(request.getParameter("agentBankId")));
+                agent.setBank(bank);
+                agent.setBankAcctNumber(request.getParameter("agentBankAccountNumber"));
+                agent.setBankAcctName(request.getParameter("agentBankAccountName"));
+                agent.setKinName(request.getParameter("agentKinName"));
+                agent.setKinPhone(request.getParameter("agentKinPhone"));
+                agent.setKinAddress(request.getParameter("agentKinAddress"));
+                agent.setKinRelationship(request.getParameter("agentKinRelationship"));
+                agent.setModifiedDate(AgentController.getDateTime().getTime());
+                if(sessionUser != null)
+                    agent.setModifiedBy(sessionUser.getSystemUserId());
+               
+            //We are going to put all the image into an Hash map specifying the title of the Image also
+            Map<String, Part>  documents = new HashMap<>();
+            documents.put("agent_", request.getPart("agentPhoto"));
+            documents.put("agentkin_", request.getPart("agentKinPhoto"));
+            documents.put("agent_ID_Card_", request.getPart("agentPhotoID"));
+            documents.put("agent_utility_bill_", request.getPart("utilityBill"));
+            
+           
+           FileUploader fUpload  = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), true);
+           final Agent temp_agent = agent;
+           documents.forEach((String typeAlias , Part path) -> {
+               
+               if(path != null && !path.getSubmittedFileName().trim().isEmpty())
+               {
+                DocumentType doctype = (DocumentType)em
+                        .createNamedQuery("DocumentType.findByTypeAlias")
+                        .setParameter("typeAlias", typeAlias)
+                        .getSingleResult();
+                Document doc = new Document();
+                
+                //Remove previous Document of This Type
+                //formal document
+                List<Document> fDoc = em.createNamedQuery("Document.findByOwnerIdDoctypeIdOwnerTypeId")
+                                       .setParameter("ownerID", temp_agent.getAgentId() )
+                                       .setParameter("docTypeId", doctype )
+                                       .setParameter("ownerTypeId", temp_agent.getSystemUserTypeId())
+                                       .getResultList();
+                if(fDoc != null && !fDoc.isEmpty())
+                {
+                    for(Document tDoc : fDoc)
+                        em.remove(tDoc);
+                }
+               
+                String saveName = typeAlias + unixTime +"_"+ temp_agent.getAgentId()+"." + FileUploader.getSubmittedFileExtension(path);
+                String subdir = "agents";
+                String  dir = "";
+                
+                switch(typeAlias)
+                {
+                    case "agent_":
+                        temp_agent.setPhotoPath(saveName); 
+                        break;
+                        
+                    case "agentkin_":
+                        temp_agent.setKinPhotoPath(saveName); 
+                        subdir = subdir + fUpload.getFileSeparator() + "agentkins" ;
+                        dir = "/agentkins";
+                        break;
+                       
+                    case "agent_ID_Card_":
+                        subdir = subdir + fUpload.getFileSeparator() + "ids" ;
+                         dir = "/ids";
+                        break;
+                        
+                    case "agent_utility_bill_": 
+                        subdir = subdir + fUpload.getFileSeparator() + "utilitybills" ;
+                         dir = "/utilitybills";
+                        break;
+                }
+                
+                
+                doc.setDocTypeId(doctype);
+                doc.setOwnerId(BigInteger.valueOf(temp_agent.getAgentId()));
+                doc.setOwnerTypeId(temp_agent.getSystemUserTypeId());
+                doc.setPath("agents" + dir + "/"+saveName);
+                doc.setCreatedDate(AgentController.getDateTime().getTime());
+                
+                em.persist(doctype);
+                em.persist(doc);
+                
+                try 
+                {
+                    fUpload.uploadFile(path, subdir, saveName, true);
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+           });
+                
+                agentFileName = agent.getPhotoPath();
+                agentKinFileName = agent.getKinPhotoPath();
+                em.persist(agent); 
+                em.flush();
+               
+                em.getTransaction().commit();
+                
+                em.close();
+                emf.close();
+                
+                request.setAttribute("agentKinPhotoHidden",agentKinFileName);
+                request.setAttribute("agentPhotoHidden",agentFileName);
+                request.setAttribute("agents", listAgents());
+                request.setAttribute("success",true);
+                request.setAttribute("agent", agent);
+                request.setAttribute("corporate", false);
+                request.setAttribute("action", "edit");
                 
                 String imageAccessDirPath = new FileUploader(FileUploader.fileTypesEnum.IMAGE.toString(), false).getAccessDirectoryString();
                 log("imageAccessDirPath: " + imageAccessDirPath);
@@ -926,22 +1703,23 @@ public class AgentController extends AppController {
                 request.setAttribute("agentKinImageAccessDir", imageAccessDirPath + "/agentkins");
                 
             }
-            catch(PropertyException err){
-                err.printStackTrace();
-                System.out.println("inside catch area: " + err.getMessage());
-                
-                request.setAttribute("agentKinPhotoHidden",agentKinFileName);
-                request.setAttribute("agentPhotoHidden",agentFileName);
-                request.setAttribute("agent", agent);
-                request.setAttribute("errors", errorMessages);    
-                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), err.getMessage());
-            }
+        //<editor-fold>
+//            catch(PropertyException err){
+//                err.printStackTrace();
+//                //System.out.println("inside catch area: " + err.getMessage());
+//                
+//                request.setAttribute("agentKinPhotoHidden",agentKinFileName);
+//                request.setAttribute("agentPhotoHidden",agentFileName);
+//                request.setAttribute("agent", agent);
+//                request.setAttribute("errors", errorMessages);    
+//                SystemLogger.logSystemIssue("Agent", agent.getAgentId().toString(), err.getMessage());
+//            }</editor-fold>
             catch(Exception e){
                 e.printStackTrace();
-                System.out.println("System Error: " + e.getMessage());
-                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), e.getMessage());
+                //System.out.println("System Error: " + e.getMessage());
+                SystemLogger.logSystemIssue("Agent", agent.getAgentId().toString(), e.getMessage());
             }
-        
+            request.setAttribute("Banks", BankService.getAllBanks());
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
     }
@@ -952,77 +1730,218 @@ public class AgentController extends AppController {
          EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
          EntityManager em = emf.createEntityManager();
          Query jpqlQuery  = em.createNamedQuery("Agent.findByEmail");
-         jpqlQuery.setParameter("email",request.getParameter("agentEmail"));
+         String email = request.getParameter("agentEmail") != null ? request.getParameter("agentEmail").toLowerCase().trim() : "";
+         jpqlQuery.setParameter("email",email);
          List<Agent> agentDetails = jpqlQuery.getResultList();
-         System.out.println(agentDetails);
          
-         String agent_id = request.getParameter("agent_id") != null ? request.getParameter("agent_id") : "";
          
-        if(request.getParameter("agentFirstname").isEmpty()){
-            errorMessages.put("errors1", "Please enter First Name");
-        } 
-        
-        if(request.getParameter("agentLastname").isEmpty()){
-            errorMessages.put("errors2", "Please enter Last Name");
-        }
-        if(request.getParameter("agentEmail").isEmpty()){
-            errorMessages.put("errors3", "Please enter Email");
-        }
-        
-        if(agent_id.equalsIgnoreCase("")) { //edit mode
-                if(request.getParameter("agentPassword").isEmpty()){
-                         errorMessages.put("errors4", "Please enter Password");
-                 }
-                else if(!request.getParameter("agentPassword").equals(request.getParameter("agentConfirmPassword"))){
-                    errorMessages.put("errors5", "Re-enter password does not match password");
-                }
+        //Validating refCode
+         String refCode = request.getParameter("refCode");
+         if(refCode != null && !refCode.trim().isEmpty())
+         {
+             if(refCode.contains("AG000"))
+             {
+                Account acc;
                 
-        if(!agentDetails.isEmpty()){
-            errorMessages.put("errors6","Email exists in the database");
+                try
+                {
+                    acc = (Account)em
+                .createNamedQuery("Account.findByAccountCode")
+                .setParameter("accountCode", refCode)
+                .getSingleResult();
+                    if(acc == null)
+                       errorMessages.put("errors0", "Invalid Referral Code"); 
+                }
+                catch(Exception e)
+                {
+                    errorMessages.put("errors0", "Invalid Referral Code");
+                }
+             }
+             else
+             {
+                 errorMessages.put("errors0", "Invalid Referral Code");
+             }
+         }
+         
+         String formFieldStage1[][] = {{"agentFirstname", "", "Agent First Name"},
+             {"agentMiddlename", "", "Agent Middle Name"},
+             {"agentLastname", "", "Agent Last Name"},
+             {"agentEmail", "", "Agent Email"},
+             {"agentPhone", "", "Agent Phone"},
+             {"agentStreet", "", "Agent Street Address"},
+             {"agentCity", "", "Agent Operational City Name"},
+            {"agentState", "", "Agent Operational State Name"},
+            {"agentBankId", "select", "Agent Bank Name"},
+            {"agentBankAccountName", "", "Agent Bank Account Name"},
+            {"agentBankAccountNumber", "", "Agent Bank Account Number"},
+            {"agentKinNames", "", "Agent Next Of Kin Name"},
+            {"agentKinPhone", "", "Agent Next Of Kin Phone Number"},
+            {"agentKinAddress", "", "Agent Next Of Kin Address"},
+            {"agentKinRelationship", "", "Agent Next Of Kin Relationship"}};
+
+    String formFieldStage2[][] = {{"agentPhoto", "", "Agent PassPort"},
+        {"agentKinPhoto", "", "Agent Next Of Kin PassPort"},
+        {"utilityBill", "", "Agent Utility Bill"},
+        {"agentPhotoID", "", "Agent ID card /Driver Lincense , etc"}};
+
+        
+         int error = 1;
+        for(String field[] : formFieldStage1)
+        {
+            String parameter = request.getParameter(field[0]);
+            if(parameter != null)
+            {
+                if(parameter.trim().isEmpty() || parameter.trim().equals("select"))
+                {
+                    if(field[1].isEmpty())
+                    {
+                        errorMessages.put("errors"+error, "Please Enter Value For " + field[2]);
+                    }
+                    else if(field[1].equals("select"))
+                    {
+                        errorMessages.put("errors"+error, "Please Select Value For " + field[2]);
+                    }
+                      error ++;  
+                }
+            }
         }
-      }
-       
-       if(request.getParameter("agentStreet").isEmpty()){
-        errorMessages.put("errors7", "Please enter Street");
-       }
-       if(request.getParameter("agentCity").isEmpty()){
-        errorMessages.put("errors8", "Please enter City");
+ 
+        for(String field[] : formFieldStage2)
+        {
+            String fileName = request.getPart(field[0]).getSubmittedFileName();
+            if(fileName != null)
+            {
+                if(fileName.trim().isEmpty())
+                {
+                    errorMessages.put("errors"+error, "Please Upload File For " + field[2]);
+                    error ++;  
+                }
+            }
         }
-       if(request.getParameter("agentState").isEmpty()){
-        errorMessages.put("errors9", "Please select a State");
-       }
-       if(request.getParameter("agentPhone").isEmpty()){
-        errorMessages.put("errors10", "Please enter Phone Number");
-       }
-       if(request.getParameter("agentBankName").isEmpty()){
-        errorMessages.put("errors11", "Please enter Bank Name");
-       }
-       if(request.getParameter("agentBankAccountName").isEmpty()){
-        errorMessages.put("errors12", "Please enter Bank Account Name");
-       }
-       if(request.getParameter("agentBankAccountNumber").isEmpty()){
-        errorMessages.put("errors13", "Please enter Bank Account Number");
-       }
-       if(request.getParameter("agentKinName").isEmpty()){
-        errorMessages.put("errors14", "Please enter Kin Name");
-       }
-       if(request.getParameter("agentKinPhone").isEmpty()){
-        errorMessages.put("errors15", "Please enter Kin Phone Number");
-       }
-       if(request.getParameter("agentKinAddress").isEmpty()){
-        errorMessages.put("errors16", "Please enter Kin Address");
-       }   
+        
+        if(!agentDetails.isEmpty())
+        {
+            errorMessages.put("errors"+error, "Email Already Exit");
+            error ++;
+        }
        
-       /*
-       if(request.getPart("agentPhoto") == null){
-           errorMessages.put("errors17", "Please upload agent picture");
+       boolean validateFile = FileUploader.validateFile(request.getParts());
+       if(!validateFile)
+       {
+           errorMessages.put("errors"+error, "One or More Upload Files are Invalid (Please Upload Image File With Max Size Of 2MB)");
        }
+        if(!(errorMessages.isEmpty())) throw new PropertyException("Error While Validating Agent Registration/Update Details");
+    }
+    
+    private void validateCorporate(Agent agent, HttpServletRequest request) throws PropertyException, ServletException, IOException {
+         errorMessages.clear();
+         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+         EntityManager em = emf.createEntityManager();
+         Query jpqlQuery  = em.createNamedQuery("Agent.findByEmail");
+         String email = request.getParameter("agentEmail") != null ? request.getParameter("agentEmail").toLowerCase().trim() : "";
+         jpqlQuery.setParameter("email",email);
+         List<Agent> agentDetails = jpqlQuery.getResultList();
+         
+         //Validating refCode
+         String refCode = request.getParameter("refCode");
+         if(refCode != null && !refCode.trim().isEmpty())
+         {
+             if(refCode.contains("AG000"))
+             {
+                Account acc;
+                
+                try
+                {
+                    acc = (Account)em
+                .createNamedQuery("Account.findByAccountCode")
+                .setParameter("accountCode", refCode)
+                .getSingleResult();
+                    if(acc == null)
+                       errorMessages.put("errors0", "Invalid Referral Code"); 
+                }
+                catch(Exception e)
+                {
+                    errorMessages.put("errors0", "Invalid Referral Code");
+                }
+             }
+             else
+             {
+                 errorMessages.put("errors0", "Invalid Referral Code");
+             }
+         }
+         
+        String formFieldStage1[][] = {
+            {"agentFirstname", "", "Company Name"},
+            {"agentRCNumber", "", "Company RC Number"},
+            {"agentEmail", "", "Company Email"},
+            {"agentPhone", "", "Company Office Phone Number"},
+            {"agentStreet", "", "Company Office  Street Address"},
+        {"agentCity", "", "Company Office City Name"},
+        {"agentState", "", "Company Office Operational State Name"},
+        {"agentBankId", "select", "Company Bank Name"},
+        {"agentBankAccountName", "", "Company Bank Account Name"},
+        {"agentBankAccountNumber", "", "Company Bank Account Number"},
+        {"agentDirectorName1", "", "Name Of A Director"}, //This should not be classified here actually
+        };
+
+    String formFieldStage2[][]= {
+        {"agentPhoto", "", "Company Logo"},
+        {"agentCertOfIncorporation", "", "Company Certificate of Incorporation"},
+        {"agentBoardResolution", "", "Company Board Resolution"},
+        {"agentPassportOfRep", "", "Passport Of A Representative"},
+        {"agentIDCardOfRep", "", "Representative IDCard"},
+        {"agentUtilityBillOfRep", "", "Utility Bill Of Representative"},
+        {"agentDirectorPassport1", "", "Director Passport"},
+        {"agentDirectorIDCard1", "", "Director IDCard"}
+        };
+
+        
+         int error = 0;
+        for(String field[] : formFieldStage1)
+        {
+            String parameter = request.getParameter(field[0]);
+            if(parameter != null)
+            {
+                if(parameter.trim().isEmpty() || parameter.trim().equalsIgnoreCase("select"))
+                {
+                    if(field[1].isEmpty())
+                    {
+                        errorMessages.put("errors"+error, "Please Enter Value For " + field[2]);
+                    }
+                    else if(field[1].equalsIgnoreCase("select"))
+                    {
+                        errorMessages.put("errors"+error, "Please Select Value For " + field[2]);
+                    }
+                      error ++; 
+                }
+            }
+        }
+ 
+        for(String field[] : formFieldStage2)
+        {
+            String fileName = request.getPart(field[0]).getSubmittedFileName();
+            if(fileName != null)
+            {
+                if(fileName.trim().isEmpty())
+                {
+                    errorMessages.put("errors"+error, "Please Upload File For " + field[2]);
+                    error ++;  
+                }
+            }
+        }
+        
+        if(!agentDetails.isEmpty())
+        {
+            errorMessages.put("errors"+error, "Email Already Exit");
+            error ++;
+        }
        
-       if(request.getPart("agentKinPhoto") == null){
-           errorMessages.put("errors18", "Please upload next of kin picture");
-       }*/
-       
-        if(!(errorMessages.isEmpty())) throw new PropertyException("");
+       boolean validateFile = FileUploader.validateFile(request.getParts());
+       if(!validateFile)
+       {
+           errorMessages.put("errors"+error, "One or More Upload Files are Invalid (Please Upload Image File With Max Size Of 2MB)");
+       }
+        if(!(errorMessages.isEmpty())) throw new PropertyException("Error While Validating Agent Registration/Update Details");
     }
     
     /*TP: Listing og agents that exists in the database and are not deleted*/
@@ -1123,48 +2042,6 @@ public class AgentController extends AppController {
         return agent;
     }
     
-    private double getAgentBalance(){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        Query jpQL = em.createNamedQuery("AgentBalance.findByAgentId");
-        jpQL.setParameter("agentId",sessionUser.getSystemUserId());
-        
-        AgentBalance agentBalance = (AgentBalance)jpQL.getSingleResult();
-        
-        System.out.println("AgentBalance : " + agentBalance);
-        double totalCredit = agentBalance.getTotalcredit() != null ? agentBalance.getTotalcredit() : 0.00;
-        double totalDebit = agentBalance.getTotaldebit() != null ? agentBalance.getTotaldebit() : 0.00;
-        
-        double balance = totalCredit - totalDebit;
-        
-        emf.getCache().evictAll();
-        em.close();
-        emf.close();
-        return balance;
-    }
-    
-    private double getAgentBalance(long agentId){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
-        
-        Query jpQL = em.createNamedQuery("AgentBalance.findByAgentId");
-        jpQL.setParameter("agentId",agentId);
-        
-        AgentBalance agentBalance = (AgentBalance)jpQL.getSingleResult();
-        
-        System.out.println("AgentBalance : " + agentBalance);
-        double totalCredit = agentBalance.getTotalcredit() != null ? agentBalance.getTotalcredit() : 0.00;
-        double totalDebit = agentBalance.getTotaldebit() != null ? agentBalance.getTotaldebit() : 0.00;
-        
-        double balance = totalCredit - totalDebit;
-        
-        emf.getCache().evictAll();
-        em.close();
-        emf.close();
-        return balance;
-    }
-    
     private List<Transaction> getCreditHistory(){
         
         TransactionManager manager = new TransactionManager(sessionUser);
@@ -1186,13 +2063,38 @@ public class AgentController extends AppController {
         EntityManager em = emf.createEntityManager();
         
         double amount = Double.parseDouble(req.getParameter("amount"));
+           
         long agentId = Long.parseLong(req.getParameter("agent_id"));
         
         Agent agent = em.find(Agent.class, agentId);
         
+        
+        //Lets Validate the Withdrawal Request here
+        boolean valid = false;
+        
+        //prevent a zero and negative amount
+        if(amount > 0d)
+        {
+            valid = true;
+        }
+   
+        double  eligible = agent.getEligibleWithdrawalBalance()-1000;
+        if(eligible < 0d)
+            eligible = 0d;
+        if(valid && (amount <= eligible ))
+        {
+            valid = true;
+        }
+        else
+        {
+            valid = false;
+        }
+        
         em.close();
         emf.close();
         
+        if(valid)
+        {
         Withdrawal withdrawal = new Withdrawal();
         
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
@@ -1206,10 +2108,17 @@ public class AgentController extends AppController {
         
         WithdrawalManager manager = new WithdrawalManager(sessionUser);
         manager.processWithdrawalRequest(withdrawal, req.getContextPath());
+        }
         
         response.setContentType("text/html;charset=UTF-8");
+        if(valid)
+        {
         response.getWriter().write("1");
-        
+        }
+        else
+        {
+        response.sendError(401);
+        }
     }
     
     private List<Map> getPendingWithdrawalRequest(){
@@ -1231,7 +2140,7 @@ public class AgentController extends AppController {
             map.put("agentFullName", w.getAgent().getFullName());
             map.put("agentId", w.getAgent().getAgentId().toString());
             map.put("amount", String.format("%.2f", w.getAmount()));
-            map.put("balance", String.format("%.2f", getAgentBalance(w.getAgent().getAgentId())));
+            map.put("balance", String.format("%.2f", w.getAgent().getEligibleWithdrawalBalance()));
             
             pendingWithdrawalMap.add(map);
         }
@@ -1292,11 +2201,11 @@ public class AgentController extends AppController {
         
         Withdrawal withdrawal = em.find(Withdrawal.class,id);
         
-        Long notificationId = Long.parseLong(req.getParameter("nof_id"));
-        Notification notification = em.find(Notification.class, notificationId);
+        //Long notificationId = Long.parseLong(req.getParameter("nof_id"));
+        //Notification notification = em.find(Notification.class, notificationId);
         
         WithdrawalManager manager = new WithdrawalManager(sessionUser);
-        //manager.processWithdrawalApproval(withdrawal, req.getContextPath());
+        manager.processWithdrawalDisApproval(withdrawal, req.getContextPath());
         
         res.setContentType("text/html");
         res.getWriter().write("1");
@@ -1318,7 +2227,7 @@ public class AgentController extends AppController {
             String pwd1 = request.getParameter("pwd1");
             String pwd2 = request.getParameter("pwd2");
             
-            System.out.println("Old Password : " + oldPassword + " Id : " + id);
+            //System.out.println("Old Password : " + oldPassword + " Id : " + id);
             em.getTransaction().begin();
             
             Agent agent = em.find(Agent.class, id);
@@ -1402,7 +2311,7 @@ public class AgentController extends AppController {
         
         List<Transaction> transactionList = query.getResultList();
         
-        double agentBalance = getAgentBalance(id);
+        double agentBalance = agent.getEligibleWithdrawalBalance();
         
         List<Map> transactionMapList = new ArrayList();
         
@@ -1451,27 +2360,38 @@ public class AgentController extends AppController {
         
         List<Transaction> transactionList = query.getResultList();
         
-        double agentBalance = getAgentBalance(sessionUser.getSystemUserId());
+        Agent agent = em.find(Agent.class,sessionUser.getSystemUserId() );
+        
+        double agentBalance = agent.getEligibleWithdrawalBalance();
         
         List<Map> transactionListMap = new ArrayList();
         
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
         
+        Double balance = 0.0;
+        
         for(Transaction t : transactionList){
             
-            Map<String, String> map = new HashMap();
+            Map<String, Object> map = new HashMap();
             
             map.put("amount", String.format("%.2f", t.getAmount()));
             map.put("date", sdf.format(t.getTransactionDate()));
             if(t.getCreditAccount().getAccountCode().equalsIgnoreCase(acctCode)){
                 map.put("type", "Credit");
+                balance += t.getAmount();
+                map.put("accbalance" , String.format("%.2f", balance));
             }
             else{
                 map.put("type", "Debit");
+                balance -= t.getAmount();
+                map.put("accbalance" , String.format("%.2f", balance));
             }
-            
+            map.put("id", t.getId());
             transactionListMap.add(map);
         }
+        
+        //lets us arrange the map in decending order
+        transactionListMap.sort((Map a , Map b) ->{ return ((Long)(b.get("id"))).compareTo((Long)(a.get("id"))); });
         
         request.setAttribute("transactions",transactionListMap);
         request.setAttribute("balance", agentBalance - minimumBalance);
@@ -1490,4 +2410,140 @@ public class AgentController extends AppController {
         return networkList;
     }
 
+    public static Calendar getDateTime() {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
+        return calendar;
+    }
+
+     private void validateEmail(HttpServletRequest request, HttpServletResponse response) {
+
+        try {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+            EntityManager em = emf.createEntityManager();
+
+            String email = request.getParameter("email") != null ? request.getParameter("email").toLowerCase().trim() : "";
+            
+            if(email == null)
+                return;
+            Query query = em.createNamedQuery("Agent.findByEmail");
+            query.setParameter("email", email);
+
+            List<Agent> agent = query.getResultList();
+
+            //System.out.println("Agent count : " + agent.size());
+
+            Integer code = agent.size() == 0 ? 1 : -1;
+
+            Gson gson = new GsonBuilder().create();
+
+            Map<String, String> map = new HashMap();
+            map.put("code", code.toString());
+
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(gson.toJson(map));
+            response.getWriter().flush();
+            response.getWriter().close();
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+     private void getReferrerInfo(HttpServletRequest request, HttpServletResponse response) throws IOException{
+         
+        String refCode = request.getParameter("refCode");
+        
+        if(!(refCode != null && !refCode.trim().isEmpty()))
+        {
+            response.sendError(404, "Error");
+            return;
+        }
+        
+        ////System.out.println(refCode);
+        response.setStatus(200);
+        
+        //Agent Detail
+        HashMap<String , String> aDtail = new HashMap<>();
+        if(em == null)
+        em = AppController.emf.createEntityManager();
+        
+        Account acc = (Account)em
+                .createNamedQuery("Account.findByAccountCode")
+                .setParameter("accountCode", refCode)
+                .getSingleResult();
+       
+        Agent agent = em.find(Agent.class, acc.getRemoteId());
+        
+        aDtail.put("imgPath", agent.getPhotoPath());
+        aDtail.put("name", agent.getFullName());
+       
+       String Output = gson.toJson(aDtail);
+       response.getOutputStream().println(Output);
+     }
+     
+     private void processPayout(HttpServletRequest request, HttpServletResponse response) throws IOException{
+                 //Lets first get the list of all approved withdrawals
+                 if(em != null && em.isOpen()){}
+                 else { em = emf.createEntityManager();}
+       List<Withdrawal> withdrawals = em.createNamedQuery("Withdrawal.findByApproved")
+                                        .setParameter("approved",1 )
+                                        .getResultList();
+       List<Map<String,String>>  payOut = new ArrayList<>();
+       
+       String date = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM/d/uuuu"));
+       Date tDate = new Date(System.currentTimeMillis());
+       Account agentCommission = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "AGENT_COMMISSION").getSingleResult();
+       
+       em.getTransaction().begin();
+       for(Withdrawal w : withdrawals)
+       {
+           Map<String,String> agentRequest = new HashMap<>();
+           agentRequest.put("PaymentAmount", String.format("%,.2f",w.getAmount()));
+           agentRequest.put("PaymentDate",date);
+           agentRequest.put("Reference", "\"\"");
+           agentRequest.put("Remark", "AGENCY COMMISSION PAYMENT");
+           agentRequest.put("VendorCode", w.getAgent().getBankAcctName());
+           agentRequest.put("VendorName", w.getAgent().getBankAcctName());
+           agentRequest.put("VendorAccountNumber", w.getAgent().getBankAcctNumber());
+           agentRequest.put("Bank Sort Code", w.getAgent().getBank().getSortCode());
+           payOut.add(agentRequest);
+           //We have to debit the agent account with the amount 
+           //and debit the agent commision account
+          new TransactionManager(sessionUser).doDoubleEntry(w.getAgent().getAccount(), agentCommission, w.getAmount());
+          w.setApproved((short)3);
+          w.setModifiedDate(tDate);
+          w.setModifiedBy(sessionUser.getSystemUserId());
+          em.persist(w);
+        }
+       
+       //Lets us now write our CSV File 
+       //comma delimited
+       StringBuilder csv = new StringBuilder();
+       csv.append("PaymentAmount,PaymentDate,Reference,Remark,VendorCode,VendorName,VendorAccountNumber,Bank Sort Code,\n");
+       
+       for(Map<String,String> agentRequest : payOut)
+       {
+         csv.append("\"").append(agentRequest.get("PaymentAmount")).append("\"," )
+         .append(agentRequest.get("PaymentDate") ).append(",")
+         .append(agentRequest.get("Reference")).append(",")
+         .append(agentRequest.get("Remark")).append(",")
+         .append(agentRequest.get("VendorCode")).append(",")
+         .append(agentRequest.get("VendorName")).append(",")
+         .append(agentRequest.get("VendorAccountNumber")).append(",")
+         .append(agentRequest.get("Bank Sort Code")).append(",\n");
+       }
+       
+       //System.out.print(csv)
+       
+       response.setContentType("application/csv");
+       //response.addHeader("Content-Type", "application/csv");
+       response.addHeader("Content-Disposition", "inline; filename=Agent_Disbursement_List_" + LocalDate.now().format(DateTimeFormatter.ofPattern("d-M-uuuu")) + ".csv");
+       response.setContentLength( csv.length());
+       PrintWriter writer = new PrintWriter(response.getOutputStream());
+       writer.append(csv);
+       writer.flush();
+       writer.close();
+       
+       em.getTransaction().commit();
+     }
 }

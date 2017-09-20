@@ -92,7 +92,7 @@
 
                                 <div class="form-group">
                                     <label for="role" class="control-label">System Role*</label>
-                                        <select name="role_id" id="role_id" style="width: 80%;" class="form-control">
+                                    <select name="role_id" id="role_id" style="width: 80%;" class="form-control" >
                                             <option value="0">--Choose--</option>
                                             <c:forEach items="${rolesList}" var="role">
                                                 <option value="${role.roleId}" <c:if test="${reqUser.role.roleId == role.roleId}"> selected </c:if> >${role.title}</option>
@@ -100,51 +100,53 @@
                                         </select>
                                 </div>    
                         </div>
+                        
                     </div>
 
                     
                                 
                     <!--PERMISSIONS--> 
-                    <div class="row">
-                <div class="col-md-12">
-                
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Permissions <span class="pull-right"><input class="minimal" type="checkbox" name="select-all" id="select-all"> SELECT ALL</span></h3>
-                        </div>
-
-                        <!-- Table -->
-                        <table class="table" id='permissions_table'>                            
-                          <tbody>
-
-                              <c:forEach items="${permissionsList}" var="entity">
-                              <tr>
-                                  <td class="paddingtop20 bold bgeee" style="width:15%;">
-                                      ${entity.key}
-                                  </td>
-
-                                  <td>
-                                      <c:forEach items="${entity.value}" var="permission">
-                                          <div class="col-sm-2">
-                                            <label class="checkbox-inline">
-                                              <input class="minimal" type="checkbox" name="permissions" 
-                                                     ${selectedPermissions.contains(permission.alias) ? "checked" : ""}
-                                                     id="${permission.alias}" value="${permission.alias}">
-                                                     ${permission.action}
-                                            </label>
-                                          </div>
-                                      </c:forEach>
-                                  </td>
-                              </tr>
-                              </c:forEach>
-                          </tbody>
-                        </table>
-                </div>
+                 <% 
+                 //   <div class="row">
+                //<div class="col-md-12">
+                //
+                //    <div class="panel panel-default">
+                //        <div class="panel-heading">
+                //            <h3 class="panel-title">Permissions <span class="pull-right"><input class="minimal" type="checkbox" name="select-all" id="select-all"> SELECT ALL</span></h3>
+                //        </div>
+//
+  //                      <!-- Table -->
+    //                    <table class="table" id='permissions_table'>                            
+      //                    <tbody>
+//
+  //                            <c:forEach items="${permissionsList}" var="entity">
+    //                          <tr>
+     //                             <td class="paddingtop20 bold bgeee" style="width:15%;">
+       //                               ${entity.key}
+         //                         </td>
+//
+  //                                <td>
+    //                                  <c:forEach items="${entity.value}" var="permission">
+      //                                    <div class="col-sm-2">
+        //                                    <label class="checkbox-inline">
+          //                                    <input class="minimal" type="checkbox" name="permissions" 
+            //                                         ${selectedPermissions.contains(permission.alias) ? "checked" : ""}
+              //                                       id="${permission.alias}" value="${permission.alias}">
+                //                                     ${permission.action}
+                  //                          </label>
+                    //                      </div>
+                      //                </c:forEach>
+                        //          </td>
+                          //    </tr>
+                            //  </c:forEach>
+                        //  </tbody>
+                        //</table>
+               // </div>
                   
                   
-              </div><!-- /.col -->
-          </div> <!-- /.row -->
-                    
+              //</div><!-- /.col -->
+              //       </div> <!-- /.row -->
+                    %>
                     
                     <div class="col-md-12">
                         <input type="hidden" name="id" id="id" value="${reqUser.userId}">
@@ -163,7 +165,7 @@
 </form>
                         
 <script>
-    $(document).ready(function(){
+    /*$(document).ready(function(){
         $("#role_id").on("change",function(){
            var selectedValue = $("#role_id").val();
            var data = {"role_id": selectedValue, "action":"rolechange","mode":"ajax"};
@@ -177,7 +179,7 @@
         $('#select-all').on('ifUnchecked', function(event){
             $('#permissions_table input[type="checkbox"].minimal').iCheck('uncheck')
         });
-    });
+    });*/
     
     function updatePermissionListDOM(permissionsDetails){
         //console.log(permissionsDetails);
@@ -204,6 +206,5 @@
             </c:forEach>
                 
     }
-    
     
 </script>

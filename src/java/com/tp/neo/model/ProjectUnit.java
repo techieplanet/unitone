@@ -68,7 +68,9 @@ import javax.xml.bind.annotation.XmlTransient;
     }) //end NamedQuery
     
 public class ProjectUnit extends BaseModel {
-
+    
+    @Column(name="image")
+    private String image;
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "modified_by")
@@ -78,7 +80,7 @@ public class ProjectUnit extends BaseModel {
     @Column(name = "annual_maintenance_percentage")
     private Double annualMaintenancePercentage;
     @Column(name = "reward_points")
-    private Integer rewardPoints;
+    private Double rewardPoints;
     @Column(name = "building_cost")
     private Double buildingCost;
     @Column(name = "service_value")
@@ -360,11 +362,11 @@ public class ProjectUnit extends BaseModel {
         this.unitType = unitType;
     }
 
-    public Integer getRewardPoints() {
+    public Double getRewardPoints() {
         return rewardPoints;
     }
 
-    public void setRewardPoints(Integer rewardPoints) {
+    public void setRewardPoints(Double rewardPoints) {
         this.rewardPoints = rewardPoints;
     }
 
@@ -396,5 +398,19 @@ public class ProjectUnit extends BaseModel {
      */
     public void setAnnualMaintenancePercentage(Double annualMaintenancePercentage) {
         this.annualMaintenancePercentage = annualMaintenancePercentage;
+    }
+
+    /**
+     * @return the image
+     */
+    public String getImage() {
+        return image;
+    }
+
+    /**
+     * @param image the image to set
+     */
+    public void setImage(String image) {
+        this.image = image;
     }
 }

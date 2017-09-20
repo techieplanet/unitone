@@ -307,8 +307,8 @@ public class OrderItem extends BaseModel {
     
     public double getCommissionAmount(double lodgementAmount){
         DecimalFormat df = new DecimalFormat(".##");
-        System.out.println("lodgementAmount: " + lodgementAmount);
-        System.out.println("comm perc: " + this.getCommissionPercentage());
+        //System.out.println("lodgementAmount: " + lodgementAmount);
+        //System.out.println("comm perc: " + this.getCommissionPercentage());
         double amount = lodgementAmount * this.getCommissionPercentage() / 100;
         String amountString = df.format(amount); //rounded to two decimal places
         return Double.parseDouble(amountString); //change back to double and return
@@ -380,7 +380,7 @@ public class OrderItem extends BaseModel {
     }
 
     public double calculateVatAmount(double amount){
-        return (amount * vatPercentage)/100;
+        return (amount * vatPercentage)/(100 + vatPercentage);
     }
     
     public double calculateAnnualMaintenanceAmount(double amount){

@@ -87,6 +87,8 @@ public class Lodgement extends BaseModel {
     private String originAccountName;
     @Column(name = "origin_account_number")
     private String originAccountNumber;
+    @Column(name="depositor_bank_name")
+    private String depositorBankName;
     @Column(name = "payment_mode")
     private Short paymentMode;
     @Column(name = "lodgment_date")
@@ -304,4 +306,17 @@ public class Lodgement extends BaseModel {
         this.rewardAmount = rewardAmount;
     }
 
+     /**
+     * @return the depositorBankName
+     */
+    public String getDepositorBankName() {
+        return depositorBankName;
+    }
+
+    /**
+     * @param depositorBankName the depositorBankName to set
+     */
+    public void setDepositorBankName(String depositorBankName) {
+        this.depositorBankName = depositorBankName;
+    }
 }

@@ -34,8 +34,10 @@
                 <div class="box-header">
                   <h3 class="box-title block">
                      Withdrawal Request List
-                     <a href="#" class="btn btn-success pull-right">Pay out</a>
-                  </h3>
+                     <c:if test="${fn:contains(sessionScope.user.permissions, 'agent_commission_disbursement')}">
+                     <a href="${pageContext.request.contextPath}/Agent?action=makePayout" class="btn btn-success pull-right" onclick="makePayout()">Pay out and download GAPs csv <i class="fa fa-download"> </i></a>
+                     </c:if>
+                     </h3>
                 </div><!-- /.box-header -->
                 
                  <div class="box-body">
@@ -137,5 +139,10 @@
         });
                        
 });
+
+function makePayout(){
+var table = $('#entitylist').DataTable();
+ table.clear().draw();
+}
   </script>
   

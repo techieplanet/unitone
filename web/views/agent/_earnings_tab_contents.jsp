@@ -1,10 +1,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div class="row margintop10 marginbottom20">
+<div class="row" style="padding: 5px ;">
     <div class="col-md-6 bg-green text-conspicuous"><span>Available Balance</span><br/> <strong><fmt:formatNumber value="${agentDetails.balance}" type="currency" currencySymbol="${nairaSymbol}" groupingUsed="TRUE" /></strong></div>
     <div class="col-md-6 bgeee text-conspicuous"><span>Ledger Balance </span><br/><strong><fmt:formatNumber value="${agentDetails.ledgerBalance}" type="currency" currencySymbol="${nairaSymbol}" groupingUsed="TRUE" /></strong></div>    
 </div>
-
+<div class="row" style="padding: 5px ;">
+    <div class="col-md-4 bg-warning text-conspicuous"><span>Pending Withdrawal</span><br/> <strong><fmt:formatNumber value="${agent.getTotalPendingWithdrawal()}" type="currency" currencySymbol="${nairaSymbol}" groupingUsed="TRUE" /></strong></div>
+    <div class="col-md-4 bg-green text-conspicuous"><span>Approved Withdrawal </span><br/><strong><fmt:formatNumber value="${agent.getTotalApprovedWithdrawal()}" type="currency" currencySymbol="${nairaSymbol}" groupingUsed="TRUE" /></strong></div>    
+    <div class="col-md-4 bgeee text-conspicuous"><span>Paid WithDrawal</span><br/> <strong><fmt:formatNumber value="${agent.getTotalPaidWithdrawal()}" type="currency" currencySymbol="${nairaSymbol}" groupingUsed="TRUE" /></strong></div>
+</div>
 
 <div class="box-body">
  <!--<div class="permissions block">-->
