@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "ProductOrder.findAll", query = "SELECT o FROM ProductOrder o ORDER BY o.id DESC"),
-    @NamedQuery(name = "ProductOrder.totalAmount", query = "SELECT SUM(unit.amountPayable * item.quantity) FROM ProductOrder order JOIN OrderItem item ON item.order.id = order.id JOIN item.unit unit where order.id = :orderId"),
+    @NamedQuery(name = "ProductOrder.totalAmount", query = "SELECT SUM(item.amountPayable) FROM ProductOrder order JOIN OrderItem item ON item.order.id = order.id where order.id = :orderId"),
     @NamedQuery(name = "ProductOrder.findByAgent", query = "SELECT o FROM ProductOrder o WHERE o.agent = :agent "),
     @NamedQuery(name = "ProductOrder.findById", query = "SELECT o FROM ProductOrder o WHERE o.id = :id"),
     @NamedQuery(name = "ProductOrder.findByCreatedBy", query = "SELECT o FROM ProductOrder o WHERE o.createdBy = :createdBy"),

@@ -29,7 +29,7 @@
 </div>
 
      <c:if test="${isNew}">       
- <c:if test='${userTypeId != null && action.equals("new") && userTypeId == "1" }'>
+ <c:if test='${userTypeId != null && action.equals("new") && userTypeId == 1 }'>
  <div class="row margin-bottom" id="agentListContainer">
     <div class="col-md-12">   
          <div class="panel panel-default">
@@ -139,7 +139,7 @@
                 <form role="form" name="customerRegistration" method="POST"   action='<c:if test="${isNew}"><jsp:text>Customer?action=new</jsp:text></c:if><c:if test="${isAdminEdit}"><jsp:text>Customer?action=update</jsp:text></c:if>'  enctype="multipart/form-data" onsubmit="return submitForm()">
   
    <input type="hidden" name="customer_id" value="<c:out value='${customer.customerId}'/>" /> 
-   <c:if test="${isNew}"><input type="hidden" name="agent_id" id="agent_id" value="" /></c:if>  
+   <c:if test="${isNew}"><input type="hidden" name="agent_id" id="agent_id" value="select" /></c:if>  
  
     <!-- Step One Customer Details -->
  <div class="row" id="step1">
@@ -211,7 +211,7 @@
                         
                               <div class="col-md-3">
                                   <div class="form-group" >
-                                      <label for="customerTitle">Title</label>
+                                      <label for="customerTitle">Title*</label>
                                      
                                      <% //<input type="text"  name="customerTitle" class="form-control" id="customerTitle" placeholder="Title" 
                                          //    <c:if test='${isEdit}'>readonly</c:if>    
@@ -233,7 +233,7 @@
                           
                               <div class="col-md-3">
                                   <div class="form-group" >
-                                      <label for="customerFirstname">First Name</label>
+                                      <label for="customerFirstname">First Name*</label>
                                       <input type="text"  name="customerFirstname" class="form-control" id="customerFirstname" placeholder="First Name" 
                                              <c:if test='${isEdit}'>readonly</c:if>    
                                          value=<c:if test="${isError}">"${param.customerFirstname}"</c:if><c:if test="${!isError}">"${customer.firstname}"</c:if> />
@@ -244,7 +244,7 @@
                            
                               <div class="col-md-3">
                                     <div class="form-group" >
-                                      <label for="customerMiddlename">Middle Name</label>
+                                      <label for="customerMiddlename">Middle Name*</label>
                                       <input type="text" class="form-control" id="customerMiddlename" name="customerMiddlename" placeholder="Middle Name"
                                              <c:if test='${isEdit}'>readonly</c:if> 
                                         value=<c:if test="${isError}">"${param.customerMiddlename}"</c:if><c:if test="${!isError}">"${customer.middlename}"</c:if> />
@@ -254,7 +254,7 @@
                            
                             <div class="col-md-3">
                                     <div class="form-group" >
-                                      <label for="customerLastname">Last Name</label>
+                                      <label for="customerLastname">Last Name*</label>
                                       <input type="text" class="form-control" name="customerLastname" id="customerLastname" placeholder="Last Name" 
                                              <c:if test='${isEdit}'>readonly</c:if> 
                                          value=<c:if test="${isError}">"${param.customerLastname}"</c:if><c:if test="${!isError}">"${customer.lastname}"</c:if>/>
@@ -265,7 +265,7 @@
                              
                               <div class="col-md-3">
                                     <div class="form-group" >
-                                      <label for="customerGender" >Gender</label><br/>
+                                      <label for="customerGender" >Gender*</label><br/>
                                       <select  name="customerGender" id="customerGender" class=" form-control"
                                                <c:if test='${isEdit}'>readonly</c:if>  >
                                                <c:set var="tGender" value="${isAdminEdit ? customer.gender : (isError ? param.customerGender : '')}"/>
@@ -279,7 +279,7 @@
                            
                               <div class="col-md-3">
                                     <div class="form-group" >
-                                      <label for="customerMaritalStatus" >Marital Status</label><br/>
+                                      <label for="customerMaritalStatus" >Marital Status*</label><br/>
                                       <select  name="customerMaritalStatus" id="customerMaritalStatus" class=" form-control"
                                                <c:if test='${isEdit}'>readonly</c:if>  >
                                               <c:set var="mStatus" value="${isAdminEdit ? customer.maritalStatus : (isError ? param.customerMaritalStatus : '')}"/>
@@ -294,7 +294,7 @@
                              
                               <div class="col-md-3">
                                     <div class="form-group" >
-                                      <label for="customerDateOfBirth" >Date Of Birth</label>
+                                      <label for="customerDateOfBirth" >Date Of Birth*</label>
                                       
                                        <input type="text" name="customerDateOfBirth" id="customerDateOfBirth" placeholder="dd/mm/yy" class="text-black form-control" 
                                                <c:if test='${isEdit}'>readonly</c:if> 
@@ -305,7 +305,7 @@
                               
                              <div class="col-md-3">
                             <div class="form-group" >
-                              <label for="customerEmail">Email address</label>
+                              <label for="customerEmail">Email address*</label>
                               <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="your@email.com" 
                                      <c:if test='${isEdit}'>readonly</c:if> 
                                      value=<c:if test="${isError}">"${param.customerEmail}"</c:if><c:if test="${!isError}">"${customer.email}"</c:if>  />
@@ -322,7 +322,7 @@
                                 <legend >Work Information</legend>
                         <div class="col-md-4">
                                     <div class="form-group" >
-                                      <label for="customerOccupation">Occupation</label>
+                                      <label for="customerOccupation">Occupation*</label>
                                      
                                       <input type="text" class="form-control" name="customerOccupation" id="customerOccupation" placeholder="Occupation" 
                                              <c:if test='${isEdit}'>readonly</c:if> 
@@ -332,7 +332,7 @@
                                 </div>
                               <div class="col-md-4">
                                     <div class="form-group" >
-                                      <label for="customerEmployer">Employer</label>
+                                      <label for="customerEmployer">Employer*</label>
                                       
                                       <input type="text" class="form-control" name="customerEmployer" id="customerEmployer" placeholder="Employer" 
                                              <c:if test='${isEdit}'>readonly</c:if> 
@@ -343,7 +343,7 @@
                               
                               <div class="col-md-4">
                                     <div class="form-group" >
-                                      <label for="customerOfficePhone">Office Phone</label>
+                                      <label for="customerOfficePhone">Office Phone*</label>
                                       
                                       <input type="number" class="form-control" name="customerOfficePhone" id="customerOfficePhone" placeholder="Office Phone" 
                                              <c:if test='${isEdit}'>readonly</c:if> 
@@ -351,13 +351,15 @@
                                              
                                     </div>
                                 </div>
+                                         <%
+                                             /*
                             <div class="col-md-12">
                                     <div class="form-group" >
                                      <legend >Office Address</legend>
                                      
                                       <div class="col-md-12"> 
                                           <div class="col-md-3">
-                                              <label for ="customerOfficeStreet">Street</label>
+                                              <label for ="customerOfficeStreet">Address</label>
                                               <input type="text" class="form-control" name="customerOfficeStreet" id="customerOfficeStreet" placeholder="Street" 
                                              <c:if test='${isEdit}'>readonly</c:if> 
                                          value=<c:if test="${isError}">"${param.customerOfficeStreet}"</c:if><c:if test="${!isError}">"${customer.officeStreet}"</c:if> />
@@ -391,28 +393,28 @@
                                       </div>      
                                     </div>
                                 </div>
-                              
+                             */ %>
                              <div class="col-md-12">
                                     <div class="form-group" >
                                      <legend >Employer Address</legend>
                                      
                                       <div class="col-md-12"> 
                                           <div class="col-md-3">
-                                              <label for ="customerEmployerStreet">Street</label>
+                                              <label for ="customerEmployerStreet">Address*</label>
                                               <input type="text" class="form-control" name="customerEmployerStreet" id="customerEmployerStreet" placeholder="Street" 
                                              <c:if test='${isEdit}'>readonly</c:if> 
                                          value=<c:if test="${isError}">"${param.customerEmployerStreet}"</c:if><c:if test="${!isError }">"${customer.employerStreet}"</c:if> />
                                               
                                           </div>
                                            <div class="col-md-3">
-                                              <label for ="customerEmployerCity">City</label>
+                                              <label for ="customerEmployerCity">City*</label>
                                               <input type="text" class="form-control" name="customerEmployerCity" id="customerEmployerCity" placeholder="City" 
                                              <c:if test='${isEdit}'>readonly</c:if> 
                                          value=<c:if test="${isError}">"${param.customerEmployerCity}"</c:if><c:if test="${!isError}">"${customer.employerCity}"</c:if> />
                                        
                                           </div>
                                            <div class="col-md-3">
-                                              <label for ="customerEmployerState">State</label>
+                                              <label for ="customerEmployerState">State*</label>
                                               <input type="text" class="form-control" name="customerEmployerState" id="customerEmployerState" placeholder="State" 
                                              <c:if test='${isEdit}'>readonly</c:if> 
                                          value=<c:if test="${isError}">"${param.customerEmployerState}"</c:if><c:if test="${!isError}">"${customer.employerState}"</c:if> "/>
@@ -420,7 +422,7 @@
                                           </div>
                                            <div class="col-md-3">
                                                <div class="form-group" >
-                                              <label for ="customerEmployerCountry">Country</label>
+                                              <label for ="customerEmployerCountry">Country*</label>
                                                 <select class="form-control" name="customerEmployerCountry" id="customerEmployerCountry">
                                                      <option value="select">--Select--</option>
                                               <c:set var="tcountry" value="${!isNew ? customer.employerCountry : (isError ? param.customerEmployerCountry : '')}"/>
@@ -485,7 +487,7 @@
                         <div class="col-md-3">
                             
                             <div class="form-group" >
-                            <label for="customerStreet">Street</label>
+                            <label for="customerStreet">Address*</label>
                                 <input type="text" class="form-control" id="customerStreet" name="customerStreet" placeholder="Street"  
                                        <c:if test='${isEdit}'>readonly</c:if> 
                                        value=<c:if test="${isError}">"${param.customerStreet}"</c:if><c:if test="${!isError}">"${customer.street}"</c:if> />
@@ -494,7 +496,7 @@
                         
                         <div class="col-md-3">
                             <div class="form-group" >
-                            <label for="customerCity">City</label>
+                            <label for="customerCity">City*</label>
                               
                                 <input type="text" class="form-control" id="customerCity" name="customerCity" placeholder="City"  
                                        <c:if test='${isEdit}'>readonly</c:if> 
@@ -506,7 +508,7 @@
                         
                         <div class="col-md-3">
                             <div class="form-group" />
-                              <label for="customerState">State</label>
+                              <label for="customerState">State*</label>
                               <input class="form-control" id="customerState" name="customerState"  placeholder="State"
                                      <c:if test='${isEdit}'>readonly</c:if> 
                                       value=<c:if test="${isError}">"${param.customerState}"</c:if><c:if test="${!isError}">"${customer.state}"</c:if> />
@@ -558,7 +560,7 @@
                      
                             <div class="col-md-3">
                             <div class="form-group" >
-                            <label for="customerCountry">Country</label>
+                            <label for="customerCountry">Country*</label>
                              <select class="form-control" name="customerCountry" id="customerCountry">
                                                 <option value="select">--Select--</option>
                                                 <c:set var="tcountry" value="${isAdminEdit ? customer.country : (isError ? param.customerCountry : '')}"/>
@@ -570,7 +572,7 @@
                         </div>  
                             <div class="col-md-4">
                             <div class="form-group" >
-                            <label for="customerPhone">Phone Number</label>
+                            <label for="customerPhone">Phone Number*</label>
                                 <input type="number" class="form-control" id="customerPhone" name="customerPhone" placeholder="Phone Number" 
                                        <c:if test='${isEdit}'>readonly</c:if> 
                                        value=<c:if test="${isError}">"${param.customerPhone}"</c:if><c:if test="${!isError}">"${customer.phone}"</c:if> />
@@ -588,7 +590,7 @@
                            </div>
                        <div class="col-md-4">
                             <div class="form-group" >
-                            <label for="customerPostalAddress">Postal Address</label>
+                            <label for="customerPostalAddress">Postal Address*</label>
                                 <input type="text" class="form-control" id="customerPostalAddress" name="customerPostalAddress" placeholder="Postal Address" 
                                        <c:if test='${isEdit}'>readonly</c:if> 
                                        value=<c:if test="${isError }">"${param.customerPostalAddress}"</c:if><c:if test="${!isError }">"${customer.postalAddress}"</c:if> />
@@ -611,7 +613,7 @@
                             <div class="row">
                               <div class="col-md-4">
                                     <div class="form-group" >
-                                      <label for="customerKinNames">Next of Kin Name</label>
+                                      <label for="customerKinNames">Next of Kin Name*</label>
                                       <input type="text" class="form-control" id="customerKinName" name="customerKinName" placeholder="Enter Kin Name"  
                                           <c:if test='${isEdit}'>readonly</c:if> 
                                           value=<c:if test="${isError }">"${param.customerKinName}"</c:if><c:if test="${!isError }">"${customer.kinName}"</c:if> />
@@ -620,7 +622,7 @@
                                 </div>
                                  <div class="col-md-4">
                                     <div class="form-group" >
-                                      <label for="customerKinRelationship">Relationship Of Next Of kin</label>
+                                      <label for="customerKinRelationship">Relationship Of Next Of kin*</label>
                                      
                                       <input type="text" class="form-control" id="customerKinRelationship" name="customerKinRelationship" placeholder="Relationship"  
                                           <c:if test='${isEdit}'>readonly</c:if> 
@@ -640,7 +642,7 @@
                                 </div> 
                                 <div class="col-md-4">
                                     <div class="form-group" >
-                                    <label for="customerKinPhone">Next of Kin Phone Number</label>
+                                    <label for="customerKinPhone">Next of Kin Phone Number*</label>
                                        
                                         <input type="number" class="form-control" id="customerKinPhone" name="customerKinPhone" placeholder="Enter Kin Phone Number" 
                                                <c:if test='${isEdit}'>readonly</c:if> 
@@ -652,7 +654,7 @@
                                <div class="col-md-4 " >
                                     <div class="row" >
                             <div class="form-group" >
-                              <label for="customerKinAddress" >Next of Kin Address</label>
+                              <label for="customerKinAddress" >Next of Kin Address*</label>
                                <input type="text" class="form-control" id="customerKinAddress" name="customerKinAddress" placeholder="Enter Kin Address" 
                                       <c:if test='${isEdit}'>readonly</c:if> 
                                       value=<c:if test="${isError }">"${param.customerKinAddress}"</c:if><c:if test="${!isError }">"${customer.kinAddress}"</c:if> />
@@ -677,7 +679,7 @@
                             <div class="row">
                               <div class="col-md-4">
                                     <div class="form-group" >
-                                      <label for="customerBanker">Banker</label>
+                                      <label for="customerBanker">Banker*</label>
                                      
                                       <input type="text" class="form-control" id="customerBanker" name="customerBanker" placeholder="Bank Name"  
                                           <c:if test='${isEdit}'>readonly</c:if> 
@@ -687,7 +689,7 @@
                                 </div>
                                  <div class="col-md-4">
                                     <div class="form-group" >
-                                      <label for="customerAccountName">Account Name</label>
+                                      <label for="customerAccountName">Account Name*</label>
                                       <input type="text" class="form-control" id="customerAccountName" name="customerAccountName" placeholder="Account Name"  
                                           <c:if test='${isEdit}'>readonly</c:if> 
                                           value=<c:if test="${isError }">"${param.customerAccountName}"</c:if><c:if test="${!isError }">"${customer.accountName}"</c:if> />
@@ -696,7 +698,7 @@
                                 </div> 
                                 <div class="col-md-4">
                                     <div class="form-group" >
-                                      <label for="customerAccountNumber">Account Number</label>
+                                      <label for="customerAccountNumber">Account Number*</label>
                                       
                                       <input type="number" class="form-control" id="customerAccountNumber" name="customerAccountNumber" placeholder="Account Number"  
                                           <c:if test='${isEdit}'>readonly</c:if> 
@@ -868,7 +870,7 @@
 <!--                                              /.form-group  select unit-->
                                     </div>
                                 
-                                	<div class="col-md-3">
+                                	<div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="selectQuantity">Select Quantity</label>
                                             
@@ -898,7 +900,7 @@
                                 	<div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMinimumInitialAmount">Initial Amount(N)</label>
-                                            <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()">
+                                            <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="monthlyPayCalculator()">
                                             <span id="amountPerUnit">
                                                 min initial amt /unit: <span id="initialAmountPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="minInitialAmountSpan"></span><br/>
@@ -907,8 +909,16 @@
                                         </div> 
 <!--                                            /.form-group initial monthly amount -->
                                     </div>
-                                              
-                                              <div class="col-md-2">
+                                    <c:if test="${userTypeId == 1}">    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="productDiscount">Discount Percentage </label>
+                                            <input type="text" class="form-control" id="productDiscount" name="productDiscount" style="width: 100%;"  onchange="monthlyPayCalculator()">
+                                        </div> 
+<!--                                            /.form-group productDiscount  -->
+                                    </div>
+                                    </c:if>     
+                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="amountLeft">Balance Payable(N)</label>
                                             <input type="text" class="form-control" id="amountLeft" name="amountLeft" style="width: 100%;" readonly >
@@ -939,7 +949,7 @@
                                 	<div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMinimumMonthlyPayment">Monthly Payment(N)</label>
-                                            <input type="text" class="form-control" id="productMinimumMonthlyPayment" name="productMinimumMonthlyPayment" style="width: 100%;" onKeyup="calculateDurationFromMonthlyPay()">
+                                            <input type="text" class="form-control" id="productMinimumMonthlyPayment" name="productMinimumMonthlyPayment" style="width: 100%;" onkeyup="calculateDurationFromMonthlyPay()">
                                             <span id="finalAmount" style="display:block"></span>
                                             <span id="amountPerUnit">
                                                 min monthly pay / unit: <span id="monthlyPayPerUnit"></span><br/>
@@ -960,7 +970,7 @@
                                                       value="0" 
                                                       name="commp" 
                                                       id="commp" 
-                                                      <c:if test="${userTypeId == 2}">readonly="readonly"</c:if> 
+                                                      <c:if test="${userTypeId != 1}">readonly="readonly"</c:if> 
                                                   />
                                                    <span >This is the commission payable to an agent</span>
                                               </div>
@@ -1262,7 +1272,8 @@
     $( "#customerDateOfBirth" ).datepicker({changeMonth: true, changeYear: true , yearRange: "1930:2017" , dateFormat: "dd/mm/yy" });
   } );
  
-  var formFieldStage1 = [  ["customerTitle" , "select" , "Customer Title"]
+  var formFieldStage1 = [       [ "agent_id" , "select" , "an Agent for Customer"]
+                                ,["customerTitle" , "select" , "Customer Title"]
                                 ,["customerFirstname" , "" , "Customer First Name"]
                                 ,["customerMiddlename" , "" , "Customer Middle Name"]
                                 ,["customerLastname" , "" , "Customer Last Name"]
@@ -1272,11 +1283,11 @@
                                 ,["customerEmail" , "" , "Customer Email"]
                                 ,["customerOccupation" , "" , "Customer Occupation"]
                                 ,["customerEmployer" , "" , "Customer Employer"]
-                                ,["customerOfficePhone" , "" , "Customer Office Phone"]
+                                <%/*,["customerOfficePhone" , "" , "Customer Office Phone"]
                                 ,["customerOfficeStreet" , "" , "Customer Office Street"]
                                 ,["customerOfficeCity" , "" , "Customer Office City"]
                                 ,["customerOfficeState" , "" , "Customer Office State"]
-                                ,["customerOfficeCountry" , "select" , "Customer Office Country"]
+                                ,["customerOfficeCountry" , "select" , "Customer Office Country"] */%>
                                 ,["customerEmployerStreet" , "" , "Customer Employer Street"]
                                 ,["customerEmployerCity" , "" , "Customer Employer City"]
                                 ,["customerEmployerState" , "" , "Employer State"]
@@ -1286,11 +1297,11 @@
                                 ,["customerState" , "" , "Customer State"]
                                 ,["customerCountry" , "select" , "Customer Country"]
                                 ,["customerPhone" , "" , "Customer Phone"] 
-                                //,["customerOtherPhone" , "select" , "Customer Country"]
+                                <%//,["customerOtherPhone" , "select" , "Customer Country"]%>
                                 ,["customerPostalAddress" , "" , "Customer  Postal Address"]
                                 ,["customerKinName" , "" , "Customer Next Of Kin Name"]
                                 ,["customerKinRelationship" , "" , "Customer Next Of Kin Relationship"]
-                                ,["customerKinEmail" , "" , "Customer Next Of Kin Email"]
+                                <%//,["customerKinEmail" , "" , "Customer Next Of Kin Email"]%>
                                 ,["customerKinPhone" , "" , "Customer Next Of Kin Phone Number"]
                                 ,["customerKinAddress" , "" , "Customer  Next Of Kin Address"]
                                 ,["customerBanker" , "" , "Customer Banker"]

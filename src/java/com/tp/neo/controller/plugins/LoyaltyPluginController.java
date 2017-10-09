@@ -168,10 +168,12 @@ public class LoyaltyPluginController extends PluginsController {
                 em.getTransaction().begin();
                 
                 loyaltyPlugin = (Plugin) em.createNamedQuery("Plugin.findByPluginName").setParameter("pluginName", "Loyalty").getSingleResult();
-                int installationValue = request.getParameter("install_status").equalsIgnoreCase("on") ? 1 : 0;
+                String installation = request.getParameter("install_status");
+                int installationValue = installation != null ? (installation.equalsIgnoreCase("on") ? 1 : 0 ): 0;
                 loyaltyPlugin.setInstallationStatus((short)installationValue);
                 
-                int activeValue = request.getParameter("active").equalsIgnoreCase("on") ? 1 : 0;
+                String active = request.getParameter("active");
+                int activeValue =  active != null ? (active.equalsIgnoreCase("on") ? 1 : 0 ): 0;
                 loyaltyPlugin.setActive((short)activeValue);
                 
                 loyaltyPlugin.setSettings(request.getParameter("reward_value"));

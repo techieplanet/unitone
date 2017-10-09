@@ -456,6 +456,10 @@ public class OrderManager {
     }
     
     public List<OrderItem> prepareOrderItem(OrderItemObjectsList salesItemObject, Agent agent){
+     return prepareOrderItem(salesItemObject , agent , false);
+    }
+    
+    public List<OrderItem> prepareOrderItem(OrderItemObjectsList salesItemObject, Agent agent , boolean isAdmin){
         List<OrderItem> orderItemList = new ArrayList();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -482,11 +486,11 @@ public class OrderManager {
             short approval = 0;
             long unitId = saleItem.productUnitId;
             ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
+            int qty = saleItem.productQuantity;
             
-            orderItem.setQuantity(saleItem.productQuantity);
+            orderItem.setQuantity(qty);
             orderItem.setInitialDep((double)(saleItem.productMinimumInitialAmount));
-            orderItem.setDiscountAmt(projectUnit.getDiscount());
-            orderItem.setDiscountPercentage(projectUnit.getDiscount());
+            
             orderItem.setCreatedDate(getDateTime().getTime());
             orderItem.setMonthlyPayDay(saleItem.dayOfNotification);
             
@@ -494,10 +498,12 @@ public class OrderManager {
                
                orderItem.setRewardAmount(saleItem.rewardPoint * amountPerRewardPoint);
                orderItem.setRewardPoints((int)saleItem.rewardPoint);
+               orderItem.setRewardPoint(projectUnit.getRewardPoints() * qty);
             }
             else{
                 orderItem.setRewardAmount(new Double(0));
                 orderItem.setRewardPoints(0);
+                orderItem.setRewardPoint(0.0);
             }
             
             //if(sessionUser.getSystemUserTypeId() == 1){
@@ -512,6 +518,32 @@ public class OrderManager {
             orderItem.setCommissionPercentage(projectUnit.getCommissionPercentage());
             orderItem.setVatPercentage(projectUnit.getVatPercentage());
             orderItem.setAnnualMaintenancePercentage(projectUnit.getAnnualMaintenancePercentage());
+            
+            if(isAdmin)
+            orderItem.setAmountPayable((double)saleItem.productAmount);
+            else
+            orderItem.setAmountPayable(projectUnit.getAmountPayable() * qty);
+            
+            orderItem.setCostPrice(projectUnit.getCpu() * qty );
+            
+            orderItem.setMontlyPayment((double)saleItem.monthlyPayPerQuantity); // hey we need This for some calculations
+            orderItem.setServiceValue(projectUnit.getServiceValue() * qty);
+            //int payDuration = saleItem.productMaximumDuration.indexOf(" ");
+            orderItem.setMaxPaymentDuration(Integer.parseInt(saleItem.productMaximumDuration));
+            
+            if(isAdmin)
+            {
+            orderItem.setDiscountPercentage(saleItem.discountPercent);
+            orderItem.setDiscountAmt(calculatediscountAmount(saleItem.discountPercent , projectUnit)* qty);
+            }
+            else
+            {
+            orderItem.setDiscountPercentage(projectUnit.getDiscount());
+            orderItem.setDiscountAmt(calculatediscountAmount(projectUnit)* qty);
+            }
+            
+            orderItem.setProjectUnitDiscountPercentage(projectUnit.getDiscount());
+            //orderItem.setIncome(projectUnit.getIncome() * qty);
             orderItemList.add(orderItem);
             
             ////System.out.println("Notification ID : " + saleItem.dayOfNotification);
@@ -624,6 +656,83 @@ public class OrderManager {
         return lodgement;
     }
     
+    private double calculatediscountAmount( double discountPercent  , ProjectUnit unit){
+        double cpuMinusServiceValue = unit.getCpu() - unit.getServiceValue();
+        double discountAmount = (cpuMinusServiceValue * discountPercent)/100;
+        return discountAmount;
+    }
+   private double calculatediscountAmount(ProjectUnit unit){
+        double cpuMinusServiceValue = unit.getCpu() - unit.getServiceValue();
+        double discountAmount = (cpuMinusServiceValue * unit.getDiscount())/100;
+        return discountAmount;
+    }
+   
+   public boolean validateOrder(List<OrderItem> orderItems , Lodgement lodgement, StringBuilder errorMSG){
+      
+       //Validating if the initial payment specified by user is lesser that what is required
+       Double customerTotalInitialPayment = 0.0;
+      
+       for(OrderItem item : orderItems)
+       {
+         //Here we calculate the actual value of initial deposit that we are expecting
+         double expectedIntialDep = item.getQuantity() * item.getUnit().getLeastInitDep();
+         //Lets compare it with the value we are receiving from the front end
+         if(item.getInitialDep() < expectedIntialDep )
+         {
+             //Here we know that the customer have reduced the amount he/she oghth to pay 
+             errorMSG.append("One or more Order have an Invalid Initial deposit amount");
+             return false;
+         }
+         
+         //for each order item lets validate the montly payment amount and the maximum payment duration
+         //lets first get the maximum payment duration specified from front end
+         int payDuration = item.getMaxPaymentDuration();
+         if(payDuration <= item.getUnit().getMaxPaymentDuration())
+         {
+             //Here we Know The Customer wants to pay for a lesser time
+             //Now we need to judge his montly payment according to his/her 
+             //Demand
+             boolean valid = validateMontlyPayment(item);
+             if(!valid)
+             {
+             errorMSG.append("The Montly Payment value You entered Is Invalid for one or more orders");
+             return false;
+             }
+         }
+         else
+         {
+             //Here We definately know That the customer wants to beat the system
+             errorMSG.append("The Maximum Payment Duration You entered Is Invalid for one or more orders");
+             return false;
+         }
+         //If we get here that mean the customer is paying the expected value or is paying over
+         customerTotalInitialPayment += item.getInitialDep();
+         
+       }
+       
+       if(lodgement.getAmount() < customerTotalInitialPayment)
+       {
+           errorMSG.append("The Lodgement Amount is invalid");
+           return false;
+       }
+       
+       
+      return true;
+  }
+   
+   private  boolean validateMontlyPayment(OrderItem item){
+       double amount = item.getAmountPayable();
+       double maxPayduration = item.getMaxPaymentDuration();
+       double initialPayment = item.getInitialDep();
+       double montlyPayment = Math.round(item.getMontlyPayment());
+       
+       double balance = amount - initialPayment;
+       
+       double validMontlyPay = Math.round(balance / maxPayduration);
+       //Double.validMontlyPay
+       return validMontlyPay == montlyPayment;
+   }
+   
     public static void main(String[] args){
 //        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
 //            EntityManager em = emf.createEntityManager();

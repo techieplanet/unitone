@@ -29,6 +29,7 @@ import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
@@ -328,8 +329,16 @@ public class CustomerController extends AppController {
             }
             else
             {
-                long agentId = Long.parseLong(request.getParameter("agent_id"));
-                agent = em.find(Agent.class, agentId);
+                try{
+                    long agentId = Long.parseLong(request.getParameter("agent_id"));
+                    agent = em.find(Agent.class, agentId);
+                }
+                catch(Exception e){
+                     errorMessages.put("errors504", "Please Select an Agent for The Customer" );
+                     request.setAttribute("sideNav", "Customer");
+                   throw new PropertyException("");
+                }
+                
             }
 
             //customer Personal information
@@ -378,12 +387,12 @@ public class CustomerController extends AppController {
             customer.setEmployer(request.getParameter("customerEmployer"));
             customer.setOfficePhone(request.getParameter("customerOfficePhone"));
 
-            //Office Address 
+            /*//Office Address 
             customer.setOfficeStreet(request.getParameter("customerOfficeStreet"));
             customer.setOfficeCity(request.getParameter("customerOfficeCity"));
             customer.setOfficeState(request.getParameter("customerOfficeState"));
             customer.setOfficeCountry(request.getParameter("customerOfficeCountry"));
-
+            */
             //Employer Address
             customer.setEmployerStreet(request.getParameter("customerEmployerStreet"));
             customer.setEmployerCity(request.getParameter("customerEmployerCity"));
@@ -507,7 +516,7 @@ public class CustomerController extends AppController {
                 doc.setPath("customers" + dir + "/" + saveName);
                 doc.setCreatedDate(getDateTime().getTime());
 
-                em.persist(doctype);
+                //em.persist(doctype);
                 em.persist(doc);
 
                 try
@@ -526,7 +535,7 @@ public class CustomerController extends AppController {
 
             Account account = new AccountManager().createCustomerAccount(customer);
             em.persist(account);
-            em.persist(customer);
+            //em.persist(customer);
             em.refresh(customer);
             customer.setAccount(account);
 
@@ -544,15 +553,17 @@ public class CustomerController extends AppController {
             OrderItemObjectsList saleItemObjectList = orderManager.getCartData(request.getParameter("cartDataJson").toString());
             Map<String ,String> requestParameters = getRequestParameters(request);
 
-            List<OrderItem> orderItem = orderManager.prepareOrderItem(saleItemObjectList, agent);
+            boolean isAdmin = sessionUser != null && sessionUser.getSystemUserTypeId() == 1;
+            
+            List<OrderItem> orderItem =  orderManager.prepareOrderItem(saleItemObjectList, agent , isAdmin);
             Lodgement lodgement = orderManager.prepareLodgement(requestParameters, agent);
             
             StringBuilder eMsg = new StringBuilder();
-            boolean valid = validateOrder(orderItem , lodgement , eMsg);
+            boolean valid = orderManager.validateOrder(orderItem , lodgement , eMsg);
             //Remove customer account if the Order is not valid
             if(!valid)
             {
-                errorMessages.put("error2", eMsg.toString());
+                errorMessages.put("error419", eMsg.toString());
                 em.getTransaction().rollback();
                 em.close();
                 emf.close();
@@ -675,7 +686,7 @@ public class CustomerController extends AppController {
             request.setAttribute("customer", customer);
             request.setAttribute("errors", errorMessages);
             request.setAttribute("projects", new ProjectController().listProjects());
-            request.setAttribute("userTypeId", userType);
+            request.setAttribute("userTypeId", sessionUser.getSystemUserTypeId());
             request.setAttribute("userType", sessionUser.getSystemUserId());
             request.setAttribute("agents", new AgentController().listAgents());
             request.setAttribute("action", "new");
@@ -1399,7 +1410,7 @@ public class CustomerController extends AppController {
                         {
                 "customerEmployer", "", "Customer Employer"
             },
-                        {
+             /*           {
                 "customerOfficePhone", "", "Customer Office Phone"
             },
                         {
@@ -1413,7 +1424,7 @@ public class CustomerController extends AppController {
             },
                         {
                 "customerOfficeCountry", "select", "Customer Office Country"
-            },
+            },*/
                         {
                 "customerEmployerStreet", "", "Customer Employer Street"
             },
@@ -1451,9 +1462,9 @@ public class CustomerController extends AppController {
                         {
                 "customerKinRelationship", "", "Customer Next Of Kin Relationship"
             },
-                        {
+                   /*     {
                 "customerKinEmail", "", "Customer Next Of Kin Email"
-            },
+            }, */
                         {
                 "customerKinPhone", "", "Customer Next Of Kin Phone Number"
             },
@@ -1649,7 +1660,7 @@ public class CustomerController extends AppController {
         for (LodgementItem LI : LItems)
         {
 
-            double rewardAmount = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            double rewardAmount = LI.getRewardAmount() ;
             total += LI.getAmount() + rewardAmount;
         }
 
@@ -2109,7 +2120,7 @@ public class CustomerController extends AppController {
         double total = 0;
         for (LodgementItem LI : LItems)
         {
-            double reward = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            double reward = LI.getRewardAmount() ;
             double amount = LI.getAmount() + reward;
 
             html += "<tr>";
@@ -2487,28 +2498,4 @@ public class CustomerController extends AppController {
         return "Short description";
     }// </editor-fold>
 
-   private boolean validateOrder(List<OrderItem> orderItems , Lodgement lodgement, StringBuilder errorMSG){
-      
-       //Validating if the initial payment specified by user is lesser that what is required
-       Double customerTotalInitialPayment = 0.0;
-       
-       for(OrderItem item : orderItems)
-       {
-          customerTotalInitialPayment += item.getInitialDep();
-          if(item.getInitialDep() < item.getUnit().getLeastInitDep())
-          {
-              errorMSG.append("One or more Order have an Invalid Initial deposit amount");
-              return false;
-          }
-       }
-       
-       if(lodgement.getAmount() < customerTotalInitialPayment)
-       {
-           errorMSG.append("The Lodgement Amount is invalid");
-           return false;
-       }
-       
-       
-      return true;
-  }
 }

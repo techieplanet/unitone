@@ -40,7 +40,7 @@ public class OrderItemHelper {
              if(item.getLodgement().getApprovalStatus() == 0)
                  continue;
             
-             double rewardPoint = item.getRewardAmount() != null ? item.getRewardAmount() : 0;
+             double rewardPoint = item.getRewardAmount() ;
             totalAmount += item.getAmount() + rewardPoint;
         }
 

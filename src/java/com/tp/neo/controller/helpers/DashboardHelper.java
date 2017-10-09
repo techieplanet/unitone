@@ -425,10 +425,10 @@ public class DashboardHelper {
         EntityManager em = emf.createEntityManager();
         
         String loyaltyQueryHook = "";
-        if( availablePlugins.containsKey("loyalty")) 
+        //if( availablePlugins.containsKey("loyalty")) 
             loyaltyQueryHook = "SUM(l.reward_amount) as rvalue ";
         
-        String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount) as lvalue, " +
+        String query = "SELECT COUNT(DISTINCT(l.lodgement_id)) as lcount, SUM(l.amount+ l.reward_amount) as lvalue, " +
                        "to_char(date_trunc('" + truncatedBy + "', l.modified_date),'" + truncationResultFormat + "') as grouper " +
                        (!loyaltyQueryHook.isEmpty()? ", " + loyaltyQueryHook : " "  )+ " " +
                        "FROM lodgement_item l " +
@@ -451,7 +451,8 @@ public class DashboardHelper {
             summaryMap.put("count", summary[0]);
             summaryMap.put("value", summary[1]);
             summaryMap.put("date", summary[2]);
-            if(availablePlugins.containsKey("loyalty")) summaryMap.put("loyalty_value", summary[3]);
+            //if(availablePlugins.containsKey("loyalty")) 
+                summaryMap.put("loyalty_value", summary[3]);
             summaryMapsList.add(summaryMap);
         }
         

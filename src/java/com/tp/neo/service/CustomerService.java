@@ -29,7 +29,8 @@ public class CustomerService {
         {
             if(l.getType() == 1)
                 loyaltyPoint += l.getRewardPoints();
-            else  
+            else if(l.getType() == 2 && l.getApprovalStatus() != 2)
+                //here we check if the loyalty is not declined
                 loyaltyPoint -= l.getRewardPoints();
         }
         

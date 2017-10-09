@@ -20,6 +20,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,7 +36,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "LodgementItem.findAll", query = "SELECT l FROM LodgementItem l"),
-    @NamedQuery(name = "LodgementItem.findTotalApprovedOrderSum", query = "SELECT COALESCE(sum(LI.amount),0) FROM LodgementItem LI JOIN LI.item oi where LI.approvalStatus = 1 AND oi.order.id = :orderId"),
+    @NamedQuery(name = "LodgementItem.findTotalApprovedOrderSum", query = "SELECT COALESCE(sum(LI.amount + LI.rewardAmount),0) FROM LodgementItem LI JOIN LI.item oi where LI.approvalStatus = 1 AND oi.order.id = :orderId"),
     @NamedQuery(name = "LodgementItem.findById", query = "SELECT l FROM LodgementItem l WHERE l.id = :id"),
     @NamedQuery(name = "LodgementItem.findByLodgment", query = "SELECT l FROM LodgementItem l WHERE l.lodgement = :lodgement"),
     @NamedQuery(name = "LodgementItem.findByAmount", query = "SELECT l FROM LodgementItem l WHERE l.amount = :amount"),
@@ -51,10 +52,12 @@ public class LodgementItem extends BaseModel {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-    @OneToMany(mappedBy = "itemId")
-    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
+    
+    @JoinColumn(name="loyalty_id", referencedColumnName = "id")
+    @OneToOne
+    private LoyaltyHistory loyaltyHistory;
     @Column(name = "reward_amount")
-    private Double rewardAmount;
+    private double rewardAmount;
     @Column(name = "approval_status")
     private Short approvalStatus;
 
@@ -66,7 +69,7 @@ public class LodgementItem extends BaseModel {
     private Long id;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "amount")
-    private Double amount;
+    private double amount;
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
@@ -95,7 +98,7 @@ public class LodgementItem extends BaseModel {
         this.id = id;
     }
 
-    public Double getAmount() {
+    public double getAmount() {
         return amount;
     }
 
@@ -184,7 +187,7 @@ public class LodgementItem extends BaseModel {
         this.approvalStatus = approvalStatus;
     }
 
-    public Double getRewardAmount() {
+    public double getRewardAmount() {
         return rewardAmount;
     }
 
@@ -192,13 +195,12 @@ public class LodgementItem extends BaseModel {
         this.rewardAmount = rewardAmount;
     }
 
-    @XmlTransient
-    public Collection<LoyaltyHistory> getLoyaltyHistoryCollection() {
-        return loyaltyHistoryCollection;
+    public LoyaltyHistory getLoyaltyHistory() {
+        return loyaltyHistory;
     }
 
-    public void setLoyaltyHistoryCollection(Collection<LoyaltyHistory> loyaltyHistoryCollection) {
-        this.loyaltyHistoryCollection = loyaltyHistoryCollection;
+    public void setLoyaltyHistory(LoyaltyHistory loyaltyHistory) {
+        this.loyaltyHistory = loyaltyHistory;
     }
 
     

@@ -191,7 +191,7 @@ public class PDFHelper {
         int count = 1;
         double total = 0;
         for (LodgementItem LI : LItems) {
-            double reward = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            double reward = LI.getRewardAmount();
             double amount = LI.getAmount() + reward;
 
             html += "<tr>";

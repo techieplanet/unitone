@@ -179,7 +179,7 @@ public class OrderController extends AppController {
         //HttpSession session = request.getSession();
         SystemUser user = sessionUser;
         //System.out.println("System User : " + user);
-        
+        request.setAttribute("userTypeId", sessionUser.getSystemUserTypeId());
         request.setAttribute("userType", sessionUser.getSystemUserTypeId());
         request.setAttribute("agents",agent.listAgents());
        
@@ -364,12 +364,13 @@ public class OrderController extends AppController {
             OrderItemObjectsList orderItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
            Map<String , String> requestParams = getRequestParameters(request);
             
+            boolean isAdmin = sessionUser != null && sessionUser.getSystemUserTypeId() == 1;
             
-            List<OrderItem> orderItems = orderManager.prepareOrderItem(orderItemObject, agent);
+            List<OrderItem> orderItems = orderManager.prepareOrderItem(orderItemObject, agent , isAdmin);
             Lodgement lodgement = orderManager.prepareLodgement(requestParams, agent);
             
             StringBuilder eMsg = new StringBuilder();
-            boolean valid = validateOrder(orderItems , lodgement , eMsg);
+            boolean valid = orderManager.validateOrder(orderItems , lodgement , eMsg);
             if(!valid)
             {
                 sendErrorMessage(request, response , eMsg.toString());
@@ -766,16 +767,14 @@ public class OrderController extends AppController {
                     customer = orderItem.getOrder().getCustomer();
                     
                     int quantity = orderItem.getQuantity();
-                    
-                    for(int x = 0 ; x < quantity ; x ++ )
-                    {
                     LoyaltyHistory lH = new LoyaltyHistory();
                     lH.setCustomerId(customer);
-                    lH.setRewardPoints(orderItem.getUnit().getRewardPoints());
+                    lH.setRewardPoints(orderItem.getUnit().getRewardPoints() * quantity);
                     lH.setType((short)1);
+                    lH.setUnit(orderItem.getUnit());
                     lH.setCreatedDate(date);
                     em.persist(lH);
-                    }
+                   
                 }
               
             }
@@ -955,7 +954,7 @@ public class OrderController extends AppController {
         double grandTotal = 0.00;
         
         for(LodgementItem LI : items){
-            double rewardAmount = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            double rewardAmount = LI.getRewardAmount();
             total += LI.getAmount() + rewardAmount;
         }
         
@@ -967,31 +966,6 @@ public class OrderController extends AppController {
         
         return map;
     }
-   
-   private boolean validateOrder(List<OrderItem> orderItems , Lodgement lodgement, StringBuilder errorMSG){
-      
-       //Validating if the initial payment specified by user is lesser that what is required
-       Double customerTotalInitialPayment = 0.0;
-       
-       for(OrderItem item : orderItems)
-       {
-          customerTotalInitialPayment += item.getInitialDep();
-          if(item.getInitialDep() < item.getUnit().getLeastInitDep())
-          {
-              errorMSG.append("One or more Order have an Invalid Initial deposit amount");
-              return false;
-          }
-       }
-       
-       if(lodgement.getAmount() < customerTotalInitialPayment)
-       {
-           errorMSG.append("The Lodgement Amount is invalid");
-           return false;
-       }
-       
-       
-      return true;
-  }
    
    private void sendErrorMessage(HttpServletRequest request, HttpServletResponse response , String msg) throws IOException{
        response.sendError(403, msg+ "---Go back <a href='" + request.getHeader("referer") + "'>Previous Page</a>");

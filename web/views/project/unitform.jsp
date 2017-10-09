@@ -69,7 +69,7 @@
             </div>
           </div>
           <div class="form-group marginbottom10 ">
-            <label for="cpu" class="col-sm-4 control-label">Selling Price*</label>
+            <label for="cpu" class="col-sm-4 control-label">Sales Proceeds*</label>
             <div class="col-sm-8">
                 <input type="text" name="cpu" id="cpu" class="col-sm-6 text-right" value="" onfocus="showElement('cpuFormat' , this.value)" onkeyup="formatAmount('cpuFormat' , this.value)">
                 <span id="cpuFormat" class=" col-sm-6 text-right" ></span>
@@ -208,11 +208,19 @@
             cpu = !isNaN(cpu) ? cpu : 0; 
             $("#cpu").val(cpu);
             
+             var serviceValue = parseFloat($("#service_value").val());
+            serviceValue = !isNaN(serviceValue) ? serviceValue : 0; 
+            $("#service_value").val(serviceValue);
+            
+            var cpAfterServiceValue = cpu - serviceValue;
+            
             var discount = parseFloat($("#discount").val());
             discount = !isNaN(discount) ? discount : 0; 
             $("#discount").val(discount);
             
-            var amt_payable = cpu - (discount/100*cpu);
+            var discountValue = cpAfterServiceValue * discount / 100;
+            
+            var amt_payable = cpu - discountValue;
             $("#amt_payable").val(amt_payable.toFixed(2));
             $("#amt_payableFormat").text("# "+ accounting.formatNumber(amt_payable , 2));
             
@@ -247,26 +255,36 @@
             cpu = !isNaN(cpu) ? cpu : 0; 
             $("#cpu").val(cpu);
             
+            var serviceValue = parseFloat($("#service_value").val());
+            serviceValue = !isNaN(serviceValue) ? serviceValue : 0; 
+            $("#service_value").val(serviceValue);
+            
+            var cpAfterServiceValue = cpu - serviceValue;
+            
             var discountPercentage = parseFloat($("#discount").val());
             discountPercentage = !isNaN(discountPercentage) ? discountPercentage : 0; 
             $("#discount").val(discountPercentage);
-            var discountValue = cpu * discountPercentage / 100;
+            var discountValue = cpAfterServiceValue * discountPercentage / 100;
             
             var buildingCost = parseFloat($("#building_cost").val());
             buildingCost = !isNaN(buildingCost) ? buildingCost : 0; 
             $("#building_cost").val(buildingCost);
             
-            var serviceValue = parseFloat($("#service_value").val());
-            serviceValue = !isNaN(serviceValue) ? serviceValue : 0; 
-            $("#service_value").val(serviceValue);
+            var VATPercentage = parseFloat($("#vatp").val());
+            VATPercentage = !isNaN(VATPercentage) ? VATPercentage : 0; 
+            $("#vatp").val(VATPercentage);
+            
+            var cpAfterServiceValueMinusDiscount = cpAfterServiceValue - discountValue;
+            
+            var VATValue = ((cpAfterServiceValueMinusDiscount) * VATPercentage / (100 + VATPercentage) );
+            
+            var cpAfterServiceValueMinusDiscountMinusVat = cpAfterServiceValueMinusDiscount - VATValue;
             
             var commissionPercentage = parseFloat($("#commp").val());
             commissionPercentage = !isNaN(commissionPercentage) ? commissionPercentage : 0; 
             $("#commp").val(commissionPercentage);
             
-            var VATPercentage = parseFloat($("#vatp").val());
-            VATPercentage = !isNaN(VATPercentage) ? VATPercentage : 0; 
-            $("#vatp").val(VATPercentage);
+            var commissionValue = ((cpAfterServiceValueMinusDiscountMinusVat) * commissionPercentage / 100);
             
             var AMPercentage = parseFloat($("#amp").val());
             AMPercentage = !isNaN(AMPercentage) ? AMPercentage : 0; 
@@ -276,18 +294,14 @@
             rewardPoints = !isNaN(rewardPoints) ? rewardPoints : 0; 
             $("#reward_points").val(rewardPoints);
             
-            //Vat should be calculated after deducting service value 
-            var realCost = cpu - (serviceValue +discountValue);
-            
-            var VATValue = ((costMinusServiceValue) * VATPercentage / (100 + VATPercentage) );
-            
+           
             //var AMValue = (cpu * AMPercentage / 100);
-            var commissionValue = ((costMinusServiceValue-VATValue) * commissionPercentage / 100);
+           
             //AMValue = (commissionValue * AMPercentage / 100);
             //commissionValue -= AMValue;
             
             
-           var income = cpu - (discountValue +buildingCost + serviceValue + commissionValue + VATValue) ;//- AMValue;
+           var income = cpu - (discountValue + serviceValue + VATValue + commissionValue ) ;//- AMValue;
            
             income = !isNaN(income) ? income : 0; 
             $("#income").val(income.toFixed(2));

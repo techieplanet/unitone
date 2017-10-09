@@ -37,7 +37,9 @@
             <th>Phone No</th>
             <th>Email</th>
             <th>State</th>
-            <th>Reward Point</th>
+           <c:if test="${sessionScope.availablePlugins.loyalty != null}">
+           <th>Reward Point</th>
+           </c:if>
             <th>Action</th>
 
           </tr>
@@ -54,7 +56,9 @@
                     <td class="customerPhone"><c:out value="${customer.phone}" /></td>
                     <td class="customerEmail"><c:out value="${customer.email}" /></td>
                     <td class="customerState"><c:out value="${customer.state}" /></td>
+                    <c:if test="${sessionScope.availablePlugins.loyalty != null}">
                     <td class="customerLoyaltyPoint" style="text-align:right">${customer.getRewardPoints()}</td>
+                    </c:if>
                     <td>
                         <input type="hidden" class="customerImg" value='<c:out value="/uploads/NeoForce/images/customers/${customer.photoPath}"></c:out>' />
                         <input type="hidden" class="agentImg" value='<c:out value="/uploads/NeoForce/images/agents/${customer.agent.photoPath}"></c:out>' />
@@ -105,7 +109,9 @@
                                  <span id="customerPhone"></span> <br />
                                  <span id="customerEmail"></span> <br />
                                  <span id="customerState"></span> <br />
+                                 <c:if test="${sessionScope.availablePlugins.loyalty != null}">
                                  <span>Reward point :</span> <span id="customerRewardPoint"></span> <br />
+                                 </c:if>
                              </div>
                          </div>
                          

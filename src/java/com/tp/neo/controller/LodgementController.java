@@ -23,6 +23,7 @@ import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.service.CustomerService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -261,7 +262,10 @@ public class LodgementController extends AppController {
         
         String action = request.getParameter("action");
         
-        if(action.equalsIgnoreCase("mortgage")){
+        if(super.hasActiveUserSession(request, response)){
+            //if(super.hasActionPermission(new Lodgement().getPermissionName(action), request, response)){
+              
+             if(action.equalsIgnoreCase("mortgage")){
              
              String viewFile = LODGEMENT_NEW;
              StringBuilder errMsg = new StringBuilder();
@@ -274,9 +278,14 @@ public class LodgementController extends AppController {
              {
                 response.sendError(403, errMsg + "---Go back <a href='" + request.getHeader("referer") + "'>Previous Page</a>");
              }
-         }
-        else{
-            processInsertRequest(request, response);
+               }
+           else{
+               processInsertRequest(request, response);
+              }
+            // }else{
+            //    super.errorPageHandler("forbidden", request, response);
+            //}
+            
         }
     }
 
@@ -472,15 +481,15 @@ public class LodgementController extends AppController {
             
             
             Map<String, String> map = new HashMap();
-            Double remainingAmt = (orderItem.getUnit().getAmountPayable() * orderItem.getQuantity()) - ((Double)orderItemDetail.get("totalPaid"));
+            Double remainingAmt = orderItem.getAmountPayable() - ((Double)orderItemDetail.get("totalPaid"));
             map.put("saleId",orderItem.getId().toString());
-            map.put("project", orderItem.getUnit().getProject().getName());
-            map.put("unitName", orderItem.getUnit().getTitle());
+            map.put("project", orderItem.getUnit().getProject().getName().replaceAll("'", "").replaceAll("\"", ""));
+            map.put("unitName", orderItem.getUnit().getTitle().replaceAll("'", "").replaceAll("\"", ""));
             map.put("unitQty",orderItem.getQuantity().toString());
             map.put("initialDeposit",orderItem.getInitialDep().toString());
             map.put("amountPayable", remainingAmt.toString());
             map.put("amountPaid", ((Double)orderItemDetail.get("totalPaid")).toString());
-            map.put("monthlyPay", ((Double)orderItem.getUnit().getMonthlyPay()).toString());
+            map.put("monthlyPay", ((Double)orderItem.getMontlyPayment()).toString());
             
             OrderItemsList.add(map);
         }
@@ -505,12 +514,11 @@ public class LodgementController extends AppController {
         
         for(LodgementItem lodgementItem : lodgementItemList){
             
-            totalPaid += lodgementItem.getAmount();
+            totalPaid += lodgementItem.getAmount()+lodgementItem.getRewardAmount();
         }
         
-        //Fixed Bug here 
-        //Formally was : double unitAmount = orderItem.getUnit().getAmountPayable() ;
-        double unitAmount = orderItem.getUnit().getAmountPayable() * orderItem.getQuantity();
+        
+        double unitAmount = orderItem.getAmountPayable();
         
         if(unitAmount <= totalPaid){
             isComplete = true;
@@ -675,7 +683,7 @@ public class LodgementController extends AppController {
             }
             double lodgementAmount = 0;
             double lodgementRewardAmount = 0;
-            
+            double totalRoyaltyUsed = 0;
             List<LodgementItem> lodgementItemList = new ArrayList();
             
             for(MorgageList morgageItem : morgageList){
@@ -696,7 +704,7 @@ public class LodgementController extends AppController {
                 lodgementAmount += morgageItem.getAmount();
                 
                 if(plugins.containsKey("loyalty")){
-                    
+                    totalRoyaltyUsed += morgageItem.getRewardPoint();
                     lodgementItem.setRewardAmount(morgageItem.getRewardPoint() * amountPerRewardPoint);
                     lodgementRewardAmount += (morgageItem.getRewardPoint() * amountPerRewardPoint);
                 }
@@ -711,13 +719,19 @@ public class LodgementController extends AppController {
                     customer = orderItem.getOrder().getCustomer();
                     order = orderItem.getOrder();
                 }
-                
+               
             }
-            
+            //lets now validate the royalty point;
+            double customerBalanceRewardPoint = CustomerService.getCustomerRewardPointBalance(customer);
             if(lodgement.getAmount() < lodgementAmount)
             {
                 errMsg.append("Invalid Lodgement Amount");
                 return false;
+            }
+            else if(plugins.containsKey("loyalty") && (totalRoyaltyUsed > customerBalanceRewardPoint))
+            {
+               errMsg.append("Total Royalty Being used is more than available");
+                return false; 
             }
             
             if(plugins.containsKey("loyalty")){
@@ -730,6 +744,8 @@ public class LodgementController extends AppController {
             
             lodgement.setCustomer(customer);
             LodgementManager lodgementManager = new LodgementManager(user);
+            lodgementManager.amountPerRewardPoint = amountPerRewardPoint;
+            lodgementManager.availablePlugins = plugins;
             lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath(), order);
             
             Map map = prepareMorgageInvoice(lodgement, lodgementItemList);
@@ -745,6 +761,7 @@ public class LodgementController extends AppController {
             
         } catch (RollbackException ex) {
             Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
         
         return true;

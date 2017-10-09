@@ -5,6 +5,7 @@
  */
 package com.tp.neo.model;
 
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -83,16 +84,32 @@ import javax.xml.bind.annotation.XmlTransient;
 
 public class OrderItem extends BaseModel {
 
+    @Column(name = "created_by")
+    private BigInteger createdBy;
+    @Column(name = "modified_by")
+    private BigInteger modifiedBy;
+    @Column(name = "amount_payable")
+    private Double amountPayable;
+    @Column(name = "cost_price")
+    private Double costPrice;
+    @Column(name = "reward_point")
+    private Double rewardPoint;
+    @Column(name = "montly_payment")
+    private Double montlyPayment;
+    @Column(name = "service_value")
+    private Double serviceValue;
+    @Column(name = "max_payment_duration")
+    private Integer maxPaymentDuration;
+
     @Column(name = "vat_percentage")
     private Double vatPercentage;
     @Column(name = "annual_maintenance_percentage")
     private Double annualMaintenancePercentage;
     
-    @Column(name = "created_by")
-    private Long createdBy;
-    @Column(name = "modified_by")
-    private Long modifiedBy;
 
+    @Column(name = "projectunit_discount_percentage")
+    private double projectUnitDiscountPercentage;
+    
     transient Double rewardAmount = 0.0;
     transient Integer rewardPoints = 0;
     
@@ -125,9 +142,9 @@ public class OrderItem extends BaseModel {
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "initial_dep")
     private Double initialDep;
-    @Column(name = "discount_percentage")
-    private Double discountAmt;
     @Column(name = "discount_amt")
+    private Double discountAmt;
+    @Column(name = "discount_percentage")
     private Double discountPercentage;
     @Column(name = "deleted")
     private Short deleted;
@@ -205,11 +222,11 @@ public class OrderItem extends BaseModel {
     }
 
     public Long getCreatedBy() {
-        return createdBy;
+        return createdBy.longValue();
     }
 
     public void setCreatedBy(Long createdBy) {
-        this.createdBy = createdBy;
+        this.createdBy = BigInteger.valueOf(createdBy);
     }
 
     public Date getModifiedDate() {
@@ -221,11 +238,11 @@ public class OrderItem extends BaseModel {
     }
 
     public Long getModifiedBy() {
-        return modifiedBy;
+        return modifiedBy.longValue();
     }
 
     public void setModifiedBy(Long modifiedBy) {
-        this.modifiedBy = modifiedBy;
+        this.modifiedBy = BigInteger.valueOf(modifiedBy);
     }
 
     public ProductOrder getOrder() {
@@ -364,7 +381,7 @@ public class OrderItem extends BaseModel {
         
         for(LodgementItem LI : LItems){
             
-            double rewardPoint = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            double rewardPoint = LI.getRewardAmount();
             total += (LI.getAmount() + rewardPoint);
         }
         
@@ -399,6 +416,77 @@ public class OrderItem extends BaseModel {
      */
     public void setAnnualMaintenancePercentage(Double annualMaintenancePercentage) {
         this.annualMaintenancePercentage = annualMaintenancePercentage;
+    }
+
+    public void setCreatedBy(BigInteger createdBy) {
+        this.createdBy = createdBy;
+    }
+
+
+    public void setModifiedBy(BigInteger modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Double getAmountPayable() {
+        return amountPayable;
+    }
+
+    public void setAmountPayable(Double amountPayable) {
+        this.amountPayable = amountPayable;
+    }
+
+    public Double getCostPrice() {
+        return costPrice;
+    }
+
+    public void setCostPrice(Double costPrice) {
+        this.costPrice = costPrice;
+    }
+
+    public Double getRewardPoint() {
+        return rewardPoint;
+    }
+
+    public void setRewardPoint(Double rewardPoint) {
+        this.rewardPoint = rewardPoint;
+    }
+
+    public Double getMontlyPayment() {
+        return montlyPayment;
+    }
+
+    public void setMontlyPayment(Double montlyPayment) {
+        this.montlyPayment = montlyPayment;
+    }
+
+    public Double getServiceValue() {
+        return serviceValue;
+    }
+
+    public void setServiceValue(Double serviceValue) {
+        this.serviceValue = serviceValue;
+    }
+
+    public Integer getMaxPaymentDuration() {
+        return maxPaymentDuration;
+    }
+
+    public void setMaxPaymentDuration(Integer maxPaymentDuration) {
+        this.maxPaymentDuration = maxPaymentDuration;
+    }
+
+    /**
+     * @return the projectUnitDiscountPercentage
+     */
+    public double getProjectUnitDiscountPercentage() {
+        return projectUnitDiscountPercentage;
+    }
+
+    /**
+     * @param projectUnitDiscountPercentage the projectUnitDiscountPercentage to set
+     */
+    public void setProjectUnitDiscountPercentage(double projectUnitDiscountPercentage) {
+        this.projectUnitDiscountPercentage = projectUnitDiscountPercentage;
     }
 
 }

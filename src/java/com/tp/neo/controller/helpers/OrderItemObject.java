@@ -22,7 +22,7 @@ public class OrderItemObject {
     public String productUnitName;
     public int productUnitId;
     public int productQuantity;
-    public float productAmount;
+    public double productAmount;
     public float amountUnit;
     public float amountTotalUnit;
     public float initialAmountPerUnit;
@@ -38,6 +38,7 @@ public class OrderItemObject {
     public Double commp ;
     public int dayOfNotification;
     public double rewardPoint;
+    public double discountPercent;
 
     
 

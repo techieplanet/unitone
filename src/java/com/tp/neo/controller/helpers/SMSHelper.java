@@ -21,11 +21,13 @@ import java.util.List;
  */
 public class SMSHelper {
     
+    boolean SMSEnabled = false;
     /*********************************** AGENT ***********************************/
     /*
     This method sends approval or decline SMS for agents
     */
     protected void sendAgentApprovalSMS(Agent agent, int status) {
+        if(!SMSEnabled) return;
         //send email 
         String approvalMessage = "Dear %s, your registration as an agent has been approved. You may now login on our site. Thank you";
         String declineMessage = "Dear %s, unfortunately your registration as an agent could not be approved.";
@@ -44,6 +46,7 @@ public class SMSHelper {
     }
     
     protected void sendAgentWalletCreditAlert(Customer customer, ProjectUnit unit, double amount){
+        if(!SMSEnabled) return;
         String phone ="";
         String message =   "Acct: " + customer.getAgent().getAccount().getAccountCode() 
                       + "Wallet credit " + String.format("%.2f", amount)
@@ -66,6 +69,7 @@ public class SMSHelper {
 
 
     protected void sendNewOrderSMSToCustomer(Lodgement lodgement, Customer customer){
+        if(!SMSEnabled) return;
         String phone ="";
         String message =   "New Order of value " + lodgement.getAmount() + " has been received and is being processed."
                             + "Customer: " + customer.getFirstname() + " " + customer.getLastname();
@@ -77,7 +81,8 @@ public class SMSHelper {
     }
     
     protected void sendNewOrderSMSToAgent(Lodgement lodgement, Customer customer){
-            String phone ="";
+        if(!SMSEnabled) return;    
+        String phone ="";
             String message =   "Acct: " + customer.getAgent().getAccount().getAccountCode()
                                + "New Order of value " + lodgement.getAmount() + " has been received and is being processed."
                                + "Customer: " + customer.getFirstname() + " " + customer.getLastname();
@@ -96,6 +101,7 @@ public class SMSHelper {
     
     /************** ORDER APPROVALS *******************/
     protected void sendOrderApprovalSMSToCustomer(Customer customer, ProjectUnit unit, double amount){
+        if(!SMSEnabled) return;
         String phone = "";
         String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
                       + "Order approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
@@ -110,6 +116,7 @@ public class SMSHelper {
     }
     
     protected void sendOrderApprovalSMSToAgent(Customer customer, ProjectUnit unit, double amount){
+        if(!SMSEnabled) return;
         String phone ="";
         String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
                       + "Order approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
@@ -132,6 +139,7 @@ public class SMSHelper {
     
     /*********************************** LODGEMENT ***********************************/
     protected void sendNewLodgementSMSToCustomer(Lodgement lodgement, Customer customer){
+        if(!SMSEnabled) return;
         String phone ="";
         String message =   "Acct: " + customer.getAccount().getAccountCode()
                                     + "Lodgement of " + lodgement.getAmount() + " has been received and is awaiting processing.";
@@ -143,7 +151,8 @@ public class SMSHelper {
     }
     
     protected void sendNewLodgementEmailToAgent(Lodgement lodgement, Customer customer){
-            String phone ="";
+        if(!SMSEnabled) return;    
+        String phone ="";
             String message =   "Acct: " + customer.getAgent().getAccount().getAccountCode()
                           + "Lodgement received for customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
                           + "Amount: " + lodgement.getAmount();
@@ -161,6 +170,8 @@ public class SMSHelper {
     
     /************** LODGEMENT APPROVALS *******************/
     protected void sendLodgementApprovalSMSToCustomer(Customer customer, ProjectUnit unit, double amount){
+        
+        if(!SMSEnabled) return;
         String phone = "";
         String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
                       + "Lodgement approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
@@ -175,6 +186,7 @@ public class SMSHelper {
     }
     
     protected void sendLodgementApprovalSMSToAgent(Customer customer, ProjectUnit unit, double amount){
+        if(!SMSEnabled) return;
         String phone ="";
         String message =   "Customer: " + customer.getFirstname() + " " + customer.getLastname() + customer.getAccount().getAccountCode() + ","
                       + "Lodgement approval: " + unit.getTitle() + " (" + unit.getProject().getName() + ") " 
@@ -192,6 +204,7 @@ public class SMSHelper {
     
     /************** LODGEMENT DECLINES *******************/
     protected void sendLodgementDeclineSMSToCustomer(Customer customer, Lodgement lodgement, double amount){
+        if(!SMSEnabled) return;
         String phone = "";
         String message =   "Acct: " + customer.getAccount().getAccountCode() + ","
                       + "Lodgement decline: " + lodgement.getAmount() + " on " + lodgement.getCreatedDate() + ". " 
@@ -205,6 +218,7 @@ public class SMSHelper {
     }
     
     protected void sendLodgementDeclineSMSToAgent(Customer customer, Lodgement lodgement, double amount){
+        if(!SMSEnabled) return;
         String phone ="";
         String message =   "Customer: " + customer.getFirstname() + " " + customer.getLastname() + customer.getAccount().getAccountCode() + ","
                       + "Lodgement decline: " + lodgement.getAmount() + " on " + lodgement.getCreatedDate() + ". " 
@@ -222,6 +236,7 @@ public class SMSHelper {
     
     /************************************  WITHDRAWAL ********************************/
     protected void sendWithdrawalRequestEmailToAgent(Withdrawal w){
+        if(!SMSEnabled) return;
         String phone = "";
         String message =   "Acct: " + w.getAgent().getFirstname() + " " + w.getAgent().getLastname() + " (" + w.getAgent().getAccount().getAccountCode() + "),"
                       + "Withdrawal request received and processing"
@@ -238,6 +253,7 @@ public class SMSHelper {
     
     /************************** REMINDER ALERT ****************************************/
     protected void sendReminderAlert(List customerAndItemsList, int dueDays){
+        if(!SMSEnabled) return;
         String orderItemsString = ""; String phone="";
         for(Object customerAndItems : customerAndItemsList){
             HashMap customerAndItemsMap = (HashMap) customerAndItems;

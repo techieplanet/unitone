@@ -18,7 +18,7 @@
                   <i class="fa fa-cart-plus"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" class="small-box-footer">${debtorsCount} customers <i class="fa fa-angle-double-right"></i></a>
+                <a href="" class="small-box-footer">${debtorsCount} orders <i class="fa fa-angle-double-right"></i></a>
               </div>
             </div><!-- ./col -->
             
@@ -33,7 +33,7 @@
                   <i class="fa fa-cart-plus"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" class="small-box-footer">${outstandersCount} customers <i class="fa fa-angle-double-right"></i></a>
+                <a href="" class="small-box-footer">${outstandersCount} orders <i class="fa fa-angle-double-right"></i></a>
               </div>
             </div><!-- ./col -->
             
