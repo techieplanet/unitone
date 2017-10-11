@@ -25,6 +25,7 @@ import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.utils.FileUploader;
+import com.tp.neo.service.CountryService;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
@@ -124,6 +125,7 @@ public class OrderController extends AppController {
                 
                String viewFile = "/views/index/checkout.jsp";
                request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
+               request.setAttribute("countries", CountryService.getCountryList());
                request.getRequestDispatcher(viewFile).forward(request, response);
                return;
         }
@@ -897,12 +899,12 @@ public class OrderController extends AppController {
            map.put("id", item.getId().toString());
            map.put("quantity", item.getQuantity().toString());
            map.put("initialDeposit", String.format("%.2f",item.getInitialDep()));
-           map.put("cpu", String.format("%.2f",item.getUnit().getCpu()));
+           map.put("cpu", String.format("%.2f",item.getCostPrice()));
            map.put("title", item.getUnit().getTitle());
-           map.put("discount", itemHelper.getOrderItemDiscount(item.getUnit().getDiscount(), item.getUnit().getCpu(), item.getQuantity()));
+           map.put("discount",  String.format("%.2f" ,item.getDiscountAmt()));
            map.put("total_paid", String.format("%.2f",total_paid));
            map.put("project_name", item.getUnit().getProject().getName());
-           map.put("balance",itemHelper.getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
+           map.put("balance",itemHelper.getOrderItemBalance(item.getAmountPayable(),  total_paid));
            map.put("completionDate",itemHelper.getCompletionDate(item, total_paid));
            
            orderItemMap.add(map);

@@ -125,9 +125,14 @@ public class OrderManager {
         
         order.setAgent(agentId);
         order.setCustomer(customerId);
+        if(sessionUser != null)
         order.setCreatorUserType(sessionUser.getSystemUserTypeId());
+        else
+        order.setCreatorUserType(3);//Customer is registering 
+        
         order.setApprovalStatus((short)0);
         order.setMortgageStatus((short)0);
+        if(sessionUser != null)
         new TrailableManager(order).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
         em.persist(order);
@@ -150,6 +155,7 @@ public class OrderManager {
     private OrderItem createOrderItem(OrderItem orderItem, ProductOrder order) throws PropertyException, RollbackException{
             orderItem.setOrder(order);
             orderItem.setApprovalStatus((short)0);
+            if(sessionUser != null)
             new TrailableManager(orderItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
             
             em.persist(orderItem);

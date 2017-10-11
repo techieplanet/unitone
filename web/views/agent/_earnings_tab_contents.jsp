@@ -41,6 +41,12 @@
         <th class="text-center">Debit</th>
         <th class="text-center">Credit</th>
       </tr>
+       <tr>
+        <th class="text-center"> </th>
+         <th class="text-center"><b>Total</b></th>
+         <th class="text-center"><fmt:formatNumber value="${totalDebit}" type="currency" currencySymbol="N" /></th>
+         <th class="text-center"><fmt:formatNumber value="${totalCredit}" type="currency" currencySymbol="N" /></th>
+          </tr>
     </tfoot>
   </table>
 

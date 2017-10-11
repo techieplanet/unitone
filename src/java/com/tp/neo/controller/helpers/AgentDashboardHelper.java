@@ -431,15 +431,20 @@ public class AgentDashboardHelper {
     }
     
     
-    public double getMyOrdersValue(Long agentId){
-        double myOrdersValue = (double)em.createNamedQuery("Agent.findMyTotalLodgements")
+    public double getMyPaymentValue(Long agentId){
+        double myPaymentValue = (double)em.createNamedQuery("Agent.findMyTotalLodgements")
                                                         .setParameter("item_aps", 1)
                                                         .setParameter("aps", 1)
                                                         .setParameter("agentId", agentId)
                                                         .getSingleResult();
-        return myOrdersValue;
+        return myPaymentValue;
     }
     
+    
+    public double getTotalOrderValue(Long agentId){
+        double totalOrderSum = (double)em.createNamedQuery("Agent.getTotalOrderSum").setParameter("agentId" , agentId).getSingleResult();
+        return totalOrderSum;
+    }
     
     public static  void main(String[] args){
          

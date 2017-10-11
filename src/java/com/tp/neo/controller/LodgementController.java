@@ -28,6 +28,7 @@ import com.tp.neo.service.CustomerService;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -173,6 +174,11 @@ public class LodgementController extends AppController {
          else if(action.equalsIgnoreCase("lodgmentItems")){
              
              getLodgmentItemCollection(request, response);
+             return;
+         }
+         else if(action.equalsIgnoreCase("lodgmentItem")){
+             
+             getLodgmentItem(request, response);
              return;
          }
          else if(action.equalsIgnoreCase("list_approved")){
@@ -888,6 +894,34 @@ public class LodgementController extends AppController {
         Gson gson = new GsonBuilder().create();
         
         String jsonString = gson.toJson(mapList);
+        
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonString);
+        response.getWriter().flush();
+        response.getWriter().close();
+    }
+    
+    private void getLodgmentItem(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long lodgmentitem_id = Long.parseLong(request.getParameter("lodgementitem_id"));
+        
+        LodgementItem l = em.find(LodgementItem.class, lodgmentitem_id);
+        
+       
+            Map<String,String> map = new HashMap();
+            
+            map.put("project", l.getItem().getUnit().getProject().getName());
+            map.put("unit", l.getItem().getUnit().getTitle());
+            map.put("amount", String.format("%.2f",l.getAmount()));
+            map.put("date", new SimpleDateFormat("EEE, d MMM yyyy").format(l.getCreatedDate()));
+      
+        Gson gson = new GsonBuilder().create();
+        
+        String jsonString = gson.toJson(map);
         
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");

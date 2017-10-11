@@ -76,9 +76,9 @@
                                     </c:if>
                                     
                                      <c:if test="${sessionScope.user.getSystemUserTypeId() <= 2}">
-                                        <a class="btn btn-primary btn-xs" href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${customer.customerId}" role="button" title="View ${customer.firstname} profile"><i class="fa fa-user"></i> </a>
-                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button" title="View ${customer.firstname} orders"><i class="fa fa-cart-plus"></i> </a>
-                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button" title="View ${customer.firstname} lodgements"><i class="fa fa-dollar"></i> </a>
+                                        <a class="btn btn-primary btn-xs" href="${pageContext.request.contextPath}/Customer?action=profile&customerId=${customer.customerId}" role="button" title="View ${customer.firstname}'s profile"><i class="fa fa-user"></i> </a>
+                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerOrders('${customer.customerId}',event)" role="button" title="View ${customer.firstname}'s orders"><i class="fa fa-cart-plus"></i> </a>
+                                        <a class="btn btn-success btn-xs" href="#" onclick="customer.getCustomerLodgements('${customer.customerId}',event)" role="button" title="View ${customer.firstname}'s lodgements"><i class="fa fa-dollar"></i> </a>
                                      </c:if>
                                      
                                      <c:if test="${sessionScope.user.getSystemUserTypeId() == 1}"> 
@@ -334,7 +334,7 @@
                       table += "<th> # </th>";
                       table += "<th> Project Name </th>";
                       table += "<th> Unit Name </th>";
-                      table += "<th> Cost per unit </th>";
+                      table += "<th> Cost</th>";
                       table += "<th> Qty </th>";
                       table += "</tr>";
                       table += "</thead>";

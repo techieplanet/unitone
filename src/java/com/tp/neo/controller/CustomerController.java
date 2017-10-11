@@ -20,6 +20,7 @@ import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.AgentProspect;
+import com.tp.neo.model.Bank;
 import com.tp.neo.model.Company;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.CustomerAgent;
@@ -33,6 +34,7 @@ import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.utils.AuthManager;
 import com.tp.neo.model.utils.FileUploader;
 import com.tp.neo.model.utils.TrailableManager;
+import com.tp.neo.service.BankService;
 import com.tp.neo.service.CountryService;
 import com.tp.neo.service.DocumentService;
 import java.io.File;
@@ -293,7 +295,7 @@ public class CustomerController extends AppController {
         String requestFrom = request.getAttribute("from") != null ? request.getAttribute("from").toString() : "";
 
         final SystemUser user = sessionUser;
-
+        request.setAttribute("Banks", BankService.getAllBanks());
         try
         {
 
@@ -316,20 +318,19 @@ public class CustomerController extends AppController {
 
             if (requestFrom.equalsIgnoreCase("customerRegistrationController"))
             {
-
                 //Assign default companies Agent to the customer
-                Query query = em.createNamedQuery("Agent.findByFullname");
-                query.setParameter("firstname", "company");
-                query.setParameter("lastname", "company");
-                agent = (Agent) query.getSingleResult();
+                
+                agent = em.find(Agent.class, 1L);
+                sessionUser = customer;
             }
             else if (user.getSystemUserTypeId() == 2)
-            { //agent
+            { 
+                //agent
                 agent = em.find(Agent.class, user.getSystemUserId());
             }
             else
             {
-                try{
+             try{
                     long agentId = Long.parseLong(request.getParameter("agent_id"));
                     agent = em.find(Agent.class, agentId);
                 }
@@ -406,11 +407,13 @@ public class CustomerController extends AppController {
             customer.setKinRelationship(request.getParameter("customerKinRelationship"));
             customer.setKinEmail(request.getParameter("customerKinEmail"));
 
+            Bank bank = em.find(Bank.class, Integer.parseInt(request.getParameter("customerBanker")));
             //Banker Information
-            customer.setBanker(request.getParameter("customerBanker"));
+            customer.setBanker(bank);
             customer.setAccountName(request.getParameter("customerAccountName"));
             customer.setAccountNumber(request.getParameter("customerAccountNumber"));
-
+            
+            
             if (requestFrom.equalsIgnoreCase("customerRegistrationController"))
             {
                 //Assign default created by user
@@ -686,8 +689,10 @@ public class CustomerController extends AppController {
             request.setAttribute("customer", customer);
             request.setAttribute("errors", errorMessages);
             request.setAttribute("projects", new ProjectController().listProjects());
+            if(sessionUser != null){
             request.setAttribute("userTypeId", sessionUser.getSystemUserTypeId());
             request.setAttribute("userType", sessionUser.getSystemUserId());
+            }
             request.setAttribute("agents", new AgentController().listAgents());
             request.setAttribute("action", "new");
             request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
@@ -718,6 +723,7 @@ public class CustomerController extends AppController {
             request.setAttribute("errors", errorMessages);
             request.setAttribute("projects", new ProjectController().listProjects());
             request.setAttribute("userTypeId", userType);
+            if(sessionUser != null)
             request.setAttribute("userType", sessionUser.getSystemUserId());
             request.setAttribute("agents", new AgentController().listAgents());
             request.setAttribute("action", "new");
@@ -810,9 +816,11 @@ public class CustomerController extends AppController {
             customer.setKinAddress(request.getParameter("customerKinAddress"));
             customer.setKinRelationship(request.getParameter("customerKinRelationship"));
             customer.setKinEmail(request.getParameter("customerKinEmail"));
-
+            
+            
+            Bank bank = em.find(Bank.class, Integer.parseInt(request.getParameter("customerBanker")));
             //Banker Information
-            customer.setBanker(request.getParameter("customerBanker"));
+            customer.setBanker(bank);
             customer.setAccountName(request.getParameter("customerAccountName"));
             customer.setAccountNumber(request.getParameter("customerAccountNumber"));
 
@@ -1055,7 +1063,8 @@ public class CustomerController extends AppController {
             request.setAttribute("sideNav", "Customer");
             request.setAttribute("sideNavAction", action);
             request.setAttribute("countries", CountryService.getCountryList());
-
+            request.setAttribute("Banks", BankService.getAllBanks());
+            
             RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
             dispatcher.forward(request, response);
 
@@ -1386,9 +1395,9 @@ public class CustomerController extends AppController {
                         {
                 "customerFirstname", "", "Customer First Name"
             },
-                        {
+                 /*       {
                 "customerMiddlename", "", "Customer Middle Name"
-            },
+            },*/
                         {
                 "customerLastname", "", "Customer Last Name"
             },
@@ -1410,10 +1419,10 @@ public class CustomerController extends AppController {
                         {
                 "customerEmployer", "", "Customer Employer"
             },
-             /*           {
+                      {
                 "customerOfficePhone", "", "Customer Office Phone"
             },
-                        {
+           /*             {
                 "customerOfficeStreet", "", "Customer Office Street"
             },
                         {
@@ -1472,7 +1481,7 @@ public class CustomerController extends AppController {
                 "customerKinAddress", "", "Customer  Next Of Kin Address"
             },
                         {
-                "customerBanker", "", "Customer Banker"
+                "customerBanker", "select", "Customer Banker"
             },
                         {
                 "customerAccountName", "", "Customer Account Name"
@@ -1948,14 +1957,14 @@ public class CustomerController extends AppController {
                     map.put("initialDeposit", String.format("%.2f", item.getInitialDep()));
                     map.put("cpu", String.format("%.2f", item.getUnit().getCpu()));
                     map.put("title", item.getUnit().getTitle());
-                    map.put("discount", itemHelper.getOrderItemDiscount(item.getUnit().getDiscount(), item.getUnit().getCpu(), item.getQuantity()));
+                    map.put("discount", String.format("%.2f",item.getDiscountAmt()));
                     map.put("total_paid", String.format("%.2f", total_paid));
                     map.put("project_name", item.getUnit().getProject().getName());
-                    map.put("balance", itemHelper.getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
+                    map.put("balance", itemHelper.getOrderItemBalance(item.getAmountPayable(),  total_paid));
                     map.put("completionDate", itemHelper.getCompletionDate(item, total_paid));
                     map.put("paymentStage", itemHelper.getPaymentStage(item, total_paid));
-                    map.put("advance", String.format("%.2f", ((total_paid - item.getInitialDep()) % item.getUnit().getMonthlyPay())));
-                    map.put("monthly", String.format("%.2f", (item.getUnit().getMonthlyPay())));
+                    map.put("advance", String.format("%.2f", ((total_paid - item.getInitialDep()) % item.getMontlyPayment())));
+                    map.put("monthly", String.format("%.2f", (item.getMontlyPayment())));
 
                     Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
                     cal.setTime(item.getCreatedDate());
@@ -2208,7 +2217,7 @@ public class CustomerController extends AppController {
                 map.put("project_name", item.getUnit().getProject().getName());
                 map.put("unit_name", item.getUnit().getTitle());
                 map.put("qty", item.getQuantity().toString());
-                map.put("cpu", String.format("%.2f", item.getUnit().getAmountPayable()));
+                map.put("cpu", String.format("%.2f", item.getAmountPayable()));
 
                 itemMapList.add(map);
             }

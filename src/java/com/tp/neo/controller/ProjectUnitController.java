@@ -96,13 +96,18 @@ public class ProjectUnitController extends AppController {
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
         
-            if(super.hasActiveUserSession(request, response)){
+        if(action.equalsIgnoreCase("edit"))
+        {
+            processGetRequest(request, response);
+        }
+          else  if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new ProjectUnit().getPermissionName(action), request, response)){
-                processGetRequest(request, response);
+                if(action.equalsIgnoreCase("delete")){
+                 delete(Long.parseLong(request.getParameter("id")));
+                 }
             }else{
                 super.errorPageHandler("forbidden", request, response);
             }
-            
         }
     }
 
@@ -118,12 +123,8 @@ public class ProjectUnitController extends AppController {
 //        if (action.equalsIgnoreCase("new")){
 //               viewFile = PROJECTS_NEW;
 //        }
-        if(action.equalsIgnoreCase("delete")){
-            delete(Long.parseLong(request.getParameter("id")));
-        }
-
-
-        else if(action.equalsIgnoreCase("edit")){            
+        
+         if(action.equalsIgnoreCase("edit")){            
             long id = (Long.parseLong(request.getParameter("id")));
             Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
             ProjectUnit projectUnit = (ProjectUnit)query.getSingleResult();

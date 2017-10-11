@@ -580,6 +580,7 @@ public class ProjectController extends AppController {
         
         long project_id = 0;
         
+        if(unitIds != null)
         for(String id : unitIds){
             
             ProjectUnit unit = em.find(ProjectUnit.class, Long.parseLong(id));
@@ -596,9 +597,9 @@ public class ProjectController extends AppController {
         
         
         if(loggedIn.equalsIgnoreCase("no")){
-            AppController.doRedirection(request, response, "Project?action=listunits&project_id="+project_id+"&loggedin=no");
+            AppController.doRedirection(request, response, "/Project?action=listunits&project_id="+project_id+"&loggedin=no");
         }else{
-            AppController.doRedirection(request, response, "Project?action=listunits&project_id="+project_id);
+            AppController.doRedirection(request, response, "/Project?action=listunits&project_id="+project_id);
         }
             
     }

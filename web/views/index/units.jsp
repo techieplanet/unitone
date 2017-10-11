@@ -51,6 +51,11 @@
                           <div class="caption text-center">
                             <h4>${unit.getTitle()}</h4>
                             <span><fmt:formatNumber value="${unit.getCpu()}" type="currency" currencySymbol="N" /></span><br />
+                            
+                            <c:choose>
+                            <c:when test="${unit.getMaxPaymentDuration() != 0}"><span>Payment Duration : <b>${unit.getMaxPaymentDuration()} Month</b> </span><br/></c:when>
+                            <c:otherwise><span>Payment Duration : <b>Outright</b> </span><br/></c:otherwise>
+                             </c:choose>
                             <span>In Stock : ${unit.getQuantity()}</span> 
                             <p class="text-center">
                                 <input type="checkbox"  class="unit_check" name="unit_id" value="${unit.getId()}" autocomplete="off"

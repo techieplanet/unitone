@@ -274,10 +274,12 @@ public class DashboardController extends AppController {
                 List<ProductOrder> myOrders = helper.getMyOrders(agentId);
                 request.setAttribute("orderCount", myOrders.size());
                 
-                request.setAttribute("ordersValue", String.format("%,.2f",helper.getMyOrdersValue(agentId)));  
+                double paymentValue = helper.getMyPaymentValue(agentId);
+                request.setAttribute("paymentValue", String.format("%,.2f",paymentValue));  
                 //request.setAttribute("processingOrders", em.createNamedQuery("ProductOrder.findByApprovalStatus").setParameter("approvalStatus", 1).getResultList().size());  
                 //request.setAttribute("customersPerAgent", String.format("%.2f", agentCount == 0 ? 0 : (float)customerCount/agentCount));  
-                
+                //total order value = totalpayment + totalOutstanding + totalReceivable;
+                request.setAttribute("totalOrderValue" , String.format("%,.2f", helper.getTotalOrderValue(agentId)));
                 RequestDispatcher dispatcher = request.getRequestDispatcher(viewFile);
                 dispatcher.forward(request, response);
             }

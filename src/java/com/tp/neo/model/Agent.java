@@ -104,7 +104,10 @@ import javax.xml.bind.annotation.XmlTransient;
     
     @NamedQuery(name = "Agent.findNetwork", query = "SELECT a FROM Agent a WHERE a.referrerId = :agentId"),
     @NamedQuery(name = "Agent.findALLCorporate", query = "SELECT a FROM Agent a WHERE a.corporate = true"),
-    @NamedQuery(name = "Agent.findALLIndividual", query = "SELECT a FROM Agent a WHERE a.corporate = false")
+    @NamedQuery(name = "Agent.findALLIndividual", query = "SELECT a FROM Agent a WHERE a.corporate = false"),
+    @NamedQuery(name = "Agent.getTotalOrderSum", query = "SELECT SUM(i.amountPayable) FROM Agent a "
+                        + "LEFT JOIN ProductOrder o on o.agent = a  "
+                        + "LEFT JOIN OrderItem i on  i.order = o WHERE a.agentId = :agentId and i.approvalStatus = 1")
 
 })
 

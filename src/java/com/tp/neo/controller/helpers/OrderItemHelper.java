@@ -18,6 +18,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import java.time.*;
 
 /**
  *
@@ -47,9 +48,9 @@ public class OrderItemHelper {
         return totalAmount;
     }
 
-    public String getOrderItemBalance(double amtPayable, int qty, double amountPaid) {
+    public String getOrderItemBalance(double amtPayable,  double amountPaid) {
 
-        String amt = String.format("%.2f", (Double) ((amtPayable * qty) - amountPaid));
+        String amt = String.format("%.2f", (Double) (amtPayable  - amountPaid));
         return amt;
     }
     
@@ -59,19 +60,41 @@ public class OrderItemHelper {
         return amt;
     }
 
-    public String getOrderItemDiscount(double discountPercent, double cpu, int qty) {
+    public String getOrderItemDiscount(OrderItem item) {
 
-        String amt = String.format("%.2f", (Double) ((discountPercent / 100) * (cpu * qty)));
-        return amt;
+        //double discountPercentage = item.getDiscountPercentage();
+       // String amt = String.format("%.2f", (Double) ((discountPercent / 100) * (cpu * qty)));
+        return item.getDiscountAmt().toString();
     }
 
     public String getCompletionDate(OrderItem item, double total_paid) {
 
+        Date approvalDate = item.getModifiedDate();
+        if(approvalDate == null)
+        {
+            //Order have not been approved yet
+            return "Processing";
+        }
+        
+        else if(item.getOrder().getMortgageStatus() == 2)
+        {
+            return "completed";
+        }
+        
+        int maxPayDuration = item.getMaxPaymentDuration();
+        LocalDate date =
+        Instant.ofEpochMilli(approvalDate.getTime())
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate();
+        date = date.plusMonths(maxPayDuration);
+        
+        
+        /*
         //Get monthly Pay
-        double mortgage = item.getUnit().getMonthlyPay();
-        double balance = Double.parseDouble(getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
+        double mortgage = item.getMontlyPayment();
+        double balance = Double.parseDouble(getOrderItemBalance(item.getAmountPayable(), total_paid));
         int qty = item.getQuantity();
-
+        
         double months = Math.ceil(balance / (mortgage * qty));
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Africa/Lagos"));
 
@@ -90,8 +113,8 @@ public class OrderItemHelper {
         }
 
         //System.out.println("Month = " + (int) months);
-
-        return date;
+        */
+        return date.toString();
     }
 
     /**

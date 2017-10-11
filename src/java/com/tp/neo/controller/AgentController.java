@@ -307,6 +307,8 @@ public class AgentController extends AppController {
             request.setAttribute("refAgent", em.find(Agent.class, agent.getReferrerId()));
             request.setAttribute("documents", DocumentService.getAgentDocuments(id));
             request.setAttribute("documentDir", imageAccessDirPath+"/");
+            request.setAttribute("totalDebit",historymap.get("totalDebit"));
+            request.setAttribute("totalCredit",historymap.get("totalCredit"));        
             
              if(agent.isCorporate())
             {
@@ -2316,7 +2318,7 @@ public class AgentController extends AppController {
         List<Map> transactionMapList = new ArrayList();
         
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
-        
+        double totalCredit = 0 , totalDebit = 0 ;
         for(Transaction t : transactionList){
             
             Map<String, String> map = new HashMap();
@@ -2325,9 +2327,11 @@ public class AgentController extends AppController {
             map.put("date", sdf.format(t.getTransactionDate()));
             if(t.getCreditAccount().getAccountCode().equalsIgnoreCase(acctCode)){
                 map.put("type", "credit");
+                totalCredit += t.getAmount();
             }
             else{
                 map.put("type", "debit");
+                totalDebit += t.getAmount();
             }
             
             transactionMapList.add(map);
@@ -2342,6 +2346,8 @@ public class AgentController extends AppController {
         Map historyMap = new HashMap<String, Object>();
         historyMap.put("transactionMapsList", transactionMapList);
         historyMap.put("agentDetails", agentDetails);
+        historyMap.put("totalCredit" ,  totalCredit);
+        historyMap.put("totalDebit" , totalDebit);
         
         return historyMap;
     }
@@ -2369,6 +2375,7 @@ public class AgentController extends AppController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
         
         Double balance = 0.0;
+        Double totalCredit = 0.0 , totalDebit  = 0.0;
         
         for(Transaction t : transactionList){
             
@@ -2379,23 +2386,27 @@ public class AgentController extends AppController {
             if(t.getCreditAccount().getAccountCode().equalsIgnoreCase(acctCode)){
                 map.put("type", "Credit");
                 balance += t.getAmount();
+                totalCredit += t.getAmount();
                 map.put("accbalance" , String.format("%.2f", balance));
             }
             else{
                 map.put("type", "Debit");
                 balance -= t.getAmount();
+                totalDebit += t.getAmount();
                 map.put("accbalance" , String.format("%.2f", balance));
             }
             map.put("id", t.getId());
             transactionListMap.add(map);
         }
         
-        //lets us arrange the map in decending order
+        //lets us arrange the map in decending order item
         transactionListMap.sort((Map a , Map b) ->{ return ((Long)(b.get("id"))).compareTo((Long)(a.get("id"))); });
         
         request.setAttribute("transactions",transactionListMap);
         request.setAttribute("balance", agentBalance - minimumBalance);
         request.setAttribute("ledgerBalance", agentBalance);
+        request.setAttribute("totalDedit", totalDebit);
+        request.setAttribute("totalCredit", totalCredit);
         request.setAttribute("accountCode", acctCode);
         
     }

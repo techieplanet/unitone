@@ -211,8 +211,9 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @Column(name = "kin_email")
     private String  kinEmail;
     
-    @Column(name = "bank_name")
-    private String  banker;
+    @JoinColumn(name = "bank_id", referencedColumnName = "id")
+    @ManyToOne
+    private Bank  banker;
     
     @Column(name = "bank_account_name")
     private String  accountName;
@@ -863,14 +864,14 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     /**
      * @return the banker
      */
-    public String getBanker() {
+    public Bank getBanker() {
         return banker;
     }
 
     /**
      * @param banker the banker to set
      */
-    public void setBanker(String banker) {
+    public void setBanker(Bank banker) {
         this.banker = banker;
     }
 
