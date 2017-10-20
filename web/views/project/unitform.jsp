@@ -333,6 +333,7 @@
 
         
       //  console.log("send data: " + $('#projectunitform').serialize());
+      if(validate())
         submitPostForm('${pageContext.request.contextPath}/ProjectUnit', 
                         $('#projectunitform').serialize()
                      );

@@ -27,6 +27,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -116,7 +117,7 @@ public class OrderItem extends BaseModel {
     @Column(name = "approval_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date approvalDate;
-//    @OneToMany(mappedBy = "itemId")
+//    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "itemId")
 //    private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "monthly_pay_day")
     private Integer monthlyPayDay;
@@ -128,7 +129,7 @@ public class OrderItem extends BaseModel {
     @Column(name = "approval_status")
     private Short approvalStatus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "item")
+    @OneToMany(fetch=FetchType.LAZY , mappedBy = "item")
     private Collection<LodgementItem> lodgementItemCollection;
 
     private static final long serialVersionUID = 1L;

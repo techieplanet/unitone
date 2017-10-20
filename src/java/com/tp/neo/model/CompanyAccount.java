@@ -19,6 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -46,7 +47,7 @@ public class CompanyAccount implements Serializable {
     private String accountNumber;
     @Column(name = "bank_name")
     private String bankName;
-    @OneToMany(mappedBy = "companyAccountId")
+    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "companyAccountId")
     private Collection<Lodgement> lodgementCollection;
 
     public CompanyAccount() {

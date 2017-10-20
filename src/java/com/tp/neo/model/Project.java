@@ -27,6 +27,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -66,7 +67,7 @@ public class Project extends BaseModel{
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
 
     
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "project")
+    @OneToMany(fetch=FetchType.LAZY ,orphanRemoval = true, cascade = CascadeType.REFRESH , mappedBy = "project")
     private Collection<ProjectUnit> projectUnitCollection;
 
     @Basic(optional = false)
@@ -76,7 +77,7 @@ public class Project extends BaseModel{
     @Column(name = "active")
     private short active;
 
-    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+    //@OneToMany(fetch=FetchType.LAZY  , mappedBy = "project")
 
 
     private static final long serialVersionUID = 1L;

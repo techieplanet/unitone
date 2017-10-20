@@ -530,6 +530,16 @@ public class ProjectUnitController extends AppController {
             errorMessages.put("service_value", "Please enter valid money value");
         }
         
+        try{
+            int unitId = Integer.parseInt(request.getParameter("unittype"));
+           if(unitId <= 0){
+            errorMessages.put("Unit Type", "Please Select a project Unit Type");
+        } 
+        }catch (NumberFormatException e){
+            errorMessages.put("Unit Type", "Please Select a project Unit Type");
+        }
+        
+        
         
         if(!(errorMessages.isEmpty())) throw new PropertyException("");
         

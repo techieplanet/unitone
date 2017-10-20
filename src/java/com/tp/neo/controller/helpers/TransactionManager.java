@@ -37,8 +37,6 @@ public class TransactionManager {
         Transaction transaction = new Transaction();
         
         em.getTransaction().begin();
-        transaction.setDebitAccount(debitAccount);
-        transaction.setCreditAccount(creditAccount);
         transaction.setAmount(amount);
         transaction.setTransactionDate(calendar.getTime());
         transaction.setCreatedBy(sessionUser.getSystemUserId());
@@ -46,10 +44,14 @@ public class TransactionManager {
         
         em.persist(transaction);
         //System.out.println("after  perist: " + transaction.getId());
-        
+        em.flush();
+        em.refresh(transaction);
+        transaction.setDebitAccount(debitAccount);
+        transaction.setCreditAccount(creditAccount);
+        transaction = (Transaction)em.merge(transaction);
         em.getTransaction().commit();
         
-        em.refresh(transaction);
+        //em.refresh(transaction);
         
         return transaction;
     }
@@ -58,16 +60,18 @@ public class TransactionManager {
         Transaction transaction = new Transaction();
         
         em.getTransaction().begin();
-        transaction.setDebitAccount(debitAccount);
-        transaction.setCreditAccount(creditAccount);
         transaction.setAmount(amount);
         transaction.setTransactionDate(calendar.getTime());
         transaction.setCreatedBy(sessionUser.getSystemUserId());
         transaction.setAmount(amount);
-        transaction.setLodgementItem(item);
         em.persist(transaction);
         //System.out.println("after  perist: " + transaction.getId());
-        
+        em.flush();
+        em.refresh(transaction);
+        transaction.setDebitAccount(debitAccount);
+        transaction.setCreditAccount(creditAccount);
+        transaction.setLodgementItem(item);
+        transaction = (Transaction)em.merge(transaction);
         em.getTransaction().commit();
         
         em.refresh(transaction);

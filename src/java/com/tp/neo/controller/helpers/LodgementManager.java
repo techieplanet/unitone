@@ -103,8 +103,10 @@ public class LodgementManager {
         }
         
         //create system notification for the lodgement
-        String route =  applicationContext + "/Lodgement?action=notification&id=" + lodgement.getId();
-        Notification notification = new AlertManager().getNotificationsManager(route).setupLodgementNotification(customer,lodgement);
+        //notification URL
+        String notURL = "/Lodgement?action=notification&id=" + lodgement.getId();
+        //String route =  applicationContext + notURL;
+        Notification notification = new AlertManager().getNotificationsManager(notURL).setupLodgementNotification(customer,lodgement);
         em.persist(notification);
         
         
@@ -164,7 +166,6 @@ public class LodgementManager {
             //System.out.println("Inside approveLodgement order side");
             //process lodgement approval for a fresh  new order
             processLodgementApproval(lodgement, lodgement.getCustomer(), notification);
-            
             //now this method will create the alerts for the order 
             new OrderManager(sessionUser).createNewOrderAlerts(lodgement, order, lodgement.getCustomer(), applicationContext);
             //Don't Fret: processApprovedLodgementItems will be called in order manager when the order is finally approved
@@ -237,7 +238,7 @@ public class LodgementManager {
      * @throws RollbackException 
      */
     protected void processApprovedLodgementItems(List<LodgementItem> lodgementItems, Customer customer, ProductOrder order) throws PropertyException, RollbackException{
-        em.getTransaction().begin();
+        //em.getTransaction().begin();
         //System.out.println("processApprovedLodgementItems LITEMS SIZE: " + lodgementItems.size());
         
         for(int i=0; i < lodgementItems.size(); i++){
@@ -250,7 +251,7 @@ public class LodgementManager {
             //double entry - take the money out of the customer account and fund the project unit
             
             TransactionManager transactionManager = new TransactionManager(sessionUser);
-            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount() + thisItem.getRewardAmount());
+            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem , thisItem.getAmount() + thisItem.getRewardAmount());
             
             if(thisItem.getAmount() != 0)
             {
@@ -262,15 +263,15 @@ public class LodgementManager {
             
             //send approval alerts (email and SMS) to agent and customer
             AlertManager alertManager = new AlertManager();
-            alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+           alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem(), thisItem.getAmount());
 
             //send wallet credit alert
-            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem(), thisItem.getAmount());
            
-            //em.persist(thisItem);
+            //em.merge(thisItem);
         }//end for       
         
-        em.getTransaction().commit();
+        //em.getTransaction().commit();
         
         //set the mortgage status for the order based on the resultant of the order items
         updateMortgageStatus(order);
@@ -341,7 +342,7 @@ public class LodgementManager {
         // Now that we have the main Commission
         
         if(agentActualCommission != 0)
-        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, customer.getAgent().getAccount(),lodgementItem ,  agentActualCommission);
+            new TransactionManager(sessionUser).doDoubleEntry(unitAccount, customer.getAgent().getAccount(),lodgementItem ,  agentActualCommission);
         
         //calculate annual maintenance amount = ama = comm - ( comm * am percentage)/100
         //double entry - debit: agent , credit : annual maintenace
@@ -373,9 +374,10 @@ public class LodgementManager {
         new TransactionManager(sessionUser).doDoubleEntry(customer.getAgent().getAccount(), agentWithholdingAcc, lodgementItem, withHoldingTax);
         }
        
-        agentActualCommission -= (annualMaintenance + withHoldingTax);
+        
+        double agentNetCommission = agentActualCommission - (annualMaintenance + withHoldingTax);
         //calculate the commissions for the upline if MLM is enabled.
-        processUplineCommissions(customer.getAgent() , unit  , agentActualCommission);
+        double  totalUplineCommission = processUplineCommissions(customer.getAgent() , unit  , lodgementItem , agentNetCommission);
         
         //Split property dev cost - debit unit, credit property dev  - double entry
         double buildingCost = lodgementItem.getItem().getUnit().getBuildingCost();
@@ -391,7 +393,7 @@ public class LodgementManager {
 //        
         
         //Split income amount - debit unit, credit credit income account  - double entry
-        double income = incomeAfterTax - agentActualCommission;
+        double income = incomeAfterTax - (agentActualCommission + totalUplineCommission);
         if(income != 0)
         {
         Account incomeAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "INCOME").getSingleResult();
@@ -496,8 +498,8 @@ public class LodgementManager {
    }
     
     public void updateMortgageStatus(ProductOrder order){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
+        if(em != null && !em.isOpen())
+            em = emf.createEntityManager();
         
         //System.out.println("UpdateMortgageStatus Called");
         
@@ -509,13 +511,12 @@ public class LodgementManager {
         if((actualCost - totalLodgementAmount) <= 0){
             
             order.setMortgageStatus((short)1);
-            em.merge(order);
+            order = (ProductOrder) em.merge(order);
         }
         
         em.getTransaction().commit();
-        emf.getCache().evictAll();
-       em.close();
-       emf.close();
+         //em.close();
+       //emf.close();
     }
      
     /**
@@ -528,9 +529,9 @@ public class LodgementManager {
      * @param unit
      * @param agentCommission 
      */
-    public void processUplineCommissions(Agent agent , ProjectUnit unit  , double agentCommission){
+    public double processUplineCommissions(Agent agent , ProjectUnit unit  ,LodgementItem  item , double agentCommission){
         if(!this.availablePlugins.containsKey("mlm") || agent.getReferrerId() == 0)
-            return;
+            return 0;
         
         Type mapType = new TypeToken<Map<String, String>>(){}.getType();
         Map<String, String> mlmSettingsMap = gson.fromJson(availablePlugins.get("mlm").getSettings(), mapType);
@@ -547,12 +548,13 @@ public class LodgementManager {
         
         //remove the total Upline MLM commison from the project Unit account into the agent account
         if(totalMLMCommission != 0)
-            new TransactionManager(sessionUser).doDoubleEntry(unit.getAccount(), agent.getAccount(), totalMLMCommission);
+            new TransactionManager(sessionUser).doDoubleEntry(unit.getAccount(), agent.getAccount(), item , totalMLMCommission);
         
         //after the money have been credited into the Agent account we move on to Split it into
         //different Uplines account . 
         //Note : we are going to take it Out now from The agent account So That it is trace able
-       AgentService.removeUplineCommissionsFromAgentAccount(sessionUser, agent, uplines, agentCommission, mlmPercentage);
+       AgentService.removeUplineCommissionsFromAgentAccount(sessionUser, agent, uplines, agentCommission, mlmPercentage , item);
+       return totalMLMCommission;
     }
     
     public static double calculateServiceValue(double lodgementValue , double totalServiceValue , double totalAmountPayable ){

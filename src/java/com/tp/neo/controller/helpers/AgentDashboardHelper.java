@@ -36,8 +36,8 @@ import javax.persistence.Query;
  * @author swedge-mac
  */
 public class AgentDashboardHelper {
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-    EntityManager em;
+    static EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+    static EntityManager em = emf.createEntityManager();
     Query query;
     
     Gson gson = new GsonBuilder().create();
@@ -442,7 +442,15 @@ public class AgentDashboardHelper {
     
     
     public double getTotalOrderValue(Long agentId){
-        double totalOrderSum = (double)em.createNamedQuery("Agent.getTotalOrderSum").setParameter("agentId" , agentId).getSingleResult();
+        query = em.createNamedQuery("Agent.getTotalOrderSum")
+                .setParameter("agentId" , agentId);
+        
+        
+        double totalOrderSum   = 0;
+        try{
+        totalOrderSum = (double)query.getSingleResult();
+        }catch(Exception e){}
+        
         return totalOrderSum;
     }
     

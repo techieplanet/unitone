@@ -557,35 +557,29 @@
             , ["customerOccupation", "", "Customer Occupation"]
             , ["customerEmployer", "", "Customer Employer"]
     ,["customerOfficePhone" , "" , "Customer Office Phone"]
-       <% /*                         ,["customerOfficeStreet" , "" , "Customer Office Street"]
-                                ,["customerOfficeCity" , "" , "Customer Office City"]
-                                ,["customerOfficeState" , "" , "Customer Office State"]
-                                ,["customerOfficeCountry" , "select" , "Customer Office Country"] */%>
-    , ["customerEmployerStreet", "", "Customer Employer Street"]
-            , ["customerEmployerCity", "", "Customer Employer City"]
-            , ["customerEmployerState", "", "Employer State"]
+    , ["customerEmployerStreet", "", "Customer Employer's Street"]
+            , ["customerEmployerCity", "", "Customer Employer's City"]
+            , ["customerEmployerState", "", "Employer's State"]
             , ["customerEmployerCountry", "select", "Customer Employer Country"]
-            , ["customerStreet", "", "Customer Address"]
-            , ["customerCity", "", "Customer City"]
-            , ["customerState", "", "Customer State"]
-            , ["customerCountry", "select", "Customer Country"]
-            , ["customerPhone", "", "Customer Phone"]
-    <%//,["customerOtherPhone" , "select" , "Customer Country"]%>
-    , ["customerPostalAddress", "", "Customer  Postal Address"]
-    , ["customerKinName", "", "Customer Next Of Kin Name"]
-    , ["customerKinRelationship", "", "Customer Next Of Kin Relationship"]
-    <%//,["customerKinEmail" , "" , "Customer Next Of Kin Email"]%>
-    , ["customerKinPhone", "", "Customer Next Of Kin Phone Number"]
-            , ["customerKinAddress", "", "Customer  Next Of Kin Address"]
-            , ["customerBanker", "", "Customer Banker"]
-            , ["customerAccountName", "", "Customer Account Name"]
-    , ["customerAccountNumber", "", "Customer Account Number"]
+            , ["customerStreet", "", "Customer's Address"]
+            , ["customerCity", "", "Customer's City"]
+            , ["customerState", "", "Customer's State"]
+            , ["customerCountry", "select", "Customer's Country"]
+            , ["customerPhone", "", "Customer's Phone Number"]
+    , ["customerPostalAddress", "", "Customer's  Postal Address"]
+    , ["customerKinName", "", "Customer's Next Of Kin Name"]
+    , ["customerKinRelationship", "", "Customer's Next Of Kin Relationship"]
+    , ["customerKinPhone", "", "Customer's Next Of Kin Phone Number"]
+            , ["customerKinAddress", "", "Customer's  Next Of Kin Address"]
+            , ["customerBanker", "", "Customer's Banker"]
+            , ["customerAccountName", "", "Customer's Account Name"]
+    , ["customerAccountNumber", "", "Customer's Account Number"]
     ];
 
-    var formFieldStage2 = [["customerPhoto", "", " Customer PassPort"]
-                , ["customerKinPhoto", "", "Customer Next Of Kin Passport"],
-        ["customerPhotoID", "", "Customer ID card /Driver Lincense etc"],
-        ["customerBankStandingOrder", "", "Customer Post-dated Cheques/Bank Standing Order"]];
+    var formFieldStage2 = [["customerPhoto", "", " Customer's PassPort"]
+                , ["customerKinPhoto", "", "Customer's Next Of Kin Passport"],
+        ["customerPhotoID", "", "Customer's ID card /Driver Lincense etc"],
+        ["customerBankStandingOrder", "", "Customer's Post-dated Cheques/Bank Standing Order"]];
     function   validateCustomer(stage) {
 
         //Validating Elements on the first stage of validation
@@ -681,7 +675,7 @@
                 {
                     $("#" + formFieldStage2[i][0]).css("border", "1px solid red");
 
-                    errors.push("Please Input File For " + formFieldStage2[i][2]);
+                    errors.push("Please Input  " + formFieldStage2[i][2]);
                     break;
                     //border: 1px solid red;
                 }

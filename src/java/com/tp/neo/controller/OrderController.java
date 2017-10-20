@@ -388,8 +388,9 @@ public class OrderController extends AppController {
             }
             
             lodgement.setCustomer(customer);
-            
-            ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, request.getContextPath());
+            String url = request.getServerName() + "/" + request.getContextPath()+"/";
+            url  = url.replace("//", "/");
+            ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, url );
             
             if(productOrder != null){
                     if(productOrder.getId() != null){
@@ -733,7 +734,6 @@ public class OrderController extends AppController {
    
     
     private void approveOrder(HttpServletRequest request,HttpServletResponse response, String viewFile){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
         HttpSession session = request.getSession();
@@ -758,7 +758,7 @@ public class OrderController extends AppController {
                 OrderItem orderItem = em.find(OrderItem.class, id);
                 short s = 1;
                 orderItem.setApprovalStatus(s);
-                //em.persist(orderItem);
+                //orderItem = (OrderItem)em.merge(orderItem);
                 orderItemList.add(orderItem);
                 
                 //Lets make a Loyalty history entry 
@@ -816,9 +816,10 @@ public class OrderController extends AppController {
             //System.out.println("Successful");
             
         }
-        em.getTransaction().commit();
+        em.getTransaction()
+                .commit();
         em.close();
-        emf.close();
+       // emf.close();
         
         redirectToPendingOrder(request, response, viewFile);
     }
@@ -829,12 +830,12 @@ public class OrderController extends AppController {
         if(em.getTransaction().isActive())
         em.getTransaction().rollback();
         em.close();
-        emf.close();
+       // emf.close();
     }
     catch(Exception e){
         em.getTransaction().rollback();
         em.close();
-        emf.close();
+       // emf.close();
     }
    }
     

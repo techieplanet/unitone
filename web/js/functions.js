@@ -1073,6 +1073,14 @@ function monthlyPayCalculator(){
     
     var discount = $("#productDiscount").val();
     if(!discount)discount= resp.discount;
+    else{
+        //Validate discount percentage
+        if(discount > 100)
+        {
+            alert("Discount cannot be more than 100 percent");
+            return false;
+        }
+    }
     var serviceValue = resp.service_value;
     var cpu = resp.cpu;
     var cpuMinusService = cpu - serviceValue;
@@ -1100,7 +1108,10 @@ function monthlyPayCalculator(){
          $("#amountLeft").val("");
     $("#amountLeftFormat").text("");
     }
-    var monthlyPay = (payLeft / productMaximumDuration).toFixed(2);
+    var monthlyPay =  0 ;
+    if(productMaximumDuration != 0)
+    monthlyPay = (payLeft / productMaximumDuration).toFixed(2);
+    
     $("#productMinimumMonthlyPayment").val(monthlyPay);
     $("#monthlyPayPerUnit").text(accounting.formatMoney((monthlyPay/quantity).toFixed(2),"N",2,",","."));
     $("#monthlyPayPerQuantity").text(accounting.formatMoney(monthlyPay,"N",2,",","."));
@@ -1168,7 +1179,7 @@ function calculateAmountToPay(){
         $("#errorInitDep").remove();
         $("#errorText").text("");
         var ammountleftTopay =productAmount - userInitialAmount; 
-        if(ammountleftTopay > 0)
+        if(ammountleftTopay >= 0)
         {$("#amountLeft").val(ammountleftTopay);
          $("#amountLeftFormat").text(accounting.formatNumber(ammountleftTopay , 2));
         }
@@ -1197,8 +1208,13 @@ function calculateDurationFromMonthlyPay(){
     $("#finalAmount").text("");
     var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val();
     var amountLeft = $("#amountLeft").val();
-    var monthLeft = Math.round(amountLeft / productMinimumMonthlyPayment);
-    var finalAmount = amountLeft % productMinimumMonthlyPayment ;
+    var monthLeft = 0;
+    var finalAmount = 0;
+    if(productMinimumMonthlyPayment != 0)
+    {
+    monthLeft = Math.round(amountLeft / productMinimumMonthlyPayment);
+    finalAmount = amountLeft % productMinimumMonthlyPayment ;
+    }
   //  alert("hello this is where we work month-->"+monthLeft+" finalAmount "+ quantityDuration);
     
     if(monthLeft>quantityDuration){
@@ -1290,7 +1306,16 @@ function calculateProductAmount(){
     $(this).attr("selected","selected");
 
   }
-          
+    
+    if(totalDuration == 0)
+    {
+        $('#productMaximumDuration').empty();
+        $('#productMaximumDuration').append($('<option>', {
+    value: 0,
+    text: "Outright Payment",
+     selected: true
+}));
+    }
    
     
     monthlyPayCalculator();
@@ -1750,7 +1775,7 @@ function submitForm(){
                var tellerNumber = $("#tellerNumber").val();
                        
                if( $.trim(depositorsName) == ""){
-                   alert("Please Enter depositors name");
+                   alert("Please enter depositor's name");
                    submitOk = false;
                }
                else if($.trim(tellerNumber) == ""){
@@ -1765,15 +1790,20 @@ function submitForm(){
                var transfer_accountName = $("#transfer_accountName").val();
                
                if($.trim(transfer_bankName) == ""){
-                   alert("Please enter Bank Name");
+                   alert("Please enter depositor's bank name");
                    submitOk = false;
                }
                else if($.trim(transfer_accountNo) == ""){
-                   alert("Please enter account number");
+                   alert("Please enter depositor's bank account number");
                    submitOk = false;
                }
                else if($.trim(transfer_accountName) == ""){
                    alert("Please enter account Name");
+                   submitOk = false;
+               }
+               else if(!$.isNumeric(transfer_accountNo))
+               {
+                   alert("Please enter valid depositor's bank account number");
                    submitOk = false;
                }
                

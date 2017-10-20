@@ -1161,7 +1161,8 @@ public class AgentController extends AppController {
             response.setContentType("text/plain");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(jsonResponse);
-
+            response.flushBuffer();
+            new AlertManager().sendAgentApprovalAlerts(agent);
             //System.out.println("jsonResponse: " + jsonResponse);
            }
 //        catch(PropertyException err){
@@ -1170,7 +1171,7 @@ public class AgentController extends AppController {
 //                  
 //                SystemLogger.logSystemIssue("Agent", gson.toJson(agent), err.getMessage());
 //            }
-            catch(Exception e){
+          catch(Exception e){
                
                 e.printStackTrace();
                 //System.out.println("System Error: " + e.getMessage());
@@ -1766,11 +1767,11 @@ public class AgentController extends AppController {
          }
          
          String formFieldStage1[][] = {{"agentFirstname", "", "Agent First Name"},
-             {"agentMiddlename", "", "Agent Middle Name"},
+             //{"agentMiddlename", "", "Agent Middle Name"},
              {"agentLastname", "", "Agent Last Name"},
              {"agentEmail", "", "Agent Email"},
              {"agentPhone", "", "Agent Phone"},
-             {"agentStreet", "", "Agent Street Address"},
+             {"agentStreet", "", "Agent  Address"},
              {"agentCity", "", "Agent Operational City Name"},
             {"agentState", "", "Agent Operational State Name"},
             {"agentBankId", "select", "Agent Bank Name"},
@@ -1877,12 +1878,12 @@ public class AgentController extends AppController {
             {"agentRCNumber", "", "Company RC Number"},
             {"agentEmail", "", "Company Email"},
             {"agentPhone", "", "Company Office Phone Number"},
-            {"agentStreet", "", "Company Office  Street Address"},
-        {"agentCity", "", "Company Office City Name"},
-        {"agentState", "", "Company Office Operational State Name"},
-        {"agentBankId", "select", "Company Bank Name"},
-        {"agentBankAccountName", "", "Company Bank Account Name"},
-        {"agentBankAccountNumber", "", "Company Bank Account Number"},
+            {"agentStreet", "", "Company's Address"},
+        {"agentCity", "", "Company's City"},
+        {"agentState", "", "Company's State "},
+        {"agentBankId", "select", "Company's Bank Name"},
+        {"agentBankAccountName", "", "Company's Bank Account Name"},
+        {"agentBankAccountNumber", "", "Company's Bank Account Number"},
         {"agentDirectorName1", "", "Name Of A Director"}, //This should not be classified here actually
         };
 

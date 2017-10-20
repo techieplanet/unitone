@@ -40,7 +40,7 @@ public class testAgentService {
     }
     
     public static void removeUplineCommissionsFromAgentAccount(Agent agent , Map<Integer , Agent> uplines, Double agentInitialCommission ,Double mlmUplineCommission){
-        AgentService.removeUplineCommissionsFromAgentAccount(agent , agent, uplines, agentInitialCommission, mlmUplineCommission);
+       // AgentService.removeUplineCommissionsFromAgentAccount(agent , agent, uplines, agentInitialCommission, mlmUplineCommission);
     }
     
    public static void makePayOut(){

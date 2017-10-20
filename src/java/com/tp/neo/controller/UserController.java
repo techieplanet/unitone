@@ -636,7 +636,7 @@ public class UserController extends AppController {
                     user.setPassword(AuthManager.getSaltedHash(pwd1));
                     resMap.put("success", "Password changed successfully");
                 }else{
-                    resMap.put("error", "Password and Re-enter password do not match");
+                    resMap.put("error", "Password and Re-entered password do not match");
                 }
                  
             }else{

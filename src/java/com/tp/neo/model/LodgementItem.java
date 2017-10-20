@@ -21,6 +21,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.CascadeType;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -76,10 +77,10 @@ public class LodgementItem extends BaseModel {
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @JoinColumn(name = "lodgement_id", referencedColumnName = "id")
+    @JoinColumn(name = "lodgement_id",referencedColumnName = "id" , updatable =false)
     @ManyToOne
     private Lodgement lodgement;
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
+    @JoinColumn(name = "item_id", referencedColumnName = "id" , updatable=false)
     @ManyToOne(optional = false)
     private OrderItem item;
 

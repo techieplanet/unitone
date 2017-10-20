@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -42,7 +43,7 @@ public class AccountType implements Serializable {
     private Integer id;
     @Column(name = "title")
     private String title;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountTypeId")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "accountTypeId")
     private Collection<Account> accountCollection;
 
     public AccountType() {

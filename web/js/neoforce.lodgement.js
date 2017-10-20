@@ -234,18 +234,18 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
     {
         if(isNaN(amount))
         {
-        alert("Please Input A Valid Amount to pay");
+        alert("Please input a valid amount");
         return;
         }
         else if(amount <= 0 )
         {
-            alert("Amount Must Be Greater Than 0");
+            alert("Please input a valid amount");
         return;
         }
     }
     else
     {
-        alert("Please Input The Amount to pay");
+        alert("Please input the amount to be paid");
         return;
     }
     

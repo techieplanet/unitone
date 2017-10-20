@@ -8,7 +8,7 @@ package com.tp.neo.service;
 import com.tp.neo.controller.helpers.TransactionManager;
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Agent;
-import com.tp.neo.model.User;
+import com.tp.neo.model.LodgementItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,7 +87,7 @@ public class AgentService {
      * @param agentCommissionAfterTax
      * @param mlmUplineCommission 
      */
-    public static void removeUplineCommissionsFromAgentAccount(SystemUser sessionUser , Agent agent , Map<Integer , Agent> uplines, Double agentCommissionAfterTax ,Double mlmUplineCommission){
+    public static void removeUplineCommissionsFromAgentAccount(SystemUser sessionUser , Agent agent , Map<Integer , Agent> uplines, Double agentCommissionAfterTax ,Double mlmUplineCommission , LodgementItem item){
         //Lets Get the Key Set in asccending order
         List<Integer> list = new ArrayList<>(uplines.keySet());
         Collections.sort(list);
@@ -105,7 +105,7 @@ public class AgentService {
             //System.out.println("Upline: " + id  + "  With AgentId: " + uplines.get(id).getAgentId() + " And Account code: " + uplines.get(id).getAccount().getAccountCode() +  " Gets " + uplineComm);
             
             //Remove the value from Agent Account and place it inside the Upline accounts
-           new TransactionManager(sessionUser).doDoubleEntry(agent.getAccount(), uplines.get(id).getAccount(), temp);
+           new TransactionManager(sessionUser).doDoubleEntry(agent.getAccount(), uplines.get(id).getAccount(), item , temp);
         }
     }
     

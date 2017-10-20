@@ -574,7 +574,8 @@ public class CustomerController extends AppController {
             }
             
             //done With Validation , We can Now Proceed
-            String Url = request.getServerName() + "/" + request.getContextPath();
+            String Url = request.getServerName() + "/" + request.getContextPath()+"/";
+            Url = Url.replace("//", "/");
             new EmailHelper().sendUserWelcomeMessageAndPassword(customer.getEmail(), company.getEmail(), initPass, customer, company, Url);
             em.getTransaction().commit();
             em.close();
@@ -587,7 +588,7 @@ public class CustomerController extends AppController {
                 //user = (SystemUser) customer;
             }
 
-            ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItem, request.getContextPath());
+            ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItem, Url);
 
             if (productOrder != null)
             {
@@ -1417,10 +1418,10 @@ public class CustomerController extends AppController {
                 "customerOccupation", "", "Customer Occupation"
             },
                         {
-                "customerEmployer", "", "Customer Employer"
+                "customerEmployer", "", "Customer's Employer"
             },
                       {
-                "customerOfficePhone", "", "Customer Office Phone"
+                "customerOfficePhone", "", "Customer's Office Phone Number"
             },
            /*             {
                 "customerOfficeStreet", "", "Customer Office Street"
@@ -1435,59 +1436,59 @@ public class CustomerController extends AppController {
                 "customerOfficeCountry", "select", "Customer Office Country"
             },*/
                         {
-                "customerEmployerStreet", "", "Customer Employer Street"
+                "customerEmployerStreet", "", "Customer's Employer Address"
             },
                         {
-                "customerEmployerCity", "", "Customer Employer City"
+                "customerEmployerCity", "", "Customer's Employer City"
             },
                         {
                 "customerEmployerState", "", "Employer State"
             },
                         {
-                "customerEmployerCountry", "select", "Customer Employer Country"
+                "customerEmployerCountry", "select", "Customer's Employer Country"
             },
                         {
-                "customerStreet", "", "Customer Street"
+                "customerStreet", "", "Customer's  Address"
             },
                         {
-                "customerCity", "", "Customer City"
+                "customerCity", "", "Customer's City"
             },
                         {
-                "customerState", "", "Customer State"
+                "customerState", "", "Customer's State"
             },
                         {
-                "customerCountry", "select", "Customer Country"
+                "customerCountry", "select", "Customer's Country"
             },
                         {
-                "customerPhone", "", "Customer Phone"
+                "customerPhone", "", "Customer's Phone Number"
             } //,["customerOtherPhone" , "select" , "Customer Country"]
             ,
                         {
-                "customerPostalAddress", "", "Customer  Postal Address"
+                "customerPostalAddress", "", "Customer's  Postal Address"
             },
                         {
-                "customerKinName", "", "Customer Next Of Kin Name"
+                "customerKinName", "", "Customer's Next Of Kin Name"
             },
                         {
-                "customerKinRelationship", "", "Customer Next Of Kin Relationship"
+                "customerKinRelationship", "", "Customer's Next Of Kin Relationship"
             },
                    /*     {
                 "customerKinEmail", "", "Customer Next Of Kin Email"
             }, */
                         {
-                "customerKinPhone", "", "Customer Next Of Kin Phone Number"
+                "customerKinPhone", "", "Customer's Next Of Kin Phone Number"
             },
                         {
-                "customerKinAddress", "", "Customer  Next Of Kin Address"
+                "customerKinAddress", "", "Customer's  Next Of Kin Address"
             },
                         {
-                "customerBanker", "select", "Customer Banker"
+                "customerBanker", "select", "Customer's Banker"
             },
                         {
-                "customerAccountName", "", "Customer Account Name"
+                "customerAccountName", "", "Customer's Account Name"
             },
                         {
-                "customerAccountNumber", "", "Customer Account Number"
+                "customerAccountNumber", "", "Customer's Account Number"
             }
         };
         //</editor-fold>
@@ -1536,7 +1537,7 @@ public class CustomerController extends AppController {
             {
                 if (fileName.isEmpty())
                 {
-                    errorMessages.put("errors" + error, "Please Upload File For " + field[2]);
+                    errorMessages.put("errors" + error, "Please Upload  " + field[2]);
                     error++;
                 }
             }

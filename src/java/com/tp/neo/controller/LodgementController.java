@@ -613,8 +613,10 @@ public class LodgementController extends AppController {
                 
                 manager = new LodgementManager(sessionUser,plugins);
             }
-            
-            manager.approveLodgement(lodgement, notification, request.getContextPath());
+            String uri = request.getServerName()+request.getContextPath();
+            uri = uri + "/";
+            uri = uri.replaceAll("//", "/");
+            manager.approveLodgement(lodgement, notification, uri);
             
             
             
@@ -752,7 +754,10 @@ public class LodgementController extends AppController {
             LodgementManager lodgementManager = new LodgementManager(user);
             lodgementManager.amountPerRewardPoint = amountPerRewardPoint;
             lodgementManager.availablePlugins = plugins;
-            lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath(), order);
+            String uri = request.getServerName()+request.getContextPath();
+            uri = uri + "/";
+            uri = uri.replaceAll("//", "/");
+            lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, uri, order);
             
             Map map = prepareMorgageInvoice(lodgement, lodgementItemList);
             

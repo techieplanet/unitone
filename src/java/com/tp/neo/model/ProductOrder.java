@@ -24,6 +24,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -80,7 +81,7 @@ public class ProductOrder extends BaseModel {
     private Long approvedBy;
     @Column(name = "mortgage_status")
     private Short mortgageStatus;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "order")
     private Collection<OrderItem> orderItemCollection;
 
     private static final long serialVersionUID = 1L;

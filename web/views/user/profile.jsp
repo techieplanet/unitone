@@ -224,10 +224,14 @@
              }
              
              if($.trim(pwd1).length < 1){
-                 errors.push("New Password is required")
+                 errors.push("New password is required");
+             }
+             else if($.trim(pwd2).length < 1)
+             {
+                 errors.push("Please re-enter new password");
              }
              else if($.trim(pwd1) != $.trim(pwd2)){
-                 errors.push("Password and Re-enter password must match");
+                 errors.push("Password and Re-entered password must match");
              }
              
              if(errors.length > 0){

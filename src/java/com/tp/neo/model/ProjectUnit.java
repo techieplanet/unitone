@@ -23,6 +23,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -97,7 +98,7 @@ public class ProjectUnit extends BaseModel {
     @Basic(optional = false)
     @Column(name = "deleted")
     private short deleted;
-    @OneToMany(mappedBy = "unit")
+    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "unit")
     private Collection<OrderItem> orderItemCollection;
 
     private static final long serialVersionUID = 1L;

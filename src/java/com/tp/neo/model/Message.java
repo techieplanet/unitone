@@ -25,6 +25,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 @Entity
 @Table(name = "message")
@@ -101,13 +102,13 @@ public class Message implements Serializable {
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "messageId")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "messageId")
     private List<MessageToRecipient> messageToRecipientList;
     @Column(name = "created_by")
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "messageId")
+    //@OneToMany(fetch=FetchType.LAZY  , mappedBy = "messageId")
     //private Collection<MessageToRecipient> messageToRecipientCollection;
     @Column(name = "subject")
     private String subject;

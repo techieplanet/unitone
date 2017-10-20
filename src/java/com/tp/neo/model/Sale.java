@@ -25,6 +25,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -84,7 +85,7 @@ public class Sale implements Serializable {
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     @ManyToOne(optional = false)
     private Customer customerId;
-    @OneToMany(cascade = CascadeType.ALL/*, mappedBy = "sale"*/)
+    @OneToMany(fetch=FetchType.LAZY  /*, mappedBy = "sale"*/)
     private Collection<Lodgement> lodgementCollection;
 
     public Sale() {

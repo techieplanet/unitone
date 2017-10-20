@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
 import javax.xml.bind.PropertyException;
@@ -218,7 +219,7 @@ public class OrderManager {
                 //note that 1 has been set for the item approval status already
                 //this will now set the audit dates and approval date
                 setOrderItemDates(thisItem); 
-                //em.persist(thisItem);
+                //thisItem = (OrderItem)em.merge(thisItem);
                 
                 //get/set corresponding lodgment item
 
@@ -226,7 +227,7 @@ public class OrderManager {
                 LodgementItem lodgementItem = (LodgementItem) lodgementItems.get(0);
 
                 setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
-                //em.persist(lodgementItem);
+                //lodgementItem = (LodgementItem)em.merge(lodgementItem);
                 
                 approvedLodgementItems.add(lodgementItem);
                 
@@ -288,8 +289,6 @@ public class OrderManager {
             setOrderStatus(order, (short)2); //complete the order
             //set the notification status here
             notification.setStatus((short)2);
-           // em.persist(notification);
-            
         }
         else if(declinedItems.size() == allItems.size()){
             setOrderStatus(order, (short)3); //decline order
@@ -298,13 +297,9 @@ public class OrderManager {
         }
         else if(approvedItems.size() + declinedItems.size() < allItems.size()){
             setOrderStatus(order, (short)1); //processing status
-            //no need to treat lodgement items
-            
         }
-        
-        //em.persist(order);
-        //em.flush();
-        em.getTransaction().commit();
+        em.getTransaction()
+                .commit();
         em.close();
     }
     
@@ -325,8 +320,8 @@ public class OrderManager {
         //new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
         
         //create new order system notification
-        String route =  applicationContext + "/Order?action=notification&id=" + order.getId();
-        Notification notification = new AlertManager().getNotificationsManager(route).createNewOrderNotification(customer,order);
+        String orderUri = "/Order?action=notification&id=" + order.getId();
+        Notification notification = new AlertManager().getNotificationsManager(orderUri).createNewOrderNotification(customer,order);
         em.persist(notification);
         
         //send email alert to all Admins with approve_order permisison
@@ -335,7 +330,7 @@ public class OrderManager {
             if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
                 recipientsList.remove(i);
         }
-        String thisOrderPageLink = applicationContext + "/Order?action=notification&id=" + order.getId();
+        String thisOrderPageLink = applicationContext + "Order?action=notification&id=" + order.getId();
         new AlertManager().sendNewOrderAlerts(order, lodgement, customer, recipientsList, thisOrderPageLink);
         
         em.getTransaction().commit();
@@ -680,6 +675,19 @@ public class OrderManager {
       
        for(OrderItem item : orderItems)
        {
+           if(item.getDiscountPercentage() > 100)
+               {
+             //Here we know that the customer have reduced the amount he/she oghth to pay 
+             errorMSG.append("The discount percentage is invalid");
+             return false;
+            }
+           /*
+           if(item.getCommissionPercentage() > 100)
+           {
+             errorMSG.append("The agent commission  percentage is invalid");
+             return false;  
+           }
+           */
          //Here we calculate the actual value of initial deposit that we are expecting
          double expectedIntialDep = item.getQuantity() * item.getUnit().getLeastInitDep();
          //Lets compare it with the value we are receiving from the front end

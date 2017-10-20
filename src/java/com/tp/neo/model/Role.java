@@ -25,6 +25,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -59,7 +60,7 @@ public class Role extends BaseModel {
     @Column(name="role_supervisor")
     private String supervisor;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "role")
     private Collection<User> userCollection;
 
 
@@ -180,6 +181,7 @@ public class Role extends BaseModel {
         else if(action.toUpperCase().equals("EDIT")) return "edit_role";
         else if(action.toUpperCase().equals("DELETE")) return "delete_role";
         else if(action.toUpperCase().equals("PERMISSIONS")) return "view_system_permissions";
+        else if(action.toUpperCase().equals("LOADPERMISSIONS")) return "view_system_permissions";
         else return "view_role";
     }
     

@@ -108,7 +108,7 @@
     });
     
     function update(id , name){
-         var data = {"role_id": id, "action":"rolechange","mode":"ajax"};
+         var data = {"role_id": id, "action":"loadPermissions","mode":"ajax"};
          genericAjax('${pageContext.request.contextPath}', 'Role', "GET", data, updatePermissionListDOM);
          $("#roleName").text(name);
     }

@@ -262,7 +262,7 @@
                                                         <div class="form-group">
                                                             <label for="agentBankName">Bank Name</label>
                                                             <select name="agentBankId" id="agentBankName" class="form-control">
-                                                            <option value="select">--choose--</option>
+                                                            <option value="select" >--choose--</option>
                                                        <c:forEach items="${Banks}" var="bank">
                                                            <option value="${bank.id}" <c:if test="${agent.bank.id == bank.id.toString() || param.agentBankId == bank.id.toString()}">selected</c:if>>${bank.bankName}</option>
                                                        </c:forEach>
@@ -450,12 +450,12 @@
         ["agentRCNumber", "", "Company RC Number"],
         ["agentEmail", "", "Company Email"],
         ["agentPhone", "", "Company Office Phone Number"],
-        ["agentStreet", "", "Company Office  Street Address"],
-        ["agentCity", "", "Company Office City Name"],
-        ["agentState", "", "Company Office Operational State Name"],
-        ["agentBankId", "select", "Company Bank Name"],
-        ["agentBankAccountName", "", "Company Bank Account Name"],
-        ["agentBankAccountNumber", "", "Company Bank Account Number"]
+        ["agentStreet", "", "Company  Address"],
+        ["agentCity", "", "Company's City"],
+        ["agentState", "", "Company's State"],
+        ["agentBankName", "select", "Company's Bank Name"],
+        ["agentBankAccountName", "", "Company's Bank Account Name"],
+        ["agentBankAccountNumber", "", "Company's Bank Account Number"]
         ];
 
     var formFieldStage2 = [["agentPhoto", "", "Company Logo"],
@@ -481,10 +481,10 @@
             for (var i = 0; i < formFieldStage1.length; i++)
             {
                 var temp = $("#" + formFieldStage1[i][0]).val();
-                if (temp == formFieldStage1[i][1])
+                if (temp === formFieldStage1[i][1])
                 {
                     $("#" + formFieldStage1[i][0]).css("border", "1px solid red");
-                    if (formFieldStage1[i][1] == "select") //If The default value is selec i.e Used for drop down
+                    if (formFieldStage1[i][1] === "select") //If The default value is selec i.e Used for drop down
                     {
                         errors.push("Please Select " + formFieldStage1[i][2]); //
                     } else
