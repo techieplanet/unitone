@@ -62,6 +62,7 @@
                         <th>Teller/Transaction Id</th>
                         <th>Depositors Name</th>
                         <th>Lodgement Date</th>
+                        <th>Approval Status</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -83,6 +84,23 @@
                                 <td><c:out value="${lodgement.getTransactionId()}" /></td>
                                 <td><c:out value="${lodgement.depositorName}" /></td>
                                 <td><fmt:formatDate value="${lodgement.createdDate}" type="date" /></td>
+                                <td>
+                                     <c:set value="${lodgement.getApprovalStatus()}" var="status"/>
+                                    
+                                     <c:choose>   
+                                    <c:when test="${status == 0}">
+                                        <span class="label label-warning">Unattended</span>
+                                    </c:when>
+                                    
+                                    <c:when test="${status == 1 }">
+                                        <span class="label label-primary">Approved <i class="fa fa-check"></i></span>
+                                    </c:when>
+                                        
+                                    <c:otherwise>
+                                        <span class="label label-danger">Decline</span>
+                                    </c:otherwise>
+                                     </c:choose>
+                                </td>
                                 <td><a href='#' class="btn btn-primary " onclick="getLodgmentItem('${lodgement.getId()}','${pageContext.request.contextPath}',event)" title="View Lodgment Details"><i class='fa fa-eye'></i> View</a></td>
                               
                             </tr>
@@ -98,6 +116,7 @@
                         <th>Teller/Transaction Id</th>
                         <th>Depositors Name</th>
                         <th>Lodgement Date</th>
+                        <th>Approval Status</th>
                         <th>Action</th>
                       </tr>
                     </tfoot>

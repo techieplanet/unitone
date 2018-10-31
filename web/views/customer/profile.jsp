@@ -250,7 +250,7 @@
                                     </tr>
                                     <tr>
                                         <td class="field">Banker</td>
-                                        <td>${customer.getBanker()}</td>
+                                        <td>${customer.getBanker().getBankName()}</td>
                                     </tr>
                                     <tr>
                                         <td class="field">Account Name</td>
@@ -311,7 +311,7 @@
                                               <table class="table table-hover table-striped table-bordered">
                                                   <thead>
                                                       <tr>
-                                                          <th>Project</th><th>Unit</th><th>Qty</th><th>Cost per Unit</th>
+                                                          <th>Project</th><th>Unit</th><th>Qty</th><th>Cost</th>
                                                       </tr>
                                                   </thead>
                                                   <tbody>

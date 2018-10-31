@@ -117,7 +117,22 @@
                                                   <div class="col-md-8">
                                                       <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
                                                   </div>
-
+                                                  <c:if test="${lodgement.getRewardAmount() != 0}">
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Royalty Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getRewardAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Total Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getRewardAmount() + lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  </c:if>
                                                   <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Teller No : </span> 
                                                   </div>
@@ -151,7 +166,22 @@
                                                   <div class="col-md-8">
                                                       <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
                                                   </div>
-
+                                                  <c:if test="${lodgement.getRewardAmount() != 0}">
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Royalty Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getRewardAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Total Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getRewardAmount() + lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  </c:if>
                                                   <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Date : </span> 
                                                   </div>
@@ -178,7 +208,22 @@
                                                   <div class="col-md-8">
                                                       <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
                                                   </div>
-
+                                                  <c:if test="${lodgement.getRewardAmount() != 0}">
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Royalty Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getRewardAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Total Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getRewardAmount() + lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  </c:if>
                                                   <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Date : </span> 
                                                   </div>
@@ -230,7 +275,23 @@
                                                       <span><fmt:formatNumber value="${lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
                                                   </div>
                                                   <div class="clearfix"></div>
-
+                                                  <c:if test="${lodgement.getRewardAmount() != 0}">
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Royalty Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getRewardAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  
+                                                  <div class="col-md-4">
+                                                      <span class="lodgementTitleSpan">Total Amount : </span> 
+                                                  </div>
+                                                  <div class="col-md-8">
+                                                      <span><fmt:formatNumber value="${lodgement.getRewardAmount() + lodgement.getAmount()}" type="currency" currencySymbol="N" /></span>
+                                                  </div>
+                                                  <div class="clearfix"></div>
+                                                  </c:if>
                                                   <div class="col-md-4">
                                                       <span class="lodgementTitleSpan">Date : </span> 
                                                   </div>

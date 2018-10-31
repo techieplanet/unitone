@@ -151,6 +151,15 @@ public class RoleController extends AppController {
             allAndSelectedPermissionsMap.put("all", permissionsListMap);
             allAndSelectedPermissionsMap.put("selected", selectedRolePermissions);
         }
+        else if(action.equalsIgnoreCase("loadPermissions")){
+            Map permissionsListMap = permissionHelper.getSystemPermissionsEntitiesMap(); //all permissions
+            Role selectedRole = em.find(Role.class, Integer.parseInt(request.getParameter("role_id")));
+            List selectedRolePermissions = permissionHelper.getSelectedPermissionsCollection(selectedRole.getPermissions());
+            
+            allAndSelectedPermissionsMap.put("all", permissionsListMap);
+            allAndSelectedPermissionsMap.put("selected", selectedRolePermissions);
+        }
+        
         else if(action.equalsIgnoreCase("permissions")){
             request.setAttribute("permissionsList", permissionHelper.getSystemPermissionsEntitiesMap());
             request.setAttribute("supervisors", RoleService.findAllRolesLowerThanOrEqual(((User)super.sessionUser).getRole().getRoleId()));

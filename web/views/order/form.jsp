@@ -278,7 +278,7 @@
                                 	<div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMinimumInitialAmount">Initial Amount(N)</label>
-                                            <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="calculateAmountToPay()" >
+                                            <input type="text" class="form-control" id="productMinimumInitialAmount" name="productMinimumInitialAmount" style="width: 100%;"  onkeyup="monthlyPayCalculator()" >
                                             <span id="amountPerUnit" >
                                                 Min initial amt /unit: <span id="initialAmountPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="minInitialAmountSpan"></span><br/>
@@ -287,13 +287,23 @@
                                         </div> 
 <!--                                            /.form-group initial monthly amount -->
                                         </div>
+                                                  
+                                       <c:if test="${userTypeId == 1}">    
+                                    <div class="col-md-2">
+                                    	<div class="form-group">
+                                            <label for="productDiscount">Discount Percentage </label>
+                                            <input type="text" class="form-control" id="productDiscount" name="productDiscount" style="width: 100%;"  onchange="monthlyPayCalculator()">
+                                        </div> 
+<!--                                            /.form-group productDiscount  -->
+                                    </div>
+                                    </c:if>  
                                       
                                       <c:if test="${plugins.containsKey('loyalty')}">
                                           <div class="col-md-2" >
                                               <div class="form-group">
                                                   <label for="productLoyaltyPoint">Loyalty Point</label>
                                                   <span>Amount of loyalty point to use for Item</span>
-                                                  <input type="text" size="4" class="form-control" name="productLoyaltyPoint" id="productLoyaltyPoint" onkeyup="calculateAmountToPay()">
+                                                  <input type="text" size="4" class="form-control" name="productLoyaltyPoint" id="productLoyaltyPoint" onchange="calculateAmountToPay()">
                                               </div>
                                           </div>         
                                       </c:if>        
@@ -328,7 +338,7 @@
                                     <div class="col-md-2">
                                     	<div class="form-group">
                                             <label for="productMinimumMonthlyPayment">Monthly Payment(N)</label>
-                                            <input type="text" class="form-control" id="productMinimumMonthlyPayment" name="productMinimumMonthlyPayment" style="width: 100%;" onKeyup="calculateDurationFromMonthlyPay()" readonly>
+                                            <input type="text" class="form-control" id="productMinimumMonthlyPayment" name="productMinimumMonthlyPayment" style="width: 100%;" onkeyup="calculateDurationFromMonthlyPay()" readonly>
                                              <span id="amountPerUnit">
                                                 Min monthly pay / unit: <span id="monthlyPayPerUnit"></span><br/>
                                                 This Sale (x<span id="qty"></span>):  <span id="monthlyPayPerQuantity"></span>
@@ -337,13 +347,13 @@
                                         </div> <!--/.form-group amount -->
                                     </div>
                                
-                                    <c:if test="${userType != null && userType == 1 }">     
+                                    <c:if test="${userType != null && userType <3 }">     
                                           <div class="col-md-2">
                                               <div class="form-group">
                                                   <label>
                                                       Commission(%)
                                                   </label>
-                                                  <input type="text" class="form-control" value="0" name="commp" id="commp" readonly/>
+                                                  <input type="text" class="form-control" value="0" name="commp" id="commp" <c:if test="${userType == 2}">readonly</c:if>/>
                                               <span>This is the commission payable to an agent</span>
                                               </div>
                                           </div>

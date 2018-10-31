@@ -22,7 +22,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
+import javax.persistence.FetchType;
 /**
  *
  * @author SWEDGE
@@ -63,7 +63,7 @@ public class DocumentType implements Serializable {
     private Date modifiedDate;
     @Column(name="weight")
     private Integer weight;
-    @OneToMany(mappedBy = "docTypeId")
+    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "docTypeId")
     private Collection<Document> documentCollection;
 
     public DocumentType() {

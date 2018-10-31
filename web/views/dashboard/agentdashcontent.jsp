@@ -18,7 +18,7 @@
                   <i class="fa fa-cart-plus"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" class="small-box-footer">${debtorsCount} customers <i class="fa fa-angle-double-right"></i></a>
+                <a href="" class="small-box-footer">${debtorsCount} orders <i class="fa fa-angle-double-right"></i></a>
               </div>
             </div><!-- ./col -->
             
@@ -33,7 +33,7 @@
                   <i class="fa fa-cart-plus"></i>
                 </div>
                 <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
-                <a href="" class="small-box-footer">${outstandersCount} customers <i class="fa fa-angle-double-right"></i></a>
+                <a href="" class="small-box-footer">${outstandersCount} orders <i class="fa fa-angle-double-right"></i></a>
               </div>
             </div><!-- ./col -->
             
@@ -83,8 +83,8 @@
             <div class="col-md-4 col-sm-6 col-xs-12">
                 <div class="callout bg-green">
                     <strong>
-                        Order Count
-                        <span class="pull-right">${orderCount}</span>
+                        Order 
+                        <span class="pull-right">${orderCount} | ${totalOrderValue}</span>
                     </strong>
                 </div>
             </div><!-- /.col -->
@@ -95,8 +95,8 @@
             <div class="col-md-4 col-sm-6 col-xs-12">
                 <div class="callout bg-olive">
                     <strong>
-                        Total Sales Value
-                        <span class="pull-right"><b>${ordersValue}</b></span>
+                        Total Payments
+                        <span class="pull-right"><b>${paymentValue}</b></span>
                     </strong>
                 </div>
             </div><!-- /.col -->

@@ -40,11 +40,8 @@
                     <span>Amount</span>
                 </div>
 
-                <div class="col-md-2">
-                    <input type="text" name="" id="withdraw_amount" />
-                </div>
-
                 <div class="col-md-12">
+                    <input type="text" name="" id="withdraw_amount" />
                     <a href="#" onclick="return withdrawalRequest(event)" class="btn btn-success"><i class="fa fa-money"></i>  Request</a>
                 </div>
             </div>

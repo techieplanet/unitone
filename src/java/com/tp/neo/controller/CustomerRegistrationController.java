@@ -7,6 +7,8 @@ package com.tp.neo.controller;
 
 import com.tp.neo.controller.components.AppController;
 import com.tp.neo.controller.helpers.CompanyAccountHelper;
+import com.tp.neo.service.CountryService;
+import com.tp.neo.service.BankService;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -37,10 +39,12 @@ public class CustomerRegistrationController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         
         ProjectController project = new ProjectController();
-        
+        request.setAttribute("countries", CountryService.getCountryList());
+        request.setAttribute("Banks", BankService.getAllBanks());
         String viewFile = "/views/customer/registration.jsp";
         request.setAttribute("projects", project.listProjects());
         request.setAttribute("companyAccount",CompanyAccountHelper.getCompanyAccounts());
+        
         request.getRequestDispatcher(viewFile).forward(request, response);
         
     }

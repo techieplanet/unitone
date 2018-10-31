@@ -35,7 +35,7 @@ public class EmailHelper {
     /*
     This method sends approval or decline email
      */
-    protected void sendAgentApprovalEmail(Agent agent, int status) {
+    public void sendAgentApprovalEmail(Agent agent, int status) {
         //send email 
         String approvalMessage = "Dear %s %s,<br/>"
                 + "Your registration as an agent on %s has been approved.<br/>"
@@ -56,20 +56,21 @@ public class EmailHelper {
         }
 
         //System.err.println("email " + agent.getEmail() + " email: " + defaultEmail + " subject: " + emailSubject + " message: " + message);
-        new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, emailSubject, message);
+        StringBuilder html = new EmailParser().prepareEmail("Agent Approval", message , "", "");
+        new MailSender().sendHtmlEmail(agent.getEmail(), defaultEmail, emailSubject, html);
 
     }
 
-    protected void sendAgentWalletCreditAlert(Customer customer, ProjectUnit unit, double amount) {
+    protected void sendAgentWalletCreditAlert(Customer customer, OrderItem order ,  double amount) {
         String messageBody = "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
                 + "<br/>" + "Your wallet has been credited " + String.format("%.2f", amount)
-                + "Item: " + unit.getTitle() + " in " + unit.getProject().getName() + "."
+                + "Item: " + order.getUnit().getTitle() + " in " + order.getUnit().getProject().getName() + "."
                 + "Customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ","
-                + "Number of Units: " + unit.getQuantity();
+                + "Number of Units: " + order.getQuantity();
 
         String emailSubject = APP_NAME + ": New Wallet Credit";
-
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("Agent Wallet Alert", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, html);
     }
 
     /**
@@ -88,47 +89,35 @@ public class EmailHelper {
 
         String messageBody = "Dear Admin,"
                 + "<br/>" + "A new order, ID: <b>" + order.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname()
-                + " has been created and needs approval from you."
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + "Please follow the link below to take necessary action."
-                + "<br/>" + "<a href=" + thisOrderPageLink + ">" + thisOrderPageLink + "</a>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + " has been created and needs approval from you.";
 
         String emailSubject = APP_NAME + ": New Order Awaiting Approval";
-
+        StringBuilder html = new EmailParser().prepareEmail("New Order Alert", messageBody , thisOrderPageLink, "Goto Order");
         for (int i = 0; i < recipientsList.size(); i++)
         {
-            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, html);
         }
 
     }
 
     protected void sendNewOrderEmailToCustomer(Lodgement lodgement, Customer customer) {
         String messageBody = "Dear " + customer.getFirstname() + " " + customer.getLastname() + ","
-                + "<br/>" + "Your order of value " + lodgement.getAmount() + " has been received and is being processed."
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/>" + "Your order of value " + lodgement.getAmount() + " has been received and is being processed.";
 
         String emailSubject = APP_NAME + ": New Order";
-
-        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("New Order", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, html);
     }
 
     protected void sendNewOrderEmailToAgent(Lodgement lodgement, Customer customer) {
         String messageBody = "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
                 + "<br/>" + "Your new customer order has been received and is being processed."
                 + "<br/>" + "Customer: " + customer.getFirstname() + " " + customer.getLastname()
-                + "<br/>" + "Order Amount: " + lodgement.getAmount()
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/>" + "Order Amount: " + lodgement.getAmount();
 
         String emailSubject = APP_NAME + ": New Order";
-
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+         StringBuilder html = new EmailParser().prepareEmail("New Order", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, html);
     }
 
     /**
@@ -140,14 +129,11 @@ public class EmailHelper {
                 + "<br/>" + "Your order for " + unit.getTitle() + " in " + unit.getProject().getName() + " has been approved "
                 + "and has been advanced by the sum of " + String.format("%.2f", amount) + "."
                 + "<br/>"
-                + "<br/>" + "Congratulations "
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/>" + "Congratulations ";
 
         String emailSubject = APP_NAME + ": New Order Approval";
-
-        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("Order Approval", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, html);
     }
 
     protected void sendOrderApprovalEmailToAgent(Customer customer, ProjectUnit unit, double amount) {
@@ -157,14 +143,11 @@ public class EmailHelper {
                 + "Number of Units: " + unit.getQuantity()
                 + "This order has been advanced by the sum of " + String.format("%.2f", amount) + "."
                 + "<br/>"
-                + "<br/>" + "Congratulations "
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/>" + "Congratulations ";
 
         String emailSubject = APP_NAME + ": New Order Approval";
-
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("Order Approval", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, html);
     }
 
     /**
@@ -174,84 +157,63 @@ public class EmailHelper {
     protected void sendNewLodgementEmailToAdmins(Lodgement lodgement, Customer customer, List<User> recipientsList, String waitingLodgementsPageLink) {
         String messageBody = "Dear Admin,"
                 + "<br/>" + "A new lodgement, ID: <b>" + lodgement.getId() + "</b> for customer: <b>" + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
-                + " has been created and needs approval."
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + "Please follow the link below to take necessary action."
-                + "<br/>" + waitingLodgementsPageLink
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + " has been created and needs approval.";
 
         String emailSubject = APP_NAME + ": New Lodgement Awaiting Approval";
-
+        StringBuilder html = new EmailParser().prepareEmail("New Lodgement Alert", messageBody , waitingLodgementsPageLink, "Goto Lodgement");
         for (int i = 0; i < recipientsList.size(); i++)
         {
-            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, html);
         }
 
     }
 
     protected void sendNewLodgementEmailToCustomer(Lodgement lodgement, Customer customer) {
         String messageBody = "Dear " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
-                + "<br/>" + "Your lodgement of value " + lodgement.getAmount() + " has been received and is being processed."
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/>" + "Your lodgement of value " + lodgement.getAmount() + " has been received and is being processed.";
 
         String emailSubject = APP_NAME + ": New Lodgement";
-
-        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("New Lodgement Alert", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, html);
     }
 
     protected void sendNewLodgementEmailToAgent(Lodgement lodgement, Customer customer) {
         String messageBody = "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
                 + "<br/>" + "Your customer's lodgement has been received and is being processed."
                 + "<br/>" + "Customer: " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
-                + "<br/>" + "Amount: " + lodgement.getAmount()
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/>" + "Amount: " + lodgement.getAmount();
 
         String emailSubject = APP_NAME + ": New Lodgement";
-
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("New Lodgement Alert", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, html);
     }
 
     /**
      * ********************************* LODGEMENT APPROVALS
      * **********************************
      */
-    protected void sendLodgementApprovalEmailToCustomer(Customer customer, ProjectUnit unit, double amount) {
+    protected void sendLodgementApprovalEmailToCustomer(Customer customer, OrderItem item, double amount) {
         String messageBody = "Dear " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
-                + "<br/>" + "Your lodgement for " + unit.getTitle() + " in " + unit.getProject().getName() + " has been approved "
+                + "<br/>" + "Your lodgement for " + item.getUnit().getTitle() + " in " + item.getUnit().getProject().getName() + " has been approved "
                 + "and your purchase has been advanced by the sum of " + String.format("%.2f", amount) + "."
-                + "<br/>"
-                + "<br/>" + "Congratulations "
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/><br/>" + "Congratulations ";
 
         String emailSubject = APP_NAME + ": New Lodgement Approval";
-
-        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("Lodgement Approval", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, html);
     }
 
-    protected void sendLodgementApprovalEmailToAgent(Customer customer, ProjectUnit unit, double amount) {
+    protected void sendLodgementApprovalEmailToAgent(Customer customer, OrderItem item, double amount) {
         String messageBody = "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
                 + "<br/>" + "A lodgement has been approved for your customer - " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ")"
-                + "Item: " + unit.getTitle() + " in " + unit.getProject().getName() + "."
-                + "Number of Units: " + unit.getQuantity()
+                + "Item: " + item.getUnit().getTitle() + " in " + item.getUnit().getProject().getName() + "."
+                + "Number of Units: " + item.getUnit().getQuantity()
                 + "This sale has been advanced by the sum of " + String.format("%.2f", amount) + "."
-                + "<br/>"
-                + "<br/>" + "Congratulations "
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/><br/>" + "Congratulations ";
 
         String emailSubject = APP_NAME + ": New Lodgement Approval";
-
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("Lodgement Approval", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, html);
     }
 
     /**
@@ -261,31 +223,21 @@ public class EmailHelper {
     protected void sendLodgementDeclineEmailToCustomer(Customer customer, Lodgement lodgement, double amount) {
         String messageBody = "Dear " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + "),"
                 + "<br/>" + "Your lodgement of " + lodgement.getAmount() + " on " + lodgement.getCreatedDate() + " has been declined. "
-                + "<br/>"
-                + "<br/>"
-                + "Please contact your agent or our customer care for further details."
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/><br/>Please contact your agent or our customer care for further details.";
 
         String emailSubject = APP_NAME + ": Lodgement Decline";
-
-        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("Lodgement Decline", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, html);
     }
 
     protected void sendLodgementDeclineEmailToAgent(Customer customer, Lodgement lodgement, double amount) {
         String messageBody = "Dear " + customer.getAgent().getFirstname() + " " + customer.getAgent().getLastname() + " (" + customer.getAgent().getAccount().getAccountCode() + "),"
                 + "<br/>" + "A lodgement of your customer -  " + customer.getFirstname() + " " + customer.getLastname() + " (" + customer.getAccount().getAccountCode() + ") has been declined."
-                + "<br/>"
-                + "<br/>"
-                + "Please contact your agent or our customer care for further details."
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/><br/>Please contact your agent or our customer care for further details.";
 
         String emailSubject = APP_NAME + ": New Lodgement Approval";
-
-        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("Lodgement Decline", messageBody , "", "");
+        new MailSender().sendHtmlEmail(customer.getAgent().getEmail(), defaultEmail, emailSubject, html);
     }
 
     /**
@@ -295,31 +247,23 @@ public class EmailHelper {
     protected void sendWithdrawalRequestEmailToAgent(Withdrawal w) {
         String messageBody = "Dear " + w.getAgent().getFirstname() + " " + w.getAgent().getLastname() + " (" + w.getAgent().getAccount().getAccountCode() + "),"
                 + "<br/>" + "Your withdrawal request has been received and is being processed."
-                + "<br/>Amount: " + w.getAmount()
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/>Amount: " + w.getAmount();
 
         String emailSubject = APP_NAME + ": New Withdrawal Request";
-
-        new MailSender().sendHtmlEmail(w.getAgent().getEmail(), defaultEmail, emailSubject, messageBody);
+        StringBuilder html = new EmailParser().prepareEmail("Withdrawal Request", messageBody , "", "");
+        new MailSender().sendHtmlEmail(w.getAgent().getEmail(), defaultEmail, emailSubject, html);
     }
 
     protected void sendWithdrawalRequestEmailToAdmin(Withdrawal w, List<User> recipientsList, String withdrawalPageLink) {
         String messageBody = "New withdrawal request waiting for approval."
                 + "<br/>" + "Agent: " + w.getAgent().getFirstname() + " " + w.getAgent().getLastname() + " (" + w.getAgent().getAccount().getAccountCode() + "),"
-                + "<br/>Amount: " + w.getAmount()
-                + "<br/>" + "Please follow the link below to take necessary action."
-                + "<br/>" + "<a href=" + withdrawalPageLink + ">" + withdrawalPageLink + "</a>"
-                + "<br/>"
-                + "<br/>"
-                + "<br/>" + APP_NAME;
+                + "<br/>Amount: " + w.getAmount();
 
         String emailSubject = APP_NAME + ": New Withdrawal Request";
-
+        StringBuilder html = new EmailParser().prepareEmail("Withdrawal Request", messageBody , withdrawalPageLink, "Goto Withdrawal");
         for (int i = 0; i < recipientsList.size(); i++)
         {
-            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, messageBody);
+            new MailSender().sendHtmlEmail(recipientsList.get(i).getEmail(), defaultEmail, emailSubject, html);
         }
     }
 
@@ -348,14 +292,11 @@ public class EmailHelper {
             String messageBody = "Dear Customer (" + customer.getFirstname() + " " + customer.getLastname() + "(" + customer.getAccount().getAccountCode() + ")"
                     + "<br/>Reminder on your orders with payment due in " + dueDays + "."
                     + "<br/>" + orderItemsString
-                    + "<br/><br/>" + "Please take necessary actions."
-                    + "<br/>"
-                    + "<br/>"
-                    + "<br/>" + APP_NAME;
+                    + "<br/><br/>" + "Please take necessary actions.";
 
             String emailSubject = APP_NAME + ": Payment Due in " + dueDays;
-
-            new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, messageBody);
+            StringBuilder html = new EmailParser().prepareEmail("Withdrawal Request", messageBody , "", "");
+            new MailSender().sendHtmlEmail(customer.getEmail(), defaultEmail, emailSubject, html);
 
         }
     }
@@ -367,18 +308,12 @@ public class EmailHelper {
     protected void sendReferralCodeEmail(String recipientEmail, Agent agent, String refLink) {
         String messageBody = "Good day,"
                 + "<br/>" + "Please join me as an agent with " + companyName + "."
-                + "<br/>" + "You stand a chance to make a lot of money selling properties."
-                + "<br/><br/>" + "Simply follow the link below to register with my referral code."
-                + "<br/>"
-                + "<br/>"
-                + "<a href=" + refLink + ">" + "Go to registration" + "</a>"
-                + "<br/>"
-                + "<br/>"
-                + "Thank you";
-
+                + "<br/>" + "You stand a chance to make a lot of money selling properties.";
+        
         String emailSubject = "Agent Referral Code - " + agent.getAccount().getAccountCode();
+        StringBuilder html = new EmailParser().prepareEmail("Withdrawal Request", messageBody , refLink, "Register");
         //System.out.println("recipientEmail: " + recipientEmail);
-        new MailSender().sendHtmlEmail(recipientEmail, agent.getEmail(), emailSubject, messageBody);
+        new MailSender().sendHtmlEmail(recipientEmail, agent.getEmail(), emailSubject, html);
     }
 
     
@@ -734,4 +669,5 @@ public class EmailHelper {
         String emailSubject = "NeoForce - Password Reset";
         new MailSender().sendHtmlEmail(recipentEmail, companyEmail, emailSubject, messageBody);
     }
+
 }

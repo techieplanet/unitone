@@ -7,6 +7,7 @@ package com.tp.neo.model.plugins;
 
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.LodgementItem;
+import com.tp.neo.model.ProjectUnit;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
@@ -20,6 +21,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -41,9 +43,17 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "LoyaltyHistory.findByCreatedBy", query = "SELECT l FROM LoyaltyHistory l WHERE l.createdBy = :createdBy"),
     @NamedQuery(name = "LoyaltyHistory.findByCreatedDate", query = "SELECT l FROM LoyaltyHistory l WHERE l.createdDate = :createdDate"),
     @NamedQuery(name = "LoyaltyHistory.findByModifiedBy", query = "SELECT l FROM LoyaltyHistory l WHERE l.modifiedBy = :modifiedBy"),
-    @NamedQuery(name = "LoyaltyHistory.findByModifiedDate", query = "SELECT l FROM LoyaltyHistory l WHERE l.modifiedDate = :modifiedDate")
+    @NamedQuery(name = "LoyaltyHistory.findByCustomer", query = "SELECT l FROM LoyaltyHistory l WHERE l.customerId = :customer"),
+    @NamedQuery(name = "LoyaltyHistory.findByProjectUnit", query = "SELECT l FROM LoyaltyHistory l WHERE l.unit = :unit"),
+    @NamedQuery(name = "LoyaltyHistory.findByLodgementItem", query = "SELECT l FROM LoyaltyHistory l WHERE l.itemId = :item")
     })
 public class LoyaltyHistory implements Serializable {
+
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "reward_points")
+    private Double rewardPoints;
+    @Column(name = "amount_per_reward")
+    private Double amountPerReward;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -51,8 +61,6 @@ public class LoyaltyHistory implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Long id;
-    @Column(name = "reward_points")
-    private double rewardPoints;
     @Column(name = "type")
     private Short type;
     @Column(name = "deleted")
@@ -71,9 +79,16 @@ public class LoyaltyHistory implements Serializable {
     @ManyToOne
     private Customer customerId;
     @JoinColumn(name = "item_id", referencedColumnName = "id")
-    @ManyToOne
+    @OneToOne
     private LodgementItem itemId;
+    
+    @JoinColumn(name = "unit_id", referencedColumnName = "id")
+    @ManyToOne
+    private ProjectUnit unit;
 
+    @Column(name = "approval_status")
+    private int approvalStatus;//0 -- waiting , 1 --- approved , 2 ---- decline 
+    
     public LoyaltyHistory() {
     }
 
@@ -184,6 +199,42 @@ public class LoyaltyHistory implements Serializable {
     @Override
     public String toString() {
         return "com.tp.neo.model.plugins.LoyaltyHistory[ id=" + id + " ]";
+    }
+
+    public Double getAmountPerReward() {
+        return amountPerReward;
+    }
+
+    public void setAmountPerReward(Double amountPerReward) {
+        this.amountPerReward = amountPerReward;
+    }
+
+    /**
+     * @return the unit
+     */
+    public ProjectUnit getUnit() {
+        return unit;
+    }
+
+    /**
+     * @param unit the unit to set
+     */
+    public void setUnit(ProjectUnit unit) {
+        this.unit = unit;
+    }
+
+    /**
+     * @return the approvedStatus
+     */
+    public int  getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    /**
+     * @param approvedStatus the approvedStatus to set
+     */
+    public void setApprovalStatus(int approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
     
 }

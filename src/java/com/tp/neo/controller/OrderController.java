@@ -25,6 +25,7 @@ import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.model.utils.FileUploader;
+import com.tp.neo.service.CountryService;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
@@ -124,6 +125,7 @@ public class OrderController extends AppController {
                 
                String viewFile = "/views/index/checkout.jsp";
                request.setAttribute("companyAccount", CompanyAccountHelper.getCompanyAccounts());
+               request.setAttribute("countries", CountryService.getCountryList());
                request.getRequestDispatcher(viewFile).forward(request, response);
                return;
         }
@@ -179,7 +181,7 @@ public class OrderController extends AppController {
         //HttpSession session = request.getSession();
         SystemUser user = sessionUser;
         //System.out.println("System User : " + user);
-        
+        request.setAttribute("userTypeId", sessionUser.getSystemUserTypeId());
         request.setAttribute("userType", sessionUser.getSystemUserTypeId());
         request.setAttribute("agents",agent.listAgents());
        
@@ -364,12 +366,13 @@ public class OrderController extends AppController {
             OrderItemObjectsList orderItemObject = orderManager.getCartData(request.getParameter("cartDataJson").toString());
            Map<String , String> requestParams = getRequestParameters(request);
             
+            boolean isAdmin = sessionUser != null && sessionUser.getSystemUserTypeId() == 1;
             
-            List<OrderItem> orderItems = orderManager.prepareOrderItem(orderItemObject, agent);
+            List<OrderItem> orderItems = orderManager.prepareOrderItem(orderItemObject, agent , isAdmin);
             Lodgement lodgement = orderManager.prepareLodgement(requestParams, agent);
             
             StringBuilder eMsg = new StringBuilder();
-            boolean valid = validateOrder(orderItems , lodgement , eMsg);
+            boolean valid = orderManager.validateOrder(orderItems , lodgement , eMsg);
             if(!valid)
             {
                 sendErrorMessage(request, response , eMsg.toString());
@@ -385,8 +388,9 @@ public class OrderController extends AppController {
             }
             
             lodgement.setCustomer(customer);
-            
-            ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, request.getContextPath());
+            String url = request.getServerName() + "/" + request.getContextPath()+"/";
+            url  = url.replace("//", "/");
+            ProductOrder productOrder = orderManager.processOrder(customer, lodgement, orderItems, url );
             
             if(productOrder != null){
                     if(productOrder.getId() != null){
@@ -730,7 +734,6 @@ public class OrderController extends AppController {
    
     
     private void approveOrder(HttpServletRequest request,HttpServletResponse response, String viewFile){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
         EntityManager em = emf.createEntityManager();
         
         HttpSession session = request.getSession();
@@ -755,7 +758,7 @@ public class OrderController extends AppController {
                 OrderItem orderItem = em.find(OrderItem.class, id);
                 short s = 1;
                 orderItem.setApprovalStatus(s);
-                //em.persist(orderItem);
+                //orderItem = (OrderItem)em.merge(orderItem);
                 orderItemList.add(orderItem);
                 
                 //Lets make a Loyalty history entry 
@@ -766,16 +769,14 @@ public class OrderController extends AppController {
                     customer = orderItem.getOrder().getCustomer();
                     
                     int quantity = orderItem.getQuantity();
-                    
-                    for(int x = 0 ; x < quantity ; x ++ )
-                    {
                     LoyaltyHistory lH = new LoyaltyHistory();
                     lH.setCustomerId(customer);
-                    lH.setRewardPoints(orderItem.getUnit().getRewardPoints());
+                    lH.setRewardPoints(orderItem.getUnit().getRewardPoints() * quantity);
                     lH.setType((short)1);
+                    lH.setUnit(orderItem.getUnit());
                     lH.setCreatedDate(date);
                     em.persist(lH);
-                    }
+                   
                 }
               
             }
@@ -815,9 +816,10 @@ public class OrderController extends AppController {
             //System.out.println("Successful");
             
         }
-        em.getTransaction().commit();
+        em.getTransaction()
+                .commit();
         em.close();
-        emf.close();
+       // emf.close();
         
         redirectToPendingOrder(request, response, viewFile);
     }
@@ -828,12 +830,12 @@ public class OrderController extends AppController {
         if(em.getTransaction().isActive())
         em.getTransaction().rollback();
         em.close();
-        emf.close();
+       // emf.close();
     }
     catch(Exception e){
         em.getTransaction().rollback();
         em.close();
-        emf.close();
+       // emf.close();
     }
    }
     
@@ -898,12 +900,12 @@ public class OrderController extends AppController {
            map.put("id", item.getId().toString());
            map.put("quantity", item.getQuantity().toString());
            map.put("initialDeposit", String.format("%.2f",item.getInitialDep()));
-           map.put("cpu", String.format("%.2f",item.getUnit().getCpu()));
+           map.put("cpu", String.format("%.2f",item.getCostPrice()));
            map.put("title", item.getUnit().getTitle());
-           map.put("discount", itemHelper.getOrderItemDiscount(item.getUnit().getDiscount(), item.getUnit().getCpu(), item.getQuantity()));
+           map.put("discount",  String.format("%.2f" ,item.getDiscountAmt()));
            map.put("total_paid", String.format("%.2f",total_paid));
            map.put("project_name", item.getUnit().getProject().getName());
-           map.put("balance",itemHelper.getOrderItemBalance(item.getUnit().getAmountPayable(), item.getQuantity(), total_paid));
+           map.put("balance",itemHelper.getOrderItemBalance(item.getAmountPayable(),  total_paid));
            map.put("completionDate",itemHelper.getCompletionDate(item, total_paid));
            
            orderItemMap.add(map);
@@ -955,7 +957,7 @@ public class OrderController extends AppController {
         double grandTotal = 0.00;
         
         for(LodgementItem LI : items){
-            double rewardAmount = LI.getRewardAmount() != null ? LI.getRewardAmount() : 0;
+            double rewardAmount = LI.getRewardAmount();
             total += LI.getAmount() + rewardAmount;
         }
         
@@ -967,31 +969,6 @@ public class OrderController extends AppController {
         
         return map;
     }
-   
-   private boolean validateOrder(List<OrderItem> orderItems , Lodgement lodgement, StringBuilder errorMSG){
-      
-       //Validating if the initial payment specified by user is lesser that what is required
-       Double customerTotalInitialPayment = 0.0;
-       
-       for(OrderItem item : orderItems)
-       {
-          customerTotalInitialPayment += item.getInitialDep();
-          if(item.getInitialDep() < item.getUnit().getLeastInitDep())
-          {
-              errorMSG.append("One or more Order have an Invalid Initial deposit amount");
-              return false;
-          }
-       }
-       
-       if(lodgement.getAmount() < customerTotalInitialPayment)
-       {
-           errorMSG.append("The Lodgement Amount is invalid");
-           return false;
-       }
-       
-       
-      return true;
-  }
    
    private void sendErrorMessage(HttpServletRequest request, HttpServletResponse response , String msg) throws IOException{
        response.sendError(403, msg+ "---Go back <a href='" + request.getHeader("referer") + "'>Previous Page</a>");

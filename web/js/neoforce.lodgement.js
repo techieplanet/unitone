@@ -85,11 +85,11 @@ function prepareOrderListTable(jsonString){
             if(isLoyaltyEnabled == 1){
                 tr += "<td><input type='text'  class='points' name='' id='' value='0' onkeyup='checkLoyaltyPoint(" + rowId + ",this)' /></td>";
             }
-            tr += "<td><button class='btn btn-success addToCart' onclick='addToCart(\"" +project+"\", \""+unitName+"\",\""+unitQty+"\", \""+orderItemId+"\", \""+rowId+"\")'><i class='fa fa-cart-plus'></i>Add</button></td>";
+            tr += "<td><button class='btn btn-success addToCart' onclick=\"addToCart('"+escapeHtml(project)+"', '"+escapeHtml(unitName)+"','"+unitQty+"', '"+orderItemId+"', '"+rowId+"')\"><i class='fa fa-cart-plus'></i>Add</button></td>";
             rows += tr;
             payId++;
         }
-        
+        // , 
         var table = "<table class='table table-bordered table-striped table-hover'>";
         table += "<thead><tr>";
         if(isLoyaltyEnabled == 1){
@@ -131,7 +131,7 @@ function populateCustomerDetails(id){
     
     customerLoyaltyPoint = parseInt(loyaltyPoint);
     
-    console.log("Loyalty Point : " + customerLoyaltyPoint);
+    //console.log("Loyalty Point : " + customerLoyaltyPoint);
     
     $("#customerImage").attr("src",customerImgPath);
     $("#customerName").text(customerName.trim());
@@ -234,18 +234,18 @@ function addToCart(project,unitName,qty,orderItemId,rowId){
     {
         if(isNaN(amount))
         {
-        alert("Please Input A Valid Amount to pay");
+        alert("Please input a valid amount");
         return;
         }
         else if(amount <= 0 )
         {
-            alert("Amount Must Be Greater Than 0");
+            alert("Please input a valid amount");
         return;
         }
     }
     else
     {
-        alert("Please Input The Amount to pay");
+        alert("Please input the amount to be paid");
         return;
     }
     
@@ -566,4 +566,21 @@ function getAllPoints(){
     //console.log("Total Points : " + points);
     
     return points;
+}
+
+var entityMap = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+  '/': '&#x2F;',
+  '`': '&#x60;',
+  '=': '&#x3D;'
+};
+
+function escapeHtml (string) {
+  return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+    return entityMap[s];
+  });
 }

@@ -43,9 +43,9 @@
                       <div class="panel panel-warning"> <!-- Panel starts here -->
                       
                       <div class="panel-body">
-                          <div class="col-md-12"><b>Account Code</b> ${accountCode}</div>
-                          <div class="col-md-6"><b>Available Balance</b> <fmt:formatNumber value="${balance}" type="currency" currencySymbol="N" /></div>
-                          <div class="col-md-6"><b>Ledger Balance</b> <fmt:formatNumber value="${ledgerBalance}" type="currency" currencySymbol="N" /></div>
+                          <div class="col-md-12"><b>Account Code:</b> ${accountCode}</div>
+                          <div class="col-md-6"><b>Available Balance:</b> <fmt:formatNumber value="${balance}" type="currency" currencySymbol="N" /></div>
+                          <div class="col-md-6"><b>Ledger Balance:</b> <fmt:formatNumber value="${ledgerBalance}" type="currency" currencySymbol="N" /></div>
                       </div>
                       
                       </div> <!-- Panel ends here -->
@@ -56,7 +56,7 @@
                       
                       <thead>
                           <tr>
-                              <td class="text-center">SN</td>
+                              <td class="text-center"> S/N </td>
                               <td class="text-center">Date</td>
                               <td class="text-center">Debit</td>
                               <td class="text-center">Credit</td>
@@ -66,15 +66,12 @@
                       
                       <tbody>
                           
-                          <c:set var="totalCredit" value="0" />
-                          <c:set var="totalDebit" value="0" />
-                          
+                         
                           <c:forEach items="${transactions}" var="transaction" varStatus="pointer">
                               
                               <c:if test='${transaction["type"] eq "Credit"}'> 
                                   <c:set var="creditAmount" value="${transaction['amount']}"  />
-                                  <c:set var="totalCredit" value="${transaction['amount'] + totalCredit}" />
-                                  <tr>
+                                 <tr>
                                   <td class="text-center">${pointer.count}</td>
                                   <td class="text-center">${transaction['date']}</td>
                                   <td class="text-right"></td>
@@ -84,7 +81,6 @@
                               </c:if>
                               <c:if test='${transaction["type"] eq "Debit"}'> 
                                   <c:set var="debitAmount" value="${transaction['amount']}" />
-                                  <c:set var="totalDedit" value="${transaction['amount'] + totalDebit}" />
                                   <tr>
                                   <td class="text-center">${pointer.count}</td>
                                   <td class="text-center">${transaction['date']}</td>

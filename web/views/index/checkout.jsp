@@ -1,6 +1,12 @@
 <%@include file="header.jsp" %> 
-
-    <!-- Main content -->
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ include file="../includes/lid.jsp" %>  
+ <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="${pageContext.request.contextPath}/js/accounting.min.js"></script>
+ <script type="text/javascript" src="${pageContext.request.contextPath}/js/app.min.js"></script>
+ <script type="text/javascript" src="${pageContext.request.contextPath}/js/functions.js"></script>    
+   <!-- Main content -->
 <section class="container" style="margin-top:120px;background-color:#fff">                              
 <div class="row">
 
@@ -9,319 +15,13 @@
 
     <!-- form start -->
     <form role="form" name="new_order" method="POST" action="CustomerRegistration" enctype="multipart/form-data" onsubmit="return submitForm()" >
-
-    <input type="hidden" name="agent_id" id="agent_id" value="" />
-
     <div style="">
-    <!--<form role="form" name="customerRegistration" method="POST" action="Order" enctype="multipart/form-data">-->
-      
-    
-     <div class="row" id="step1">
-      <div class="col-md-12">
-                <!-- form start -->
-               <c:if test="${fn:length(errors) > 0 }">
-                <div class="row">
-                    <div class="col-md-12 ">
-                        <p class="bg-danger padding10" style="width:100%; margin:0 auto !important">
-                          <c:forEach items="${errors}" var="error">
-                              <c:out value="${error.value}" /><br/>
-                          </c:forEach>
-                        </p>
-                    </div>
-                </div>
-            </c:if>
-                    <c:if test="${success}">
-              <div class="row">
-                    <div class="col-md-12 ">
-                        <p class="bg-success padding10" style="width:95%">
-                          <i class="fa fa-check"></i>Saved Successfully
-                          <span class="pull-right">
-                              
-                              <a class="btn btn-primary btn-sm margintop5negative" role="button" href="${pageContext.request.contextPath}/Customer">Back to list</a>
-                              
-                          </span>
-                        </p>
-                    </div>
-                </div>
-          </c:if>   
-                 
-                    
-                    <div class="row" style="padding-top:10px;">
-                        <div class="col-md-4">
-                      <fieldset>
-                        <legend style="padding-left:10px !important;">Personal Information</legend>
-                          <div class="row">
-                              <div class="col-md-12">
-                                  <div class="form-group" style="padding-left:10px !important;">
-                                      <label for="customerFirstname">First Name</label>
-                                      <input type="text"  name="customerFirstname" class="form-control" id="customerFirstname" placeholder="First Name" 
-                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerFirstname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.firstname}"</c:if> "/>
-                                             
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
-                                    <div class="form-group" style="padding-left:10px !important;">
-                                      <label for="customerMiddlename">Middle Name</label>
-                                      <input type="text" class="form-control" id="customerMiddlename" name="customerMiddlename" placeholder="Middle Name"
-                                        value=<c:if test="${fn:length(errors) > 0 }">"${param.customerMiddlename}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.middlename}"</c:if> "/>
-                                             
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
-                                    <div class="form-group" style="padding-left:10px !important;">
-                                      <label for="customerLastname">Last Name</label>
-                                      <input type="text" class="form-control" name="customerLastname" id="customerLastname" placeholder="Last Name" 
-                                         value=<c:if test="${fn:length(errors) > 0 }">"${param.customerLastname}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.lastname}"</c:if> "/>
-                                             
-                                    </div>
-                                </div>
-                            </div>
-                        </fieldset>
-                        </div>
-                        
-                        <div class="col-md-4" style="padding-top:50px">
-                       
-                          <fieldset>
-                              
-                          <div class="row">
-                             <div class="col-md-12">
-                            <div class="form-group" style="padding-left:10px !important;padding-right:10px !important">
-                              <label for="customerEmail">Email address</label>
-                              <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="your@email.com" 
-                                     value=<c:if test="${fn:length(errors) > 0 }">"${param.customerEmail}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.email}"</c:if> "
-                              <c:if test="${customer.customerId !='' && customer.customerId != null }">readonly="true"</c:if>
-                              />
-                                     
-                            </div>
-                        </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
-                                    <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
-                                      <label for="customerPassword">Password</label>
-                                      <input type="password" class="form-control" id="customerPassword" name="customerPassword" placeholder="Password" 
-                                        
-                                             />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-12">
-                                    <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
-                                      <label for="customerConfirmPassword">Confirm Password</label>
-                                      <input type="password" class="form-control" id="customerConfirmPassword" name="customerConfirmPassword" placeholder="Confirm Password"  />
-                                    </div>
-                                </div>
-                            </div>
-                            </fieldset>
-                        </div>
-                         
-                    
-                    </div>
-                    <div class="row">
-                      <div class="col-md-4">
-                                 <fieldset>
-                                    <div class="col-md-6" style="padding-top:0px">
-
-                                        <div class="form-group">
-                                          <div class="btn-group btn-group-xs">
-                                              <label for="customerPhoto">Customer Photo</label>
-                                              <div class="btn btn-primary">
-                                                <input type="file" name="customerPhoto" accept="image/gif, image/jpeg, image/png" id="customerPhoto" >
-                                                <input type="hidden" name="customerPhotoHidden" />
-                                              </div>
-                                          </div>
-
-                                        </div>
-
-                                    </div>
-                                 </fieldset>
-                             
-                            </div>
-
-                    </div>
-                    </div>
-                    
-                   
-                    
-                    
-                    <div class="row" style="padding-top:10px;">
-                    <div class="col-md-12" >
-                        <fieldset>
-                            <legend style="padding-left:10px !important;">Contact Information</legend>
-                        <div class="row">
-                        
-                        <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-4">
-                            
-                                <div class="form-group" style="margin-left:14px !important;padding-left:10px !important;">
-                                    <label for="customerStreet">Street</label>
-                                    <input type="text" class="form-control" id="customerStreet" name="customerStreet" placeholder="Street"  
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerStreet}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.street}"</c:if> "
-                                       />
-                                </div>
-                            </div>
-                        
-                            <div class="col-md-4">
-                                <div class="form-group" style="padding-left:10px !important;">
-                                <label for="customerCity">City</label>
-
-                                    <input type="text" class="form-control" id="customerCity" name="customerCity" placeholder="City"  
-                                           value=<c:if test="${fn:length(errors) > 0 }">"${param.customerCity}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.city}"</c:if> "
-                                           />
-
-
-                                </div>
-                            </div>
-                        <c:if test="${fn:length(errors) > 0 }"><c:set var="state" value="${param.customerState}" scope="session" /></c:if>
-                        <c:if test="${fn:length(errors) <= 0 }"><c:set var="state" value="${customer.state}" scope="session" /></c:if>
-                      
-                        <div class="col-md-4">
-                            <div class="form-group" style="margin-right:24px !important;padding-left:20px !important;"  />
-                              <label for="customerState">State</label>
-                              <select class="form-control" id="customerState" name="customerState"  >
-                                    <option value="">--choose--</option>
-                                    
-                                    <option value="ABUJA FCT" <c:if test='${state == "ABUJA FCT"}'> <jsp:text>selected</jsp:text> </c:if>>ABUJA FCT</option>
-                                    <option value="Abia" <c:if test='${state == "Abia"}'> <jsp:text>selected</jsp:text> </c:if>>ABIA</option>
-                                    <option value="Adamawa" <c:if test='${state == "Adamawa"}'> <jsp:text>selected</jsp:text> </c:if>>ADAMAWA</option>
-                                    <option value="Akwa Ibom" <c:if test='${state == "Akwa Ibom"}'> <jsp:text>selected</jsp:text> </c:if>>AKWA IBOM</option>
-                                    <option value="Anambra" <c:if test='${state == "Anambra"}'> <jsp:text>selected</jsp:text> </c:if>>ANAMBRA</option>
-                                    <option value="Bauchi" <c:if test='${state == "Bauchi"}'> <jsp:text>selected</jsp:text> </c:if>>BAUCHI</option>
-                                    <option value="Bayelsa" <c:if test='${state == "Bayelsa"}'> <jsp:text>selected</jsp:text> </c:if>>BAYELSA</option>
-                                    <option value="Benue" <c:if test='${state == "Benue"}'> <jsp:text>selected</jsp:text> </c:if>>BENUE</option>
-                                    <option value="Borno" <c:if test='${state == "Borno"}'> <jsp:text>selected</jsp:text> </c:if>>BORNO</option>
-                                    <option value="Cross River" <c:if test='${state == "Cross River"}'> <jsp:text>selected</jsp:text> </c:if>>CROSS RIVER</option>
-                                    <option value="Delta" <c:if test='${state == "Delta"}'> <jsp:text>selected</jsp:text> </c:if>>DELTA</option>
-                                    <option value="Ebonyi" <c:if test='${state == "Ebonyi"}'> <jsp:text>selected</jsp:text> </c:if>>EBONYI</option>
-                                    <option value="Edo" <c:if test='${state == "Edo"}'> <jsp:text>selected</jsp:text> </c:if>>EDO</option>
-                                    <option value="Ekiti" <c:if test='${state == "Ekiti"}'> <jsp:text>selected</jsp:text> </c:if>>EKITI</option>
-                                    <option value="Enugu" <c:if test='${state == "Enugu"}'> <jsp:text>selected</jsp:text> </c:if>>ENUGU</option>
-                                    <option value="Gombe" <c:if test='${state == "Gombe"}'> <jsp:text>selected</jsp:text> </c:if>>GOMBE</option>
-                                    <option value="Imo" <c:if test='${state == "Imo"}'> <jsp:text>selected</jsp:text> </c:if>>IMO</option>
-                                    <option value="Jigawa" <c:if test='${state == "Jigawa"}'> <jsp:text>selected</jsp:text> </c:if>>JIGAWA</option>
-                                    <option value="Kaduna" <c:if test='${state == "Kaduna"}'> <jsp:text>selected</jsp:text> </c:if>>KADUNA</option>
-                                    <option value="Kano" <c:if test='${state == "Kano"}'> <jsp:text>selected</jsp:text> </c:if>>KANO</option>
-                                    <option value="Katsina" <c:if test='${state == "Katsina"}'> <jsp:text>selected</jsp:text> </c:if>>KATSINA</option>
-                                    <option value="Kebbi" <c:if test='${state == "Kebbi"}'> <jsp:text>selected</jsp:text> </c:if>>KEBBI</option>
-                                    <option value="Kogi" <c:if test='${state == "Kogi"}'> <jsp:text>selected</jsp:text> </c:if>>KOGI</option>
-                                    <option value="Kwara" <c:if test='${state == "Kwara"}'> <jsp:text>selected</jsp:text> </c:if>>KWARA</option>
-                                    <option value="Lagos" <c:if test='${state == "Lagos"}'> <jsp:text>selected</jsp:text> </c:if>>LAGOS</option>
-                                    <option value="Nassarawa" <c:if test='${state == "Nassarawa"}'> <jsp:text>selected</jsp:text> </c:if>>NASSARAWA</option>
-                                    <option value="Niger" <c:if test='${state == "Niger"}'> <jsp:text>selected</jsp:text> </c:if>>NIGER</option>
-                                    <option value="Ogun" <c:if test='${state == "Ogun"}'> <jsp:text>selected</jsp:text> </c:if>>OGUN</option>
-                                    <option value="Ondo" <c:if test='${state == "Ondo"}'> <jsp:text>selected</jsp:text> </c:if>>ONDO</option>
-                                    <option value="Osun" <c:if test='${state == "Osun"}'> <jsp:text>selected</jsp:text> </c:if>>OSUN</option>
-                                    <option value="Oyo" <c:if test='${state == "Oyo"}'> <jsp:text>selected</jsp:text> </c:if>>OYO</option>
-                                    <option value="Plateau" <c:if test='${state == "Plateau"}'> <jsp:text>selected</jsp:text> </c:if>>PLATEAU</option>
-                                    <option value="Rivers" <c:if test='${state == "Rivers"}'> <jsp:text>selected</jsp:text> </c:if>>RIVERS</option>
-                                    <option value="Sokoto" <c:if test='${state == "Sokoto"}'> <jsp:text>selected</jsp:text> </c:if>>SOKOTO</option>
-                                    <option value="Taraba" <c:if test='${state == "Taraba"}'> <jsp:text>selected</jsp:text> </c:if>>TARABA</option>
-                                    <option value="Yobe" <c:if test='${state == "Yobe"}'> <jsp:text>selected</jsp:text> </c:if>>YOBE</option>
-                                    <option value="Zamfara" <c:if test='${state == "Zamfara"}'> <jsp:text>selected</jsp:text> </c:if>>ZAMFARA</option>
-                              </select>
-                            </div>
-                        </div>
-                        
-                        </div>
-                        </div>
-                              
-                        <div class="col-md-12">
-                            <div class="col-md-6">
-                            <div class="form-group" style="padding-left:10px !important;margin-right:10px !important;">
-                            <label for="customerPhone">Phone Number</label>
-                               
-                                <input type="tel" class="form-control" id="customerPhone" name="customerPhone" placeholder="Phone Number" 
-                                       value=<c:if test="${fn:length(errors) > 0 }">"${param.customerPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.phone}"</c:if> "/>
-                                    
-                            </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                  </fieldset>
-                </div>
-                    </div>
-                    
-                   
-                    
-                    
-                    <div class="row" style="padding-top:10px;">
-                    <div class="col-md-12">
-                        <fieldset>
-                            <legend style="padding-left:20px !important;">Next of Kin</legend>
-                            <div class="col-md-12">
-                            
-                            <div class="row">
-                              <div class="col-md-6">
-                                    <div class="form-group" style="padding-left:10px !important;">
-                                      <label for="customerKinNames">Next of Kin Name</label>
-                                      <input type="text" class="form-control" id="customerKinNames" name="customerKinName" placeholder="Enter Kin Name"  
-                                          value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinName}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinName}"</c:if> "/>
-                                            
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group" style="padding-right:10px !important;padding-left:10px !important;">
-                                    <label for="customerKinPhone">Next of Kin Phone Number</label>
-                                       
-                                        <input type="tel" class="form-control" id="customerKinPhone" name="customerKinPhone" placeholder="Enter Kin Phone Number" 
-                                               value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinPhone}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinPhone}"</c:if> "/>
-                                              
-                                            
-                                    </div>
-                                </div>
-                            </div>
-                            </div>
-                        <div class="row" >
-                            <div class="col-md-6">
-                                    
-                                        <div class="form-group" style="padding-left:25px !important;">
-                                          <label for="customerKinAddress" style="">Next of Kin Address</label>
-                                           <input type="text" class="form-control" id="customerKinAddress" name="customerKinAddress" placeholder="Enter Kin Address" style="  width:100%;"
-                                                  value=<c:if test="${fn:length(errors) > 0 }">"${param.customerKinAddress}"</c:if><c:if test="${fn:length(errors) <= 0 }">"${customer.kinAddress}"</c:if> "/>
-                                                  <br/>
-                                        </div>
-                                    
-                            </div>
-                         </div>    
-                                                  
-                            <div  class="row">
-                                    <div class="col-md-4" style="padding-top:0px;padding-left:25px !important;" >
-                                     
-                                            <div class="form-group" >
-                                                <div class="btn-group btn-group-xs">  
-                                                  <label for="customerKinPhoto" style="">Next of Kin Picture</label>
-                                                  <div class="btn btn-primary">
-                                                   <input type="file" id="customerKinPhoto" name="customerKinPhoto" accept="image/gif, image/jpeg, image/png" />
-                                                   <input type="hidden" name="customerKinPhotoHidden" />
-                                                  </div>
-                                                </div>
-                                            </div>
-
-                                    </div>
-                            </div>
-                                                  
-                        
-                        </fieldset>
-                    </div>
-                    </div>
-                                                  
-                    <div class="col-md-12">
-                        <a class="btn btn-primary" href="#" onclick="return ecommerce.validateCustomerRegForm(event)" role="button">Proceed to Order <i class="fa fa-long-arrow-right"></i></a>
-                    </div>
-        </div>
-    
-      
+     
+     <%@ include file="customerForm.jsp" %>
       <!--
        Step 2 starts here {Product Order}
       -->
-      <div class="row" id="step2" style="display:none">
+      <div class="row" id="step3" style="display:none">
       <div class="col-md-12">
 
       <div id="cart_list" style="padding-top: 20px">
@@ -556,7 +256,6 @@
       <input type="hidden" name="customer_id" id="id" value="${customerId}">
       <input type="hidden" name="id" id="id" value="${customerId}">
       <input type="hidden" name="cartDataJson" id="cartDataJson" />
-      
       </form>
 
   </div>
@@ -672,11 +371,7 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
       </div><!-- /.modal -->
- <script type="text/javascript" src="${pageContext.request.contextPath}/js/jQuery-2.1.4.min.js"></script>
- <script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
- <script type="text/javascript" src="${pageContext.request.contextPath}/js/accounting.min.js"></script>
- <script type="text/javascript" src="${pageContext.request.contextPath}/js/app.min.js"></script>
- <script type="text/javascript" src="${pageContext.request.contextPath}/js/functions.js"></script>     
+  
 <script>
     
     $(".amount-box").attr("readonly",true);
@@ -1049,6 +744,6 @@
     }
     
 </script>
-
+  
     </body>
 </html>

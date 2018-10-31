@@ -15,6 +15,7 @@ import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
 import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Notification;
+import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
@@ -24,6 +25,7 @@ import com.tp.neo.model.utils.TrailableManager;
 import com.tp.neo.service.AgentService;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +42,9 @@ import javax.xml.bind.PropertyException;
  */
 public class LodgementManager {
     
+    public double amountPerRewardPoint = 0;
     SystemUser sessionUser;
-    HashMap<String, Plugin> availablePlugins = new HashMap<String, Plugin>();
+    public Map<String, Plugin> availablePlugins = new HashMap<String, Plugin>();
     
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
     EntityManager em = emf.createEntityManager();
@@ -82,12 +85,28 @@ public class LodgementManager {
                  new TrailableManager(lodgementItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
                 em.persist(lodgementItem);
-                em.flush();
+                //We Will be updating the loyalty table with this
+            if(availablePlugins.containsKey("loyalty")){
+                double rewardAmount = lodgementItem.getRewardAmount();
+                if(rewardAmount == 0) continue;
+                LoyaltyHistory history = new LoyaltyHistory();
+                history.setRewardPoints(rewardAmount/amountPerRewardPoint);
+                history.setType((short)2);
+                history.setAmountPerReward(amountPerRewardPoint);
+                history.setCustomerId(customer);
+                history.setItemId(lodgementItem);
+                history.setApprovalStatus(0);
+                history.setCreatedDate(new Date());
+                em.persist(history);
+                lodgementItem.setLoyaltyHistory(history);
+            }
         }
         
         //create system notification for the lodgement
-        String route =  applicationContext + "/Lodgement?action=notification&id=" + lodgement.getId();
-        Notification notification = new AlertManager().getNotificationsManager(route).setupLodgementNotification(customer,lodgement);
+        //notification URL
+        String notURL = "/Lodgement?action=notification&id=" + lodgement.getId();
+        //String route =  applicationContext + notURL;
+        Notification notification = new AlertManager().getNotificationsManager(notURL).setupLodgementNotification(customer,lodgement);
         em.persist(notification);
         
         
@@ -109,7 +128,6 @@ public class LodgementManager {
         return lodgement;
     }
 
-    
     /**
      * Record lodgment items for mortgage lodgements
      * @param lodgement lodgment of the whole sale
@@ -148,7 +166,6 @@ public class LodgementManager {
             //System.out.println("Inside approveLodgement order side");
             //process lodgement approval for a fresh  new order
             processLodgementApproval(lodgement, lodgement.getCustomer(), notification);
-            
             //now this method will create the alerts for the order 
             new OrderManager(sessionUser).createNewOrderAlerts(lodgement, order, lodgement.getCustomer(), applicationContext);
             //Don't Fret: processApprovedLodgementItems will be called in order manager when the order is finally approved
@@ -161,7 +178,6 @@ public class LodgementManager {
         }
     }
    
-    
     /**
      * 1. This method is used to approve the lodgment made for a new order i.e. it is run when approve lodgement is clicked
      * 2. It also clears the lodgment notification
@@ -187,6 +203,16 @@ public class LodgementManager {
         List<LodgementItem> lodgmeItems = (List)lodgement.getLodgementItemCollection();
         for(LodgementItem thisItem : lodgmeItems){
             thisItem.setApprovalStatus((short)1);
+            
+            if(availablePlugins.containsKey("loyalty")){
+                if(thisItem.getRewardAmount() != 0)
+                {
+                    LoyaltyHistory history = thisItem.getLoyaltyHistory();
+                    history.setApprovalStatus(1);
+                     em.merge(history);
+                }
+                
+            }
             new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
             em.merge(thisItem);
         }
@@ -203,7 +229,6 @@ public class LodgementManager {
         
     }
     
-    
     /**
      * This will process approved (a new order may not have all order items approved and so not all lodgment items  ) lodgement items from an approved lodgement
      * @param lodgementItems
@@ -213,7 +238,7 @@ public class LodgementManager {
      * @throws RollbackException 
      */
     protected void processApprovedLodgementItems(List<LodgementItem> lodgementItems, Customer customer, ProductOrder order) throws PropertyException, RollbackException{
-        em.getTransaction().begin();
+        //em.getTransaction().begin();
         //System.out.println("processApprovedLodgementItems LITEMS SIZE: " + lodgementItems.size());
         
         for(int i=0; i < lodgementItems.size(); i++){
@@ -224,24 +249,29 @@ public class LodgementManager {
             //new TrailableManager(thisItem).registerUpdateTrailInfo(sessionUser.getSystemUserId());
             
             //double entry - take the money out of the customer account and fund the project unit
-            TransactionManager transactionManager = new TransactionManager(sessionUser);
-            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem.getAmount());
             
+            TransactionManager transactionManager = new TransactionManager(sessionUser);
+            transactionManager.doDoubleEntry(customer.getAccount(), thisItem.getItem().getUnit().getAccount(), thisItem , thisItem.getAmount() + thisItem.getRewardAmount());
+            
+            if(thisItem.getAmount() != 0)
+            {
+             //Check if the customer only use reward point to pay for lodgement
             //split funds into respective accounts - buidling, service, income. Others can be added later too.
             this.splitUnitFunds(customer, thisItem.getItem().getUnit(), thisItem);
-            
+            }
             
             
             //send approval alerts (email and SMS) to agent and customer
             AlertManager alertManager = new AlertManager();
-            alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
+           alertManager.sendLodgementApprovalAlerts(customer, thisItem.getItem(), thisItem.getAmount());
 
             //send wallet credit alert
-            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem().getUnit(), thisItem.getAmount());
-            //em.persist(thisItem);
+            alertManager.sendAgentWalletCreditAlerts(customer, thisItem.getItem(), thisItem.getAmount());
+           
+            //em.merge(thisItem);
         }//end for       
         
-        em.getTransaction().commit();
+        //em.getTransaction().commit();
         
         //set the mortgage status for the order based on the resultant of the order items
         updateMortgageStatus(order);
@@ -260,9 +290,6 @@ public class LodgementManager {
         }
         */
     }
-    
-    
-    
     
     public void declineLodgementApproval(Lodgement lodgement, List<LodgementItem> lodgementItems, Customer customer, Notification notification, ProductOrder order) throws PropertyException, RollbackException{
 //        em.getTransaction().begin();
@@ -289,20 +316,20 @@ public class LodgementManager {
         
        
         //Deduct service value before doing VAT and others
-        double serviceValue = calculateServiceValue(unit , lodgementItem);
+        double serviceValue = calculateServiceValue(lodgementItem);
         
-        double lodgementAfterServiceValue = lodgementItem.getAmount()-serviceValue;
+        double lodgementAfterServiceValue = lodgementItem.getAmount()- serviceValue;
         if(serviceValue != 0){
         //Split services cost - debit unit, credit property dev  - double entry
         Account servicesAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "SERVICES").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, servicesAccount, lodgementItem.getItem().getUnit().getServiceValue());
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, servicesAccount, lodgementItem , serviceValue);
         }
         
         //Split Vat amount into vat account
         double vatAmount = lodgementItem.getItem().calculateVatAmount(lodgementAfterServiceValue);
         Account vatAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "VAT").getSingleResult();
         if(vatAmount != 0)
-        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, vatAccount, vatAmount);
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, vatAccount, lodgementItem ,  vatAmount);
         
         
         double incomeAfterTax = lodgementAfterServiceValue - vatAmount;
@@ -315,45 +342,50 @@ public class LodgementManager {
         // Now that we have the main Commission
         
         if(agentActualCommission != 0)
-        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, customer.getAgent().getAccount(), agentActualCommission);
+            new TransactionManager(sessionUser).doDoubleEntry(unitAccount, customer.getAgent().getAccount(),lodgementItem ,  agentActualCommission);
         
         //calculate annual maintenance amount = ama = comm - ( comm * am percentage)/100
         //double entry - debit: agent , credit : annual maintenace
         double annualMaintenance = lodgementItem.getItem().calculateAnnualMaintenanceAmount(agentActualCommission);
+        if(annualMaintenance != 0){
         Account annualMaintenanceAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "AGENT_ANNUAL_MAINTENANCE").getSingleResult();
-        if(annualMaintenance != 0)
-        new TransactionManager(sessionUser).doDoubleEntry(customer.getAgent().getAccount(), annualMaintenanceAccount, annualMaintenance);
+        new TransactionManager(sessionUser).doDoubleEntry(customer.getAgent().getAccount(), annualMaintenanceAccount, lodgementItem , annualMaintenance);
+        }
         
-        
-        //remove the agent withholding tax;
-        Account agentWithholdingAcc =  (Account)em.createNamedQuery("Account.findByAccountCode")
-                                         .setParameter("accountCode", "AGENT_WITHHOLDING")
-                                         .getSingleResult();
         
         double withHoldingTax = 0;
+        double comminssionAfterAnnualMaintenace = agentActualCommission - annualMaintenance;
         if(customer.getAgent().isCorporate())
         {
             //coporate agent
-            withHoldingTax = (agentActualCommission * 10)/100;
+            withHoldingTax = (comminssionAfterAnnualMaintenace * 10)/100;
         }
         else
         {
-            withHoldingTax = (agentActualCommission *  5)/100;
+            withHoldingTax = (comminssionAfterAnnualMaintenace *  5)/100;
         }
         
         if(withHoldingTax != 0)
-        new TransactionManager(sessionUser).doDoubleEntry(customer.getAgent().getAccount(), agentWithholdingAcc, withHoldingTax);
+        {
+            //remove the agent withholding tax;
+        Account agentWithholdingAcc =  (Account)em.createNamedQuery("Account.findByAccountCode")
+                                         .setParameter("accountCode", "AGENT_WITHHOLDING")
+                                         .getSingleResult();
+        new TransactionManager(sessionUser).doDoubleEntry(customer.getAgent().getAccount(), agentWithholdingAcc, lodgementItem, withHoldingTax);
+        }
+       
         
-        
-        agentActualCommission -= annualMaintenance;
-        agentActualCommission -= withHoldingTax;
+        double agentNetCommission = agentActualCommission - (annualMaintenance + withHoldingTax);
         //calculate the commissions for the upline if MLM is enabled.
-        processUplineCommissions(customer.getAgent() , unit  , agentActualCommission);
+        double  totalUplineCommission = processUplineCommissions(customer.getAgent() , unit  , lodgementItem , agentNetCommission);
         
         //Split property dev cost - debit unit, credit property dev  - double entry
+        double buildingCost = lodgementItem.getItem().getUnit().getBuildingCost();
+        if(buildingCost != 0)
+        {
         Account propertyDevelopmentAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "PROPERTY_DEV").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, propertyDevelopmentAccount, lodgementItem.getItem().getUnit().getBuildingCost());
-        
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, propertyDevelopmentAccount,lodgementItem,buildingCost );
+        }
         //Split reward cost - debit unit, credit loyalty  - double entry
 //        Account loyaltyAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "LOYALTY").getSingleResult();
 //        //System.out.println("Account : " + loyaltyAccount.getAccountCode() + ", LodgementItem RewardPoint : " + lodgementItem.getRewardAmount());
@@ -361,10 +393,13 @@ public class LodgementManager {
 //        
         
         //Split income amount - debit unit, credit credit income account  - double entry
+        double income = incomeAfterTax - (agentActualCommission + totalUplineCommission);
+        if(income != 0)
+        {
         Account incomeAccount = (Account)em.createNamedQuery("Account.findByAccountCode").setParameter("accountCode", "INCOME").getSingleResult();
-        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, incomeAccount, lodgementItem.getItem().getUnit().getIncome() - lodgementItem.getRewardAmount());
+        new TransactionManager(sessionUser).doDoubleEntry(unitAccount, incomeAccount,lodgementItem , income/*lodgementItem.getItem().getUnit().getIncome() - lodgementItem.getRewardAmount()*/);
+        }
     }
-    
     
     private void processLoyaltyDetails(LodgementItem lodgementItem, Customer customer, ProductOrder order){
         //System.out.println("Customer Reward Point : " + customer.getRewardPoints());
@@ -399,8 +434,6 @@ public class LodgementManager {
         
     }
     
-    
-    
     private void processUplineCommissions(Agent agent, double initialCommissionAmount){
         if(!this.availablePlugins.containsKey("mlm") || agent.getReferrerId() == 0)
             return;
@@ -426,7 +459,6 @@ public class LodgementManager {
             new TransactionManager(sessionUser).doDoubleEntry(agent.getAccount(), uplineList.get(i).getAccount(), commissionAmount);
         }
     }
-    
     
     private void setLodgementStatus(Lodgement lodgement, short status) throws PropertyException, RollbackException{
         lodgement.setApprovalStatus(status);
@@ -466,26 +498,25 @@ public class LodgementManager {
    }
     
     public void updateMortgageStatus(ProductOrder order){
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-        EntityManager em = emf.createEntityManager();
+        if(em != null && !em.isOpen())
+            em = emf.createEntityManager();
         
         //System.out.println("UpdateMortgageStatus Called");
         
         em.getTransaction().begin();
         
         double actualCost = getOrderActualCost(order);
-        double totalLodgementAmount = getTotalOrderLodgementAmount(order);
+        double totalLodgementAmount = getTotalOrderLodgementAmount(order);//Problem Child
         
         if((actualCost - totalLodgementAmount) <= 0){
             
             order.setMortgageStatus((short)1);
-            em.merge(order);
+            order = (ProductOrder) em.merge(order);
         }
         
         em.getTransaction().commit();
-        emf.getCache().evictAll();
-       em.close();
-       emf.close();
+         //em.close();
+       //emf.close();
     }
      
     /**
@@ -498,9 +529,9 @@ public class LodgementManager {
      * @param unit
      * @param agentCommission 
      */
-    public void processUplineCommissions(Agent agent , ProjectUnit unit  , double agentCommission){
+    public double processUplineCommissions(Agent agent , ProjectUnit unit  ,LodgementItem  item , double agentCommission){
         if(!this.availablePlugins.containsKey("mlm") || agent.getReferrerId() == 0)
-            return;
+            return 0;
         
         Type mapType = new TypeToken<Map<String, String>>(){}.getType();
         Map<String, String> mlmSettingsMap = gson.fromJson(availablePlugins.get("mlm").getSettings(), mapType);
@@ -517,26 +548,76 @@ public class LodgementManager {
         
         //remove the total Upline MLM commison from the project Unit account into the agent account
         if(totalMLMCommission != 0)
-            new TransactionManager(sessionUser).doDoubleEntry(unit.getAccount(), agent.getAccount(), totalMLMCommission);
+            new TransactionManager(sessionUser).doDoubleEntry(unit.getAccount(), agent.getAccount(), item , totalMLMCommission);
         
         //after the money have been credited into the Agent account we move on to Split it into
         //different Uplines account . 
         //Note : we are going to take it Out now from The agent account So That it is trace able
-       AgentService.removeUplineCommissionsFromAgentAccount(sessionUser, agent, uplines, agentCommission, mlmPercentage);
+       AgentService.removeUplineCommissionsFromAgentAccount(sessionUser, agent, uplines, agentCommission, mlmPercentage , item);
+       return totalMLMCommission;
     }
     
-    public static double calculateServiceValue(double lodgementValue , double totalServiceValue , double totalSellingCost ){
+    public static double calculateServiceValue(double lodgementValue , double totalServiceValue , double totalAmountPayable ){
         //We first proceed to calculate the percentage of the service value from the sellingcost
         //we the remove that percentage from the logdgement value
         //note that we are assuming one product here
         if(totalServiceValue == 0) return 0;
         
-        double percentage = (totalServiceValue / totalSellingCost) * 100.0;
+        double percentage = (totalServiceValue / totalAmountPayable) * 100.0;
         
         return (percentage/100.0) * lodgementValue;
     }
     
-    public static double calculateServiceValue(ProjectUnit unit, LodgementItem lodgementItem){
-        return calculateServiceValue(lodgementItem.getAmount() , unit.getServiceValue()* lodgementItem.getItem().getQuantity() , unit.getCpu() * lodgementItem.getItem().getQuantity());
+    public static double calculateIncomeValue(double lodgementValue , double incomeValue , double totalAmountPayable ){
+        //We first proceed to calculate the percentage of the service value from the sellingcost
+        //we the remove that percentage from the logdgement value
+        //note that we are assuming one product here
+        if(incomeValue == 0) return 0;
+        
+        double percentage = (incomeValue / totalAmountPayable) * 100.0;
+        
+        return (percentage/100.0) * lodgementValue;
+    }
+    
+    public static double calculateIncomeValue( LodgementItem lodgementItem){
+         int qty = lodgementItem.getItem().getQuantity();
+        OrderItem item = lodgementItem.getItem();
+        //return calculateIncomeValue(lodgementItem.getAmount() , item.getIncome() * qty , item.getAmountPayable() * qty);
+        return 0;
+    }
+    
+    public static double calculateServiceValue(LodgementItem lodgementItem){
+         int qty = lodgementItem.getItem().getQuantity();
+         OrderItem item = lodgementItem.getItem();
+        return calculateServiceValue(lodgementItem.getAmount() , item.getServiceValue()* qty , item.getAmountPayable() * qty);
+    }
+    
+    public static void registerLoyaltyHistory(List<LodgementItem> items , double amountPerRewardPoint )
+    {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+         Customer customer = items.get(0).getLodgement().getCustomer();
+         double rewardAmount = 0;
+         em.getTransaction().begin();
+         for(LodgementItem item : items)
+         {
+                //lets update the loyalty in the loyalty History table
+                rewardAmount = item.getRewardAmount();
+                if(rewardAmount == 0) continue;
+                LoyaltyHistory history = new LoyaltyHistory();
+                history.setRewardPoints(rewardAmount/amountPerRewardPoint);
+                history.setType((short)2);
+                history.setAmountPerReward(amountPerRewardPoint);
+                history.setCustomerId(customer);
+                history.setItemId(item);
+                item.setLoyaltyHistory(history);
+                history.setApprovalStatus(0);
+                history.setCreatedDate(new Date());
+                em.persist(history);
+         }
+         
+         em.getTransaction().commit();
+         em.close();
+         emf.close();
     }
 }

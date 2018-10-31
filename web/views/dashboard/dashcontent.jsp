@@ -79,7 +79,7 @@
             <div class="col-md-3 col-sm-5 col-xs-12">
                 <div class="callout bg-green">
                     <strong>
-                        INCOME
+                        Net Sales Proceeds
                         <span class="pull-right">${income}</span>
                     </strong>
                 </div>
@@ -468,9 +468,9 @@
         var seriesArray = new Array();
         var countsObject = {name: 'Payments Count', type: 'column', data: new Array()};
         var valuesObject = {name: 'Payments Value', type: 'spline', yAxis: 1, color: '#00a65a', data: new Array()};
-        <c:if test="${sessionScope.availablePlugins.loyalty != null}">
-            var loyaltyObject = {name: 'Loyalty Value', type: 'column', data: new Array()};
-        </c:if>
+        <%//<c:if test="${sessionScope.availablePlugins.loyalty != null}">%>
+        var loyaltyObject = {name: 'Loyalty Value', type: 'spline', yAxis: 1, data: new Array()};
+        <%//</c:if>%>
             
         var categoriesArray = new Array();
         
@@ -498,18 +498,18 @@
                 var summary = lodgementSummaryList[i];
                 countsObject.data.push(summary.count); 
                 
-                <c:if test="${sessionScope.availablePlugins.loyalty != null}">
-                    loyaltyObject.data.push(summary.reward_value); 
-                </c:if>
+              <%//  <c:if test="${sessionScope.availablePlugins.loyalty != null}">%>
+                    loyaltyObject.data.push(summary.loyalty_value); 
+               <%// </c:if>%>
                     
                 valuesObject.data.push(summary.value);
                 categoriesArray.push(summary.date)
         }
             
             seriesArray.push(countsObject);
-            <c:if test="${sessionScope.availablePlugins.loyalty != null}">
+           <%// <c:if test="${sessionScope.availablePlugins.loyalty != null}">%>
                 seriesArray.push(loyaltyObject);
-            </c:if>
+           <%// </c:if>%>
             seriesArray.push(valuesObject);
             
             

@@ -30,6 +30,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -71,17 +72,17 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     private Long createdBy;
     @Column(name = "modified_by")
     private Long modifiedBy;
-    @OneToMany(mappedBy = "customerId")
+    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "customerId")
     private Collection<LoyaltyHistory> loyaltyHistoryCollection;
     @Column(name = "reward_points")
     private double rewardPoints;
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "customer")
     private Collection<Lodgement> lodgementCollection;
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     @ManyToOne
     private Account account;
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "customer")
     private Collection<ProductOrder> productOrderCollection;
     
     @JoinColumn(name = "agent_id", referencedColumnName = "agent_id")
@@ -138,10 +139,10 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "customer")
     private Collection<CustomerAgent> customerAgentCollection;
     
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "customer")
+    @OneToOne(cascade = CascadeType.REFRESH , mappedBy = "customer")
     private CustomerBalance customerBalance;
     
     @Transient
@@ -211,8 +212,9 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     @Column(name = "kin_email")
     private String  kinEmail;
     
-    @Column(name = "bank_name")
-    private String  banker;
+    @JoinColumn(name = "bank_id", referencedColumnName = "id")
+    @ManyToOne
+    private Bank  banker;
     
     @Column(name = "bank_account_name")
     private String  accountName;
@@ -863,14 +865,14 @@ public class Customer implements Serializable, ITrailable, SystemUser {
     /**
      * @return the banker
      */
-    public String getBanker() {
+    public Bank getBanker() {
         return banker;
     }
 
     /**
      * @param banker the banker to set
      */
-    public void setBanker(String banker) {
+    public void setBanker(Bank banker) {
         this.banker = banker;
     }
 

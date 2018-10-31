@@ -7,6 +7,7 @@ package com.tp.neo.controller.helpers;
 
 import com.tp.neo.interfaces.SystemUser;
 import com.tp.neo.model.Account;
+import com.tp.neo.model.LodgementItem;
 import com.tp.neo.model.Transaction;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,8 +37,6 @@ public class TransactionManager {
         Transaction transaction = new Transaction();
         
         em.getTransaction().begin();
-        transaction.setDebitAccount(debitAccount);
-        transaction.setCreditAccount(creditAccount);
         transaction.setAmount(amount);
         transaction.setTransactionDate(calendar.getTime());
         transaction.setCreatedBy(sessionUser.getSystemUserId());
@@ -45,7 +44,34 @@ public class TransactionManager {
         
         em.persist(transaction);
         //System.out.println("after  perist: " + transaction.getId());
+        em.flush();
+        em.refresh(transaction);
+        transaction.setDebitAccount(debitAccount);
+        transaction.setCreditAccount(creditAccount);
+        transaction = (Transaction)em.merge(transaction);
+        em.getTransaction().commit();
         
+        //em.refresh(transaction);
+        
+        return transaction;
+    }
+    
+    public Transaction doDoubleEntry(Account debitAccount, Account creditAccount, LodgementItem item , double amount){            
+        Transaction transaction = new Transaction();
+        
+        em.getTransaction().begin();
+        transaction.setAmount(amount);
+        transaction.setTransactionDate(calendar.getTime());
+        transaction.setCreatedBy(sessionUser.getSystemUserId());
+        transaction.setAmount(amount);
+        em.persist(transaction);
+        //System.out.println("after  perist: " + transaction.getId());
+        em.flush();
+        em.refresh(transaction);
+        transaction.setDebitAccount(debitAccount);
+        transaction.setCreditAccount(creditAccount);
+        transaction.setLodgementItem(item);
+        transaction = (Transaction)em.merge(transaction);
         em.getTransaction().commit();
         
         em.refresh(transaction);

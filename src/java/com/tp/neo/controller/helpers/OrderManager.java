@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
 import javax.xml.bind.PropertyException;
@@ -125,9 +126,14 @@ public class OrderManager {
         
         order.setAgent(agentId);
         order.setCustomer(customerId);
+        if(sessionUser != null)
         order.setCreatorUserType(sessionUser.getSystemUserTypeId());
+        else
+        order.setCreatorUserType(3);//Customer is registering 
+        
         order.setApprovalStatus((short)0);
         order.setMortgageStatus((short)0);
+        if(sessionUser != null)
         new TrailableManager(order).registerInsertTrailInfo(sessionUser.getSystemUserId());
         
         em.persist(order);
@@ -150,6 +156,7 @@ public class OrderManager {
     private OrderItem createOrderItem(OrderItem orderItem, ProductOrder order) throws PropertyException, RollbackException{
             orderItem.setOrder(order);
             orderItem.setApprovalStatus((short)0);
+            if(sessionUser != null)
             new TrailableManager(orderItem).registerInsertTrailInfo(sessionUser.getSystemUserId());
             
             em.persist(orderItem);
@@ -212,7 +219,7 @@ public class OrderManager {
                 //note that 1 has been set for the item approval status already
                 //this will now set the audit dates and approval date
                 setOrderItemDates(thisItem); 
-                //em.persist(thisItem);
+                //thisItem = (OrderItem)em.merge(thisItem);
                 
                 //get/set corresponding lodgment item
 
@@ -220,7 +227,7 @@ public class OrderManager {
                 LodgementItem lodgementItem = (LodgementItem) lodgementItems.get(0);
 
                 setLodgementItemStatus(lodgementItem, thisItem.getApprovalStatus());
-                //em.persist(lodgementItem);
+                //lodgementItem = (LodgementItem)em.merge(lodgementItem);
                 
                 approvedLodgementItems.add(lodgementItem);
                 
@@ -282,8 +289,6 @@ public class OrderManager {
             setOrderStatus(order, (short)2); //complete the order
             //set the notification status here
             notification.setStatus((short)2);
-           // em.persist(notification);
-            
         }
         else if(declinedItems.size() == allItems.size()){
             setOrderStatus(order, (short)3); //decline order
@@ -292,13 +297,9 @@ public class OrderManager {
         }
         else if(approvedItems.size() + declinedItems.size() < allItems.size()){
             setOrderStatus(order, (short)1); //processing status
-            //no need to treat lodgement items
-            
         }
-        
-        //em.persist(order);
-        //em.flush();
-        em.getTransaction().commit();
+        em.getTransaction()
+                .commit();
         em.close();
     }
     
@@ -319,8 +320,8 @@ public class OrderManager {
         //new TransactionManager(sessionUser).doDoubleEntry(cashAccount, customer.getAccount(), lodgement.getAmount());
         
         //create new order system notification
-        String route =  applicationContext + "/Order?action=notification&id=" + order.getId();
-        Notification notification = new AlertManager().getNotificationsManager(route).createNewOrderNotification(customer,order);
+        String orderUri = "/Order?action=notification&id=" + order.getId();
+        Notification notification = new AlertManager().getNotificationsManager(orderUri).createNewOrderNotification(customer,order);
         em.persist(notification);
         
         //send email alert to all Admins with approve_order permisison
@@ -329,7 +330,7 @@ public class OrderManager {
             if( !(recipientsList.get(i).hasActionPermission("approve_order")) )
                 recipientsList.remove(i);
         }
-        String thisOrderPageLink = applicationContext + "/Order?action=notification&id=" + order.getId();
+        String thisOrderPageLink = applicationContext + "Order?action=notification&id=" + order.getId();
         new AlertManager().sendNewOrderAlerts(order, lodgement, customer, recipientsList, thisOrderPageLink);
         
         em.getTransaction().commit();
@@ -456,6 +457,10 @@ public class OrderManager {
     }
     
     public List<OrderItem> prepareOrderItem(OrderItemObjectsList salesItemObject, Agent agent){
+     return prepareOrderItem(salesItemObject , agent , false);
+    }
+    
+    public List<OrderItem> prepareOrderItem(OrderItemObjectsList salesItemObject, Agent agent , boolean isAdmin){
         List<OrderItem> orderItemList = new ArrayList();
         
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
@@ -482,11 +487,11 @@ public class OrderManager {
             short approval = 0;
             long unitId = saleItem.productUnitId;
             ProjectUnit projectUnit = em.find(ProjectUnit.class, unitId);
+            int qty = saleItem.productQuantity;
             
-            orderItem.setQuantity(saleItem.productQuantity);
+            orderItem.setQuantity(qty);
             orderItem.setInitialDep((double)(saleItem.productMinimumInitialAmount));
-            orderItem.setDiscountAmt(projectUnit.getDiscount());
-            orderItem.setDiscountPercentage(projectUnit.getDiscount());
+            
             orderItem.setCreatedDate(getDateTime().getTime());
             orderItem.setMonthlyPayDay(saleItem.dayOfNotification);
             
@@ -494,10 +499,12 @@ public class OrderManager {
                
                orderItem.setRewardAmount(saleItem.rewardPoint * amountPerRewardPoint);
                orderItem.setRewardPoints((int)saleItem.rewardPoint);
+               orderItem.setRewardPoint(projectUnit.getRewardPoints() * qty);
             }
             else{
                 orderItem.setRewardAmount(new Double(0));
                 orderItem.setRewardPoints(0);
+                orderItem.setRewardPoint(0.0);
             }
             
             //if(sessionUser.getSystemUserTypeId() == 1){
@@ -512,6 +519,32 @@ public class OrderManager {
             orderItem.setCommissionPercentage(projectUnit.getCommissionPercentage());
             orderItem.setVatPercentage(projectUnit.getVatPercentage());
             orderItem.setAnnualMaintenancePercentage(projectUnit.getAnnualMaintenancePercentage());
+            
+            if(isAdmin)
+            orderItem.setAmountPayable((double)saleItem.productAmount);
+            else
+            orderItem.setAmountPayable(projectUnit.getAmountPayable() * qty);
+            
+            orderItem.setCostPrice(projectUnit.getCpu() * qty );
+            
+            orderItem.setMontlyPayment((double)saleItem.monthlyPayPerQuantity); // hey we need This for some calculations
+            orderItem.setServiceValue(projectUnit.getServiceValue() * qty);
+            //int payDuration = saleItem.productMaximumDuration.indexOf(" ");
+            orderItem.setMaxPaymentDuration(Integer.parseInt(saleItem.productMaximumDuration));
+            
+            if(isAdmin)
+            {
+            orderItem.setDiscountPercentage(saleItem.discountPercent);
+            orderItem.setDiscountAmt(calculatediscountAmount(saleItem.discountPercent , projectUnit)* qty);
+            }
+            else
+            {
+            orderItem.setDiscountPercentage(projectUnit.getDiscount());
+            orderItem.setDiscountAmt(calculatediscountAmount(projectUnit)* qty);
+            }
+            
+            orderItem.setProjectUnitDiscountPercentage(projectUnit.getDiscount());
+            //orderItem.setIncome(projectUnit.getIncome() * qty);
             orderItemList.add(orderItem);
             
             ////System.out.println("Notification ID : " + saleItem.dayOfNotification);
@@ -624,6 +657,96 @@ public class OrderManager {
         return lodgement;
     }
     
+    private double calculatediscountAmount( double discountPercent  , ProjectUnit unit){
+        double cpuMinusServiceValue = unit.getCpu() - unit.getServiceValue();
+        double discountAmount = (cpuMinusServiceValue * discountPercent)/100;
+        return discountAmount;
+    }
+   private double calculatediscountAmount(ProjectUnit unit){
+        double cpuMinusServiceValue = unit.getCpu() - unit.getServiceValue();
+        double discountAmount = (cpuMinusServiceValue * unit.getDiscount())/100;
+        return discountAmount;
+    }
+   
+   public boolean validateOrder(List<OrderItem> orderItems , Lodgement lodgement, StringBuilder errorMSG){
+      
+       //Validating if the initial payment specified by user is lesser that what is required
+       Double customerTotalInitialPayment = 0.0;
+      
+       for(OrderItem item : orderItems)
+       {
+           if(item.getDiscountPercentage() > 100)
+               {
+             //Here we know that the customer have reduced the amount he/she oghth to pay 
+             errorMSG.append("The discount percentage is invalid");
+             return false;
+            }
+           /*
+           if(item.getCommissionPercentage() > 100)
+           {
+             errorMSG.append("The agent commission  percentage is invalid");
+             return false;  
+           }
+           */
+         //Here we calculate the actual value of initial deposit that we are expecting
+         double expectedIntialDep = item.getQuantity() * item.getUnit().getLeastInitDep();
+         //Lets compare it with the value we are receiving from the front end
+         if(item.getInitialDep() < expectedIntialDep )
+         {
+             //Here we know that the customer have reduced the amount he/she oghth to pay 
+             errorMSG.append("One or more Order have an Invalid Initial deposit amount");
+             return false;
+         }
+         
+         //for each order item lets validate the montly payment amount and the maximum payment duration
+         //lets first get the maximum payment duration specified from front end
+         int payDuration = item.getMaxPaymentDuration();
+         if(payDuration <= item.getUnit().getMaxPaymentDuration())
+         {
+             //Here we Know The Customer wants to pay for a lesser time
+             //Now we need to judge his montly payment according to his/her 
+             //Demand
+             boolean valid = validateMontlyPayment(item);
+             if(!valid)
+             {
+             errorMSG.append("The Montly Payment value You entered Is Invalid for one or more orders");
+             return false;
+             }
+         }
+         else
+         {
+             //Here We definately know That the customer wants to beat the system
+             errorMSG.append("The Maximum Payment Duration You entered Is Invalid for one or more orders");
+             return false;
+         }
+         //If we get here that mean the customer is paying the expected value or is paying over
+         customerTotalInitialPayment += item.getInitialDep();
+         
+       }
+       
+       if(lodgement.getAmount() < customerTotalInitialPayment)
+       {
+           errorMSG.append("The Lodgement Amount is invalid");
+           return false;
+       }
+       
+       
+      return true;
+  }
+   
+   private  boolean validateMontlyPayment(OrderItem item){
+       double amount = item.getAmountPayable();
+       double maxPayduration = item.getMaxPaymentDuration();
+       double initialPayment = item.getInitialDep();
+       double montlyPayment = Math.round(item.getMontlyPayment());
+       
+       double balance = amount - initialPayment;
+       
+       double validMontlyPay = Math.round(balance / maxPayduration);
+       //Double.validMontlyPay
+       return validMontlyPay == montlyPayment;
+   }
+   
     public static void main(String[] args){
 //        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
 //            EntityManager em = emf.createEntityManager();

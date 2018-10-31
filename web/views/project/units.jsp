@@ -6,7 +6,7 @@
   <h3 class="box-title">Units</h3>
   
   <c:if test="${project.id != null }">
-    <a class="pull-right text-center" onclick="$('#myModal').modal({keyboard:false,backdrop:false}); $('.title-text').html('New Unit');" style="width: 25px; cursor: pointer; padding: 2px;" ><i class="fa fa-plus"></i></a>
+    <a class="pull-right text-center" onclick="newUnit()" style="width: 25px; cursor: pointer; padding: 2px;" ><i class="fa fa-plus"></i></a>
   </c:if>
   
 </div>
@@ -135,7 +135,40 @@
           </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
         </div><!-- /.modal --> 
+        
+        <!--MODAL-->
+      <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Project Unit Validation Error</h4>
+            </div>
+            <div class="modal-body">
+             
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
 <script>
+    var formData = [  ['quantity' , 'Quantity' , true , -1]
+                     ,['cpu' , 'Sales proceed' , true , -1]
+                    ,['building_cost' , 'Building Cost', false , -1]
+                    ,['service_value' , ' Service Value' , false ,-1]
+                    ,['discount' , ' Discount', false , 100]
+                    ,['commp' , 'Agent Commission', false , 100]
+                    ,['amp' , 'Agent Annual Maintenace', false , 100]
+                    ,['vatp' , 'Value Added Tax', true , -1]
+                    ,['reward_points' , 'Reward Point', false , 100]
+                    //,['amt_payable' , 'Ammount Payable']
+                    // ,['monthly_pay' , 'Montly Payment' , false , -1]
+                   // ,['income' , 'Income']
+                    ,['lid' , 'Least Initial Payment' , true , -1]
+                    ,['mpd' , 'Montly Payment Duration' , false , -1]];
+                
     function launchEditUnitForm(unitId, context){
         $.get(context+'/ProjectUnit',{action:'edit',id:unitId},function(response){
                                 //console.log(response);
@@ -198,5 +231,111 @@
         
         $("#ImageUrl").attr('src', "/uploads/NeoForce/images/" + url);
          $("#imageModal").modal();
+    }
+
+    function newUnit(){
+        $('#myModal').modal({keyboard:false,backdrop:false}); 
+        $('.title-text').html('New Unit');
+        $("#quantity").val(0);
+        $("#cpu").val(0);
+        $("#cpuFormat").text("#0");
+        $("#service_value").val(0);
+        $("#service_valueFormat").text("#0");
+        $("#discount").val(0);
+        $("#amt_payable").val(0);
+        $("#amt_payableFormat").text("#0");
+        $("#lid").val(0);
+        $("#lidFormat").text("#0");
+        $("#mpd").val(0);
+        $("#mpdFormat").text("#0");
+        $("#monthly_pay").val(0);
+        $("#monthly_payFormat").text("#0");
+        $("#income").val(0);
+        $("#incomeFormat").text("#0");
+        $("#reward_points").val(0);
+        $("#commp").val(0);
+        $('#amp').val(0);
+        $("#vatp").val(5);
+        $("#building_cost").val(0);
+        $("#building_costFormat").text("#0"); 
+    }
+    
+    function validate(){
+         $("#errorModal .modal-body").html("");
+         //$("#errorModal .modal-body").append(errorText);
+         //$("#errorModal").modal();
+         var datalen = formData.length;
+         for( var i =0 ; i < datalen; i++ )
+        {
+              var temp = $("#"+formData[i][0]).val();//get The input id value
+              if(!temp || !$.isNumeric(temp))
+              {
+                  openModal("Please Enter a valid value for " + formData[i][1]);
+                  return false;
+              }
+              else
+              {
+                  if(temp < 0 )
+                  {
+                  openModal(formData[i][1] + " can not be a negative value");
+                  return false; 
+                  }
+                  
+                  if(formData[i][3] != -1 && temp > formData[i][3])
+                  {
+                  openModal(formData[i][1] + " can not be more than 100 percentage");
+                  return false;   
+                  }
+                  
+                  if(formData[i][2] && temp==0)
+                  {
+                 openModal(formData[i][1] + " can not have a zero value");
+                  return false;
+                  }
+                  
+              }
+        }
+        var ammountPayable = $("#amt_payable").val();
+        var lid = $("#lid").val();
+        var duration = $("#mpd").val();
+        if(ammountPayable != lid)
+        {
+           if(lid > ammountPayable) 
+           {
+              openModal("Least Initial Deposit cannot be more than ammount payable");
+              return false; 
+           }
+           if(duration <=0)
+           {
+            openModal("Montly duration can not be Zero");
+              return false;   
+           }
+        }
+        
+        var title = $("#title").val();
+        if(!title)
+        {
+         openModal("Project Unit Title cannot be empty");
+          return false;  
+        }
+        else if($.isNumeric(title))
+        {
+        openModal("Project Unit Title cannot be a Number");
+          return false; 
+        }
+        
+        var unittype = $("#unittype").val();
+        if(unittype <= 0)
+        {
+            openModal("Please Select a Project Unit Type from Dropdown");
+          return false; 
+        }
+        
+        return true;
+    }
+    
+    function openModal(message){
+         $("#errorModal .modal-body").append(message);
+             $("#errorModal").modal(); 
     }
 </script>

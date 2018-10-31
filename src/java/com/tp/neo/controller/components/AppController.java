@@ -42,7 +42,7 @@ public class AppController extends HttpServlet{
     
     
     public Calendar calendar;
-    protected long userType;
+    protected int userType;
     protected SystemUser sessionUser;
     protected String callbackUrRL = "";
     protected boolean isAjaxRequest;

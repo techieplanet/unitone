@@ -96,13 +96,18 @@ public class ProjectUnitController extends AppController {
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
         
         
-            if(super.hasActiveUserSession(request, response)){
+        if(action.equalsIgnoreCase("edit"))
+        {
+            processGetRequest(request, response);
+        }
+          else  if(super.hasActiveUserSession(request, response)){
             if(super.hasActionPermission(new ProjectUnit().getPermissionName(action), request, response)){
-                processGetRequest(request, response);
+                if(action.equalsIgnoreCase("delete")){
+                 delete(Long.parseLong(request.getParameter("id")));
+                 }
             }else{
                 super.errorPageHandler("forbidden", request, response);
             }
-            
         }
     }
 
@@ -118,12 +123,8 @@ public class ProjectUnitController extends AppController {
 //        if (action.equalsIgnoreCase("new")){
 //               viewFile = PROJECTS_NEW;
 //        }
-        if(action.equalsIgnoreCase("delete")){
-            delete(Long.parseLong(request.getParameter("id")));
-        }
-
-
-        else if(action.equalsIgnoreCase("edit")){            
+        
+         if(action.equalsIgnoreCase("edit")){            
             long id = (Long.parseLong(request.getParameter("id")));
             Query query = em.createNamedQuery("ProjectUnit.findById").setParameter("id", id);
             ProjectUnit projectUnit = (ProjectUnit)query.getSingleResult();
@@ -528,6 +529,16 @@ public class ProjectUnitController extends AppController {
         if(!request.getParameter("service_value").matches("^\\d+(\\.?\\d+$)?")){
             errorMessages.put("service_value", "Please enter valid money value");
         }
+        
+        try{
+            int unitId = Integer.parseInt(request.getParameter("unittype"));
+           if(unitId <= 0){
+            errorMessages.put("Unit Type", "Please Select a project Unit Type");
+        } 
+        }catch (NumberFormatException e){
+            errorMessages.put("Unit Type", "Please Select a project Unit Type");
+        }
+        
         
         
         if(!(errorMessages.isEmpty())) throw new PropertyException("");

@@ -473,11 +473,11 @@
 <script>
     var formFieldStage1 = [//["refCode" , "" , "Referrer Code"],
         ["agentFirstname", "", "Agent First Name"],
-        ["agentMiddlename", "", "Agent Middle Name"],
+        //["agentMiddlename", "", "Agent Middle Name"],
         ["agentLastname", "", "Agent Last Name"],
         ["agentEmail", "", "Agent Email"],
         ["agentPhone", "", "Agent Phone"],
-        ["agentStreet", "", "Agent Street Address"],
+        ["agentStreet", "", "Agent  Address"],
         ["agentCity", "", "Agent Operational City Name"],
         ["agentState", "", "Agent Operational State Name"],
         ["agentBankName", "select", "Agent Bank Name"],

@@ -40,9 +40,9 @@
                             <th>Date</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody >
                         <c:forEach items="${transactions}" var="transaction" varStatus="cursor">
-                            <tr>
+                            <tr style="cursor :pointer" onclick="getCreditLodgmentItem('${transaction.getLodgementItem().getId()}','${pageContext.request.contextPath}',event)" >
                                 <td>${cursor.count}</td>
                                 <td><fmt:formatNumber type="currency" currencySymbol="N" maxFractionDigits="2" value="${transaction.getAmount()}" /></td>
                                 <td><fmt:formatDate value="${transaction.getTransactionDate()}" type="both" /></td>
@@ -98,6 +98,35 @@
         </div><!-- /.modal-dialog -->
 </div>
 
+                <!--MODAL-->
+      <div class="modal fade" id="lodgmentItemModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Lodgment Item</h4>
+            </div>
+            <div class="modal-body table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Unit name</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+              <button id="ok" type="button" onclick="" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
 
 <!-- Include the footer -->
 <%@ include file="../includes/footer.jsp" %>      
@@ -118,6 +147,43 @@
      $("#credit_history_table").DataTable();
         
      })
+function getCreditLodgmentItem(lodgmentId,url,event){
+    
+    event.preventDefault();
+    
+    $.ajax({
+        url : url + "/Lodgement?action=lodgmentItem",
+        method : "GET",
+        data : {lodgementitem_id : lodgmentId},
+        success : function(data){
+            
+            console.log(JSON.stringify(data));
+            
+            var lodgmentItems = JSON.parse(data);
+            setupCreditLodgementItemTable(lodgmentItems);
+            
+        },
+        error : function(xhr,status_code,status_text){
+            
+            console.log(status_code + " : " + status_text);
+        }
+    });
+}
 
+function setupCreditLodgementItemTable(lodgmentItems){
+    
+    //Clear any rows in table body
+    $("#lodgmentItemModal tbody").html("");
+    
+         var tr = "<tr>";
+         tr += "<td>" + lodgmentItems.project + "</td>";
+         tr += "<td>" + lodgmentItems.unit + "</td>";
+         tr += "<td>" + lodgmentItems.date + "</td>";
+         tr += "<td>" + accounting.formatMoney(lodgmentItems.amount,"N",2,",",".") + "</td>";
+         
+         $("#lodgmentItemModal tbody").append(tr);
+     
+    $("#lodgmentItemModal").modal();
+}
 
 </script>

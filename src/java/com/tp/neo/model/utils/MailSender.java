@@ -93,6 +93,11 @@ public class MailSender {
    }
    
    
+   public void sendHtmlEmail(String to, String from, String subject, StringBuilder htmlMessage)
+   {   
+      sendHtmlEmail(to, from, subject,htmlMessage.toString());
+   }
+   
    public void sendHtmlEmail(String to, String from, String subject, String htmlMessage)
    {   
       if(session == null)
@@ -113,7 +118,6 @@ public class MailSender {
 
          // Send the actual HTML message, as big as you like
          message.setContent(htmlMessage, "text/html" );
-
          // Send message
          Transport.send(message);
          //System.out.println("Sent message successfully....");

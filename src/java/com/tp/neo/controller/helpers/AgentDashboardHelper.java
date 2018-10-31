@@ -36,8 +36,8 @@ import javax.persistence.Query;
  * @author swedge-mac
  */
 public class AgentDashboardHelper {
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
-    EntityManager em;
+    static EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+    static EntityManager em = emf.createEntityManager();
     Query query;
     
     Gson gson = new GsonBuilder().create();
@@ -431,15 +431,28 @@ public class AgentDashboardHelper {
     }
     
     
-    public double getMyOrdersValue(Long agentId){
-        double myOrdersValue = (double)em.createNamedQuery("Agent.findMyTotalLodgements")
+    public double getMyPaymentValue(Long agentId){
+        double myPaymentValue = (double)em.createNamedQuery("Agent.findMyTotalLodgements")
                                                         .setParameter("item_aps", 1)
                                                         .setParameter("aps", 1)
                                                         .setParameter("agentId", agentId)
                                                         .getSingleResult();
-        return myOrdersValue;
+        return myPaymentValue;
     }
     
+    
+    public double getTotalOrderValue(Long agentId){
+        query = em.createNamedQuery("Agent.getTotalOrderSum")
+                .setParameter("agentId" , agentId);
+        
+        
+        double totalOrderSum   = 0;
+        try{
+        totalOrderSum = (double)query.getSingleResult();
+        }catch(Exception e){}
+        
+        return totalOrderSum;
+    }
     
     public static  void main(String[] args){
          

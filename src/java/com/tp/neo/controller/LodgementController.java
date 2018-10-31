@@ -23,10 +23,12 @@ import com.tp.neo.model.Notification;
 import com.tp.neo.model.OrderItem;
 import com.tp.neo.model.Plugin;
 import com.tp.neo.model.ProductOrder;
+import com.tp.neo.model.plugins.LoyaltyHistory;
 import com.tp.neo.service.CustomerService;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
@@ -174,6 +176,11 @@ public class LodgementController extends AppController {
              getLodgmentItemCollection(request, response);
              return;
          }
+         else if(action.equalsIgnoreCase("lodgmentItem")){
+             
+             getLodgmentItem(request, response);
+             return;
+         }
          else if(action.equalsIgnoreCase("list_approved")){
              
              getApprovedLodgement(request,sessionUser.getSystemUserTypeId());
@@ -261,7 +268,10 @@ public class LodgementController extends AppController {
         
         String action = request.getParameter("action");
         
-        if(action.equalsIgnoreCase("mortgage")){
+        if(super.hasActiveUserSession(request, response)){
+            //if(super.hasActionPermission(new Lodgement().getPermissionName(action), request, response)){
+              
+             if(action.equalsIgnoreCase("mortgage")){
              
              String viewFile = LODGEMENT_NEW;
              StringBuilder errMsg = new StringBuilder();
@@ -274,9 +284,14 @@ public class LodgementController extends AppController {
              {
                 response.sendError(403, errMsg + "---Go back <a href='" + request.getHeader("referer") + "'>Previous Page</a>");
              }
-         }
-        else{
-            processInsertRequest(request, response);
+               }
+           else{
+               processInsertRequest(request, response);
+              }
+            // }else{
+            //    super.errorPageHandler("forbidden", request, response);
+            //}
+            
         }
     }
 
@@ -472,15 +487,15 @@ public class LodgementController extends AppController {
             
             
             Map<String, String> map = new HashMap();
-            Double remainingAmt = (orderItem.getUnit().getAmountPayable() * orderItem.getQuantity()) - ((Double)orderItemDetail.get("totalPaid"));
+            Double remainingAmt = orderItem.getAmountPayable() - ((Double)orderItemDetail.get("totalPaid"));
             map.put("saleId",orderItem.getId().toString());
-            map.put("project", orderItem.getUnit().getProject().getName());
-            map.put("unitName", orderItem.getUnit().getTitle());
+            map.put("project", orderItem.getUnit().getProject().getName().replaceAll("'", "").replaceAll("\"", ""));
+            map.put("unitName", orderItem.getUnit().getTitle().replaceAll("'", "").replaceAll("\"", ""));
             map.put("unitQty",orderItem.getQuantity().toString());
             map.put("initialDeposit",orderItem.getInitialDep().toString());
             map.put("amountPayable", remainingAmt.toString());
             map.put("amountPaid", ((Double)orderItemDetail.get("totalPaid")).toString());
-            map.put("monthlyPay", ((Double)orderItem.getUnit().getMonthlyPay()).toString());
+            map.put("monthlyPay", ((Double)orderItem.getMontlyPayment()).toString());
             
             OrderItemsList.add(map);
         }
@@ -505,12 +520,11 @@ public class LodgementController extends AppController {
         
         for(LodgementItem lodgementItem : lodgementItemList){
             
-            totalPaid += lodgementItem.getAmount();
+            totalPaid += lodgementItem.getAmount()+lodgementItem.getRewardAmount();
         }
         
-        //Fixed Bug here 
-        //Formally was : double unitAmount = orderItem.getUnit().getAmountPayable() ;
-        double unitAmount = orderItem.getUnit().getAmountPayable() * orderItem.getQuantity();
+        
+        double unitAmount = orderItem.getAmountPayable();
         
         if(unitAmount <= totalPaid){
             isComplete = true;
@@ -599,8 +613,10 @@ public class LodgementController extends AppController {
                 
                 manager = new LodgementManager(sessionUser,plugins);
             }
-            
-            manager.approveLodgement(lodgement, notification, request.getContextPath());
+            String uri = request.getServerName()+request.getContextPath();
+            uri = uri + "/";
+            uri = uri.replaceAll("//", "/");
+            manager.approveLodgement(lodgement, notification, uri);
             
             
             
@@ -675,7 +691,7 @@ public class LodgementController extends AppController {
             }
             double lodgementAmount = 0;
             double lodgementRewardAmount = 0;
-            
+            double totalRoyaltyUsed = 0;
             List<LodgementItem> lodgementItemList = new ArrayList();
             
             for(MorgageList morgageItem : morgageList){
@@ -696,7 +712,7 @@ public class LodgementController extends AppController {
                 lodgementAmount += morgageItem.getAmount();
                 
                 if(plugins.containsKey("loyalty")){
-                    
+                    totalRoyaltyUsed += morgageItem.getRewardPoint();
                     lodgementItem.setRewardAmount(morgageItem.getRewardPoint() * amountPerRewardPoint);
                     lodgementRewardAmount += (morgageItem.getRewardPoint() * amountPerRewardPoint);
                 }
@@ -711,13 +727,19 @@ public class LodgementController extends AppController {
                     customer = orderItem.getOrder().getCustomer();
                     order = orderItem.getOrder();
                 }
-                
+               
             }
-            
+            //lets now validate the royalty point;
+            double customerBalanceRewardPoint = CustomerService.getCustomerRewardPointBalance(customer);
             if(lodgement.getAmount() < lodgementAmount)
             {
                 errMsg.append("Invalid Lodgement Amount");
                 return false;
+            }
+            else if(plugins.containsKey("loyalty") && (totalRoyaltyUsed > customerBalanceRewardPoint))
+            {
+               errMsg.append("Total Royalty Being used is more than available");
+                return false; 
             }
             
             if(plugins.containsKey("loyalty")){
@@ -730,7 +752,12 @@ public class LodgementController extends AppController {
             
             lodgement.setCustomer(customer);
             LodgementManager lodgementManager = new LodgementManager(user);
-            lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, request.getContextPath(), order);
+            lodgementManager.amountPerRewardPoint = amountPerRewardPoint;
+            lodgementManager.availablePlugins = plugins;
+            String uri = request.getServerName()+request.getContextPath();
+            uri = uri + "/";
+            uri = uri.replaceAll("//", "/");
+            lodgement = lodgementManager.processLodgement(customer, lodgement, lodgementItemList, uri, order);
             
             Map map = prepareMorgageInvoice(lodgement, lodgementItemList);
             
@@ -745,6 +772,7 @@ public class LodgementController extends AppController {
             
         } catch (RollbackException ex) {
             Logger.getLogger(LodgementController.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
         
         return true;
@@ -871,6 +899,34 @@ public class LodgementController extends AppController {
         Gson gson = new GsonBuilder().create();
         
         String jsonString = gson.toJson(mapList);
+        
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonString);
+        response.getWriter().flush();
+        response.getWriter().close();
+    }
+    
+    private void getLodgmentItem(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("NeoForcePU");
+        EntityManager em = emf.createEntityManager();
+        
+        long lodgmentitem_id = Long.parseLong(request.getParameter("lodgementitem_id"));
+        
+        LodgementItem l = em.find(LodgementItem.class, lodgmentitem_id);
+        
+       
+            Map<String,String> map = new HashMap();
+            
+            map.put("project", l.getItem().getUnit().getProject().getName());
+            map.put("unit", l.getItem().getUnit().getTitle());
+            map.put("amount", String.format("%.2f",l.getAmount()));
+            map.put("date", new SimpleDateFormat("EEE, d MMM yyyy").format(l.getCreatedDate()));
+      
+        Gson gson = new GsonBuilder().create();
+        
+        String jsonString = gson.toJson(map);
         
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");

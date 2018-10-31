@@ -102,13 +102,13 @@
                  // </li>
                     %>        
                   <!--ANNOUNCEMENT-->
-                  <li class="treeview">
+                <%/*  <li class="treeview">
                       <a href="#"><i class="fa fa-microphone"></i><span>Announcements</span><i class="fa fa-angle-left pull-right"></i></a>
                       <ul class="treeview-menu">
                         <li><a href="${pageContext.request.contextPath}/Project" <c:if test="${sideNavAction eq '' && sideNav eq 'Announcement'}"> <c:out value='style=color:#fff' /></c:if> >View</a></li>
-                        <%/**<li><a href="${pageContext.request.contextPath}/Project?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Announcement'}"> <c:out value='style=color:#fff' /></c:if> >Create</a></li> */%>
+                        <li><a href="${pageContext.request.contextPath}/Project?action=new" <c:if test="${sideNavAction eq 'new' && sideNav eq 'Announcement'}"> <c:out value='style=color:#fff' /></c:if> >Create</a></li> 
                       </ul>
-                  </li>
+                  </li> */%>
                   
                  
                     

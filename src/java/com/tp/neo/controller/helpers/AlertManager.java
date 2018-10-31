@@ -8,6 +8,8 @@ package com.tp.neo.controller.helpers;
 import com.tp.neo.model.Agent;
 import com.tp.neo.model.Customer;
 import com.tp.neo.model.Lodgement;
+import com.tp.neo.model.OrderItem;
+import static com.tp.neo.model.OrderItem_.unit;
 import com.tp.neo.model.ProductOrder;
 import com.tp.neo.model.ProjectUnit;
 import com.tp.neo.model.User;
@@ -41,9 +43,9 @@ public class AlertManager {
         new SMSHelper().sendAgentApprovalSMS(agent, 1);
     }
     
-    public void sendAgentWalletCreditAlerts(Customer customer, ProjectUnit unit, double amount){
-        new EmailHelper().sendAgentWalletCreditAlert(customer, unit, amount);
-        new SMSHelper().sendAgentWalletCreditAlert(customer, unit, amount);
+    public void sendAgentWalletCreditAlerts(Customer customer, OrderItem item, double amount){
+        new EmailHelper().sendAgentWalletCreditAlert(customer, item, amount);
+        //new SMSHelper().sendAgentWalletCreditAlert(customer, item, amount);
     }
     
     
@@ -86,14 +88,14 @@ public class AlertManager {
     }
     
     
-    public void sendLodgementApprovalAlerts(Customer customer, ProjectUnit unit, double amount){
+    public void sendLodgementApprovalAlerts(Customer customer, OrderItem item, double amount){
         //emails
-        new EmailHelper().sendLodgementApprovalEmailToCustomer(customer, unit, amount);
-        new EmailHelper().sendLodgementApprovalEmailToAgent(customer, unit, amount);
+        new EmailHelper().sendLodgementApprovalEmailToCustomer(customer, item, amount);
+        new EmailHelper().sendLodgementApprovalEmailToAgent(customer, item, amount);
         
         //sms
-        new SMSHelper().sendLodgementApprovalSMSToCustomer(customer, unit, amount);
-        new SMSHelper().sendLodgementApprovalSMSToAgent(customer, unit, amount);
+        //new SMSHelper().sendLodgementApprovalSMSToCustomer(customer, unit, amount);
+        //new SMSHelper().sendLodgementApprovalSMSToAgent(customer, unit, amount);
     }
     
     

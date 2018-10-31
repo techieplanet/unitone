@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -35,16 +36,16 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Account.findByAccountCode", query = "SELECT a FROM Account a WHERE a.accountCode = :accountCode")})
 public class Account implements Serializable {
 
-    @OneToMany(mappedBy = "creditAccount")
+    @OneToMany(fetch=FetchType.LAZY , mappedBy = "creditAccount")
     private Collection<Transaction> transactionCollection;
-    @OneToMany(mappedBy = "debitAccount")
+    @OneToMany(fetch=FetchType.LAZY  ,mappedBy = "debitAccount")
     private Collection<Transaction> transactionCollection1;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "account")
     private Collection<Agent> agentCollection;
-    @OneToMany(mappedBy = "account")
+    @OneToMany(fetch=FetchType.LAZY  ,mappedBy = "account")
     private Collection<ProjectUnit> projectUnitCollection;
-    @OneToMany(mappedBy = "account")
+    @OneToMany(fetch=FetchType.LAZY  ,mappedBy = "account")
     private Collection<Customer> customerCollection;
 
     @Basic(optional = false)
@@ -56,7 +57,7 @@ public class Account implements Serializable {
     @Basic(optional = false)
     @Column(name = "active")
     private short active;
-    @JoinColumn(name = "account_type_id", referencedColumnName = "id")
+    @JoinColumn(name = "account_type_id", referencedColumnName = "id" , updatable=false)
     @ManyToOne(optional = false)
     private AccountType accountTypeId;
 

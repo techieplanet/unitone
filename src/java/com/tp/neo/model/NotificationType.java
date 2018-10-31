@@ -19,6 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -34,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "NotificationType.findByAlias", query = "SELECT n FROM NotificationType n WHERE n.alias = :alias")})
 public class NotificationType implements Serializable {
 
-    @OneToMany(mappedBy = "type")
+    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "type")
     private Collection<Notification> notificationCollection;
 
     private static final long serialVersionUID = 1L;

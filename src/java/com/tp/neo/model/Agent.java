@@ -30,6 +30,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -104,7 +105,10 @@ import javax.xml.bind.annotation.XmlTransient;
     
     @NamedQuery(name = "Agent.findNetwork", query = "SELECT a FROM Agent a WHERE a.referrerId = :agentId"),
     @NamedQuery(name = "Agent.findALLCorporate", query = "SELECT a FROM Agent a WHERE a.corporate = true"),
-    @NamedQuery(name = "Agent.findALLIndividual", query = "SELECT a FROM Agent a WHERE a.corporate = false")
+    @NamedQuery(name = "Agent.findALLIndividual", query = "SELECT a FROM Agent a WHERE a.corporate = false"),
+    @NamedQuery(name = "Agent.getTotalOrderSum", query = "SELECT SUM(i.amountPayable) FROM Agent a "
+                        + "LEFT JOIN ProductOrder o on o.agent = a  "
+                        + "LEFT JOIN OrderItem i on  i.order = o WHERE a.agentId = :agentId and i.approvalStatus = 1")
 
 })
 
@@ -136,9 +140,9 @@ public class Agent extends BaseModel implements SystemUser  {
     private Long modifiedBy;
     @Column(name = "referrer_id")
     private Long referrerId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "agent")
     private Collection<AgentProspect> agentProspectCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "agent")
     private Collection<Withdrawal> withdrawalCollection;
 
     @JoinColumn(name = "account_id", referencedColumnName = "id")
@@ -146,7 +150,7 @@ public class Agent extends BaseModel implements SystemUser  {
     private Account account;
 
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "agent")
     private Collection<ProductOrder> productOrderCollection;
 
     @Basic(optional = false)
@@ -156,7 +160,7 @@ public class Agent extends BaseModel implements SystemUser  {
     @Column(name = "agreement_status")
     private short agreementStatus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "agent")
+    @OneToMany(fetch=FetchType.LAZY  , mappedBy = "agent")
     private Collection<Customer> customerCollection;
 
     private static final long serialVersionUID = 1L;

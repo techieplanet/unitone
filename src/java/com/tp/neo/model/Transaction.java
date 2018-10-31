@@ -15,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.CascadeType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -40,6 +41,10 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Transaction.findByTransactionDate", query = "SELECT t FROM Transaction t WHERE t.transactionDate = :transactionDate")})
 public class Transaction implements Serializable {
 
+    @JoinColumn(name = "lodgementitem_id", referencedColumnName = "id")
+    @ManyToOne
+    private LodgementItem LodgementItem;
+    
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -139,6 +144,20 @@ public class Transaction implements Serializable {
     @Override
     public String toString() {
         return "com.tp.neo.model.Transaction[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the LodgementItem
+     */
+    public LodgementItem getLodgementItem() {
+        return LodgementItem;
+    }
+
+    /**
+     * @param LodgementItem the LodgementItem to set
+     */
+    public void setLodgementItem(LodgementItem LodgementItem) {
+        this.LodgementItem = LodgementItem;
     }
     
 }

@@ -380,6 +380,7 @@ function addToCart(event){
   var commission = $('#commp').val();
   var dayOfNotification = $("#day_of_notification").val();
   var loyaltyPoint = 0;
+  var discount = $("#productDiscount").val();
   
   //Validating The Information
   //Product , Unit , quantity , initial amount , payment duration , 
@@ -425,7 +426,7 @@ function addToCart(event){
   
   var dataArray = {productName:productName, productId: productId,productUnitName:productUnitName,productUnitId:productUnitId,productQuantity:productQuantity,productAmount:productAmount,amountUnit:amountUnit,amountTotalUnit:amountTotalUnit,
   initialAmountPerUnit:initialAmountPerUnit,minInitialAmountSpan:minInitialAmountSpan,productMinimumInitialAmount:productMinimumInitialAmount,amountLeft:amountLeft,payDurationPerUnit:payDurationPerUnit,payDurationPerQuantity:payDurationPerQuantity,
-  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment,commp : commission, dayOfNotification : dayOfNotification, rewardPoint : loyaltyPoint};
+  productMaximumDuration:productMaximumDuration,monthlyPayPerUnit:monthlyPayPerUnit,monthlyPayPerQuantity:monthlyPayPerQuantity,productMinimumMonthlyPayment:productMinimumMonthlyPayment,commp : commission, dayOfNotification : dayOfNotification, rewardPoint : loyaltyPoint , discountPercent:discount};
   
   /**
    * 
@@ -777,6 +778,7 @@ $("#commp").val("0");
 $("#addToCart").attr("disabled",false);
 $('#selectUnit').empty(); //select 
 $("#commp").val("0");
+$("#productDiscount").val("");
 $("#day_of_notification").val("1")
     if(isLoyaltyEnabled == 1){
         $("#productLoyaltyPoint").val("0");
@@ -1058,11 +1060,36 @@ function getProjectQuantity(appName, entityName){
 
 /*TP: calculate the monthly pay*/
 function monthlyPayCalculator(){
+    
+    var data = $("#dataHidden").val();
+    var resp = JSON.parse(data);
+    
     $("#addToCart").attr("disabled",false);
     var productAmount = $("#productAmount").val();
     var quantity = $("#selectQuantity").val();
     var productMinimumInitialAmount = $("#productMinimumInitialAmount").val();
     var productMaximumDuration = $("#productMaximumDuration").val();
+    
+    
+    var discount = $("#productDiscount").val();
+    if(!discount)discount= resp.discount;
+    else{
+        //Validate discount percentage
+        if(discount > 100)
+        {
+            alert("Discount cannot be more than 100 percent");
+            return false;
+        }
+    }
+    var serviceValue = resp.service_value;
+    var cpu = resp.cpu;
+    var cpuMinusService = cpu - serviceValue;
+    var discountAmount = (discount * cpuMinusService)/100;
+    productAmount = (cpu - discountAmount) * quantity;
+    $("#productAmount").val(productAmount);
+    
+    $("#amountUnit").text(accounting.formatMoney(cpu - discountAmount,"N",2,",","."));
+    $("#amountTotalUnit").text(accounting.formatMoney(productAmount,"N",2,",","."));
     
     if(isLoyaltyEnabled == 1){
         var point = $("#productLoyaltyPoint").val() || 0;
@@ -1081,10 +1108,13 @@ function monthlyPayCalculator(){
          $("#amountLeft").val("");
     $("#amountLeftFormat").text("");
     }
-    var monthlyPay = payLeft / productMaximumDuration;
-    $("#productMinimumMonthlyPayment").val(monthlyPay.toFixed(2));
-    $("#monthlyPayPerUnit").text((monthlyPay * 1).toFixed(2));
-    $("#monthlyPayPerQuantity").text(monthlyPay * quantity);
+    var monthlyPay =  0 ;
+    if(productMaximumDuration != 0)
+    monthlyPay = (payLeft / productMaximumDuration).toFixed(2);
+    
+    $("#productMinimumMonthlyPayment").val(monthlyPay);
+    $("#monthlyPayPerUnit").text(accounting.formatMoney((monthlyPay/quantity).toFixed(2),"N",2,",","."));
+    $("#monthlyPayPerQuantity").text(accounting.formatMoney(monthlyPay,"N",2,",","."));
     calculateAmountToPay();
 }
 
@@ -1149,7 +1179,7 @@ function calculateAmountToPay(){
         $("#errorInitDep").remove();
         $("#errorText").text("");
         var ammountleftTopay =productAmount - userInitialAmount; 
-        if(ammountleftTopay > 0)
+        if(ammountleftTopay >= 0)
         {$("#amountLeft").val(ammountleftTopay);
          $("#amountLeftFormat").text(accounting.formatNumber(ammountleftTopay , 2));
         }
@@ -1174,13 +1204,17 @@ function calculateDurationFromMonthlyPay(){
     
     var quantity = $("#selectQuantity").val();
     
-    var quantityDuration = duration ;
+    var quantityDuration = duration;
     $("#finalAmount").text("");
     var productMinimumMonthlyPayment = $("#productMinimumMonthlyPayment").val();
     var amountLeft = $("#amountLeft").val();
-    var monthLeft = Math.ceil(amountLeft / productMinimumMonthlyPayment);
-    
-    var finalAmount = amountLeft % productMinimumMonthlyPayment ;
+    var monthLeft = 0;
+    var finalAmount = 0;
+    if(productMinimumMonthlyPayment != 0)
+    {
+    monthLeft = Math.round(amountLeft / productMinimumMonthlyPayment);
+    finalAmount = amountLeft % productMinimumMonthlyPayment ;
+    }
   //  alert("hello this is where we work month-->"+monthLeft+" finalAmount "+ quantityDuration);
     
     if(monthLeft>quantityDuration){
@@ -1211,42 +1245,31 @@ function calculateProductAmount(){
     var data = $("#dataHidden").val();
     var resp = JSON.parse(data);
     
-    var cpu = resp.cpu;
     var quantity = $("#selectQuantity").val();
     var duration = resp.mpd;
     $('span[id="qty"]').text( quantity);
-    var discount = resp.discount;
-    var totalDiscount = 0;
-    if(discount>0){
-        totalDiscount = discount * quantity;
-    }
-    var amount = quantity * cpu;
+
+    var amountPayable = resp.amt_payable;
+    var totalamountPayable = quantity * amountPayable;
     var mpd = resp.mpd;
-    var defaultDiscount = 0;
-   
-    
-  defaultDiscount = (cpu * 1)- ((discount/100)*cpu);
-    
-    var totalDiscountAmount = 0;
-    if(totalDiscount>0){
-      totalDiscountAmount = amount * (totalDiscount/100);
-    }
+
     var totalDuration  = duration ;
     var durationPerUnit = resp.mpd;
 
-    var finalAmount = amount - totalDiscountAmount;
-    $("#amountUnit").text(accounting.formatMoney(defaultDiscount,"N",2,",","."));
-    $("#amountTotalUnit").text(accounting.formatMoney(finalAmount,"N",2,",","."))
-    $("#productAmount").val(finalAmount);
+   
+    $("#amountUnit").text(accounting.formatMoney(amountPayable,"N",2,",","."));
+    $("#amountTotalUnit").text(accounting.formatMoney(totalamountPayable,"N",2,",","."))
+    $("#productAmount").val(totalamountPayable);
     $("#initialAmountPerUnit").text(accounting.formatMoney(resp.lid *1,"N",2,",","."));
     $("#minInitialAmountSpan").text(accounting.formatMoney(resp.lid * quantity,"N",2,",","."));
+    $("#productDiscount").val(resp.discount);
     var durationPerUnit = durationPerUnit * 1;
     var alertMessage = "month";
     if(durationPerUnit>1){
         alertMessage = "months";
     }
     $("#payDurationPerUnit").text(durationPerUnit+" "+alertMessage);
-     var durationPerQuantity = durationPerUnit * quantity;
+     var durationPerQuantity = durationPerUnit ;
     
     //var alertMessage = "month";
     if(durationPerQuantity>1){
@@ -1283,7 +1306,16 @@ function calculateProductAmount(){
     $(this).attr("selected","selected");
 
   }
-          
+    
+    if(totalDuration == 0)
+    {
+        $('#productMaximumDuration').empty();
+        $('#productMaximumDuration').append($('<option>', {
+    value: 0,
+    text: "Outright Payment",
+     selected: true
+}));
+    }
    
     
     monthlyPayCalculator();
@@ -1743,7 +1775,7 @@ function submitForm(){
                var tellerNumber = $("#tellerNumber").val();
                        
                if( $.trim(depositorsName) == ""){
-                   alert("Please Enter depositors name");
+                   alert("Please enter depositor's name");
                    submitOk = false;
                }
                else if($.trim(tellerNumber) == ""){
@@ -1758,15 +1790,20 @@ function submitForm(){
                var transfer_accountName = $("#transfer_accountName").val();
                
                if($.trim(transfer_bankName) == ""){
-                   alert("Please enter Bank Name");
+                   alert("Please enter depositor's bank name");
                    submitOk = false;
                }
                else if($.trim(transfer_accountNo) == ""){
-                   alert("Please enter account number");
+                   alert("Please enter depositor's bank account number");
                    submitOk = false;
                }
                else if($.trim(transfer_accountName) == ""){
                    alert("Please enter account Name");
+                   submitOk = false;
+               }
+               else if(!$.isNumeric(transfer_accountNo))
+               {
+                   alert("Please enter valid depositor's bank account number");
                    submitOk = false;
                }
                

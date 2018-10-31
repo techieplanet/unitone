@@ -23,6 +23,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.FetchType;
 
 /**
  *
@@ -67,7 +68,7 @@ public class Lodgement extends BaseModel {
     @Column(name = "approval_status")
     private Short approvalStatus;
 
-    @OneToMany(mappedBy = "lodgement")
+    @OneToMany(fetch=FetchType.LAZY ,mappedBy = "lodgement")
     private Collection<LodgementItem> lodgementItemCollection;
 
     private static final long serialVersionUID = 1L;

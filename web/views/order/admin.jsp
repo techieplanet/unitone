@@ -148,11 +148,10 @@
                     <thead>
                         <tr>
                             <th>S/N</th>
-                            <th>ID</th>
                             <th>Project Name</th>
                             <th>Unit Name</th>
                             <th>Qty</th>
-                            <th>CPU</th>
+                            <th>Cost</th>
                             <th>Discount</th>
                             <th>Initial Deposit</th>
                             <th>Total Paid</th>
@@ -230,7 +229,6 @@
                 var tr = "<tr>";
                 
                 tr += "<td>" + sn + "</td>";
-                tr += "<td>" + items[key].id + "</td>";
                 tr += "<td>" + items[key].project_name + "</td>";
                 tr += "<td>" + items[key].title + "</td>";
                 tr += "<td>" + items[key].quantity + "</td>";
